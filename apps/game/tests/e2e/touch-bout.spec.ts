@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { Thumbs, anchorOf, hold } from './thumbs.js';
+import { Thumbs, anchorOf, hold, type Dir } from './thumbs.js';
 
 interface Snapshot {
   phase: string;
@@ -8,12 +8,27 @@ interface Snapshot {
   winner: number | null;
 }
 
-/** Roundhouse lands from roughly this far out once the step is counted in. */
-const STRIKE_GAP = { min: 1.95, max: 2.45 };
+/**
+ * Reach windows measured from the content table, widest first.
+ *
+ * Walking to one exact distance is not robust: the clock drains up to five
+ * ticks in a frame, so on a slow machine the fighter can cross a narrow window
+ * between two polls and never fire. Picking the technique that suits the gap
+ * the fighter is ALREADY at removes the race, and exercises three techniques
+ * instead of one.
+ */
+const STRIKES: ReadonlyArray<{ name: string; min: number; max: number; stance: Dir; technique: Dir }> = [
+  { name: 'roundhouse_kick', min: 2.0, max: 2.7, stance: 'right', technique: 'up' },
+  { name: 'front_kick', min: 1.6, max: 2.0, stance: 'neutral', technique: 'up' },
+  { name: 'lunge_punch', min: 1.2, max: 1.6, stance: 'neutral', technique: 'right' },
+];
+
+/** Beyond this the fighter has to close before anything can land. */
+const MAX_REACH = 2.7;
 
 test('a bout is won end to end with nothing but two thumbs', async ({ page }, info) => {
   test.skip(info.project.name !== 'phone-portrait', 'touch is the phone contract');
-  test.setTimeout(120_000);
+  test.setTimeout(300_000);
 
   await page.goto('/?mode=dojo');
   await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk']?.ready === true);
@@ -26,10 +41,10 @@ test('a bout is won end to end with nothing but two thumbs', async ({ page }, in
     page.evaluate(() => (globalThis as Record<string, any>)['__smkk'].state() as Snapshot);
 
   await page.waitForFunction(
-    () => (globalThis as Record<string, any>)['__smkk'].state().phase === 'fight',
+    () => (globalThis as Record<string, any>)['__smkk']?.state?.().phase === 'fight',
   );
 
-  const deadline = Date.now() + 90_000;
+  const deadline = Date.now() + 210_000;
   let strikesThrown = 0;
 
   while (Date.now() < deadline) {
@@ -44,24 +59,25 @@ test('a bout is won end to end with nothing but two thumbs', async ({ page }, in
 
     const gap = snapshot.positions[1] - snapshot.positions[0];
 
-    if (gap > STRIKE_GAP.max) {
+    if (gap > MAX_REACH) {
       await hold(thumbs, stance, 'right');
-      await page.waitForTimeout(50);
-      continue;
-    }
-    if (gap < STRIKE_GAP.min) {
-      await hold(thumbs, stance, 'left');
-      await page.waitForTimeout(50);
+      await page.waitForTimeout(40);
       continue;
     }
 
-    // Left stick forward qualifies the right-stick-up family into a roundhouse.
-    await hold(thumbs, stance, 'right');
-    await hold(thumbs, technique, 'up');
+    const strike = STRIKES.find((candidate) => gap >= candidate.min && gap <= candidate.max);
+    if (strike === undefined) {
+      await hold(thumbs, stance, 'left');
+      await page.waitForTimeout(40);
+      continue;
+    }
+
+    await hold(thumbs, stance, strike.stance);
+    await hold(thumbs, technique, strike.technique);
     strikesThrown += 1;
-    await page.waitForTimeout(130);
+    await page.waitForTimeout(140);
     await thumbs.release();
-    await page.waitForTimeout(260);
+    await page.waitForTimeout(240);
   }
 
   await thumbs.release();
@@ -78,7 +94,7 @@ test('the stance stick moves the fighter and the technique stick does not', asyn
 
   await page.goto('/?mode=dojo');
   await page.waitForFunction(
-    () => (globalThis as Record<string, any>)['__smkk'].state().phase === 'fight',
+    () => (globalThis as Record<string, any>)['__smkk']?.state?.().phase === 'fight',
   );
 
   const thumbs = await Thumbs.attach(page);

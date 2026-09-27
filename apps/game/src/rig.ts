@@ -1,5 +1,6 @@
 import {
   BoxGeometry,
+  CapsuleGeometry,
   CylinderGeometry,
   Group,
   Mesh,
@@ -77,8 +78,8 @@ const MOVE_KIND: Readonly<Record<string, TechniqueKind>> = {
   low_block: 'block',
 };
 
-const GUARD_SHOULDER = 0.52;
-const GUARD_ELBOW = -0.62;
+const GUARD_SHOULDER = 0.72;
+const GUARD_ELBOW = -1.05;
 const GUARD_HIP = 0.08;
 const GUARD_KNEE = -0.15;
 
@@ -181,21 +182,29 @@ const LEG_TWIST = 0.16;
 
 /** Shared across every rig: shape never varies with fighter or colour. */
 const geometry = {
-  torso: new BoxGeometry(0.27, 0.6, 0.42),
-  hips: new BoxGeometry(0.27, 0.2, 0.4),
-  sash: new BoxGeometry(0.29, 0.09, 0.46),
-  lapel: new BoxGeometry(0.035, 0.22, 0.08),
-  neck: new CylinderGeometry(0.065, 0.075, 0.12, 10),
-  head: new SphereGeometry(0.15, 16, 12),
-  upperArm: new BoxGeometry(0.1, 0.3, 0.1),
-  forearm: new BoxGeometry(0.085, 0.28, 0.085),
-  hand: new SphereGeometry(0.062, 10, 8),
-  thigh: new BoxGeometry(0.125, 0.4, 0.125),
-  shin: new BoxGeometry(0.105, 0.38, 0.105),
-  foot: new BoxGeometry(0.22, 0.06, 0.11),
-  cuff: new BoxGeometry(1, 1, 1),
+  // Round stock, not lumber. The torso and hips are cylinders squashed on x
+  // into an ellipse, tapered from chest to waist; limbs are capsules so the
+  // joints meet in a curve instead of a corner.
+  torso: new CylinderGeometry(0.21, 0.172, 0.6, 18, 1),
+  hips: new CylinderGeometry(0.178, 0.192, 0.2, 16, 1),
+  sash: new CylinderGeometry(0.206, 0.206, 0.09, 18, 1),
+  lapel: new BoxGeometry(0.022, 0.2, 0.055),
+  neck: new CylinderGeometry(0.062, 0.078, 0.13, 12),
+  head: new SphereGeometry(0.152, 20, 16),
+  shoulderCap: new SphereGeometry(0.06, 12, 10),
+  upperArm: new CapsuleGeometry(0.052, 0.196, 4, 12),
+  forearm: new CapsuleGeometry(0.045, 0.19, 4, 12),
+  hand: new SphereGeometry(0.062, 12, 10),
+  kneeCap: new SphereGeometry(0.058, 12, 10),
+  thigh: new CapsuleGeometry(0.069, 0.262, 4, 12),
+  shin: new CapsuleGeometry(0.056, 0.268, 4, 12),
+  foot: new CapsuleGeometry(0.055, 0.11, 4, 10),
+  cuff: new CylinderGeometry(1, 1, 1, 14),
   emblem: new PlaneGeometry(0.31, 0.31),
 };
+
+/** Chest and hips are elliptical: narrow front-to-back, broad shoulder to shoulder. */
+const TORSO_SQUASH = 0.64;
 
 /** Colour never varies with fighter for these: one instance, every rig. */
 const skinMaterial = new MeshStandardMaterial({ color: '#d8a882', roughness: 0.75 });
@@ -223,7 +232,7 @@ function paint(color: string, roughness: number): MeshStandardMaterial {
 /** A cuff/trim band, its size baked into the mesh scale so the geometry stays shared. */
 function band(material: MeshStandardMaterial, width: number, depth: number): Mesh {
   const mesh = new Mesh(geometry.cuff, material);
-  mesh.scale.set(width, 0.05, depth);
+  mesh.scale.set(width / 2, 0.05, depth / 2);
   return mesh;
 }
 
@@ -254,7 +263,7 @@ export class FighterRig {
     const trim = paint(spec.beltColor, 0.7);
     // A gi lapel is a seam in the same cloth, not a black strap. Belt-coloured
     // strips across the chest read as a harness and swallow the emblem.
-    const lapelCloth = paint(shade(spec.giColor, 0.72), 0.9);
+    const lapelCloth = paint(shade(spec.giColor, 0.58), 0.95);
 
     this.body.add(this.hipsPivot, this.torsoPivot);
     this.root.add(this.body);
@@ -262,25 +271,30 @@ export class FighterRig {
     // Hips carry the belt and stay put under the torso twist so a strike
     // reads as the shoulders and hips rotating together, feet still planted.
     const hips = new Mesh(geometry.hips, gi);
+    hips.scale.x = TORSO_SQUASH;
     hips.position.y = 0.84;
     this.hipsPivot.add(hips);
 
     const sash = new Mesh(geometry.sash, trim);
+    sash.scale.x = TORSO_SQUASH;
     sash.position.y = 0.9;
     this.hipsPivot.add(sash);
 
     const torso = new Mesh(geometry.torso, gi);
+    torso.scale.x = TORSO_SQUASH;
     torso.position.y = 1.18;
     this.torsoPivot.add(torso);
 
     // An open V at the collar, not an X across the sternum. The lapels stop
     // above the chest plate on purpose: the emblem owns that space.
+    // The torso is an ellipse now, so the chest surface falls away from centre.
+    // A lapel parked at the centre-line depth would float in front of the ribs.
     const lapelLeft = new Mesh(geometry.lapel, lapelCloth);
-    lapelLeft.position.set(0.144, 1.37, 0.095);
-    lapelLeft.rotation.x = 0.42;
+    lapelLeft.position.set(0.122, 1.37, 0.088);
+    lapelLeft.rotation.set(0.42, 0, -0.1);
     const lapelRight = new Mesh(geometry.lapel, lapelCloth);
-    lapelRight.position.set(0.144, 1.37, -0.095);
-    lapelRight.rotation.x = -0.42;
+    lapelRight.position.set(0.122, 1.37, -0.088);
+    lapelRight.rotation.set(-0.42, 0, -0.1);
     this.torsoPivot.add(lapelLeft, lapelRight);
 
     const neck = new Mesh(geometry.neck, skinMaterial);
@@ -305,7 +319,7 @@ export class FighterRig {
     );
     this.emblem.name = 'gi-emblem';
     this.emblem.rotation.y = Math.PI / 2;
-    this.emblem.position.set(0.152, 1.19, 0);
+    this.emblem.position.set(0.139, 1.19, 0);
     this.torsoPivot.add(this.emblem);
 
     this.leadArm = this.buildArm(gi, trim, 0.215);
@@ -319,6 +333,9 @@ export class FighterRig {
     shoulder.position.set(0.02, 1.46, z);
     this.torsoPivot.add(shoulder);
 
+    const shoulderCap = new Mesh(geometry.shoulderCap, gi);
+    shoulder.add(shoulderCap);
+
     const upperArm = new Mesh(geometry.upperArm, gi);
     upperArm.position.y = -0.15;
     shoulder.add(upperArm);
@@ -326,6 +343,10 @@ export class FighterRig {
     const elbow = new Group();
     elbow.position.y = -0.3;
     shoulder.add(elbow);
+
+    const elbowCap = new Mesh(geometry.shoulderCap, gi);
+    elbowCap.scale.setScalar(0.85);
+    elbow.add(elbowCap);
 
     const forearm = new Mesh(geometry.forearm, gi);
     forearm.position.y = -0.14;
@@ -355,6 +376,9 @@ export class FighterRig {
     knee.position.y = -0.4;
     hip.add(knee);
 
+    const kneeCap = new Mesh(geometry.kneeCap, gi);
+    knee.add(kneeCap);
+
     const shin = new Mesh(geometry.shin, gi);
     shin.position.y = -0.19;
     knee.add(shin);
@@ -364,7 +388,10 @@ export class FighterRig {
     knee.add(cuff);
 
     const foot = new Mesh(geometry.foot, skinMaterial);
-    foot.position.set(0.06, -0.41, 0);
+    foot.rotation.z = Math.PI / 2;
+    foot.scale.y = 1;
+    foot.scale.z = 0.92;
+    foot.position.set(0.05, -0.42, 0);
     knee.add(foot);
 
     return { hip, knee };

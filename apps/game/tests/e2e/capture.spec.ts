@@ -14,7 +14,7 @@ test('captures the portrait preview frame', async ({ page }, info) => {
 
   await page.goto('/?mode=dojo');
   await page.waitForFunction(
-    () => (globalThis as Record<string, any>)['__smkk'].state().phase === 'fight',
+    () => (globalThis as Record<string, any>)['__smkk']?.state?.().phase === 'fight',
   );
 
   const thumbs = await Thumbs.attach(page);
