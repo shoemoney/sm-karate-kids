@@ -7,7 +7,15 @@ export class FixedClock {
   private accumulator = 0;
   private elapsed = 0;
 
-  constructor(private readonly maxTicksPerDrain = 5) {}
+  /**
+   * The cap must cover the input clamp below, or the game runs in slow motion
+   * on a device that renders slowly: at five ticks a frame, a phone managing
+   * 10fps would simulate 50 ticks a second instead of 60 and drift further
+   * behind the harder it is pushed. Fifteen ticks is 250ms of simulation, which
+   * is exactly the largest delta a single drain will accept, so anything up to
+   * that is caught up in full and only a genuinely suspended tab dilates.
+   */
+  constructor(private readonly maxTicksPerDrain = 15) {}
 
   /** Returns how many ticks to run for the given frame delta. */
   drain(deltaMs: number): number {
