@@ -1,0 +1,23 @@
+{
+  "name": "@smkk/game",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@smkk/content": "workspace:*",
+    "@smkk/sim": "workspace:*",
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "@types/three": "^0.183.1",
+    "vite": "8.3.1",
+    "@playwright/test": "^1.56.0"
+  }
+}

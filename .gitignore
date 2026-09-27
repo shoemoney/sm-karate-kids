@@ -1,0 +1,18 @@
+node_modules/
+dist/
+dist-types/
+.tsbuild/
+*.tsbuildinfo
+coverage/
+.remember/
+test-results/
+playwright-report/
+blob-report/
+.pending-questions.md
+*.local
+.env
+.env.*
+.DS_Store
+
+# The product spec is kept out of the public repository.
+smkk.md

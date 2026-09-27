@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Typecheck, test, validate, build, e2e
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Validate content
+        run: pnpm validate:content
+
+      - name: Validate assets
+        run: pnpm validate:assets
+
+      - name: Build
+        run: pnpm build
+
+      - name: Install Playwright browsers (chromium)
+        run: pnpm --filter @smkk/game exec playwright install --with-deps chromium
+
+      - name: Browser tests (e2e)
+        run: pnpm test:e2e
+
+      - name: Secret scan (tracked files)
+        run: |
+          set -uo pipefail
+          pattern='sk-[A-Za-z0-9]{16,}|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|-----BEGIN[[:space:]][A-Z ]*PRIVATE KEY-----'
+          hits="$(git grep -InE "$pattern" -- . || true)"
+          if [ -n "$hits" ]; then
+            echo "Potential secret material found in tracked files:"
+            echo "$hits"
+            exit 1
+          fi
+          echo "No obvious secret shapes found."
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/game/playwright-report/
+          retention-days: 14
+          if-no-files-found: ignore

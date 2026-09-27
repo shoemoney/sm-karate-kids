@@ -1,0 +1,576 @@
+/* Mobile-first. 390x844 portrait is the design baseline; everything wider is an
+   adaptation of this layout, not the other way round. */
+
+:root {
+  --ink: #0c1018;
+  --ink-soft: #151c28;
+  --edge: rgba(255, 255, 255, 0.08);
+  --text: #eef2f8;
+  --muted: #8b97ab;
+  --blue: #1e90d6;
+  --blue-deep: #0b6fb0;
+  --amber: #e7b657;
+  --red: #c8443c;
+  --pad-height: clamp(210px, 34dvh, 280px);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* The pad is a control surface, not a document. Nothing here scrolls or selects. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+/* ---------- HUD ---------- */
+
+#hud {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.75rem 0.35rem;
+  background: linear-gradient(180deg, rgba(11, 111, 176, 0.18), transparent);
+}
+
+.scoreline {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.side {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.side.right {
+  justify-content: flex-end;
+}
+
+.name {
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.points {
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--text);
+  min-width: 2.2ch;
+  text-align: center;
+}
+
+.side[data-side="0"] .points {
+  color: #f2f2ef;
+}
+
+.side[data-side="1"] .points {
+  color: var(--red);
+}
+
+.clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+#timer {
+  font-size: 1.9rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--amber);
+}
+
+#backend {
+  margin-top: 0.15rem;
+  font-size: 0.55rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- Stage ---------- */
+
+#stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+#view {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.banner {
+  position: absolute;
+  inset-inline: 0;
+  top: 18%;
+  text-align: center;
+  font-size: clamp(1.5rem, 9vw, 3rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 0.12em 0 rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transition: opacity 140ms ease-out;
+  pointer-events: none;
+}
+
+.banner.show {
+  opacity: 1;
+}
+
+.banner[data-tone="full"] {
+  color: var(--amber);
+}
+
+.banner[data-tone="half"] {
+  color: var(--blue);
+}
+
+.banner[data-tone="neutral"] {
+  color: var(--text);
+}
+
+.technique {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0.5rem;
+  text-align: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  pointer-events: none;
+  min-height: 1em;
+}
+
+/* ---------- Control pad ---------- */
+
+#pad {
+  flex: 0 0 var(--pad-height);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem 0.9rem;
+  background: linear-gradient(180deg, var(--ink-soft), #0a0e15);
+  border-top: 1px solid var(--edge);
+}
+
+.stick-zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--edge);
+}
+
+.stick-label {
+  font-size: 0.55rem;
+  letter-spacing: 0.22em;
+  color: var(--muted);
+}
+
+.stick {
+  position: relative;
+  width: min(42vw, 168px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 42%, #1d2836, #10161f 70%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0.35rem 1rem rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+}
+
+/* The gate is drawn, because a glass stick has no detents to feel for. */
+.glyph {
+  position: absolute;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.18);
+  transition: color 90ms linear;
+}
+
+.glyph-up { top: 6%; }
+.glyph-down { bottom: 6%; }
+.glyph-left { left: 6%; }
+.glyph-right { right: 6%; }
+
+.stick[data-dir="up"] .glyph-up,
+.stick[data-dir="down"] .glyph-down,
+.stick[data-dir="left"] .glyph-left,
+.stick[data-dir="right"] .glyph-right {
+  color: var(--blue);
+}
+
+#stick-right[data-dir="up"] .glyph-up,
+#stick-right[data-dir="down"] .glyph-down,
+#stick-right[data-dir="left"] .glyph-left,
+#stick-right[data-dir="right"] .glyph-right {
+  color: var(--amber);
+}
+
+.knob {
+  width: 40%;
+  height: 40%;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #3b4a5f, #202b3a);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 0.25rem 0.6rem rgba(0, 0, 0, 0.55);
+  transform: translate3d(0, 0, 0);
+  transition: transform 60ms linear;
+  will-change: transform;
+}
+
+.stick-zone.engaged .stick {
+  border-color: rgba(30, 144, 214, 0.5);
+}
+
+#zone-right.engaged .stick {
+  border-color: rgba(231, 182, 87, 0.55);
+}
+
+/* ---------- Wider screens: the pad tucks into the corners ---------- */
+
+@media (min-width: 720px), (orientation: landscape) and (min-height: 420px) {
+  :root {
+    --pad-height: clamp(170px, 30dvh, 230px);
+  }
+
+  #pad {
+    position: absolute;
+    inset: auto 0 0 0;
+    background: transparent;
+    border-top: 0;
+    pointer-events: none;
+    padding-inline: 2vw;
+  }
+
+  .stick-zone {
+    background: transparent;
+    border: 0;
+    pointer-events: auto;
+  }
+
+  #app {
+    position: relative;
+  }
+
+  #stage {
+    flex: 1 1 auto;
+  }
+
+  .stick {
+    width: min(20vw, 150px);
+    opacity: 0.85;
+  }
+}
+
+/* A real keyboard is present, so the glass sticks are advisory only. */
+@media (hover: hover) and (pointer: fine) {
+  .stick {
+    opacity: 0.6;
+  }
+}
+
+/* ---------- HUD actions (settings / technique reference) ---------- */
+
+.hud-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.icon-btn {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--edge);
+  border-radius: 0.6rem;
+  color: var(--text);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.icon-btn:focus-visible,
+input:focus-visible,
+.setting-row:focus-within {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.banner-sub {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(18% + clamp(2.4rem, 11vw, 4.2rem));
+  text-align: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+/* ---------- Performance HUD ---------- */
+
+.perf-hud {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 0.35rem);
+  left: 0.5rem;
+  margin: 0;
+  padding: 0.3rem 0.5rem;
+  background: rgba(0, 0, 0, 0.55);
+  color: #8be08b;
+  font-family: ui-monospace, "SF Mono", "Menlo", monospace;
+  font-size: 0.6rem;
+  line-height: 1.35;
+  border-radius: 0.4rem;
+  pointer-events: none;
+  z-index: 25;
+  white-space: pre;
+}
+
+.perf-hud[hidden] {
+  display: none;
+}
+
+/* ---------- Settings sheet / technique reference ---------- */
+
+.sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  background: rgba(9, 12, 18, 0.97);
+  transform: translateY(100%);
+  transition: transform 220ms ease;
+  overflow: hidden;
+}
+
+.sheet[hidden] {
+  display: none;
+}
+
+.sheet.open {
+  transform: translateY(0);
+}
+
+.sheet-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--edge);
+}
+
+.sheet-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sheet-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.75rem 1rem calc(1rem + env(safe-area-inset-bottom));
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 44px;
+  padding: 0.35rem 0.25rem;
+  border-bottom: 1px solid var(--edge);
+  cursor: pointer;
+}
+
+.setting-row input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  accent-color: var(--blue);
+}
+
+.setting-hint {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.career-summary {
+  margin-top: 0.9rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+
+.tech-group {
+  margin-bottom: 1.1rem;
+}
+
+.tech-group h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.tech-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tech-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px solid var(--edge);
+  font-size: 0.8rem;
+}
+
+.tech-combo {
+  color: var(--blue);
+  white-space: nowrap;
+}
+
+.tech-name {
+  font-weight: 600;
+}
+
+.tech-meta {
+  text-align: right;
+  white-space: nowrap;
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+/* ---------- Accessibility settings ---------- */
+
+body.reduced-motion .banner,
+body.reduced-motion .sheet {
+  transition: none;
+}
+
+body.high-contrast {
+  --text: #ffffff;
+  --muted: #dfe6f2;
+  --amber: #ffd400;
+  --blue: #55c7ff;
+  --red: #ff5a52;
+  --edge: rgba(255, 255, 255, 0.4);
+}
+
+body.high-contrast .glyph {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+body.high-contrast .banner {
+  text-shadow: 0 0 0.4em rgba(0, 0, 0, 0.95), 0 0.12em 0 rgba(0, 0, 0, 0.95);
+}
+
+body.high-contrast .stick {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+body.large-controls {
+  --pad-height: clamp(260px, 42dvh, 340px);
+}
+
+body.large-controls .stick {
+  width: min(52vw, 210px);
+}
+
+body.large-controls .glyph {
+  font-size: 0.95rem;
+}
+
+/* Screen position swaps; #zone-left/#zone-right keep their stance/technique
+   roles, since input.ts binds listeners to the ids, not to a screen side. */
+body.left-handed #zone-left {
+  order: 2;
+}
+
+body.left-handed #zone-right {
+  order: 1;
+}
+
+
+/* A kanji with no label is a guess for most players; the reference button says
+   what it opens. */
+.icon-btn.text-btn {
+  width: auto;
+  min-width: 44px;
+  padding-inline: 0.7rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+/* The caption sat on bare mat and vanished. Give it its own ground. */
+.technique:not(:empty) {
+  display: block;
+  width: fit-content;
+  max-width: calc(100% - 2rem);
+  margin-inline: auto;
+  padding: 0.22rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(8, 12, 18, 0.66);
+  color: #dfe7f2;
+  backdrop-filter: blur(2px);
+}
+
+.technique {
+  text-align: center;
+}

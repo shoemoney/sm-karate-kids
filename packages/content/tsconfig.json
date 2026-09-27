@@ -1,0 +1,6 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "outDir": "dist", "rootDir": ".", "resolveJsonModule": true },
+  "include": ["src/**/*.ts", "tests/**/*.ts", "data/**/*.json"],
+  "references": [{ "path": "../sim" }]
+}

@@ -1,0 +1,8 @@
+packages:
+  - 'packages/*'
+  - 'apps/*'
+
+# esbuild's install script only verifies its prebuilt binary, which pnpm already
+# fetches as an optional platform dependency. Nothing needs to run.
+allowBuilds:
+  esbuild: true

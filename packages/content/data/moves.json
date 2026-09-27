@@ -1,0 +1,25 @@
+[
+  { "id": "lunge_punch",            "name": "Lunge Punch",            "kind": "strike", "height": "mid",  "posture": "stand",  "startup": 6,  "active": 3, "recovery": 10, "reach": 1.55, "value": "half", "advance": 0.25 },
+  { "id": "jumping_punch",          "name": "Jumping Punch",          "kind": "strike", "height": "high", "posture": "air",    "startup": 8,  "active": 4, "recovery": 14, "reach": 1.50, "value": "full", "advance": 0.60 },
+  { "id": "crouching_punch",        "name": "Crouching Punch",        "kind": "strike", "height": "low",  "posture": "crouch", "startup": 5,  "active": 3, "recovery": 9,  "reach": 1.35, "value": "half", "advance": 0.10 },
+  { "id": "stepping_lunge_punch",   "name": "Stepping Lunge Punch",   "kind": "strike", "height": "mid",  "posture": "stand",  "startup": 9,  "active": 3, "recovery": 13, "reach": 1.95, "value": "full", "advance": 0.75 },
+  { "id": "back_fist",              "name": "Back Fist",              "kind": "strike", "height": "high", "posture": "stand",  "startup": 7,  "active": 3, "recovery": 12, "reach": 1.60, "value": "half", "advance": -0.10 },
+
+  { "id": "reverse_punch",          "name": "Reverse Punch",          "kind": "strike", "height": "mid",  "posture": "stand",  "startup": 8,  "active": 3, "recovery": 12, "reach": 1.70, "value": "full", "advance": 0.15 },
+  { "id": "somersault_kick",        "name": "Somersault Kick",        "kind": "strike", "height": "high", "posture": "air",    "startup": 12, "active": 5, "recovery": 20, "reach": 1.60, "value": "full", "advance": 0.50 },
+  { "id": "crouching_reverse_punch","name": "Crouching Reverse Punch","kind": "strike", "height": "low",  "posture": "crouch", "startup": 7,  "active": 3, "recovery": 12, "reach": 1.50, "value": "half", "advance": 0.10 },
+  { "id": "back_kick",              "name": "Back Kick",              "kind": "strike", "height": "mid",  "posture": "stand",  "startup": 11, "active": 4, "recovery": 16, "reach": 1.90, "value": "full", "advance": 0.40 },
+  { "id": "spinning_back_kick",     "name": "Spinning Back Kick",     "kind": "strike", "height": "high", "posture": "stand",  "startup": 14, "active": 4, "recovery": 20, "reach": 2.00, "value": "full", "advance": 0.20 },
+
+  { "id": "front_kick",             "name": "Front Kick",             "kind": "strike", "height": "mid",  "posture": "stand",  "startup": 9,  "active": 4, "recovery": 13, "reach": 1.85, "value": "half", "advance": 0.20 },
+  { "id": "jumping_front_kick",     "name": "Jumping Front Kick",     "kind": "strike", "height": "high", "posture": "air",    "startup": 11, "active": 5, "recovery": 18, "reach": 1.90, "value": "full", "advance": 0.80 },
+  { "id": "rising_knee",            "name": "Rising Knee",            "kind": "strike", "height": "mid",  "posture": "stand",  "startup": 7,  "active": 3, "recovery": 11, "reach": 1.30, "value": "half", "advance": 0.15 },
+  { "id": "roundhouse_kick",        "name": "Roundhouse Kick",        "kind": "strike", "height": "high", "posture": "stand",  "startup": 12, "active": 4, "recovery": 17, "reach": 2.05, "value": "full", "advance": 0.35 },
+  { "id": "high_block",             "name": "High Block",             "kind": "block",  "height": "high", "posture": "stand",  "startup": 3,  "active": 12,"recovery": 6,  "reach": 0.90, "value": "half", "advance": 0.00 },
+
+  { "id": "foot_sweep",             "name": "Foot Sweep",             "kind": "strike", "height": "low",  "posture": "stand",  "startup": 8,  "active": 4, "recovery": 13, "reach": 1.75, "value": "half", "advance": 0.20 },
+  { "id": "jumping_sweep_kick",     "name": "Jumping Sweep Kick",     "kind": "strike", "height": "mid",  "posture": "air",    "startup": 10, "active": 5, "recovery": 16, "reach": 1.80, "value": "full", "advance": 0.70 },
+  { "id": "low_sweep",              "name": "Low Sweep",              "kind": "strike", "height": "low",  "posture": "crouch", "startup": 7,  "active": 4, "recovery": 12, "reach": 1.70, "value": "half", "advance": 0.15 },
+  { "id": "leg_sweep",              "name": "Leg Sweep",              "kind": "strike", "height": "low",  "posture": "stand",  "startup": 10, "active": 4, "recovery": 15, "reach": 1.95, "value": "full", "advance": 0.30 },
+  { "id": "low_block",              "name": "Low Block",              "kind": "block",  "height": "low",  "posture": "stand",  "startup": 3,  "active": 12,"recovery": 6,  "reach": 0.90, "value": "half", "advance": 0.00 }
+]

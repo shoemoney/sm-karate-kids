@@ -1,0 +1,3 @@
+[
+  { "id": "classic", "name": "Classic Rules", "pointsToWin": 2, "timerTicks": 1800, "refereeTicks": 96, "startSeparation": 3.2 }
+]

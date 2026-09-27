@@ -1,0 +1,9 @@
+{
+  "brand/shoemoney-emblem.png": {
+    "source": "Jeremy Schoemaker's own ShoeMoney brand project, copied from /Users/shoemoney/Projects/smtd/public/brand/shoemoney.png and downscaled to 256x256",
+    "license": "Proprietary brand mark, used with owner permission. NOT covered by this repository's MIT grant.",
+    "holder": "Jeremy Schoemaker",
+    "approved": true,
+    "notes": "The ShoeMoney emblem is applied to both fighters' gi chests. See docs/asset-provenance.md and THIRD_PARTY_NOTICES.md for the carve-out from the repo's MIT license."
+  }
+}

@@ -1,0 +1,4 @@
+[
+  { "id": "shiro", "name": "Shiro",  "giColor": "#f2f2ef", "beltColor": "#1b1b1f", "walkSpeed": 0.052, "hitTolerance": 0.42 },
+  { "id": "aka",   "name": "Aka",    "giColor": "#c8443c", "beltColor": "#1b1b1f", "walkSpeed": 0.052, "hitTolerance": 0.42 }
+]
