@@ -19,3 +19,7 @@ smkk.md
 
 # Incoming art, not ready to ship yet.
 codex-assets/
+
+# Workflow agent worktrees.
+.claude/worktrees/
+.todo-worktrees/
