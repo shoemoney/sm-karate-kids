@@ -127,6 +127,7 @@ pnpm dev          # http://127.0.0.1:5173
 | Parameter | Effect |
 |---|---|
 | `?mode=dojo` | Training partner holds stance so you can drill |
+| `?mode=dojo&spacing=2.5` | Dojo mode with custom opening distance (metres) |
 | `?mode=classic` \| `pressure` \| `counter` | CPU archetype |
 | `?renderer=webgl` | Force the WebGL 2 fallback path |
 | `?seed=1337` | Seed the CPU, for reproducible bouts |

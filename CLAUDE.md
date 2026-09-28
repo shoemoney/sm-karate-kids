@@ -12,7 +12,7 @@ This is a **pnpm workspace monorepo** (`pnpm-workspace.yaml`: `packages/*`, `app
 | `packages/sim` | Deterministic combat simulation: clock, input grammar, fighter/match state, CPU, replay checksum, and the Zod content schema (`packages/sim/src/content.ts`). No Three.js, no DOM, no network. |
 | `packages/content` | Loads `data/*.json` (moves, fighters, arenas, rulesets), validates it through `packages/sim`'s `loadContent`, and exports the single validated `content` bundle. Importing `@smkk/content` is the only supported way to get game data. |
 | `apps/game` | The Vite + Three.js browser client: rendering, input adapters, UI, Playwright e2e tests, static assets under `apps/game/public/`. |
-| `tools/` | Standalone validators (`validate-content.ts`, `validate-assets.ts`), run with `tsx`. |
+| `tools/` | Standalone utilities: balance-report harness (`balance-report.ts`), content validator (`validate-content.ts`), asset validator (`validate-assets.ts`). Run with `tsx`. |
 | `docs/adr/` | Architecture decision records. |
 
 The PRD (the product spec, kept out of the public repository) describes a larger eventual package split (`renderer`, `input`, `audio`,
