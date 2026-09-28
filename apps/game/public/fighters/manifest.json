@@ -1,0 +1,282 @@
+{
+  "version": 1,
+  "cell": {
+    "w": 394,
+    "h": 306
+  },
+  "baseline": 268,
+  "metresPerCell": 2.0008,
+  "facing": "right",
+  "fighters": {
+    "shiro": {
+      "pages": [
+        "shiro-0.webp",
+        "shiro-1.webp",
+        "shiro-2.webp",
+        "shiro-3.webp"
+      ],
+      "cols": 11,
+      "rows": 3
+    },
+    "aka": {
+      "pages": [
+        "aka-0.webp",
+        "aka-1.webp",
+        "aka-2.webp",
+        "aka-3.webp",
+        "aka-4.webp",
+        "aka-5.webp"
+      ],
+      "cols": 11,
+      "rows": 2
+    }
+  },
+  "poses": {
+    "idle": {
+      "frames": [
+        0
+      ],
+      "contact": 0
+    },
+    "lunge_punch": {
+      "frames": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "contact": 4,
+      "fps": 12
+    },
+    "jumping_punch": {
+      "frames": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "contact": 3,
+      "fps": 12
+    },
+    "crouching_punch": {
+      "frames": [
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "contact": 4,
+      "fps": 12
+    },
+    "stepping_lunge_punch": {
+      "frames": [
+        19,
+        20,
+        21,
+        22,
+        23,
+        24
+      ],
+      "contact": 4,
+      "fps": 12
+    },
+    "back_fist": {
+      "frames": [
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "contact": 4,
+      "fps": 12
+    },
+    "reverse_punch": {
+      "frames": [
+        31,
+        32,
+        33,
+        34,
+        35,
+        36
+      ],
+      "contact": 4,
+      "fps": 12
+    },
+    "somersault_kick": {
+      "frames": [
+        37,
+        38,
+        39,
+        40,
+        41,
+        42
+      ],
+      "contact": 4,
+      "fps": 12
+    },
+    "crouching_reverse_punch": {
+      "frames": [
+        43,
+        44,
+        45,
+        46,
+        47,
+        48
+      ],
+      "contact": 4,
+      "fps": 12
+    },
+    "back_kick": {
+      "frames": [
+        49,
+        50,
+        51,
+        52,
+        53,
+        54
+      ],
+      "contact": 4,
+      "fps": 12
+    },
+    "spinning_back_kick": {
+      "frames": [
+        55,
+        56,
+        57,
+        58,
+        59,
+        60
+      ],
+      "contact": 4,
+      "fps": 12
+    },
+    "front_kick": {
+      "frames": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66
+      ],
+      "contact": 3,
+      "fps": 12
+    },
+    "jumping_front_kick": {
+      "frames": [
+        67,
+        68,
+        69,
+        70,
+        71,
+        72
+      ],
+      "contact": 3,
+      "fps": 12
+    },
+    "rising_knee": {
+      "frames": [
+        73,
+        74,
+        75,
+        76,
+        77,
+        78
+      ],
+      "contact": 5,
+      "fps": 12
+    },
+    "roundhouse_kick": {
+      "frames": [
+        79,
+        80,
+        81,
+        82,
+        83,
+        84
+      ],
+      "contact": 3,
+      "fps": 12
+    },
+    "high_block": {
+      "frames": [
+        85,
+        86,
+        87,
+        88,
+        89,
+        90
+      ],
+      "contact": 3,
+      "fps": 12
+    },
+    "foot_sweep": {
+      "frames": [
+        91,
+        92,
+        93,
+        94,
+        95,
+        96
+      ],
+      "contact": 3,
+      "fps": 12
+    },
+    "jumping_sweep_kick": {
+      "frames": [
+        97,
+        98,
+        99,
+        100,
+        101,
+        102
+      ],
+      "contact": 3,
+      "fps": 12
+    },
+    "low_sweep": {
+      "frames": [
+        103,
+        104,
+        105,
+        106,
+        107,
+        108
+      ],
+      "contact": 4,
+      "fps": 12
+    },
+    "low_block": {
+      "frames": [
+        109,
+        110,
+        111,
+        112,
+        113,
+        114
+      ],
+      "contact": 1,
+      "fps": 12
+    },
+    "high_kick": {
+      "frames": [
+        115,
+        116,
+        117,
+        118,
+        119,
+        120
+      ],
+      "contact": 3,
+      "fps": 12
+    }
+  }
+}

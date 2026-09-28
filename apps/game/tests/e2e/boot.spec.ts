@@ -61,6 +61,8 @@ test('both gi emblems carry the ShoeMoney mark', async ({ page }) => {
     expect(emblem.visible).toBe(true);
     expect(emblem.width).toBeGreaterThan(0);
     expect(emblem.height).toBeGreaterThan(0);
-    expect(emblem.src).toContain('shoemoney-emblem');
+    // Sprite fighters wear the mark painted into the art; the mesh rigs carry
+    // it as a decal. Either way the texture that carries it must be loaded.
+    expect(emblem.src).toMatch(/shoemoney-emblem|fighters\/(shiro|aka)-\d+\.webp/);
   }
 });

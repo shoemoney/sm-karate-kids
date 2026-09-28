@@ -23,3 +23,6 @@ codex-assets/
 # Workflow agent worktrees.
 .claude/worktrees/
 .todo-worktrees/
+
+# Local agent loop state.
+.opencode/

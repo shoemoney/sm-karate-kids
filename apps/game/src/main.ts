@@ -13,12 +13,14 @@ import {
   type StickPair,
 } from '@smkk/sim';
 import { Audio } from './audio.js';
+import type { FighterView } from './fighterView.js';
 import { Hud } from './hud.js';
 import { PlayerInput } from './input/index.js';
 import { loadCareer, recordBoutResult } from './persist.js';
 import { createRenderer } from './renderer.js';
 import { FighterRig, loadEmblem } from './rig.js';
 import { SettingsStore, type Settings } from './settings.js';
+import { tryLoadSpriteViews } from './spriteRig.js';
 import { Stage } from './stage.js';
 
 function byId<T extends HTMLElement>(id: string): T {
@@ -42,6 +44,25 @@ class TrainingDummy implements Opponent {
 
 function query(): URLSearchParams {
   return new URLSearchParams(globalThis.location?.search ?? '');
+}
+
+/** Adapts the existing 3D rig to `FighterView` without touching rig.ts. */
+function wrapMeshRig(rig: FighterRig): FighterView {
+  return {
+    root: rig.root,
+    apply: (fighter, elapsedTicks) => rig.apply(fighter, elapsedTicks),
+    emblemInfo: () => {
+      const map = rig.emblem.material.map;
+      const image = map?.image as { width?: number; height?: number; src?: string } | undefined;
+      return {
+        bound: map !== null && map !== undefined,
+        width: image?.width ?? 0,
+        height: image?.height ?? 0,
+        src: image?.src ?? '',
+        visible: rig.emblem.visible,
+      };
+    },
+  };
 }
 
 function makeOpponent(mode: string, seed: number): Opponent {
@@ -152,18 +173,36 @@ async function boot(): Promise<void> {
   hud.renderTechniques(byId('tech-ref-list'), indexMoves(content));
   updateCareerSummary();
 
-  const [{ renderer, label }, emblem] = await Promise.all([
-    createRenderer(canvas, forceWebGL),
-    loadEmblem(),
-  ]);
-  hud.setBackend(label);
-
   let state = createMatch({ content, startSeparation });
   let opponent = makeOpponent(mode, seed);
 
+  // The photoreal sprite fighters are the default. ?fighters=mesh selects the
+  // procedural 3D rigs, which are also the fallback if the atlas fails to load.
+  const wantSprite = params.get('fighters') !== 'mesh';
+  const [{ renderer, label }, spriteViews] = await Promise.all([
+    createRenderer(canvas, forceWebGL),
+    wantSprite
+      ? tryLoadSpriteViews(state.fighters.map((fighter) => fighter.spec), import.meta.env.BASE_URL)
+      : Promise.resolve(null),
+  ]);
+  hud.setBackend(label);
+
+  let fighterMode: 'sprite' | 'mesh';
+  let views: readonly FighterView[];
+  if (spriteViews !== null) {
+    views = spriteViews;
+    fighterMode = 'sprite';
+  } else {
+    if (wantSprite) {
+      console.warn('[smkk] sprite fighters requested but unavailable; falling back to the 3D rig');
+    }
+    const emblem = await loadEmblem();
+    views = state.fighters.map((fighter) => wrapMeshRig(new FighterRig(fighter.spec, emblem)));
+    fighterMode = 'mesh';
+  }
+
   const stage = new Stage(state.arena);
-  const rigs = state.fighters.map((fighter) => new FighterRig(fighter.spec, emblem));
-  for (const rig of rigs) stage.scene.add(rig.root);
+  for (const view of views) stage.scene.add(view.root);
   hud.setNames(state.fighters[0].spec.name, state.fighters[1].spec.name);
 
   const resize = (): void => {
@@ -250,7 +289,7 @@ async function boot(): Promise<void> {
     if (state.phase === 'over' && restartAt === 0) restartAt = now + 4200;
     if (restartAt !== 0 && now > restartAt) restart();
 
-    for (const index of [0, 1] as const) rigs[index]!.apply(state.fighters[index], elapsedTicks);
+    for (const index of [0, 1] as const) views[index]!.apply(state.fighters[index], elapsedTicks);
     const [left, right] = state.fighters;
     stage.frame((left.x + right.x) / 2, right.x - left.x);
     hud.update(state, now);
@@ -277,6 +316,7 @@ async function boot(): Promise<void> {
       ready: true,
       backend: label,
       mode,
+      fighters: fighterMode,
       state: () => ({
         tick: state.tick,
         phase: state.phase,
@@ -311,18 +351,7 @@ async function boot(): Promise<void> {
         };
       },
       sticks: () => input.read(),
-      emblems: () =>
-        rigs.map((rig) => {
-          const map = rig.emblem.material.map;
-          const image = map?.image as { width?: number; height?: number; src?: string } | undefined;
-          return {
-            bound: map !== null && map !== undefined,
-            width: image?.width ?? 0,
-            height: image?.height ?? 0,
-            src: image?.src ?? '',
-            visible: rig.emblem.visible,
-          };
-        }),
+      emblems: () => views.map((view) => view.emblemInfo()),
     },
     writable: false,
     configurable: true,
