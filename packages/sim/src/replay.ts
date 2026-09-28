@@ -2,12 +2,14 @@ import { fnv1a, hex8 } from './checksum.js';
 import { checksumOf, createMatch, step, type MatchOptions, type MatchState } from './match.js';
 import { NEUTRAL_FRAME, packFrame, unpackFrame, type InputFrame } from './input.js';
 
-export const REPLAY_VERSION = 1;
+export const REPLAY_VERSION = 2;
 
 export interface Replay {
   readonly version: number;
   readonly rulesetId: string;
   readonly arenaId: string;
+  /** The opening distance actually in force for this match, after any override and clamping. */
+  readonly startSeparation: number;
   /** One packed input frame per tick. */
   readonly frames: readonly number[];
   /** Checksum after the final recorded tick. */
@@ -28,6 +30,7 @@ export class ReplayRecorder {
       version: REPLAY_VERSION,
       rulesetId: this.state.ruleset.id,
       arenaId: this.state.arena.id,
+      startSeparation: this.state.separation,
       frames: [...this.frames],
       checksum: checksumOf(this.state),
     };
@@ -49,6 +52,7 @@ export function playback(replay: Replay, options: MatchOptions): PlaybackResult 
     content: options.content,
     rulesetId: replay.rulesetId,
     arenaId: replay.arenaId,
+    startSeparation: replay.startSeparation,
   });
   for (const packed of replay.frames) {
     step(state, unpackFrame(packed));
