@@ -1,6 +1,9 @@
 import {
   AmbientLight,
   BoxGeometry,
+  AdditiveBlending,
+  SRGBColorSpace,
+  CanvasTexture,
   CircleGeometry,
   Color,
   CylinderGeometry,
@@ -34,6 +37,7 @@ export class Stage {
   private distance = 8;
   private readonly leftShadow: Mesh<CircleGeometry, MeshBasicMaterial>;
   private readonly rightShadow: Mesh<CircleGeometry, MeshBasicMaterial>;
+  private readonly pool: Mesh<CircleGeometry, MeshBasicMaterial>;
 
   constructor(arena: ArenaSpec) {
     const backdrop = new Color(arena.backdropColor);
@@ -88,21 +92,22 @@ export class Stage {
 
     this.scene.add(buildBackdrop(arena));
 
-    const key = new DirectionalLight('#fff2d8', 2.5);
+    // Warm key, cool rim, low ambient: the fighters are lit, the room is not.
+    const key = new DirectionalLight('#ffe0b8', 2.8);
     key.position.set(3.5, 7, 6);
     this.scene.add(key);
 
     // A dim opposing light lifts the shadow side. Raising ambient instead would
     // flatten the silhouette, and the silhouette is the read.
-    const rim = new DirectionalLight('#8fbfe8', 0.8);
+    const rim = new DirectionalLight('#7fb2e6', 1.1);
     rim.position.set(-5, 4, -3);
     this.scene.add(rim);
-    this.scene.add(new AmbientLight('#4e5f75', 0.5));
+    this.scene.add(new AmbientLight('#3a4658', 0.32));
 
     // An overhead dojo lamp with real falloff, so the mat brightens toward the
     // centre of the ring instead of reading as one flat wash from the two
     // directional lights alone.
-    const lamp = new PointLight('#ffe4bd', 6, 14, 1.8);
+    const lamp = new PointLight('#ffd49a', 8, 14, 1.8);
     lamp.position.set(0, 5.4, -1.5);
     this.scene.add(lamp);
 
@@ -120,6 +125,22 @@ export class Stage {
       blob.position.y = 0.008;
       this.scene.add(blob);
     }
+
+    // A pool of warm light on the mat that follows the fight, so wherever the
+    // exchange goes, that is where the room is brightest.
+    this.pool = new Mesh(
+      new CircleGeometry(3.2, 48),
+      new MeshBasicMaterial({
+        map: radialGlow('#ffcf8a'),
+        transparent: true,
+        opacity: 0.32,
+        depthWrite: false,
+        blending: AdditiveBlending,
+      }),
+    );
+    this.pool.rotation.x = -Math.PI / 2;
+    this.pool.position.set(0, 0.004, 0.2);
+    this.scene.add(this.pool);
   }
 
   resize(width: number, height: number): void {
@@ -153,6 +174,7 @@ export class Stage {
     this.camera.position.set(x, 1.18, this.distance);
     this.camera.lookAt(x, 1.18, 0);
 
+    this.pool.position.x += (midpointX - this.pool.position.x) * (immediate ? 1 : 0.08);
     this.leftShadow.position.x = midpointX - gap / 2;
     this.rightShadow.position.x = midpointX + gap / 2;
   }
@@ -197,4 +219,24 @@ function buildBackdrop(arena: ArenaSpec): Group {
   }
 
   return group;
+}
+
+/** A soft radial falloff, bright in the middle and gone by the edge. */
+function radialGlow(color: string): CanvasTexture {
+  const size = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const g = canvas.getContext('2d');
+  if (g !== null) {
+    const gradient = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(0.45, `${color}88`);
+    gradient.addColorStop(1, `${color}00`);
+    g.fillStyle = gradient;
+    g.fillRect(0, 0, size, size);
+  }
+  const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
+  return texture;
 }

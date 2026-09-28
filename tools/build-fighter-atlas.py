@@ -501,6 +501,31 @@ def measure_cell_extents(library, scales: dict[str, dict[str, float]]):
     return cell_w, cell_h, baseline_y, center_x, shifts
 
 
+def pose_exposure(images: list[Image.Image]) -> float:
+    """Median brightness of a pose's solid pixels, across all its frames."""
+    values = []
+    for im in images:
+        arr = np.asarray(im, dtype=np.float32)
+        solid = arr[..., 3] > 200
+        if solid.any():
+            values.append(arr[..., :3][solid].mean(axis=1))
+    return float(np.median(np.concatenate(values))) if values else 0.0
+
+
+def apply_gain(im: Image.Image, gain: float) -> Image.Image:
+    arr = np.asarray(im, dtype=np.float32).copy()
+    arr[..., :3] = np.clip(arr[..., :3] * gain, 0, 255)
+    return Image.fromarray(arr.round().astype(np.uint8), "RGBA")
+
+
+# The generator does not hold exposure between moves: some sheets came out up
+# to ~9% darker than the idle art, so a fighter visibly dimmed every time he
+# threw one of those techniques. Each pose is matched to its fighter's idle
+# exposure, within bounds, so a genuinely darker pose is corrected, not flattened.
+EXPOSURE_GAIN_MIN = 0.88
+EXPOSURE_GAIN_MAX = 1.15
+
+
 def render_frame(frame: FrameData, scale: float, shift_y: float, shift_x: float,
                   center_x: float, baseline_y: float, cell_w: int, cell_h: int) -> Image.Image:
     new_w = max(1, round(frame.local.width * scale))
@@ -626,6 +651,7 @@ def main() -> int:
 
     pose_order = ["idle"] + produced_move_ids
     global_frames: dict[str, list[Image.Image]] = {k: [] for k in FIGHTERS}
+    exposure_ref: dict[str, float] = {}
     pose_defs: dict[str, dict] = {}
     frame_cursor = 0
 
@@ -651,6 +677,7 @@ def main() -> int:
                 continue
             scale = scales[fighter_key][pose_id]
             median_foot, median_anchor = shifts[fighter_key][pose_id]
+            first = len(global_frames[fighter_key])
             for f in pose.frames:
                 # Every frame stands on the floor on its own. A pose-level
                 # median shift kept frame-to-frame drift from the generator as
@@ -660,6 +687,14 @@ def main() -> int:
                 # that also "jumps" would count the lift twice.
                 img = render_frame(f, scale, f.bbox[3] * scale, median_anchor, center_x, baseline_y, cell_w, cell_h)
                 global_frames[fighter_key].append(img)
+            rendered = global_frames[fighter_key][first:]
+            exposure = pose_exposure(rendered)
+            if pose_id == "idle":
+                exposure_ref[fighter_key] = exposure
+            elif exposure > 0 and fighter_key in exposure_ref:
+                gain = min(EXPOSURE_GAIN_MAX, max(EXPOSURE_GAIN_MIN, exposure_ref[fighter_key] / exposure))
+                if abs(gain - 1) > 0.01:
+                    global_frames[fighter_key][first:] = [apply_gain(im, gain) for im in rendered]
             if pose_id != "idle":
                 # Both fighters perform the same choreographed technique, so
                 # their reach curves should agree; summing (rather than letting

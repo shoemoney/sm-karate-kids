@@ -128,6 +128,62 @@ export class Hud {
     this.bannerSub.textContent = '';
   }
 
+  private result: HTMLElement | null = null;
+  private resultButton: HTMLButtonElement | null = null;
+
+  /**
+   * The bout is over: a card you choose to leave, not a banner that times out
+   * under you. `rematch` fires on the button; the countdown label is updated
+   * by the caller so the game loop stays the only clock.
+   */
+  showResult(opts: {
+    headline: string;
+    tone: 'full' | 'neutral';
+    score: string;
+    detail: string;
+    rematch: () => void;
+  }): void {
+    if (this.result === null) {
+      const stage = document.getElementById('stage');
+      if (stage === null) return;
+      this.result = document.createElement('div');
+      this.result.className = 'result';
+      this.result.setAttribute('role', 'dialog');
+      this.result.setAttribute('aria-label', 'Bout result');
+      stage.appendChild(this.result);
+    }
+    const headline = document.createElement('div');
+    headline.className = 'result-headline';
+    headline.textContent = opts.headline;
+    const score = document.createElement('div');
+    score.className = 'result-score';
+    score.textContent = opts.score;
+    const detail = document.createElement('div');
+    detail.className = 'result-detail';
+    detail.textContent = opts.detail;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'result-rematch';
+    button.textContent = 'REMATCH';
+    button.addEventListener('click', opts.rematch, { once: true });
+    this.resultButton = button;
+    this.result.dataset['tone'] = opts.tone;
+    this.result.replaceChildren(headline, score, detail, button);
+    this.banner.classList.remove('show');
+    this.result.classList.add('show');
+    Hud.replay(this.result, 'slam');
+    button.focus({ preventScroll: true });
+  }
+
+  setRematchCountdown(seconds: number): void {
+    if (this.resultButton !== null) this.resultButton.textContent = `REMATCH · ${seconds}`;
+  }
+
+  hideResult(): void {
+    this.result?.classList.remove('show');
+    this.resultButton = null;
+  }
+
   setPerfVisible(visible: boolean): void {
     this.perf.hidden = !visible;
   }

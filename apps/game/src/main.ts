@@ -300,20 +300,24 @@ async function boot(): Promise<void> {
         audio.play('bell');
       } else if (event.type === 'match_over') {
         const winner = event.winner;
-        hud.say(
-          winner === null ? 'DRAW' : `${state.fighters[winner].spec.name} WINS`,
-          winner === null ? 'neutral' : 'full',
-          nowMs,
-          4000,
-        );
         const record = recordBoutResult(winner === 0, winner === 0 ? state.tick : null);
-        hud.showCareer(record);
+        const [a, b] = state.fighters;
+        const points = (n: number): string => (Number.isInteger(n) ? String(n) : n === 0.5 ? '½' : `${Math.floor(n)}½`);
+        const best = record.bestWinTicks === null ? '—' : `${(record.bestWinTicks / 60).toFixed(1)}s`;
+        hud.showResult({
+          headline: winner === null ? 'DRAW' : `${state.fighters[winner].spec.name} WINS`,
+          tone: winner === null ? 'neutral' : 'full',
+          score: `${points(a.score)} — ${points(b.score)}`,
+          detail: `Bouts won ${record.boutsWon} / ${record.boutsPlayed} · best ${best}`,
+          rematch: () => restart(),
+        });
         audio.play('bell');
       }
     }
   };
 
   let lastStarted: { player: 0 | 1; moveId: string; tick: number } | null = null;
+  const REMATCH_AFTER_MS = 8000;
   let restartAt = 0;
   const restart = (): void => {
     state = createMatch({ content, startSeparation });
@@ -321,6 +325,7 @@ async function boot(): Promise<void> {
     restartAt = 0;
     hud.clearCareer();
     hud.resetScores();
+    hud.hideResult();
   };
 
   const clock = new FixedClock();
@@ -344,7 +349,10 @@ async function boot(): Promise<void> {
       elapsedTicks += 1;
     }
 
-    if (state.phase === 'over' && restartAt === 0) restartAt = now + 4200;
+    // The result card waits for a tap, but an idle screen still rolls into
+    // the next bout rather than sitting on it forever.
+    if (state.phase === 'over' && restartAt === 0) restartAt = now + REMATCH_AFTER_MS;
+    if (restartAt !== 0) hud.setRematchCountdown(Math.max(0, Math.ceil((restartAt - now) / 1000)));
     if (restartAt !== 0 && now > restartAt) restart();
 
     updateSpacing();
