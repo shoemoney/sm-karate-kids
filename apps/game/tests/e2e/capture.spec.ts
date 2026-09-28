@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures.js';
 import { Thumbs, anchorOf, hold } from './thumbs.js';
 
 const OUT = resolve(import.meta.dirname, '../../../../docs/preview');

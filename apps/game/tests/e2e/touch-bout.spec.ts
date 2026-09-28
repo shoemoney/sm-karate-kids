@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures.js';
 import { Thumbs, anchorOf, hold, tap, type Dir } from './thumbs.js';
 
 interface Snapshot {

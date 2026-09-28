@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures.js';
 
 test('boots on a portrait phone with a working renderer backend', async ({ page }) => {
   const errors: string[] = [];

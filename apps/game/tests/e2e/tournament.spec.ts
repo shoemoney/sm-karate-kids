@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures.js';
 
 type Tournament = { active: boolean; round: number; roundId: string | null; score: number; held: boolean };
 const tournament = (page: import('@playwright/test').Page) =>

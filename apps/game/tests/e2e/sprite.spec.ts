@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures.js';
 
 // The asset pipeline generates this file separately. Until it exists there is
 // nothing for the sprite renderer to load, so the whole suite stays green
