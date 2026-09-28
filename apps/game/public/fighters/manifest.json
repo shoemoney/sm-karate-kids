@@ -1,11 +1,11 @@
 {
   "version": 1,
   "cell": {
-    "w": 394,
-    "h": 306
+    "w": 406,
+    "h": 276
   },
   "baseline": 268,
-  "metresPerCell": 2.0008,
+  "metresPerCell": 1.8046,
   "facing": "right",
   "fighters": {
     "shiro": {
@@ -247,10 +247,10 @@
         107,
         108
       ],
-      "contact": 4,
+      "contact": 3,
       "fps": 12
     },
-    "low_block": {
+    "leg_sweep": {
       "frames": [
         109,
         110,
@@ -259,10 +259,10 @@
         113,
         114
       ],
-      "contact": 1,
+      "contact": 3,
       "fps": 12
     },
-    "high_kick": {
+    "low_block": {
       "frames": [
         115,
         116,
@@ -270,6 +270,18 @@
         118,
         119,
         120
+      ],
+      "contact": 3,
+      "fps": 12
+    },
+    "high_kick": {
+      "frames": [
+        121,
+        122,
+        123,
+        124,
+        125,
+        126
       ],
       "contact": 3,
       "fps": 12

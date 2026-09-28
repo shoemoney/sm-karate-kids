@@ -364,9 +364,10 @@ def relative_extents(frames: list[FrameData], scale: float, median_foot: float, 
     rel = []
     for f in frames:
         left, top, right, bottom = f.bbox
+        # Measured against this frame's own feet, matching how it is rendered.
         rel.append({
-            "top": top * scale - median_foot,
-            "bottom": bottom * scale - median_foot,
+            "top": top * scale - bottom * scale,
+            "bottom": 0.0,
             "left": left * scale - median_anchor,
             "right": right * scale - median_anchor,
         })
@@ -644,14 +645,20 @@ def main() -> int:
                 idle_scale = scales[fighter_key]["idle"]
                 idle_shift = shifts[fighter_key]["idle"]
                 for _ in range(n_frames):
-                    img = render_frame(idle_pose.frames[0], idle_scale, idle_shift[0], idle_shift[1],
+                    img = render_frame(idle_pose.frames[0], idle_scale, idle_pose.frames[0].bbox[3] * idle_scale, idle_shift[1],
                                         center_x, baseline_y, cell_w, cell_h)
                     global_frames[fighter_key].append(img)
                 continue
             scale = scales[fighter_key][pose_id]
             median_foot, median_anchor = shifts[fighter_key][pose_id]
             for f in pose.frames:
-                img = render_frame(f, scale, median_foot, median_anchor, center_x, baseline_y, cell_w, cell_h)
+                # Every frame stands on the floor on its own. A pose-level
+                # median shift kept frame-to-frame drift from the generator as
+                # if it were motion, and lifted whole grid rows whenever the
+                # segmenter measured a row from the figure instead of the cell.
+                # Real altitude comes from the simulation (heightOf), so art
+                # that also "jumps" would count the lift twice.
+                img = render_frame(f, scale, f.bbox[3] * scale, median_anchor, center_x, baseline_y, cell_w, cell_h)
                 global_frames[fighter_key].append(img)
             if pose_id != "idle":
                 # Both fighters perform the same choreographed technique, so
@@ -661,6 +668,10 @@ def main() -> int:
                 for i, r in enumerate(reach_curve(pose, scale, median_anchor)):
                     combined_reach[i] += r
         contact = int(np.argmax(combined_reach)) if pose_id != "idle" else 0
+        # Gedan barai finishes downward. Its return can project farther sideways,
+        # so horizontal reach alone can select the wrong scoring frame.
+        if pose_id == "low_block":
+            contact = 3
         pose_def = {"frames": frame_indices, "contact": contact}
         if pose_id in fps_by_move:
             pose_def["fps"] = fps_by_move[pose_id]
