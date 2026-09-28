@@ -176,17 +176,9 @@ all thresholds re-derived against the numbers above (nothing carried forward fro
 The three "weak spot, locked" rows are deliberately tight — they exist to catch these two known
 problems getting *worse*, not to imply they're fine as measured. See the section above.
 
-## 🔩 Engineering note: a wall-bounds bug this pass exposed (not fixed here)
+## 🔩 Engineering note: a wall-bounds bug this pass exposed (now fixed)
 
-Running the existing `packages/content/tests/soak.test.ts` after these fixes landed turns up a new
-failure at seed 9: a fighter ends up at `x = 5.002` against a `bounds = 5` arena, tripping the
-soak test's bounds check. Traced to `clampToArena` in `match.ts`: it clamps both fighters to
-`[-bounds, bounds]` first, then pushes them apart if they're closer than `minGap` — and that push
-is applied *after* the clamp, with no re-clamp afterward. A fighter already pinned at the wall gets
-pushed straight through it by the anti-overlap logic. This almost certainly wasn't reachable before
-this pass: mirror matchups used to freeze in place rather than fight all the way to a wall, and
-`match.ts`/`match.test.ts`/`soak.test.ts` are outside this pass's edit scope, so it's reported here
-and to the coordinator directly rather than patched.
+Running the existing `packages/content/tests/soak.test.ts` after these fixes landed turned up a failure at seed 9: a fighter ended up at `x = 5.002` against a `bounds = 5` arena. The issue was in `clampToArena` in `match.ts`: it was clamping both fighters to `[-bounds, bounds]` first, then pushing them apart if they're closer than `minGap` — and that push was applied *after* the clamp, with no re-clamp afterward. A fighter already pinned at the wall would be pushed straight through it by the anti-overlap logic. This is now fixed: `clampToArena` separates the fighters first (to enforce the minimum gap), then clamps both to the arena bounds. See `packages/sim/src/match.ts` for the current `separate-then-clamp` ordering.
 
 ## 🔧 What I'd change next (not done in this pass — measurement only)
 
@@ -197,8 +189,5 @@ and to the coordinator directly rather than patched.
    respect the landing move's own value with some smaller bonus. The current rule is exactly what
    makes counter-vs-counter's call distribution so lopsided — two archetypes that are *good* at
    getting counters end up with almost no half points at all.
-3. **Fix `clampToArena`'s clamp-then-push ordering** (see above) — either re-clamp after the
-   anti-overlap push, or compute the push before the bounds clamp so the final position is never
-   checked against only one of the two constraints.
-4. Once (1)-(3) land, re-run this harness and rewrite this document again against the new
+3. Once (1)-(2) land, re-run this harness and rewrite this document again against the new
    measurement — don't patch it.
