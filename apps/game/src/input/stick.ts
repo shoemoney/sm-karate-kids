@@ -39,3 +39,48 @@ export function resolveDirection(
   if (useHorizontal) return dx < 0 ? 'left' : 'right';
   return dy < 0 ? 'up' : 'down';
 }
+
+/**
+ * Holds a technique press until the simulation has actually seen it.
+ *
+ * Input is read once per simulation tick, but ticks are drained in bursts at
+ * frame boundaries — so a flick of the technique stick that begins and ends
+ * between two frames is never sampled at all, and the technique simply does
+ * not come out. That is worst exactly when the device is struggling, which is
+ * exactly when a dropped input is least forgivable.
+ *
+ * The latch records a press the simulation has not consumed yet and replays it
+ * on the next read. It replays for one read only, so the right stick still
+ * passes back through neutral and a held direction cannot machine-gun.
+ */
+export class PressLatch<T> {
+  private pending: T | null = null;
+  private delivered = true;
+
+  /** Call when the stick leaves neutral. */
+  press(value: T): void {
+    this.pending = value;
+    this.delivered = false;
+  }
+
+  /** Call when the stick returns to neutral. Keeps an unseen press queued. */
+  release(): void {
+    if (this.delivered) this.pending = null;
+  }
+
+  /** The live value if there is one, otherwise a press nobody has seen yet. */
+  resolve(live: T | null): T | null {
+    if (live !== null) {
+      this.delivered = true;
+      this.pending = null;
+      return live;
+    }
+    if (this.pending !== null) {
+      const replayed = this.pending;
+      this.pending = null;
+      this.delivered = true;
+      return replayed;
+    }
+    return null;
+  }
+}

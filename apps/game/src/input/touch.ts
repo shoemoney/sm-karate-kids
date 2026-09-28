@@ -1,5 +1,5 @@
 import type { Dir4, StickPair } from '@smkk/sim';
-import { DEFAULT_GATE, resolveDirection } from './stick.js';
+import { DEFAULT_GATE, PressLatch, resolveDirection } from './stick.js';
 
 interface StickBinding {
   readonly zone: HTMLElement;
@@ -31,6 +31,8 @@ export class TouchInput {
   private readonly left = bind('zone-left', 'stick-left');
   private readonly right = bind('zone-right', 'stick-right');
   private readonly cleanup: Array<() => void> = [];
+  /** A technique press the simulation has not sampled yet. */
+  private readonly latch = new PressLatch<StickPair>();
   /** True once any real pointer has driven the pad. */
   active = false;
 
@@ -54,7 +56,11 @@ export class TouchInput {
       if (stick.pointerId !== event.pointerId) return;
       const dx = event.clientX - stick.originX;
       const dy = event.clientY - stick.originY;
+      const previous = stick.dir;
       stick.dir = resolveDirection(dx, dy, stick.dir, DEFAULT_GATE);
+      if (stick === this.right && stick.dir !== 'neutral' && stick.dir !== previous) {
+        this.latch.press({ left: this.left.dir, right: stick.dir });
+      }
       this.paint(stick, dx, dy);
       event.preventDefault();
     };
@@ -66,6 +72,7 @@ export class TouchInput {
       }
       stick.pointerId = null;
       stick.dir = 'neutral';
+      if (stick === this.right) this.latch.release();
       stick.zone.classList.remove('engaged');
       this.paint(stick, 0, 0);
       event.preventDefault();
@@ -92,7 +99,10 @@ export class TouchInput {
   }
 
   read(): StickPair {
-    return { left: this.left.dir, right: this.right.dir };
+    const live = this.right.dir === 'neutral' ? null : { left: this.left.dir, right: this.right.dir };
+    const resolved = this.latch.resolve(live);
+    if (resolved !== null) return resolved;
+    return { left: this.left.dir, right: 'neutral' };
   }
 
   dispose(): void {

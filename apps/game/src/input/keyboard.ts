@@ -1,4 +1,5 @@
 import type { Dir4, StickPair } from '@smkk/sim';
+import { PressLatch } from './stick.js';
 
 const LEFT_KEYS: Record<string, Dir4> = {
   KeyW: 'up',
@@ -22,6 +23,9 @@ const RIGHT_KEYS: Record<string, Dir4> = {
 export class KeyboardInput {
   private readonly held = new Set<string>();
   private readonly cleanup: Array<() => void> = [];
+  /** A keypress can begin and end between two frames, exactly like a flick. */
+  private readonly latch = new PressLatch<StickPair>();
+  private previousRight: Dir4 = 'neutral';
 
   constructor(target: Window = window) {
     const down = (event: KeyboardEvent): void => {
@@ -55,7 +59,15 @@ export class KeyboardInput {
   }
 
   read(): StickPair {
-    return { left: this.resolve(LEFT_KEYS), right: this.resolve(RIGHT_KEYS) };
+    const left = this.resolve(LEFT_KEYS);
+    const right = this.resolve(RIGHT_KEYS);
+
+    if (right !== 'neutral' && right !== this.previousRight) this.latch.press({ left, right });
+    if (right === 'neutral' && this.previousRight !== 'neutral') this.latch.release();
+    this.previousRight = right;
+
+    const resolved = this.latch.resolve(right === 'neutral' ? null : { left, right });
+    return resolved ?? { left, right: 'neutral' };
   }
 
   dispose(): void {
