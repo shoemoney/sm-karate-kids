@@ -1,6 +1,6 @@
 # 🥋 Sprite Atlas Pipeline
 
-How `tools/build-fighter-atlas.py` turns the AI-generated contact sheets in `codex-assets/` into
+How `tools/build-fighter-atlas.py` turns the fighter contact sheets in `codex-assets/` into
 the WebP atlases and `manifest.json` that `apps/game/src/spriteRig.ts` renders. This doc covers how
 to run it, the manifest schema, the segmentation approach, and an honest list of what still needs
 regenerated art.
