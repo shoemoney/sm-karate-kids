@@ -182,7 +182,10 @@ export class Hud {
     this.banner.classList.remove('show');
     this.result.classList.add('show');
     Hud.replay(this.result, 'slam');
-    button.focus({ preventScroll: true });
+    // Never pull focus away from someone typing.
+    const active = document.activeElement;
+    const typing = active instanceof HTMLElement && (active.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName));
+    if (!typing) button.focus({ preventScroll: true });
   }
 
   private resultAction = 'REMATCH';
@@ -251,6 +254,8 @@ export class Hud {
       });
     });
     this.result.insertBefore(form, this.resultButton);
+    // The player earned this: put the cursor where the name goes.
+    input.focus({ preventScroll: true });
   }
 
   hideResult(): void {

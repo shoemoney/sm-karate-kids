@@ -68,7 +68,8 @@ test('both gi emblems carry the ShoeMoney mark', async ({ page }) => {
 });
 
 test('game keys still type into a text field', async ({ page }) => {
-  await page.goto('/?mode=classic');
+  // The dojo partner never attacks, so no bout ends mid-typing on a slow runner.
+  await page.goto('/?mode=dojo');
   await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk']?.ready === true);
   // The leaderboard name box only exists at the end of a run, but the rule is
   // general: no text field may lose the letters the controls listen for.
@@ -86,4 +87,21 @@ test('game keys still type into a text field', async ({ page }) => {
     left: 'neutral',
     right: 'neutral',
   });
+});
+
+test('a result card never pulls focus away from someone typing', async ({ page }) => {
+  await page.goto('/?mode=dojo');
+  await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk']?.ready === true);
+  await page.evaluate(() => {
+    const input = document.createElement('input');
+    input.id = 'probe';
+    document.body.appendChild(input);
+  });
+  await page.locator('#probe').click();
+  await page.keyboard.type('Asm');
+  // Force the bout to end the only way the rules allow: let the clock run out.
+  await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk'].state().phase === 'over', null, { timeout: 60_000 });
+  await expect(page.locator('.result')).toBeVisible();
+  await page.keyboard.type('ongold');
+  await expect(page.locator('#probe')).toHaveValue('Asmongold');
 });
