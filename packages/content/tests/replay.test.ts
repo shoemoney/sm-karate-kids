@@ -32,6 +32,16 @@ describe('recording and playback', () => {
     expect(result.matches).toBe(true);
     expect(scores(result.state)).toEqual(scores(state));
   });
+
+  test('a replay recorded with a startSeparation override reproduces from the replay alone', () => {
+    const { state, replay } = runMatch({ content, startSeparation: 1.85 }, cpuFrameSource(11, 22));
+    // playback is handed only {content}, the same as a saved-replay file would be: nothing here
+    // carries the override forward except the replay object itself.
+    const result = playback(replay, { content });
+
+    expect(result.matches).toBe(true);
+    expect(scores(result.state)).toEqual(scores(state));
+  });
 });
 
 describe('frame packing', () => {
