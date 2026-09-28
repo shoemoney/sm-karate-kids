@@ -26,6 +26,9 @@ const STRIKES: ReadonlyArray<{ name: string; min: number; max: number; stance: D
 /** Beyond this the fighter has to close before anything can land. */
 const MAX_REACH = 2.7;
 
+/** Inside this even the shortest technique overshoots, so back off. */
+const STEP_BACK_BELOW = 1.2;
+
 test('a bout is won end to end with nothing but two thumbs', async ({ page }, info) => {
   test.skip(info.project.name !== 'phone-portrait', 'touch is the phone contract');
   test.setTimeout(300_000);
@@ -48,27 +51,31 @@ test('a bout is won end to end with nothing but two thumbs', async ({ page }, in
   let strikesThrown = 0;
 
   while (Date.now() < deadline) {
+    // Let go before looking. A round trip to a loaded CI runner is seconds of
+    // game time, and a fighter still walking during it crosses the whole
+    // strike band between two reads. Standing still makes the gap we read the
+    // gap we actually strike from.
+    await thumbs.release();
     const snapshot = await read();
     if (snapshot.phase === 'over') break;
 
     if (snapshot.phase !== 'fight') {
-      await thumbs.release();
-      await page.waitForTimeout(150);
+      await page.waitForTimeout(120);
       continue;
     }
 
     const gap = snapshot.positions[1] - snapshot.positions[0];
 
-    if (gap > MAX_REACH) {
-      await hold(thumbs, stance, 'right');
-      await page.waitForTimeout(40);
+    if (gap > MAX_REACH || gap < STEP_BACK_BELOW) {
+      await hold(thumbs, stance, gap > MAX_REACH ? 'right' : 'left');
+      await page.waitForTimeout(90);
       continue;
     }
 
     const strike = STRIKES.find((candidate) => gap >= candidate.min && gap <= candidate.max);
     if (strike === undefined) {
       await hold(thumbs, stance, 'left');
-      await page.waitForTimeout(40);
+      await page.waitForTimeout(90);
       continue;
     }
 
@@ -77,7 +84,7 @@ test('a bout is won end to end with nothing but two thumbs', async ({ page }, in
     strikesThrown += 1;
     await page.waitForTimeout(140);
     await thumbs.release();
-    await page.waitForTimeout(240);
+    await page.waitForTimeout(200);
   }
 
   await thumbs.release();
@@ -106,21 +113,25 @@ test('the stance stick moves the fighter and the technique stick does not', asyn
 
   const start = await positionOf();
   await hold(thumbs, stance, 'right');
-  await page.waitForTimeout(400);
+  await expect
+    .poll(async () => (await positionOf()) - start, { timeout: 10_000 })
+    .toBeGreaterThan(0.15);
   await thumbs.release();
-  const walked = await positionOf();
-  expect(walked).toBeGreaterThan(start + 0.15);
 
   await page.waitForTimeout(400);
   const settled = await positionOf();
   await hold(thumbs, technique, 'up');
-  await page.waitForTimeout(90);
-  const struck = await page.evaluate(
-    () => (globalThis as Record<string, any>)['__smkk'].state().p1Move as string | null,
-  );
+  // Poll rather than sleep: a slow renderer may not have ticked yet.
+  await expect
+    .poll(
+      async () =>
+        page.evaluate(
+          () => (globalThis as Record<string, any>)['__smkk'].state().p1Move as string | null,
+        ),
+      { timeout: 10_000 },
+    )
+    .toBe('front_kick');
   await thumbs.release();
-
-  expect(struck).toBe('front_kick');
   // A technique may step, but it must not walk the fighter across the mat.
   expect(Math.abs((await positionOf()) - settled)).toBeLessThan(0.6);
 });
