@@ -1,4 +1,4 @@
-# Contributing to ShoeMoney Karate Kids 🥋
+# Contributing to SM Karate Kids: Asmongold vs HasanAbi 🥋
 
 Thanks for taking a swing at this. A few things before you throw a `reverse_punch` at the codebase.
 

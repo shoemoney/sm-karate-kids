@@ -1,4 +1,4 @@
-# 🥋 ShoeMoney Karate Kids
+# 🥋 SM Karate Kids: Asmongold vs HasanAbi
 
 ### **Two sticks. No buttons. One clean point.** 👊✨
 
@@ -7,6 +7,8 @@
 [![Built for](https://img.shields.io/badge/built%20for-thumbs-c8443c.svg)](#-mobile-first-means-mobile-first)
 [![three.js](https://img.shields.io/badge/three.js-0.186-8cbde9.svg)](https://threejs.org/)
 
+🤍 **Asmongold** in white vs ❤️ **HasanAbi** in red — a parody fan game.
+
 A browser reinterpretation of 1984 tournament karate: **no health bar, no combos**. One
 valid strike ends the exchange, a referee calls half a point or a full point, and the
 first fighter to two points takes the bout. Spacing and timing are the whole game.
@@ -14,7 +16,7 @@ first fighter to two points takes the bout. Spacing and timing are the whole gam
 > 🚧 **Phase 1 vertical slice.** Two fighters, one dojo, twenty techniques, referee
 > scoring, deterministic replay. Not the campaign yet — see [Roadmap](#-roadmap).
 
-![ShoeMoney Karate Kids on a portrait phone](docs/preview/portrait.png)
+![SM Karate Kids: Asmongold vs HasanAbi on a portrait phone](docs/preview/portrait.png)
 
 ---
 

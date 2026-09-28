@@ -16,6 +16,12 @@ export interface EmblemInfo {
  */
 export interface FighterView {
   readonly root: Object3D;
-  apply(fighter: FighterState, elapsedTicks: number): void;
+  /**
+   * `renderX` is where to draw the fighter along the mat, which is not always
+   * the simulation's x — see the spacing note in main.ts.
+   */
+  apply(fighter: FighterState, elapsedTicks: number, renderX?: number): void;
   emblemInfo(): EmblemInfo;
+  /** Brighten toward white for an impact; 0 is normal. Optional per renderer. */
+  flash?(amount: number): void;
 }

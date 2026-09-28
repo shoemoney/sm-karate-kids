@@ -60,10 +60,22 @@ export class Hud {
     this.backend.textContent = label;
   }
 
+  private lastScores: [number, number] = [0, 0];
+
+  /** Restart a one-shot CSS animation even if it is already mid-flight. */
+  private static replay(el: HTMLElement, className: string): void {
+    el.classList.remove(className);
+    void el.offsetWidth;
+    el.classList.add(className);
+  }
+
   update(state: MatchState, nowMs: number): void {
     for (const index of [0, 1] as const) {
       const score = state.fighters[index].score;
-      this.points[index]!.textContent = POINT_LABEL.get(score) ?? String(score);
+      const el = this.points[index]!;
+      el.textContent = POINT_LABEL.get(score) ?? String(score);
+      if (score > this.lastScores[index]) Hud.replay(el, 'pop');
+      this.lastScores[index] = score;
     }
     this.timer.textContent = String(Math.ceil(state.timerTicks / 60));
 
@@ -77,13 +89,29 @@ export class Hud {
     this.banner.textContent = text;
     this.banner.dataset['tone'] = tone;
     this.banner.classList.add('show');
+    Hud.replay(this.banner, 'slam');
     this.bannerUntil = nowMs + holdMs;
   }
 
+  /** The referee's call is the payoff, so it lands as a stamp, not a caption. */
   call(call: RefereeCall, scorerName: string, moveName: string, nowMs: number): void {
-    const value = call.value === 'full' ? 'IPPON' : 'WAZA-ARI';
-    this.say(`${value} — ${scorerName}`, call.value, nowMs, 1800);
+    const word = document.createElement('span');
+    word.className = 'call-word';
+    word.textContent = call.value === 'full' ? 'IPPON' : 'WAZA-ARI';
+    const who = document.createElement('span');
+    who.className = 'call-name';
+    who.textContent = scorerName;
+    this.banner.replaceChildren(word, who);
+    this.banner.dataset['tone'] = call.value;
+    this.banner.classList.add('show');
+    Hud.replay(this.banner, 'slam');
+    this.bannerUntil = nowMs + 1800;
     this.technique.textContent = `${moveName}${call.counter ? ' · counter' : ''}`;
+  }
+
+  /** A new bout starts clean. */
+  resetScores(): void {
+    this.lastScores = [0, 0];
   }
 
   showTechnique(name: string): void {

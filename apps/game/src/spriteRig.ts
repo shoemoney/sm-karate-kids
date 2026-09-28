@@ -136,10 +136,24 @@ function resolveFrame(manifest: SpriteManifest, fighter: FighterState, elapsedTi
  * `apply` contract has no camera to look at, and a plane facing +Z already
  * faces the stage's camera, which only ever dollies and pans along that axis.
  */
+const GHOST_COUNT = 3;
+
+interface Ghost {
+  mesh: Mesh<PlaneGeometry, MeshBasicMaterial>;
+  pages: Texture[];
+  worldX: number;
+  worldY: number;
+  life: number;
+}
+
 export class SpriteFighterView implements FighterView {
   readonly root = new Group();
   private readonly mesh: Mesh<PlaneGeometry, MeshBasicMaterial>;
   private currentPage = -1;
+  private readonly ghosts: Ghost[] = [];
+  private ghostCursor = 0;
+  private lastGhostTick = -99;
+  private frameCell = { page: 0, offsetX: 0, offsetY: 0, repeatX: 1, repeatY: 1 };
 
   private constructor(
     private readonly manifest: SpriteManifest,
@@ -159,6 +173,20 @@ export class SpriteFighterView implements FighterView {
     // vertical centre.
     this.mesh.position.y = planeHeight * (manifest.baseline / manifest.cell.h - 0.5);
     this.root.add(this.mesh);
+
+    // Afterimages. Each ghost owns a clone of every page up front, so leaving
+    // a trail behind a strike allocates nothing per frame.
+    for (let i = 0; i < GHOST_COUNT; i += 1) {
+      const ghost = new Mesh(
+        geometry,
+        new MeshBasicMaterial({ transparent: true, alphaTest: 0.04, depthWrite: false, opacity: 0 }),
+      );
+      ghost.scale.copy(this.mesh.scale);
+      ghost.renderOrder = -1;
+      ghost.visible = false;
+      this.root.add(ghost);
+      this.ghosts.push({ mesh: ghost, pages: pages.map(cloneTexture), worldX: 0, worldY: 0, life: 0 });
+    }
 
     this.setPage(0);
   }
@@ -218,16 +246,70 @@ export class SpriteFighterView implements FighterView {
       texture.repeat.set(1 / this.cols, 1 / this.rows);
       texture.offset.set(col / this.cols, v);
     }
+    this.frameCell = {
+      page,
+      offsetX: texture.offset.x,
+      offsetY: texture.offset.y,
+      repeatX: texture.repeat.x,
+      repeatY: texture.repeat.y,
+    };
   }
 
-  apply(fighter: FighterState, elapsedTicks: number): void {
-    this.root.position.x = fighter.x;
+  /** Freeze the current frame where it stands and let it fade. */
+  private dropGhost(): void {
+    const ghost = this.ghosts[this.ghostCursor];
+    this.ghostCursor = (this.ghostCursor + 1) % this.ghosts.length;
+    const texture = ghost?.pages[this.frameCell.page];
+    if (ghost === undefined || texture === undefined) return;
+    texture.offset.set(this.frameCell.offsetX, this.frameCell.offsetY);
+    texture.repeat.set(this.frameCell.repeatX, this.frameCell.repeatY);
+    ghost.mesh.material.map = texture;
+    ghost.mesh.material.needsUpdate = true;
+    ghost.worldX = this.root.position.x;
+    ghost.worldY = this.root.position.y;
+    ghost.life = 1;
+    ghost.mesh.visible = true;
+  }
+
+  private updateGhosts(): void {
+    for (const ghost of this.ghosts) {
+      if (!ghost.mesh.visible) continue;
+      ghost.life -= 0.18;
+      if (ghost.life <= 0) {
+        ghost.mesh.visible = false;
+        continue;
+      }
+      // Ghosts live in the fighter's group, so hold them at the world spot
+      // they were dropped, not wherever the fighter has moved since.
+      ghost.mesh.position.set(
+        ghost.worldX - this.root.position.x,
+        this.mesh.position.y + ghost.worldY - this.root.position.y,
+        -0.02,
+      );
+      ghost.mesh.material.opacity = ghost.life * 0.32;
+    }
+  }
+
+  flash(amount: number): void {
+    this.mesh.material.color.setScalar(1 + amount * 2.4);
+  }
+
+  apply(fighter: FighterState, elapsedTicks: number, renderX = fighter.x): void {
+    this.root.position.x = renderX;
     // The art draws the pose, the simulation owns the altitude. Without this a
     // jump plays on the mat while the sim has the fighter clearing low strikes.
     this.root.position.y = heightOf(fighter);
     const baseFacingRight = this.manifest.facing !== 'left';
     const mirrored = baseFacingRight ? fighter.facing === -1 : fighter.facing === 1;
     this.setCell(resolveFrame(this.manifest, fighter, elapsedTicks), mirrored);
+
+    const striking =
+      fighter.move?.kind === 'strike' && (fighter.phase === 'startup' || fighter.phase === 'active');
+    if (striking && elapsedTicks - this.lastGhostTick >= 3) {
+      this.dropGhost();
+      this.lastGhostTick = elapsedTicks;
+    }
+    this.updateGhosts();
   }
 
   emblemInfo(): EmblemInfo {

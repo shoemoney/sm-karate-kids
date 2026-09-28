@@ -4,6 +4,7 @@ import {
   CpuController,
   FixedClock,
   checksumOf,
+  heightOf,
   createMatch,
   indexMoves,
   step,
@@ -22,6 +23,7 @@ import { FighterRig, loadEmblem } from './rig.js';
 import { SettingsStore, type Settings } from './settings.js';
 import { tryLoadSpriteViews } from './spriteRig.js';
 import { Stage } from './stage.js';
+import { Juice } from './juice.js';
 
 function byId<T extends HTMLElement>(id: string): T {
   const node = document.getElementById(id);
@@ -50,7 +52,10 @@ function query(): URLSearchParams {
 function wrapMeshRig(rig: FighterRig): FighterView {
   return {
     root: rig.root,
-    apply: (fighter, elapsedTicks) => rig.apply(fighter, elapsedTicks),
+    apply: (fighter, elapsedTicks, renderX) => {
+      rig.apply(fighter, elapsedTicks);
+      if (renderX !== undefined) rig.root.position.x = renderX;
+    },
     emblemInfo: () => {
       const map = rig.emblem.material.map;
       const image = map?.image as { width?: number; height?: number; src?: string } | undefined;
@@ -220,6 +225,43 @@ async function boot(): Promise<void> {
   document.addEventListener('pointerdown', unlock, { once: true });
   document.addEventListener('keydown', unlock, { once: true });
 
+  const juice = new Juice(stage.scene, stage.camera, stageEl, () =>
+    document.body.classList.contains('reduced-motion'),
+  );
+
+  // The rules measure distance in tournament metres; the art is drawn at human
+  // proportions, and a strike in the art reaches about half as far as the
+  // simulation's reach (measured over all 18 strikes, median 0.50). Drawing the
+  // gap between the fighters at that ratio makes a hit visibly land exactly
+  // when the rules say it does — without touching the rules. The floor keeps a
+  // clinch from drawing one fighter inside the other.
+  const SPACING_SCALE = 0.5;
+  const MIN_VISUAL_GAP = 0.55;
+  const spacing = { mid: 0, k: SPACING_SCALE };
+  const updateSpacing = (): void => {
+    const [a, b] = state.fighters;
+    spacing.mid = (a.x + b.x) / 2;
+    const simGap = Math.abs(b.x - a.x);
+    spacing.k = simGap < 1e-6 ? SPACING_SCALE : Math.max(MIN_VISUAL_GAP, simGap * SPACING_SCALE) / simGap;
+  };
+  const renderX = (x: number): number => spacing.mid + (x - spacing.mid) * spacing.k;
+
+  // Where a technique actually lands: the strike point along the mat, at the
+  // height band it targets, lifted by the attacker's jump if airborne.
+  const BAND_HEIGHT = { low: 0.32, mid: 1.05, high: 1.5 } as const;
+  const impactAt = (player: 0 | 1, moveId: string) => {
+    const attacker = state.fighters[player];
+    const move = state.moves.get(moveId);
+    const reach = move?.reach ?? 1.5;
+    updateSpacing();
+    return {
+      x: renderX(attacker.x + attacker.facing * reach * 0.92),
+      y: BAND_HEIGHT[move?.height ?? 'mid'] + heightOf(attacker),
+      facing: attacker.facing,
+      low: move?.height === 'low',
+    };
+  };
+
   const moveName = (id: string): string => state.moves.get(id)?.name ?? id;
 
   const handle = (events: readonly MatchEvent[], nowMs: number): void => {
@@ -228,14 +270,26 @@ async function boot(): Promise<void> {
         lastStarted = { player: event.player, moveId: event.moveId, tick: state.tick };
         if (event.player === 0) hud.showTechnique(moveName(event.moveId));
         audio.play('strike');
+      } else if (event.type === 'contact') {
+        const at = impactAt(event.player, event.moveId);
+        juice.impact({
+          x: at.x, y: at.y, facing: at.facing,
+          kind: at.low ? 'sweep' : 'strike',
+          value: event.value,
+          defender: views[event.player === 0 ? 1 : 0] ?? null,
+          nowMs,
+        });
       } else if (event.type === 'blocked') {
         hud.say('BLOCKED', 'neutral', nowMs, 900);
-        audio.play('contact');
+        audio.play('block');
+        const at = impactAt(event.player, event.moveId);
+        juice.impact({ x: at.x, y: at.y, facing: at.facing, kind: 'block', value: 'none', defender: null, nowMs });
       } else if (event.type === 'simultaneous') {
         hud.say('AIUCHI', 'neutral', nowMs, 1200);
         audio.play('contact');
       } else if (event.type === 'call') {
         audio.play(event.call.value === 'full' ? 'ippon' : 'contact');
+        if (state.fighters[event.call.scorer].score >= state.ruleset.pointsToWin) juice.matchPoint(nowMs);
         hud.call(
           event.call,
           state.fighters[event.call.scorer].spec.name,
@@ -266,6 +320,7 @@ async function boot(): Promise<void> {
     opponent = makeOpponent(mode, seed);
     restartAt = 0;
     hud.clearCareer();
+    hud.resetScores();
   };
 
   const clock = new FixedClock();
@@ -277,7 +332,10 @@ async function boot(): Promise<void> {
   let perfTicks = 0;
 
   const frame = (now: number): void => {
-    const ticks = clock.drain(now - previous);
+    const frameDt = now - previous;
+    // Hit-stop and slow motion only change how much time the clock is given.
+    // Every tick that runs is the same tick it would have been.
+    const ticks = clock.drain(frameDt * juice.timeScale(now));
     previous = now;
 
     for (let i = 0; i < ticks; i += 1) {
@@ -289,9 +347,15 @@ async function boot(): Promise<void> {
     if (state.phase === 'over' && restartAt === 0) restartAt = now + 4200;
     if (restartAt !== 0 && now > restartAt) restart();
 
-    for (const index of [0, 1] as const) views[index]!.apply(state.fighters[index], elapsedTicks);
+    updateSpacing();
+    for (const index of [0, 1] as const) {
+      const fighter = state.fighters[index];
+      views[index]!.apply(fighter, elapsedTicks, renderX(fighter.x));
+    }
     const [left, right] = state.fighters;
-    stage.frame((left.x + right.x) / 2, right.x - left.x);
+    stage.frame(spacing.mid, renderX(right.x) - renderX(left.x));
+    juice.update(now, frameDt);
+    juice.applyCamera(now);
     hud.update(state, now);
     renderer.render(stage.scene, stage.camera);
 

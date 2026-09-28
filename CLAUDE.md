@@ -1,4 +1,4 @@
-# ShoeMoney Karate Kids 🥋
+# SM Karate Kids: Asmongold vs HasanAbi 🥋
 
 A deterministic twin-stick point-karate browser game, built with TypeScript, Vite, and Three.js.
 Codename until *Karate Champ* rights are resolved — see `THIRD_PARTY_NOTICES.md`.
