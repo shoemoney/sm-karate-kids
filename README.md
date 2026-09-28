@@ -65,7 +65,7 @@ direction never machine-guns.
 | Call | Worth | When |
 |---|---|---|
 | **WAZA-ARI** ½ | 0.5 | A clean contact with a half-value technique |
-| **IPPON** ● | 1.0 | A full-value technique, **or** any counter — landing while your opponent is committed |
+| **IPPON** ● | 1.0 | A full-value technique, **or** a counter — beating your opponent to the punch, landing while they're still winding up |
 | **AIUCHI** | 0 | Both land on the same tick. Nobody scores, reset. |
 | **BLOCKED** | 0 | An active block covering that height band |
 
