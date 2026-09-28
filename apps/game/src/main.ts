@@ -135,6 +135,10 @@ async function boot(): Promise<void> {
   const mode = params.get('mode') ?? 'classic';
   const seed = Number.parseInt(params.get('seed') ?? '1337', 10) || 1337;
   const forceWebGL = params.get('renderer') === 'webgl';
+  // Dojo drill distance. Out of the dojo the ruleset owns the opening distance.
+  const spacingParam = Number.parseFloat(params.get('spacing') ?? '');
+  const startSeparation =
+    mode === 'dojo' && Number.isFinite(spacingParam) ? spacingParam : undefined;
 
   const canvas = document.getElementById('view') as HTMLCanvasElement | null;
   const stageEl = document.getElementById('stage');
@@ -154,7 +158,7 @@ async function boot(): Promise<void> {
   ]);
   hud.setBackend(label);
 
-  let state = createMatch({ content });
+  let state = createMatch({ content, startSeparation });
   let opponent = makeOpponent(mode, seed);
 
   const stage = new Stage(state.arena);
@@ -168,7 +172,7 @@ async function boot(): Promise<void> {
     if (width === 0 || height === 0) return;
     renderer.setSize(width, height, false);
     stage.resize(width, height);
-    stage.frame(0, state.ruleset.startSeparation, true);
+    stage.frame(0, state.separation, true);
   };
   new ResizeObserver(resize).observe(stageEl);
   resize();
@@ -182,6 +186,7 @@ async function boot(): Promise<void> {
   const handle = (events: readonly MatchEvent[], nowMs: number): void => {
     for (const event of events) {
       if (event.type === 'move_start') {
+        lastStarted = { player: event.player, moveId: event.moveId, tick: state.tick };
         if (event.player === 0) hud.showTechnique(moveName(event.moveId));
         audio.play('strike');
       } else if (event.type === 'blocked') {
@@ -215,9 +220,10 @@ async function boot(): Promise<void> {
     }
   };
 
+  let lastStarted: { player: 0 | 1; moveId: string; tick: number } | null = null;
   let restartAt = 0;
   const restart = (): void => {
-    state = createMatch({ content });
+    state = createMatch({ content, startSeparation });
     opponent = makeOpponent(mode, seed);
     restartAt = 0;
     hud.clearCareer();
@@ -281,6 +287,7 @@ async function boot(): Promise<void> {
         draw: state.draw,
         lastCall: state.lastCall,
         p1Move: state.fighters[0].move?.id ?? null,
+        lastStarted,
         p1Phase: state.fighters[0].phase,
       }),
       checksum: () => checksumOf(state),

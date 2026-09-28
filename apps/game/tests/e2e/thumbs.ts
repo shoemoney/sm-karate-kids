@@ -89,3 +89,22 @@ export async function hold(thumbs: Thumbs, anchor: StickAnchor, dir: Dir): Promi
   await thumbs.down(anchor.id, anchor.x, anchor.y);
   await thumbs.move(anchor.id, anchor.x + offset.x, anchor.y + offset.y);
 }
+
+
+/**
+ * A whole press in one burst: down, throw, up, with nothing awaited in between
+ * except the dispatches themselves.
+ *
+ * Holding a direction across a round trip is not viable against a slow runner —
+ * the fighter walks at about three metres a second, so a one-second round trip
+ * carries it clean through the strike band. A tap is bounded by dispatch
+ * latency alone, and the game's press latch guarantees the simulation still
+ * sees an input shorter than one frame.
+ */
+export async function tap(thumbs: Thumbs, anchor: StickAnchor, dir: Dir): Promise<void> {
+  if (dir === 'neutral') return;
+  const offset = offsetFor(dir);
+  await thumbs.down(anchor.id, anchor.x, anchor.y);
+  await thumbs.move(anchor.id, anchor.x + offset.x, anchor.y + offset.y);
+  await thumbs.up(anchor.id);
+}

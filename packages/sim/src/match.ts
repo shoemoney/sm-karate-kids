@@ -51,6 +51,8 @@ export interface MatchState {
   events: MatchEvent[];
   readonly ruleset: RulesetSpec;
   readonly arena: ArenaSpec;
+  /** The opening distance in force for this match, after any override. */
+  readonly separation: number;
   readonly moves: ReadonlyMap<string, MoveSpec>;
 }
 
@@ -60,6 +62,12 @@ export interface MatchOptions {
   readonly content: ContentBundle;
   readonly rulesetId?: string;
   readonly arenaId?: string;
+  /**
+   * Overrides the ruleset's opening distance, in metres. The dojo uses this so
+   * a student can drill a technique from the range it actually lands at
+   * instead of walking in from the ruleset distance every repetition.
+   */
+  readonly startSeparation?: number;
 }
 
 function pick<T extends { id: string }>(items: readonly T[], id: string | undefined, label: string): T {
@@ -76,7 +84,11 @@ export function createMatch(options: MatchOptions): MatchState {
   if (first === undefined || second === undefined) {
     throw new Error('a bout needs exactly two fighters');
   }
-  const half = ruleset.startSeparation / 2;
+  const separation = Math.max(
+    0.8,
+    Math.min(options.startSeparation ?? ruleset.startSeparation, arena.bounds * 1.6),
+  );
+  const half = separation / 2;
 
   return {
     tick: 0,
@@ -90,6 +102,7 @@ export function createMatch(options: MatchOptions): MatchState {
     events: [],
     ruleset,
     arena,
+    separation,
     moves: indexMoves(options.content),
   };
 }
@@ -219,7 +232,7 @@ function awardCall(state: MatchState, call: RefereeCall): void {
 }
 
 function resetExchange(state: MatchState): void {
-  const half = state.ruleset.startSeparation / 2;
+  const half = state.separation / 2;
   resetToStance(state.fighters[0], -half, 1);
   resetToStance(state.fighters[1], half, -1);
   state.events.push({ type: 'exchange_reset' });
