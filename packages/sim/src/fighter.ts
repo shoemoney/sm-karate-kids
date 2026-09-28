@@ -67,10 +67,6 @@ export function blocksBand(fighter: FighterState, band: HeightBand): boolean {
   return band === 'mid';
 }
 
-export function isCommitted(fighter: FighterState): boolean {
-  return fighter.phase === 'startup' || fighter.phase === 'active' || fighter.phase === 'recovery';
-}
-
 export function strikePoint(fighter: FighterState): number {
   if (fighter.move === null) return fighter.x;
   return fighter.x + fighter.facing * fighter.move.reach;
