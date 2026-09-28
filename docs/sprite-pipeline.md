@@ -1,6 +1,6 @@
 # 🥋 Sprite Atlas Pipeline
 
-How `tools/build-fighter-atlas.py` turns the fighter contact sheets in `codex-assets/` into
+How `tools/build-fighter-atlas.py` turns the fighter contact sheets in `assets/` into
 the WebP atlases and `manifest.json` that `apps/game/src/spriteRig.ts` renders. This doc covers how
 to run it, the manifest schema, the segmentation approach, and an honest list of what still needs
 regenerated art.
@@ -10,12 +10,12 @@ regenerated art.
 ```bash
 python3 tools/build-fighter-atlas.py                # writes apps/game/public/fighters/
 python3 tools/build-fighter-atlas.py --dry-run       # reports what it would do, writes nothing
-python3 tools/build-fighter-atlas.py --source DIR    # override codex-assets/ location
+python3 tools/build-fighter-atlas.py --source DIR    # override assets/ location
 python3 tools/build-fighter-atlas.py --out DIR       # override apps/game/public/fighters/ location
 ```
 
 It is deterministic (same inputs → byte-identical outputs) and re-runnable: drop a new
-`codex-assets/<move_id>/{white,red}-sheet.png` pair in and re-run; it picks it up automatically. A
+`assets/<move_id>/{white,red}-sheet.png` pair in and re-run; it picks it up automatically. A
 move folder missing one or both sheets is skipped with a log line, not a crash.
 
 After running, `pnpm validate:assets` must exit 0 — it enforces the per-file 512KB cap and that
@@ -23,16 +23,16 @@ every file under `apps/game/public/` has a `PROVENANCE.json` entry.
 
 ## 📥 Inputs
 
-- `codex-assets/<move_id>/{white,red}-sheet.png` — 1024×1536 RGBA contact sheets. Each fighter's
+- `assets/<move_id>/{white,red}-sheet.png` — 1024×1536 RGBA contact sheets. Each fighter's
   own `animation.json` (see below) says whether that particular sheet packs a 2×3 or 3×2 grid of
   six frames — it is **not** uniform across sheets, and a few sheets even differ *between* the two
   fighters for the same move (`front_kick`, `high_block`, `reverse_punch` are 3×2 for white, 2×3
   for red).
-- `codex-assets/<move_id>/animation.json` — per fighter: `grid.columns`, `grid.rows`, `frames`
+- `assets/<move_id>/animation.json` — per fighter: `grid.columns`, `grid.rows`, `frames`
   (the 00→05 naming, defining frame order), `facing`, and `fps`. Read for grid shape and facing;
   the pre-sliced `white-00.png` … `red-05.png` files next to it are naive fixed-grid crops and are
   **not** used — they inherit exactly the limb-chopping this pipeline exists to avoid.
-- `codex-assets/guard/{white,red}.png` — one full-body idle pose per fighter, no grid, no
+- `assets/guard/{white,red}.png` — one full-body idle pose per fighter, no grid, no
   `animation.json`.
 - `packages/sim/src/grammar.ts` — the canonical 20 move ids (hand-mirrored into
   `CANONICAL_MOVES` at the top of the script; update both if the grammar changes).

@@ -18,7 +18,7 @@ blob-report/
 smkk.md
 
 # Incoming art, not ready to ship yet.
-codex-assets/
+/assets/
 
 # Workflow agent worktrees.
 .claude/worktrees/

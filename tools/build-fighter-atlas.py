@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Sprite-atlas authoring pipeline for the karate fighters.
 
-Reads the six-frame contact sheets under `codex-assets/<move_id>/{white,red}-sheet.png`
-(plus the single-pose `codex-assets/guard/{white,red}.png` idle art), segments each sheet
+Reads the six-frame contact sheets under `assets/<move_id>/{white,red}-sheet.png`
+(plus the single-pose `assets/guard/{white,red}.png` idle art), segments each sheet
 into individual frames from the alpha channel guided by each sheet's own
 `animation.json` grid, re-anchors every frame onto a shared foot-baseline and a
 shared body scale, packs the results into WebP atlas pages, and writes
@@ -28,7 +28,7 @@ import numpy as np
 from PIL import Image
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_SOURCE = REPO_ROOT / "codex-assets"
+DEFAULT_SOURCE = REPO_ROOT / "assets"
 DEFAULT_OUT = REPO_ROOT / "apps/game/public/fighters"
 PROVENANCE_PATH = REPO_ROOT / "apps/game/public/brand/PROVENANCE.json"
 
