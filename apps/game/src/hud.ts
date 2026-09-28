@@ -38,6 +38,8 @@ const POINT_LABEL = new Map<number, string>([
   [1, '1'],
   [1.5, '1½'],
   [2, '2'],
+  [2.5, '2½'],
+  [3, '3'],
 ]);
 
 export class Hud {
@@ -142,6 +144,10 @@ export class Hud {
     score: string;
     detail: string;
     rematch: () => void;
+    /** The button's label. Defaults to REMATCH. */
+    action?: string;
+    /** A small line above the headline, e.g. the round. */
+    kicker?: string;
   }): void {
     if (this.result === null) {
       const stage = document.getElementById('stage');
@@ -161,22 +167,45 @@ export class Hud {
     const detail = document.createElement('div');
     detail.className = 'result-detail';
     detail.textContent = opts.detail;
+    const kicker = document.createElement('div');
+    kicker.className = 'result-kicker';
+    kicker.textContent = opts.kicker ?? '';
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'result-rematch';
-    button.textContent = 'REMATCH';
+    this.resultAction = opts.action ?? 'REMATCH';
+    button.textContent = this.resultAction;
     button.addEventListener('click', opts.rematch, { once: true });
     this.resultButton = button;
     this.result.dataset['tone'] = opts.tone;
-    this.result.replaceChildren(headline, score, detail, button);
+    this.result.replaceChildren(kicker, headline, score, detail, button);
     this.banner.classList.remove('show');
     this.result.classList.add('show');
     Hud.replay(this.result, 'slam');
     button.focus({ preventScroll: true });
   }
 
+  private resultAction = 'REMATCH';
+
   setRematchCountdown(seconds: number): void {
-    if (this.resultButton !== null) this.resultButton.textContent = `REMATCH · ${seconds}`;
+    if (this.resultButton !== null) this.resultButton.textContent = `${this.resultAction} · ${seconds}`;
+  }
+
+  private roundTag: HTMLElement | null = null;
+
+  /** The ladder position, shown under the clock during a tournament. */
+  setRound(label: string): void {
+    if (this.roundTag === null) {
+      // Its own row under the scoreline: inside the clock column it widened
+      // that column and squeezed both fighters' names to an ellipsis.
+      const hud = document.getElementById('hud');
+      if (hud === null) return;
+      this.roundTag = document.createElement('div');
+      this.roundTag.className = 'round-tag';
+      hud.appendChild(this.roundTag);
+    }
+    this.roundTag.textContent = label;
+    this.roundTag.hidden = label === '';
   }
 
   hideResult(): void {

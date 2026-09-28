@@ -18,6 +18,12 @@ export interface CpuArchetype {
   readonly blockChance: number;
   /** Chance a commitment opens with a jump, which is the only way to reach air techniques. */
   readonly jumpChance: number;
+  /**
+   * How much more likely the fighter is to strike into an opponent's
+   * wind-up than into a neutral stance. Reading and punishing a telegraphed
+   * technique is what separates a champion from a novice. Defaults to 4.
+   */
+  readonly punish?: number;
 }
 
 export const ARCHETYPES: Record<ArchetypeId, CpuArchetype> = {
@@ -173,7 +179,7 @@ export class CpuController {
       return this.commit([band], toward, away);
     }
 
-    const wants = this.archetype.aggression * (telegraphed ? 4 : 1);
+    const wants = this.archetype.aggression * (telegraphed ? (this.archetype.punish ?? 4) : 1);
     if (this.cooldown === 0 && this.rng.next() < wants) {
       if (this.rng.next() < this.archetype.jumpChance) {
         this.cooldown = Math.floor(this.archetype.patience / 2);

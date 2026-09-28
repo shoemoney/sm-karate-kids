@@ -166,7 +166,10 @@ export class SpriteFighterView implements FighterView {
     const planeWidth = planeHeight * aspect;
 
     const geometry = new PlaneGeometry(1, 1);
-    const material = new MeshBasicMaterial({ transparent: true, alphaTest: 0.5 });
+    // A cutout, not a blend. Two blended planes that overlap are drawn in
+    // whatever order sorting picks that frame, so where the fighters touch
+    // they flickered in front of each other. The art is already hard-edged.
+    const material = new MeshBasicMaterial({ transparent: false, alphaTest: 0.5 });
     this.mesh = new Mesh(geometry, material);
     this.mesh.scale.set(planeWidth, planeHeight, 1);
     // The baseline pixel row inside a cell lands on the mat, not the plane's
@@ -220,8 +223,12 @@ export class SpriteFighterView implements FighterView {
     if (page === this.currentPage) return;
     const texture = this.pages[page];
     if (texture === undefined) return;
+    // Only going from no map to a map changes the shader. Swapping one page
+    // texture for another does not, and flagging it anyway rebuilt the
+    // material mid-animation — a visible hitch whenever a move crossed pages.
+    const hadMap = this.mesh.material.map !== null;
     this.mesh.material.map = texture;
-    this.mesh.material.needsUpdate = true;
+    if (!hadMap) this.mesh.material.needsUpdate = true;
     this.currentPage = page;
   }
 
@@ -263,8 +270,9 @@ export class SpriteFighterView implements FighterView {
     if (ghost === undefined || texture === undefined) return;
     texture.offset.set(this.frameCell.offsetX, this.frameCell.offsetY);
     texture.repeat.set(this.frameCell.repeatX, this.frameCell.repeatY);
+    const hadMap = ghost.mesh.material.map !== null;
     ghost.mesh.material.map = texture;
-    ghost.mesh.material.needsUpdate = true;
+    if (!hadMap) ghost.mesh.material.needsUpdate = true;
     ghost.worldX = this.root.position.x;
     ghost.worldY = this.root.position.y;
     ghost.life = 1;

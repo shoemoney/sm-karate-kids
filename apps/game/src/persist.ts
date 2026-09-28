@@ -88,3 +88,45 @@ export function recordBoutResult(won: boolean, winTicks: number | null): CareerR
   saveCareer(next);
   return next;
 }
+
+/** The best the player has done on the tournament ladder. Local only. */
+export interface TournamentRecord {
+  readonly bestScore: number;
+  /** Furthest round reached, as an index into the ladder; -1 before any run. */
+  readonly bestRound: number;
+  readonly championships: number;
+}
+
+const TOURNAMENT_KEY = 'tournament';
+
+const DEFAULT_TOURNAMENT: TournamentRecord = { bestScore: 0, bestRound: -1, championships: 0 };
+
+function isTournamentRecord(value: unknown): value is TournamentRecord {
+  if (typeof value !== 'object' || value === null) return false;
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record['bestScore'] === 'number' &&
+    typeof record['bestRound'] === 'number' &&
+    typeof record['championships'] === 'number'
+  );
+}
+
+export function loadTournament(): TournamentRecord {
+  return loadValue(TOURNAMENT_KEY, isTournamentRecord, DEFAULT_TOURNAMENT);
+}
+
+/** Folds a finished run into the stored record and reports whether it set a new best. */
+export function recordRun(score: number, roundReached: number, champion: boolean): {
+  record: TournamentRecord;
+  newBest: boolean;
+} {
+  const current = loadTournament();
+  const newBest = score > current.bestScore;
+  const record: TournamentRecord = {
+    bestScore: Math.max(current.bestScore, score),
+    bestRound: Math.max(current.bestRound, roundReached),
+    championships: current.championships + (champion ? 1 : 0),
+  };
+  saveValue(TOURNAMENT_KEY, record);
+  return { record, newBest };
+}

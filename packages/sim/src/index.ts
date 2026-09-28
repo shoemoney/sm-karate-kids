@@ -8,3 +8,4 @@ export * from './input.js';
 export * from './match.js';
 export * from './replay.js';
 export * from './rng.js';
+export * from './tournament.js';

@@ -3,7 +3,12 @@ import {
   ARCHETYPES,
   CpuController,
   FixedClock,
+  TOURNAMENT,
   checksumOf,
+  emptyTally,
+  roundArchetype,
+  scoreBout,
+  tallyCall,
   heightOf,
   createMatch,
   indexMoves,
@@ -17,7 +22,7 @@ import { Audio } from './audio.js';
 import type { FighterView } from './fighterView.js';
 import { Hud } from './hud.js';
 import { PlayerInput } from './input/index.js';
-import { loadCareer, recordBoutResult } from './persist.js';
+import { loadCareer, recordBoutResult, recordRun } from './persist.js';
 import { createRenderer } from './renderer.js';
 import { FighterRig, loadEmblem } from './rig.js';
 import { SettingsStore, type Settings } from './settings.js';
@@ -72,6 +77,7 @@ function wrapMeshRig(rig: FighterRig): FighterView {
 
 function makeOpponent(mode: string, seed: number): Opponent {
   if (mode === 'dojo') return new TrainingDummy();
+  if (mode === 'tournament') return new CpuController(roundArchetype(TOURNAMENT[0]!), seed, 1);
   const archetype = ARCHETYPES[mode === 'pressure' ? 'pressure' : mode === 'counter' ? 'counter' : 'sensei'];
   return new CpuController(archetype, seed, 1);
 }
@@ -158,7 +164,7 @@ function bindSettingsUI(settings: SettingsStore, hud: Hud, audio: Audio): void {
 
 async function boot(): Promise<void> {
   const params = query();
-  const mode = params.get('mode') ?? 'classic';
+  const mode = params.get('mode') ?? 'tournament';
   const seed = Number.parseInt(params.get('seed') ?? '1337', 10) || 1337;
   const forceWebGL = params.get('renderer') === 'webgl';
   // Dojo drill distance. Out of the dojo the ruleset owns the opening distance.
@@ -288,6 +294,7 @@ async function boot(): Promise<void> {
         hud.say('AIUCHI', 'neutral', nowMs, 1200);
         audio.play('contact');
       } else if (event.type === 'call') {
+        tallyCall(tally, event.call.scorer, event.call.value, event.call.counter);
         audio.play(event.call.value === 'full' ? 'ippon' : 'contact');
         if (state.fighters[event.call.scorer].score >= state.ruleset.pointsToWin) juice.matchPoint(nowMs);
         hud.call(
@@ -301,16 +308,21 @@ async function boot(): Promise<void> {
       } else if (event.type === 'match_over') {
         const winner = event.winner;
         const record = recordBoutResult(winner === 0, winner === 0 ? state.tick : null);
-        const [a, b] = state.fighters;
-        const points = (n: number): string => (Number.isInteger(n) ? String(n) : n === 0.5 ? '½' : `${Math.floor(n)}½`);
-        const best = record.bestWinTicks === null ? '—' : `${(record.bestWinTicks / 60).toFixed(1)}s`;
-        hud.showResult({
-          headline: winner === null ? 'DRAW' : `${state.fighters[winner].spec.name} WINS`,
-          tone: winner === null ? 'neutral' : 'full',
-          score: `${points(a.score)} — ${points(b.score)}`,
-          detail: `Bouts won ${record.boutsWon} / ${record.boutsPlayed} · best ${best}`,
-          rematch: () => restart(),
-        });
+        audio.play('bell');
+        if (tournament) {
+          finishTournamentBout(winner === 0, nowMs);
+        } else {
+          const [a, b] = state.fighters;
+          const best = record.bestWinTicks === null ? '—' : `${(record.bestWinTicks / 60).toFixed(1)}s`;
+          hud.showResult({
+            headline: winner === null ? 'DRAW' : `${state.fighters[winner].spec.name} WINS`,
+            tone: winner === null ? 'neutral' : 'full',
+            score: `${points(a.score)} — ${points(b.score)}`,
+            detail: `Bouts won ${record.boutsWon} / ${record.boutsPlayed} · best ${best}`,
+            rematch: () => act(),
+          });
+          schedule(restart, REMATCH_AFTER_MS, nowMs);
+        }
         audio.play('bell');
       }
     }
@@ -318,14 +330,118 @@ async function boot(): Promise<void> {
 
   let lastStarted: { player: 0 | 1; moveId: string; tick: number } | null = null;
   const REMATCH_AFTER_MS = 8000;
-  let restartAt = 0;
-  const restart = (): void => {
-    state = createMatch({ content, startSeparation });
-    opponent = makeOpponent(mode, seed);
-    restartAt = 0;
+  const ROUND_INTRO_MS = 4000;
+  const points = (n: number): string => (Number.isInteger(n) ? String(n) : n === 0.5 ? '½' : `${Math.floor(n)}½`);
+
+  // Every card ends in one pending action, fired by its button or by the
+  // countdown, whichever comes first — never both.
+  let pending: (() => void) | null = null;
+  let pendingAt = 0;
+  const schedule = (action: () => void, delayMs: number, nowMs: number): void => {
+    pending = action;
+    pendingAt = nowMs + delayMs;
+  };
+  const act = (): void => {
+    const action = pending;
+    pending = null;
+    pendingAt = 0;
+    action?.();
+  };
+
+  const clearBoutUi = (): void => {
     hud.clearCareer();
     hud.resetScores();
     hud.hideResult();
+  };
+
+  const restart = (): void => {
+    state = createMatch({ content, startSeparation });
+    opponent = makeOpponent(mode, seed);
+    clearBoutUi();
+  };
+
+  // ---- The tournament: a run up the ladder, ended by the first loss. ----
+  const tournament = mode === 'tournament';
+  const run = { round: 0, score: 0 };
+  let tally = emptyTally();
+  // Held while a round card is up: the bout clock gets no time, so the fight
+  // never starts behind the card.
+  let held = false;
+
+  const STYLE: Record<string, string> = {
+    counter: 'Patient. He waits for your wind-up — then makes you pay.',
+    sensei: 'Balanced. Reads the distance and picks his moment.',
+    pressure: 'Relentless. Keeps stepping in and throwing.',
+  };
+
+  const beginBout = (): void => {
+    held = false;
+    hud.hideResult();
+  };
+
+  const startRound = (nowMs: number): void => {
+    const round = TOURNAMENT[run.round]!;
+    state = createMatch({ content, startSeparation });
+    opponent = new CpuController(roundArchetype(round), seed + run.round * 101, 1);
+    tally = emptyTally();
+    clearBoutUi();
+    held = true;
+    hud.setRound(`Round ${run.round + 1}/${TOURNAMENT.length} · ${round.name}`);
+    hud.showResult({
+      kicker: `Round ${run.round + 1} of ${TOURNAMENT.length}`,
+      headline: round.name,
+      tone: 'full',
+      score: `vs ${state.fighters[1].spec.name}`,
+      detail: STYLE[round.archetype] ?? '',
+      action: 'FIGHT',
+      rematch: () => act(),
+    });
+    schedule(beginBout, ROUND_INTRO_MS, nowMs);
+  };
+
+  const newRun = (nowMs: number): void => {
+    run.round = 0;
+    run.score = 0;
+    startRound(nowMs);
+  };
+
+  const finishTournamentBout = (won: boolean, nowMs: number): void => {
+    const round = TOURNAMENT[run.round]!;
+    const earned = scoreBout({ ...tally, ticksLeft: state.timerTicks, won }, round);
+    run.score += earned;
+    const last = run.round === TOURNAMENT.length - 1;
+
+    if (won && !last) {
+      const next = TOURNAMENT[run.round + 1]!;
+      hud.showResult({
+        kicker: `Round ${run.round + 1} cleared`,
+        headline: `+${earned.toLocaleString()}`,
+        tone: 'full',
+        score: `Run ${run.score.toLocaleString()}`,
+        detail: `Next: the ${next.name}`,
+        action: 'NEXT ROUND',
+        rematch: () => act(),
+      });
+      schedule(() => {
+        run.round += 1;
+        startRound(performance.now());
+      }, REMATCH_AFTER_MS, nowMs);
+      return;
+    }
+
+    const { record, newBest } = recordRun(run.score, run.round, won && last);
+    hud.showResult({
+      kicker: won ? 'Tournament complete' : `Out in the ${round.name}`,
+      headline: won ? 'CHAMPION' : 'DEFEATED',
+      tone: won ? 'full' : 'neutral',
+      score: run.score.toLocaleString(),
+      detail: newBest
+        ? 'New best score'
+        : `Best ${record.bestScore.toLocaleString()} · titles ${record.championships}`,
+      action: 'NEW TOURNAMENT',
+      rematch: () => act(),
+    });
+    schedule(() => newRun(performance.now()), REMATCH_AFTER_MS, nowMs);
   };
 
   const clock = new FixedClock();
@@ -340,7 +456,7 @@ async function boot(): Promise<void> {
     const frameDt = now - previous;
     // Hit-stop and slow motion only change how much time the clock is given.
     // Every tick that runs is the same tick it would have been.
-    const ticks = clock.drain(frameDt * juice.timeScale(now));
+    const ticks = clock.drain(held ? 0 : frameDt * juice.timeScale(now));
     previous = now;
 
     for (let i = 0; i < ticks; i += 1) {
@@ -351,14 +467,17 @@ async function boot(): Promise<void> {
 
     // The result card waits for a tap, but an idle screen still rolls into
     // the next bout rather than sitting on it forever.
-    if (state.phase === 'over' && restartAt === 0) restartAt = now + REMATCH_AFTER_MS;
-    if (restartAt !== 0) hud.setRematchCountdown(Math.max(0, Math.ceil((restartAt - now) / 1000)));
-    if (restartAt !== 0 && now > restartAt) restart();
+    if (pendingAt !== 0) hud.setRematchCountdown(Math.max(0, Math.ceil((pendingAt - now) / 1000)));
+    if (pendingAt !== 0 && now > pendingAt) act();
 
     updateSpacing();
     for (const index of [0, 1] as const) {
       const fighter = state.fighters[index];
       views[index]!.apply(fighter, elapsedTicks, renderX(fighter.x));
+      // Distinct depths so overlapping fighters never fight over the same
+      // pixels; whoever is throwing a technique is the one drawn in front.
+      const attacking = fighter.phase === 'startup' || fighter.phase === 'active';
+      views[index]!.root.position.z = attacking ? 0.08 : index === 0 ? 0.02 : -0.02;
     }
     const [left, right] = state.fighters;
     stage.frame(spacing.mid, renderX(right.x) - renderX(left.x));
@@ -380,6 +499,8 @@ async function boot(): Promise<void> {
 
     requestAnimationFrame(frame);
   };
+  if (tournament) newRun(performance.now());
+  else hud.setRound('');
   requestAnimationFrame(frame);
 
   // Test surface. Read-only: nothing here can score a point or move a fighter.
@@ -403,6 +524,13 @@ async function boot(): Promise<void> {
         p1Phase: state.fighters[0].phase,
       }),
       checksum: () => checksumOf(state),
+      tournament: () => ({
+        active: tournament,
+        round: run.round,
+        roundId: TOURNAMENT[run.round]?.id ?? null,
+        score: run.score,
+        held,
+      }),
       /**
        * Runs a fresh seeded bout to a tick count with no wall clock involved,
        * then reports the fingerprint. Two renderer backends must agree here:

@@ -734,3 +734,23 @@ body.reduced-motion .points.pop {
 body.reduced-motion .result.slam {
   animation: none;
 }
+
+
+.result-kicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--blue);
+  min-height: 1em;
+}
+
+.round-tag {
+  margin-top: 0.1rem;
+  text-align: center;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--blue);
+}

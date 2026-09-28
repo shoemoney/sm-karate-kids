@@ -1,5 +1,6 @@
 import {
   AdditiveBlending,
+  NormalBlending,
   Color,
   Mesh,
   MeshBasicMaterial,
@@ -28,6 +29,7 @@ interface Particle {
 }
 
 const POOL_SIZE = 64;
+const DUST_POOL = 24;
 const SPARK = new Color('#fff1c9');
 const SPARK_HOT = new Color('#ffb347');
 const DUST = new Color('#c9a071');
@@ -39,7 +41,10 @@ export interface Flashable {
 
 export class Juice {
   private readonly particles: Particle[] = [];
+  private readonly dustPool: Particle[] = [];
   private cursor = 0;
+  private dustCursor = 0;
+  private readonly pools = [this.particles, this.dustPool];
   private hitstopUntil = 0;
   private slowmoUntil = 0;
   private shake = 0;
@@ -56,19 +61,23 @@ export class Juice {
     private readonly reducedMotion: () => boolean,
   ) {
     const geometry = new PlaneGeometry(1, 1);
+    // Two pools with fixed blending. One shared pool meant switching a
+    // material's blending on every spark, which forces a shader rebuild on
+    // the exact frame the hit lands.
     for (let i = 0; i < POOL_SIZE; i += 1) {
+      const dust = i >= POOL_SIZE - DUST_POOL;
       const material = new MeshBasicMaterial({
-        color: SPARK,
+        color: dust ? DUST : SPARK,
         transparent: true,
         opacity: 0,
         depthWrite: false,
-        blending: AdditiveBlending,
+        blending: dust ? NormalBlending : AdditiveBlending,
       });
       const mesh = new Mesh(geometry, material);
       mesh.visible = false;
       mesh.renderOrder = 10;
       scene.add(mesh);
-      this.particles.push({ mesh, vx: 0, vy: 0, life: 0, maxLife: 1, gravity: 0, spin: 0 });
+      (dust ? this.dustPool : this.particles).push({ mesh, vx: 0, vy: 0, life: 0, maxLife: 1, gravity: 0, spin: 0 });
     }
 
     this.screenFlash = document.createElement('div');
@@ -135,8 +144,12 @@ export class Juice {
   }
 
   private emit(x: number, y: number, facing: 1 | -1, kind: ImpactKind, heavy: boolean): void {
-    const p = this.particles[this.cursor];
-    this.cursor = (this.cursor + 1) % this.particles.length;
+    const sweep = kind === 'sweep';
+    const pool = sweep ? this.dustPool : this.particles;
+    const index = sweep ? this.dustCursor : this.cursor;
+    const p = pool[index];
+    if (sweep) this.dustCursor = (this.dustCursor + 1) % pool.length;
+    else this.cursor = (this.cursor + 1) % pool.length;
     if (p === undefined) return;
 
     const material = p.mesh.material;
@@ -149,7 +162,6 @@ export class Juice {
       p.vy = Math.abs(Math.sin(angle)) * speed * 0.7 + 0.4;
       p.gravity = 3.2;
       p.maxLife = 0.55 + Math.random() * 0.35;
-      material.blending = 1; // NormalBlending: dust is matter, not light
       p.mesh.scale.setScalar(0.07 + Math.random() * 0.09);
     } else {
       material.color.copy(kind === 'block' ? BLOCK : Math.random() < 0.35 ? SPARK_HOT : SPARK);
@@ -158,10 +170,8 @@ export class Juice {
       p.vy = Math.sin(angle) * speed;
       p.gravity = 5.5;
       p.maxLife = 0.22 + Math.random() * 0.22;
-      material.blending = AdditiveBlending;
       p.mesh.scale.set(0.05 + Math.random() * 0.05, 0.012 + Math.random() * 0.012, 1);
     }
-    material.needsUpdate = true;
     p.spin = Math.atan2(p.vy, p.vx);
     p.life = p.maxLife;
     p.mesh.position.set(x, y, 0.35);
@@ -172,19 +182,21 @@ export class Juice {
   /** Advance effects. Runs on wall time so the freeze frame still sparkles. */
   update(nowMs: number, dtMs: number): void {
     const dt = Math.min(dtMs, 50) / 1000;
-    for (const p of this.particles) {
-      if (!p.mesh.visible) continue;
-      p.life -= dt;
-      if (p.life <= 0) {
-        p.mesh.visible = false;
-        continue;
+    for (const pool of this.pools) {
+      for (const p of pool) {
+        if (!p.mesh.visible) continue;
+        p.life -= dt;
+        if (p.life <= 0) {
+          p.mesh.visible = false;
+          continue;
+        }
+        p.vy -= p.gravity * dt;
+        p.mesh.position.x += p.vx * dt;
+        p.mesh.position.y = Math.max(0.02, p.mesh.position.y + p.vy * dt);
+        p.mesh.rotation.z = Math.atan2(p.vy, p.vx);
+        const t = p.life / p.maxLife;
+        p.mesh.material.opacity = Math.min(1, t * 1.6);
       }
-      p.vy -= p.gravity * dt;
-      p.mesh.position.x += p.vx * dt;
-      p.mesh.position.y = Math.max(0.02, p.mesh.position.y + p.vy * dt);
-      p.mesh.rotation.z = Math.atan2(p.vy, p.vx);
-      const t = p.life / p.maxLife;
-      p.mesh.material.opacity = Math.min(1, t * 1.6);
     }
 
     for (let i = this.flashes.length - 1; i >= 0; i -= 1) {
