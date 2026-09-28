@@ -66,3 +66,24 @@ test('both gi emblems carry the ShoeMoney mark', async ({ page }) => {
     expect(emblem.src).toMatch(/shoemoney-emblem|fighters\/(shiro|aka)-\d+\.webp/);
   }
 });
+
+test('game keys still type into a text field', async ({ page }) => {
+  await page.goto('/?mode=classic');
+  await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk']?.ready === true);
+  // The leaderboard name box only exists at the end of a run, but the rule is
+  // general: no text field may lose the letters the controls listen for.
+  await page.evaluate(() => {
+    const input = document.createElement('input');
+    input.id = 'probe';
+    document.body.appendChild(input);
+  });
+  await page.locator('#probe').click();
+  await page.keyboard.type('Swag Kid wasd ijkl');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.type('!');
+  await expect(page.locator('#probe')).toHaveValue('Swag Kid wasd ijk!l');
+  expect(await page.evaluate(() => (globalThis as Record<string, any>)['__smkk'].sticks())).toEqual({
+    left: 'neutral',
+    right: 'neutral',
+  });
+});

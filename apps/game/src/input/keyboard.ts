@@ -19,6 +19,13 @@ const RIGHT_KEYS: Record<string, Dir4> = {
   KeyL: 'right',
 };
 
+function isTyping(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target.isContentEditable) return true;
+  const tag = target.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+}
+
 /** Two four-direction key clusters, standing in for the cabinet's two sticks. */
 export class KeyboardInput {
   private readonly held = new Set<string>();
@@ -30,6 +37,9 @@ export class KeyboardInput {
   constructor(target: Window = window) {
     const down = (event: KeyboardEvent): void => {
       if (event.repeat) return;
+      // Typing a name must type the name. The controls listen to the whole
+      // page and swallow these keys, so they stand aside for any text field.
+      if (isTyping(event.target)) return;
       if (event.code in LEFT_KEYS || event.code in RIGHT_KEYS) {
         this.held.add(event.code);
         event.preventDefault();
