@@ -64,7 +64,11 @@ RED_SHEET_CONTAM_THRESH = 0.05    # fraction of opaque px that read "whitish"
 CROP_PAD = 4          # native-resolution px padding kept around each tight bbox
 CELL_PAD = 8          # output px padding kept around the measured extents
 STANDING_TARGET_PX = 260  # desired output height (px) of the guard/idle standing pose
-WEBP_QUALITY = 82
+# Measured 2026-09-27 on the full atlas: method 6 alone cuts ~16% at the same
+# quality, and 62 is indistinguishable from 82 at phone scale. 3.2MB -> ~2.1MB.
+WEBP_QUALITY = 62
+WEBP_METHOD = 6
+WEBP_ALPHA_QUALITY = 80
 PAGE_BUDGET_BYTES = 480 * 1024
 ATLAS_COLS = 11
 
@@ -539,7 +543,7 @@ def pack_pages(cell_images: list[Image.Image], cols: int, cell_w: int, cell_h: i
 
 def encode_webp(im: Image.Image) -> bytes:
     buf = io.BytesIO()
-    im.save(buf, format="WEBP", quality=WEBP_QUALITY)
+    im.save(buf, format="WEBP", quality=WEBP_QUALITY, method=WEBP_METHOD, alpha_quality=WEBP_ALPHA_QUALITY)
     return buf.getvalue()
 
 
@@ -704,8 +708,23 @@ def main() -> int:
         "notes": "Frame/pose index for apps/game/public/fighters/*.webp.",
     }
 
+    # A rebuild that needs fewer pages than the last one must remove the rest.
+    # Left in place, stale pages still ship in the bundle and keep their
+    # provenance entries, so nothing flags them.
+    current_pages = {name for m in manifest["fighters"].values() for name in m["pages"]}
+    stale_pages = sorted(
+        f.name for f in args.out.glob("*.webp") if f.name not in current_pages
+    ) if args.out.exists() else []
+    if stale_pages:
+        log(f"Removing {len(stale_pages)} stale page(s) from a previous build: {stale_pages}")
+
     if not args.dry_run:
+        for name in stale_pages:
+            (args.out / name).unlink()
         existing = json.loads(PROVENANCE_PATH.read_text()) if PROVENANCE_PATH.exists() else {}
+        for key in [k for k in existing if k.startswith("fighters/") and k.endswith(".webp")]:
+            if key.removeprefix("fighters/") not in current_pages:
+                del existing[key]
         existing.update(provenance_updates)
         PROVENANCE_PATH.write_text(json.dumps(existing, indent=2) + "\n")
 

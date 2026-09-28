@@ -12,23 +12,19 @@
       "pages": [
         "shiro-0.webp",
         "shiro-1.webp",
-        "shiro-2.webp",
-        "shiro-3.webp"
+        "shiro-2.webp"
       ],
       "cols": 11,
-      "rows": 3
+      "rows": 4
     },
     "aka": {
       "pages": [
         "aka-0.webp",
         "aka-1.webp",
-        "aka-2.webp",
-        "aka-3.webp",
-        "aka-4.webp",
-        "aka-5.webp"
+        "aka-2.webp"
       ],
       "cols": 11,
-      "rows": 2
+      "rows": 4
     }
   },
   "poses": {

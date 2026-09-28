@@ -95,7 +95,7 @@ a standing figure naturally lands around 80–90% of cell height once jump/kick 
 accounted for.
 
 Pages are packed at a fixed `ATLAS_COLS` (11) and searched from the largest `rows_per_page` down
-until every resulting page's WebP (quality 82) encodes under 480KB. **Adding pages is always
+until every resulting page's WebP (quality 62, method 6 — measured indistinguishable from 82 at phone scale) encodes under 480KB. **Adding pages is always
 preferred over shrinking the art or dropping quality** — if a fighter needs more pages than fits in
 one, it gets `shiro-0.webp`, `shiro-1.webp`, … automatically; `manifest.fighters.<id>.cols/rows`
 describes one uniform page shape shared by all of that fighter's pages, per the addressing formula
@@ -218,3 +218,7 @@ eye after touching the script:
 3. Look for: feet on a common line, steady scale frame-to-frame, the `contact` frame actually being
    the furthest extension, no chopped limbs.
 4. `pnpm validate:assets` must exit 0.
+
+## 🗜️ Size
+
+Measured 2026-09-27 on the full art set: **2.14MB across 6 pages** (3 per fighter), down from 3.29MB across 10 at quality 82 with the default encoder method. `method=6` does most of that work. A rebuild that needs fewer pages than the last one now deletes the extra page files and their provenance entries itself — before that, stale pages silently kept shipping in the bundle.
