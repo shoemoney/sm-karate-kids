@@ -188,7 +188,9 @@ export class Hud {
   private resultAction = 'REMATCH';
 
   setRematchCountdown(seconds: number): void {
-    if (this.resultButton !== null) this.resultButton.textContent = `${this.resultAction} · ${seconds}`;
+    if (this.resultButton === null) return;
+    // Zero means no countdown is running: show the plain label.
+    this.resultButton.textContent = seconds > 0 ? `${this.resultAction} · ${seconds}` : this.resultAction;
   }
 
   private roundTag: HTMLElement | null = null;
@@ -206,6 +208,49 @@ export class Hud {
     }
     this.roundTag.textContent = label;
     this.roundTag.hidden = label === '';
+  }
+
+  /**
+   * Offer a name for the leaderboard inside the result card, above its main
+   * button. `submit` resolves to the line to show afterwards.
+   */
+  offerNameEntry(opts: { initial: string; prompt: string; submit: (name: string) => Promise<string> }): void {
+    if (this.result === null) return;
+    const form = document.createElement('form');
+    form.className = 'result-entry';
+    const label = document.createElement('label');
+    label.className = 'result-entry-label';
+    label.textContent = opts.prompt;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.maxLength = 24;
+    input.required = true;
+    input.setAttribute('autocomplete', 'nickname');
+    input.enterKeyHint = 'done';
+    input.value = opts.initial;
+    input.placeholder = 'Your name';
+    label.appendChild(input);
+    const send = document.createElement('button');
+    send.type = 'submit';
+    send.className = 'result-entry-send';
+    send.textContent = 'SUBMIT';
+    const status = document.createElement('div');
+    status.className = 'result-entry-status';
+    status.setAttribute('aria-live', 'polite');
+    form.append(label, send, status);
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const name = input.value.trim();
+      if (name === '') return;
+      input.disabled = true;
+      send.disabled = true;
+      status.textContent = 'Saving…';
+      void opts.submit(name).then((message) => {
+        status.textContent = message;
+        send.hidden = true;
+      });
+    });
+    this.result.insertBefore(form, this.resultButton);
   }
 
   hideResult(): void {

@@ -22,7 +22,8 @@ import { Audio } from './audio.js';
 import type { FighterView } from './fighterView.js';
 import { Hud } from './hud.js';
 import { PlayerInput } from './input/index.js';
-import { loadCareer, recordBoutResult, recordRun } from './persist.js';
+import { loadCareer, loadPlayerName, recordBoutResult, recordRun, savePlayerName } from './persist.js';
+import { Leaderboard } from './leaderboard.js';
 import { createRenderer } from './renderer.js';
 import { FighterRig, loadEmblem } from './rig.js';
 import { SettingsStore, type Settings } from './settings.js';
@@ -362,7 +363,8 @@ async function boot(): Promise<void> {
 
   // ---- The tournament: a run up the ladder, ended by the first loss. ----
   const tournament = mode === 'tournament';
-  const run = { round: 0, score: 0 };
+  const run = { round: 0, score: 0, techniques: 0, ippons: 0, startedAt: 0, id: 0 };
+  const leaderboard = new Leaderboard();
   let tally = emptyTally();
   // Held while a round card is up: the bout clock gets no time, so the fight
   // never starts behind the card.
@@ -402,6 +404,11 @@ async function boot(): Promise<void> {
   const newRun = (nowMs: number): void => {
     run.round = 0;
     run.score = 0;
+    run.techniques = 0;
+    run.ippons = 0;
+    run.startedAt = nowMs;
+    run.id += 1;
+    leaderboard.startRun();
     startRound(nowMs);
   };
 
@@ -409,6 +416,8 @@ async function boot(): Promise<void> {
     const round = TOURNAMENT[run.round]!;
     const earned = scoreBout({ ...tally, ticksLeft: state.timerTicks, won }, round);
     run.score += earned;
+    run.techniques += tally.ippon + tally.wazaAri;
+    run.ippons += tally.ippon;
     const last = run.round === TOURNAMENT.length - 1;
 
     if (won && !last) {
@@ -442,6 +451,36 @@ async function boot(): Promise<void> {
       rematch: () => act(),
     });
     schedule(() => newRun(performance.now()), REMATCH_AFTER_MS, nowMs);
+    offerLeaderboard(nowMs);
+  };
+
+  /** If this run makes the board, stop the countdown and ask for a name. */
+  const offerLeaderboard = (nowMs: number): void => {
+    if (!leaderboard.available || run.score <= 0) return;
+    const runId = run.id;
+    const metrics = {
+      score: run.score,
+      rounds: run.round + 1,
+      techniques: run.techniques,
+      ippons: run.ippons,
+      seconds: Math.max(0, (nowMs - run.startedAt) / 1000),
+    };
+    void leaderboard.board().then((board) => {
+      // The player may already have started another run while this was in flight.
+      if (board === null || run.id !== runId || !Leaderboard.qualifies(metrics.score, board)) return;
+      // Nobody should lose a leaderboard entry to a countdown while typing.
+      pendingAt = 0;
+      hud.setRematchCountdown(0);
+      hud.offerNameEntry({
+        initial: loadPlayerName(),
+        prompt: 'You made the board',
+        submit: async (name) => {
+          savePlayerName(name);
+          const result = await leaderboard.submit(name, metrics);
+          return result.ok ? `#${result.rank} on the arcade board` : result.message;
+        },
+      });
+    });
   };
 
   const clock = new FixedClock();

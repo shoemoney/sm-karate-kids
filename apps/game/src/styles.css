@@ -754,3 +754,52 @@ body.reduced-motion .result.slam {
   text-transform: uppercase;
   color: var(--blue);
 }
+
+
+.result-entry {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  width: min(100%, 22rem);
+  margin-top: 0.4rem;
+}
+
+.result-entry-label {
+  display: contents;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.result-entry input {
+  grid-column: 1;
+  min-height: 48px;
+  padding: 0 0.9rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(8, 12, 18, 0.7);
+  color: var(--text);
+  font-size: 1rem;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.result-entry-send {
+  min-height: 48px;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: 0.8rem;
+  background: var(--amber);
+  color: #1a1206;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.result-entry-status {
+  grid-column: 1 / -1;
+  min-height: 1.2em;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
+}

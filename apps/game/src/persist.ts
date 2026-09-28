@@ -130,3 +130,13 @@ export function recordRun(score: number, roundReached: number, champion: boolean
   saveValue(TOURNAMENT_KEY, record);
   return { record, newBest };
 }
+
+const NAME_KEY = 'playerName';
+
+export function loadPlayerName(): string {
+  return loadValue(NAME_KEY, (value): value is string => typeof value === 'string', '');
+}
+
+export function savePlayerName(name: string): void {
+  saveValue(NAME_KEY, name);
+}
