@@ -1954,3 +1954,27 @@ work and it is not something this review loop found.
 - `make-loading-progress-legible` / `loading-bar-shows-no-progress`
   (gpt-5.6-terra, claude-opus-5) — the twenty-fourth and twenty-fifth
   appearances, unchanged since round 35.
+
+### Round 58 — closing round 57's open item, against myself
+
+- `twin-sticks-indistinguishable` (claude-opus-5) — **LANDED, and it corrects
+  round 57, where this exact change was reverted as "not working".**
+
+  It was working. Computed style, which is the check the round-57 entry asked
+  for and I did not do at the time:
+
+      left   9.5x9.5px   background rgb(158,195,205)  no shadow
+      right  9.5x9.5px   background rgba(0,0,0,0)      inset 2.4px gold ring
+
+  I judged it from a 0.62x screenshot in which a 9.5px mark is three pixels
+  across.
+
+  **This is the opposite failure to rounds 20 and 52, where a picture correctly
+  overrode a DOM that said otherwise.** Here the picture was not wrong, it was
+  *under-powered*. Those are different lessons and only one of them is about
+  instruments — the other is that "I cannot see it working" and "it is not
+  working" are different claims, and conflating them costs correct work.
+
+  Three further crops at guessed coordinates failed to find the knobs at all.
+  Guessed coordinates are not an instrument either. The computed read settled it
+  in one call, and it is what should have been used first.
