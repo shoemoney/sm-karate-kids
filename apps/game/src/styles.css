@@ -416,6 +416,11 @@ body {
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
+  /* Full-bleed overlays (the result card) slam in from scale(2.4), so their
+     box is wider than the stage for the length of the animation. Without a
+     clip here that transient overflow becomes a horizontal scrollbar on a
+     phone. */
+  overflow: hidden;
 }
 
 #view {
