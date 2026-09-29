@@ -375,6 +375,68 @@ await capture('15-phone-settings-mixed', phone, async (page) => {
   await page.screenshot({ path: `${OUT}/15-phone-settings-mixed.png` });
 });
 
+/* A bout in progress, with a score on the board and feedback on screen.
+ *
+ * Every frame in this set is the first fifteen seconds of a game. That is why
+ * `10½` clipped for twenty-three rounds (round 43) and why the tip's contrast
+ * went unmeasured until round 50: nothing here has ever been played.
+ *
+ * Round 53 read the result as an all-clear — fifteen findings, fifteen stale or
+ * refused — which is the signal that the set is exhausted rather than that the
+ * product is. The models are reporting accurately on a set of screenshots of a
+ * game at 0-0.
+ *
+ * So this one is played rather than posed: real CDP touch input on both zone
+ * anchors, the same grammar the e2e suite uses, driven until the referee
+ * actually awards a point. The three attempts in round 43 all forced the DOM
+ * text and all lost to the HUD's per-frame write — posing a value the render
+ * loop owns cannot work. Playing to the state is slower and it is honest. */
+await capture('16-phone-in-play', phone, async (page) => {
+  await page.goto(`${BASE}/?mode=dojo`, { waitUntil: 'networkidle' });
+  await waitFight(page);
+  const cdp = await page.context().newCDPSession(page);
+  const pts = new Map();
+  const send = (type) =>
+    cdp.send('Input.dispatchTouchEvent', {
+      type,
+      touchPoints: [...pts].map(([id, q]) => ({ x: Math.round(q.x), y: Math.round(q.y), id })),
+    });
+  const anchor = async (sel) => {
+    const box = await page.locator(sel).boundingBox();
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  };
+  const L = await anchor('#zone-left');
+  const R = await anchor('#zone-right');
+  const DIRS = { right: [58, 0], left: [-58, 0], up: [0, -58], down: [0, 58], neutral: [0, 0] };
+  const COMBOS = [
+    ['neutral', 'up'], ['neutral', 'right'], ['right', 'right'],
+    ['neutral', 'left'], ['right', 'left'], ['neutral', 'down'],
+  ];
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    const [sd, td] = COMBOS[attempt % COMBOS.length];
+    pts.clear();
+    pts.set(1, { x: L.x, y: L.y });
+    await send('touchStart');
+    pts.set(1, { x: L.x + DIRS[sd][0], y: L.y + DIRS[sd][1] });
+    await send('touchMove');
+    pts.set(2, { x: R.x, y: R.y });
+    await send('touchStart');
+    pts.set(2, { x: R.x + DIRS[td][0], y: R.y + DIRS[td][1] });
+    await send('touchMove');
+    await page.waitForTimeout(220);
+    await send('touchEnd');
+    const scored = await page.evaluate(() => {
+      const a = document.querySelector('#points-0')?.textContent ?? '0';
+      const b = document.querySelector('#points-1')?.textContent ?? '0';
+      return a.trim() !== '0' || b.trim() !== '0';
+    });
+    if (scored) break;
+    await page.waitForTimeout(320);
+  }
+  await page.waitForTimeout(200);
+  await page.screenshot({ path: `${OUT}/16-phone-in-play.png` });
+});
+
 await browser.close();
 console.log(`shots in ${OUT}`);
 if (errors.length) console.log('console errors:\n' + [...new Set(errors)].join('\n'));
