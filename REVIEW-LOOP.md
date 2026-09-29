@@ -650,3 +650,44 @@ remaining.** The local snapshot was inventing IDs — `glm-4.7v` and
 - `fighters-lost-in-portrait`, `fight-framing-dead-bands`,
   `fighter-framing-wastes-vertical-space` — framing, in its thirteenth
   iteration. Standing: warm and low.
+
+### Round 22 — gpt-5.6-terra, gemini-3.7-flash, muse-spark-1.3 — `e93f48d`
+
+- `front-kick-decoupled-foot-sprite` (fugu-max, r21),
+  `sprite-front-kick-artifact` (gemini-3.7-flash),
+  `ippon-flash-blows-out-head` (qwen3.8-flash, r21) — **accepted, with a
+  different cause than any reviewer named.** Four reports across three rounds,
+  all describing a limb defect: a "severed foot", a leg that "passes through"
+  the opponent, a "floating severed limb", a head "clipped to a featureless
+  white blob".
+
+  The atlas is clean. A burst of sixteen input combinations at five frames each,
+  keeping every frame where a move was live, showed a back kick fully extended
+  with the foot attached to the leg. What the burst also showed, in two frames
+  of six, was a translucent second Asmongold most of a body width behind the
+  first.
+
+  That is the afterimage: three ghosts at 0.32 opacity drawn at the exact world
+  spot they were dropped, so the offset is whatever the fighter covered in three
+  ticks. On a walk that is nothing; on a stepping kick it is most of a body
+  width, and a full silhouette that far behind its owner is a second person in
+  the room. Capped to 0.1 world units, peak 0.17, opacity falling off with
+  staleness. Re-burst: a tight smear on the trailing edge.
+
+  **A reviewer describing an artefact reliably points at a frame where something
+  is genuinely wrong. They cannot name it, and the name they reach for will be
+  wrong — go and look at the frame.**
+- `meta/muse-spark-1.3` — **unavailable.** HTTP 403: requires an 18+ age
+  attestation on the OpenRouter account. Not a model defect and not a prompt
+  defect; the whole muse-spark family is behind the same gate.
+- `opponent-hud-score-contrast` (gemini-3.7-flash) — HasanAbi's score is
+  `--fighter-1` red, and rounds 5/10 already took it to the brightest red the
+  palette allows. A colour the game needs in order to read as two fighters.
+- `bottom-hud-label-clipping` (gemini-3.7-flash, gpt-5.6-terra,
+  qwen3.8-flash) — the STANCE/TECHNIQUE labels and the stick bottoms. Round 20
+  measured the strip clear of the rings; the labels measure at y=812–824 inside
+  a pad ending at 844, which is clear.
+- `ippon-impact-defender-flinch` (gemini-3.7-flash) — a content request, not a
+  defect: the art set has no recoil frames. Logged for the asset backlog.
+- `make-score-and-countdowns-legible` (gpt-5.6-terra) — the numbered bout badge
+  on the FIGHT button; deliberate, and sized to 20px in round 12.
