@@ -1237,16 +1237,29 @@ body.show-perf #backend {
 
 /* The pip is the control's own colour, dim at rest so the two sticks are
    told apart without a label, lit when held. */
+/* The mark that tells the two sticks apart, and it is doing a lot of work
+   alone: claude-opus-5, round 57, "the two dials are visual twins; the only
+   difference is a 6px dot". Two identical bronze pucks either side of the
+   screen, told apart by a pip at 0.4 opacity, in a game where picking the
+   wrong stick costs a point.
+
+   Two different COLOURS is the hardest distinction to make at a glance. Two
+   different MARKS is the easiest: shape survives colour blindness, survives a
+   dim tungsten room, and survives the half-second glance a thumb actually gets.
+
+   The stance stick's is filled and the technique stick's is hollow — which also
+   happens to say something true. The stance stick is the root you stand on; the
+   technique stick is the expression on top of it. */
 .knob::after {
   content: "";
   position: absolute;
   inset: 0;
   margin: auto;
-  width: var(--pip);
-  height: var(--pip);
+  width: calc(var(--pip) * 1.75);
+  height: calc(var(--pip) * 1.75);
   border-radius: var(--radius-circle);
   background: var(--stick-accent);
-  opacity: 0.4;
+  opacity: 0.72;
   transform: scale(0.9);
   transition:
     opacity var(--dur-fast) var(--ease-out),
@@ -1288,6 +1301,12 @@ body.show-perf #backend {
   transform: scale(1);
   border-color: var(--stick-accent);
   opacity: 1;
+}
+
+#zone-right .knob::after {
+  background: transparent;
+  box-shadow: inset 0 0 0 0.15em var(--stick-accent);
+  opacity: 0.9;
 }
 
 .stick-zone.engaged .knob::after {
