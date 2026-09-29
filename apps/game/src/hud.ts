@@ -292,9 +292,31 @@ export class Hud {
         const item = document.createElement('li');
         item.className = 'tech-item';
 
+        // The combo used to be spelled out in full — "• stance + ► technique" —
+        // on every one of the twenty rows, which spent about 40% of a phone's
+        // width restating the same two words and squeezed the move names until
+        // "Crouching Punch" and "Somersault Kick" wrapped. The group heading
+        // above already says which technique direction the rows belong to, so
+        // the row only needs to say which STICK and which DIRECTION: two lit
+        // glyphs. The spelled-out form is kept for assistive tech, where the
+        // compact version would be cryptic.
         const combo = document.createElement('span');
         combo.className = 'tech-combo';
-        combo.textContent = `${QUALIFIER_GLYPH[qualifier]} stance + ${FAMILY_GLYPH[family]} technique`;
+        const spoken = `${QUALIFIER_GLYPH[qualifier]} stance plus ${FAMILY_GLYPH[family]} technique`;
+        combo.setAttribute('aria-label', spoken);
+        combo.setAttribute('role', 'img');
+        for (const glyph of [QUALIFIER_GLYPH[qualifier], FAMILY_GLYPH[family]]) {
+          const pip = document.createElement('span');
+          pip.className = 'tech-pip';
+          pip.setAttribute('aria-hidden', 'true');
+          pip.textContent = glyph;
+          combo.appendChild(pip);
+        }
+        const plus = document.createElement('span');
+        plus.className = 'tech-plus';
+        plus.setAttribute('aria-hidden', 'true');
+        plus.textContent = '+';
+        combo.appendChild(plus);
 
         const name = document.createElement('span');
         name.className = 'tech-name';

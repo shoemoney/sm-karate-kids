@@ -34,6 +34,7 @@ import { SettingsStore, type Settings } from './settings.js';
 import { tryLoadSpriteViews } from './spriteRig.js';
 import { Stage } from './stage.js';
 import { Juice } from './juice.js';
+import { createControlCoach } from './coach.js';
 
 function byId<T extends HTMLElement>(id: string): T {
   const node = document.getElementById(id);
@@ -161,6 +162,11 @@ function bindSettingsUI(settings: SettingsStore, hud: Hud, audio: Audio): void {
     body.classList.toggle('high-contrast', value.highContrast);
     body.classList.toggle('large-controls', value.largeControls);
     body.classList.toggle('left-handed', value.leftHanded);
+    // The renderer badge is a diagnostic, and the performance HUD already
+    // prints the backend inside it. Shipping it unconditionally put "WEBGPU" in
+    // the corner of every screen for a player who cannot act on it, so it now
+    // rides the setting that means "I am looking at diagnostics".
+    body.classList.toggle('show-perf', value.showPerf);
 
     audio.setMuted(value.muted);
     hud.setPerfVisible(value.showPerf);
@@ -248,6 +254,8 @@ async function boot(screen: BootScreen): Promise<void> {
   const stage = new Stage(state.arena, import.meta.env.BASE_URL);
   for (const view of views) stage.scene.add(view.root);
   hud.setNames(state.fighters[0].spec.name, state.fighters[1].spec.name);
+  const coach = createControlCoach();
+  let coachOffered = false;
 
   // The last real transfer. Waiting for it here is what lets the pre-boot card
   // show an honest bar, and what stops the dojo changing its clothes in front
@@ -323,6 +331,8 @@ async function boot(screen: BootScreen): Promise<void> {
       if (event.type === 'move_start') {
         lastStarted = { player: event.player, moveId: event.moveId, tick: state.tick };
         if (event.player === 0) hud.showTechnique(moveName(event.moveId));
+        // The first committed technique is proof the hint has landed; retire it.
+        coach.dismiss();
         audio.play('strike');
       } else if (event.type === 'contact') {
         const at = impactAt(event.player, event.moveId);
@@ -576,6 +586,12 @@ async function boot(screen: BootScreen): Promise<void> {
     juice.update(now, frameDt);
     juice.applyCamera(now);
     hud.update(state, now);
+    // The coach mark appears the moment the bout is live, not before it — a
+    // hint sitting over the round card teaches nothing about the sticks.
+    if (!coachOffered && state.phase === 'fight') {
+      coachOffered = true;
+      coach.show();
+    }
     // The impact punch decays on the same curve as the camera punch-in, so the
     // colour kick and the hit land together instead of trailing each other.
     post.punch.value = juice.impactPunch() * 6;

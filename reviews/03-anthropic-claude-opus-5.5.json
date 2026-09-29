@@ -1,0 +1,78 @@
+{
+  "model": "anthropic/claude-opus-5.5",
+  "elapsed_s": 56.8,
+  "usage": {
+    "prompt_tokens": 12140,
+    "completion_tokens": 4247,
+    "total_tokens": 16387,
+    "cost": 0.1335,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.1335,
+      "upstream_inference_prompt_cost": 0.04856,
+      "upstream_inference_completions_cost": 0.08494
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1741,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png"
+  ],
+  "items": [
+    {
+      "id": "teach-sticks-in-context",
+      "title": "Explain the two sticks on screen before and during the first bout",
+      "what": "In the idle portrait bout screenshot, the only guidance is the STANCE and TECHNIQUE labels (y~1240) under two identical rings with bare chevrons. Nothing shows what each direction does. The move system only appears inside the MOVES sheet, which shows 10+ combos such as '\u25b2 stance + \u25c4 technique = Somersault Kick'. The intro card then auto-starts with 'FIGHT \u00b7 2'. A new player is in a live bout within seconds, with no idea that they must hold the left stick and flick the right one. The 'LUNGE PUNCH' chip only appears once the right stick is already pushed (screenshot 5). It also lingers when both sticks are centered (screenshot 4), so it doesn't read as a preview.",
+      "why": "This is the first 5 seconds of play. The combo grammar (stance \u00d7 technique) is the whole game, but it is invisible on the play surface. First-time players will mash the right stick, get Lunge Punch over and over, and lose 0\u20132\u00bd like the result screen shows, without understanding why.",
+      "how": "Pause the FIGHT countdown on the first bout until the player taps. Overlay a one-time coach mark on each stick: the left ring shows what \u25b2/\u25bc/\u25ba/\u25c4 change (Jump / Crouch / Step / Back), and the right ring shows Punch / Reverse on \u25ba/\u25c4. While the left stick is held, write the resulting move name next to each chevron of the right ring, e.g. 'Jumping Punch' at \u25ba. Use 11px warm-cream text at ~70% opacity, fading after 3 successful techniques. Show the move chip only while the right stick is deflected, and clear it on release. Remember the coach marks were dismissed in localStorage."
+    },
+    {
+      "id": "tighten-portrait-framing",
+      "title": "Pull the camera in so the fighters own the portrait frame",
+      "what": "In the portrait bout screenshots, the 3D viewport runs from y~152 to y~935 (about 783px). The top ~360px of it (y152\u2013510) is empty ceiling haze with a few bokeh specks above the shoji windows. The fighters occupy only y~510\u2013815, about 300px tall, and their faces are ~40px wide. The landscape screenshot shows the same sprites at roughly 450px tall and reading far better.",
+      "why": "On a 390pt-wide phone the photoreal likenesses are the product's hook, and they read at thumbnail size. Hit reactions, stance changes (crouch vs jump) and scoring contact are harder to see when half the play area is dead space. The player needs that information to learn timing.",
+      "how": "For aspect ratios under 0.75, narrow the camera FOV or dolly in and lower the look-at target. Aim for the fighters' heads at ~35% and feet at ~85% of the viewport height, so they span ~55\u201360% of it. Let the window band crop at the top edge; the warm windows still frame the heads. Keep a lateral margin so both fighters stay in frame at maximum separation. Clamp the camera x-span to the fighters' bounding box plus 15%."
+    },
+    {
+      "id": "keep-faces-clear-on-cards",
+      "title": "Stop intro and result overlays from covering the fighters' faces",
+      "what": "On the intro card, the 'QUALIFIER' title and the 'vs HasanAbi' plate (y~390\u2013540) sit directly over both fighters' heads; only hair and gi shoulders peek out. On the result card, the '0 \u2014 2\u00bd' pill (y~505\u2013580) lands squarely on the red fighter's head, and its backdrop blur smears his face into an unreadable blob. That is the moment the player should see who beat them. The 'vs HasanAbi' plate also has a hard-edged rectangular dark box that looks like a leftover div background.",
+      "why": "The pre-fight matchup and the post-fight victor are the two most screenshot-able, shareable moments. Both currently hide the celebrity likenesses that are the reason people click. The blurred face on the result screen also looks like a rendering bug.",
+      "how": "Move the card text stack into the upper ~40% of the viewport (above y~480 in portrait): round label, title, opponent name, then the taunt line. Put the FIGHT/REMATCH button in the lower mat band, below the fighters' feet around y~850\u2013900. Remove backdrop-filter from the score pill, or make it a solid gradient chip, and position it clear of the sprite bounds. Replace the 'vs HasanAbi' box with text-shadow only. On the result card, briefly push the camera in on the winner's face before the text lands."
+    },
+    {
+      "id": "fix-moves-sheet-readability",
+      "title": "Restructure the MOVES sheet so combos scan at a glance",
+      "what": "In the Techniques sheet, each row spends ~240px on the notation '\u2022 stance + \u25ba technique' in pale blue lowercase. That squeezes the move names so 'Crouching / Punch', 'Stepping Lunge / Punch', 'Somersault / Kick' and 'Crouching / Reverse Punch' wrap onto two lines. The 'mid \u00b7 Half point' metadata is dim grey at ~13px. The list is cut off at 'Back Kick' against the dimmed joystick area, with no fade, scrollbar or 'more below' cue, so right-stick up and down moves may never be discovered.",
+      "why": "This is the only place the game teaches its core grammar, and it reads like a spreadsheet. Repeating 'stance + technique' in every row adds noise without information. Players can't compare which moves are worth a full point versus a half point, which is the strategic choice that matters.",
+      "how": "Group rows by technique direction (already done with headers), then drop the repeated words. Show a compact two-glyph badge per row, e.g. a left mini-ring with \u25b2 lit and a right mini-ring with \u25ba lit, at ~44px total width. The move name then gets a single line. Render height as a colored tag (high / mid / low) and points as a bold gold '1' or '\u00bd' right-aligned. Extend the sheet to the bottom safe area, or add a 24px bottom fade gradient plus a '\u25bc more' hint. Consider tabs per technique direction so each list fits on one screen."
+    },
+    {
+      "id": "clean-hud-chrome",
+      "title": "Remove debug text and the dead header strip above the viewport",
+      "what": "'WEBGPU' in grey monospace sits at top-left (y~137) on every screen, including results and the landscape layout: a debug renderer label shipping to players. The band between the scoreboard and the viewport (y~62\u2013152) holds only MOVES and the gear, pushed right, leaving ~300px of empty dark bar. On the intro card, a 'ROUND 1/5 \u00b7 QUALIFIER' pill fills that gap and duplicates the 'ROUND 1 OF 5 / QUALIFIER' headline just below it.",
+      "why": "Debug strings read as unfinished on a shipping product. The dead 90px strip steals vertical space from the fighters on a screen where height is the scarcest resource. The duplicated round info adds clutter on the one screen meant to feel like a title card.",
+      "how": "Show the renderer tag only when 'Show performance HUD' is enabled in Settings. Collapse the header strip by moving MOVES and the gear into the scoreboard row as two 36px icon buttons, or overlaying them on the viewport's top-right corner with a subtle scrim. Give the reclaimed ~90px to the 3D viewport. Keep the persistent round pill, but hide it while the intro card is visible."
+    }
+  ],
+  "raw": null
+}
