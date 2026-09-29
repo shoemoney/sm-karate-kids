@@ -1,11 +1,11 @@
 {
   "model": "openai/gpt-5.4",
-  "elapsed_s": 25.1,
+  "elapsed_s": 22.9,
   "usage": {
     "prompt_tokens": 15325,
-    "completion_tokens": 1106,
-    "total_tokens": 16431,
-    "cost": 0.0549025,
+    "completion_tokens": 1046,
+    "total_tokens": 16371,
+    "cost": 0.0540025,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
@@ -14,9 +14,9 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.0549025,
+      "upstream_inference_cost": 0.0540025,
       "upstream_inference_prompt_cost": 0.0383125,
-      "upstream_inference_completions_cost": 0.01659
+      "upstream_inference_completions_cost": 0.01569
     },
     "completion_tokens_details": {
       "reasoning_tokens": 0,
@@ -45,39 +45,39 @@
   "dropped_for_cap": [],
   "items": [
     {
-      "id": "fighters-too-small-on-phone",
-      "title": "Scale the fighters up in portrait combat and intro screens",
-      "what": "On the portrait fight screens and qualifier intro screens, both fighters occupy a surprisingly small band in the middle of the display. There is a large empty area of dark dojo air above their heads and a large controls area below them; on screens like the plain combat view and the qualifier card, the characters look reduced to roughly the middle third of the phone.",
-      "why": "On a phone, the fighters are the product. If they read small, facial direction, hit spacing, and move silhouettes are harder to parse at a glance, which weakens both readability and excitement in the first few seconds.",
-      "how": "Push the portrait gameplay camera in 10\u201320% and lower the framing so the fighters fill more vertical space between the scoreboard and the move/joystick panel. Keep both full bodies visible, but target a composition where heads sit closer to the upper-middle and feet sit just above the move legend panel."
+      "id": "sticks-too-low-and-detached",
+      "title": "Raise the twin-stick controls closer to the action",
+      "what": "On the main fight screens, both joysticks sit very low with a large dead band of dark floor between the arena and the controls. In the portrait gameplay shots, the fighters end around mid-screen while the sticks start near the bottom quarter, leaving roughly a full control-panel height of empty space between them.",
+      "why": "On a phone, this visually disconnects input from outcome and makes the playfield feel split in two. It also pushes the thumbs farther from the center of the display where players are watching the fighters, increasing eye travel and making the game feel less immediate in the first seconds of play.",
+      "how": "Move the entire control deck upward by about 60\u2013100 px on the 390x844 baseline, or extend the move legend panel downward so it visually bridges into the sticks. Keep bottom-safe-area padding, but reduce the unused gap so the controls feel anchored to the bout."
     },
     {
-      "id": "top-hud-crowded-and-uneven",
-      "title": "Rebalance the top HUD so names, scores, and timer stop competing",
-      "what": "In the top scoreboard bar, the center timer medallion is visually dominant and the name fields are cramped. Long names like HASANABI are letterspaced into the edges, while the giant white and red score digits pull attention away from the actual action. On the Ippon screen, the right score becomes a large pink \u201c1\u201d that overpowers the name even more.",
-      "why": "This is the most persistent UI on screen. If the header feels cramped and visually noisy, players spend effort decoding the bar instead of reading the fight. It also makes streamer-name matchups look less premium because the layout breaks first on longer names.",
-      "how": "Reduce score numeral size slightly, give both name areas more horizontal padding, and tighten letterspacing on names. Shrink the timer chip a bit so the three elements feel balanced. Add truncation or scale-down rules for long names before they collide with the score rhythm."
+      "id": "pre-fight-overlay-obscures-fighters",
+      "title": "Stop the pre-fight card and button from covering the matchup",
+      "what": "On the 'QUALIFIER vs HasanAbi' screen, the big gold FIGHT button and countdown sit directly over the fighters\u2019 legs and the center of the tatami, while the black tagline pill cuts across chest level. The result is that three stacked overlays occupy most of the center of the screen at once.",
+      "why": "This is the player's first clear look at the match, and the UI blocks the exact characters and stance silhouettes they came to see. It weakens character presentation and makes the screen feel cramped before the fight even begins.",
+      "how": "Compress the intro layout: move the tagline pill higher under the opponent name, shrink its height, and drop the FIGHT button lower so it sits just above the control area rather than over the fighters. If needed, scale the fighters up slightly and reserve the middle third of the screen for the matchup only."
     },
     {
-      "id": "controls-dominating-lower-half",
-      "title": "Compress the lower control stack to give gameplay more screen real estate",
-      "what": "In portrait gameplay, the two virtual sticks plus the wide move-legend slab consume nearly the entire lower half of the screen. The sticks are visually huge, and the legend panel sits directly above them, creating three stacked bands that push the match area upward.",
-      "why": "For a touch-first game, controls need to be usable, but right now they visually dominate the phone. That makes the actual bout feel secondary and reduces perceived production value because too much of the screen is UI chrome instead of combat.",
-      "how": "Trim the joystick outer ring diameter, reduce the vertical gap between stick and label, and either collapse the move legend into a smaller two-line strip or show it only on first round / when Moves is expanded. Aim to recover at least 80\u2013120 px of vertical space for the arena and fighters."
+      "id": "top-bar-text-too-small",
+      "title": "Increase readability of names and round info in the top HUD",
+      "what": "In the gameplay and intro screens, 'ASMONGOLD', 'HASANABI', and the 'ROUND 1/5 \u2022 QUALIFIER' chip are rendered very small and thin against a dark brown bar. The names especially are tiny at the far left and right edges, with wide letter spacing that reduces legibility.",
+      "why": "These are key orientation labels players need immediately, especially on a phone held at arm\u2019s length. If names and round state are hard to parse, the HUD feels decorative instead of informative.",
+      "how": "Increase the player name size and weight by one step, tighten tracking, and give the round chip slightly larger text or a stronger contrast treatment. On the 390 px baseline, prioritize fewer characters per line if necessary rather than keeping the current small caps size."
     },
     {
-      "id": "result-overlays-obscure-key-action",
-      "title": "Move win and scoring banners away from the impact area",
-      "what": "On the Ippon screen, the large \u201cIPPON / HASANABI / SPINNING BACK KICK\u201d stack sits directly over the fighters\u2019 upper bodies, while hit spark effects are also happening around the white fighter\u2019s face. On the win screen, \u201cHASANABI WINS\u201d and the score block dominate the same central band where the finishing pose lives.",
-      "why": "The decisive hit is the emotional peak of the match. Covering the torsos and heads with big centered text weakens the clarity and spectacle of the moment, especially on a small phone where every covered pixel matters.",
-      "how": "Anchor celebration and result text higher, nearer the scoreboard, or split it into top and mid-top lines that avoid the fighters\u2019 head-and-chest zone. Keep the center lane clear during impact frames so the kick/punch silhouette and hit effects are fully readable."
+      "id": "sprite-cutout-halation",
+      "title": "Reduce the visible glow/fringe around fighter cutouts",
+      "what": "Around both fighters, especially the white gi against the darker dojo, there is a noticeable soft halo/edge fringe. It is most obvious on outer sleeves, pant legs, and hair outlines in the gameplay screens, where the photoreal sprites look slightly pasted over the 3D scene.",
+      "why": "This breaks the illusion of the fighters belonging in the dojo and makes the core combat presentation feel cheaper. Because the whole game revolves around looking at these two characters, compositing artifacts have outsized impact.",
+      "how": "Tighten the sprite alpha edges and reduce any bloom contribution from the character layer. Add a subtle contact shadow or edge-darkening pass around the feet and lower body so the fighters sit into the floor instead of glowing off it."
     },
     {
-      "id": "low-contrast-small-body-text",
-      "title": "Improve readability of small instructional text and secondary labels",
-      "what": "Several small text elements are hard to read against the warm brown UI: the loading screen line \u201cDownloading the game,\u201d the round subtitle chip, the move legend text above the sticks, and the settings helper copy \u201cSwaps which side the stance and technique sticks sit on.\u201d They sit in low-contrast beige/gray on dark brown and look thin at phone size.",
-      "why": "These are the lines that teach the game. If they are faint, players miss critical onboarding and control information, which is especially damaging in a control scheme that already asks for learning two sticks and directional combinations.",
-      "how": "Increase contrast on secondary text by shifting it lighter and/or bolder, especially for 12\u201316 px copy. On the move legend, enlarge the labels slightly and reduce transparency of the panel behind them. In settings and loading, use a brighter text token for active status and helper lines."
+      "id": "result-screen-empty-middle",
+      "title": "Use the result screen\u2019s empty middle space more effectively",
+      "what": "On the 'HASANABI WINS' screen, the title is very high, the REMATCH button is very low, and there is a large empty vertical span in the middle with the fighters appearing small and low-contrast. The score line and the 'BOUTS WON 0/1 \u2022 BEST \u2014' pill also feel sparse for the amount of space available.",
+      "why": "A result screen should deliver closure and excitement, but this one feels under-filled and distant. It wastes a chance to celebrate the finish, explain progress, and drive the rematch tap.",
+      "how": "Scale the fighters and win-state vignette up, move the score/progress block closer to them, and place the rematch CTA directly beneath the action instead of near the bottom edge. Use the middle third for a tighter victory composition rather than leaving it as mostly empty background."
     }
   ],
   "raw": null

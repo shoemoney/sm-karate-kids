@@ -1,11 +1,11 @@
 {
   "model": "x-ai/grok-4.3",
-  "elapsed_s": 15.7,
+  "elapsed_s": 28.8,
   "usage": {
     "prompt_tokens": 13530,
-    "completion_tokens": 1909,
-    "total_tokens": 15439,
-    "cost": 0.0214834,
+    "completion_tokens": 2465,
+    "total_tokens": 15995,
+    "cost": 0.0228734,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 192,
@@ -14,12 +14,12 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.0214834,
+      "upstream_inference_cost": 0.0228734,
       "upstream_inference_prompt_cost": 0.0167109,
-      "upstream_inference_completions_cost": 0.0047725
+      "upstream_inference_completions_cost": 0.0061625
     },
     "completion_tokens_details": {
-      "reasoning_tokens": 1223,
+      "reasoning_tokens": 1900,
       "image_tokens": 0,
       "audio_tokens": 0
     }
@@ -46,38 +46,38 @@
   "items": [
     {
       "id": "loading-progress-bar",
-      "title": "Loading progress bar too thin and low-contrast",
-      "what": "In the initial boot screen, the horizontal rule under 'Downloading the game' is a single-pixel dark brown line on near-black, with no fill or glow.",
-      "why": "Players cannot gauge download progress on a phone screen at arm's length, increasing perceived wait time and frustration before the first interaction.",
-      "how": "Replace the rule with a 4 px high rounded rect using the existing warm gold color at 60 % opacity, and add a subtle inner glow matching the logo."
-    },
-    {
-      "id": "controls-visible-during-countdown",
-      "title": "Sticks shown during pre-fight countdown",
-      "what": "Images 2, 10 and 13 show both full-opacity stance and technique sticks with their labels at the bottom while the large gold 'FIGHT IN X' button is counting down.",
-      "why": "New players instinctively touch the sticks before the round starts, causing accidental inputs or confusion about when control begins.",
-      "how": "Fade the entire bottom control cluster to 25 % opacity and disable raycasting while the countdown button is visible; restore on 'FIGHT'."
+      "title": "Loading progress bar invisible",
+      "what": "On the ShoeMoney boot screen the progress indicator is a 1-pixel brown line with zero visible fill or glow.",
+      "why": "Players launching the game for the first time see no feedback that anything is downloading.",
+      "how": "Increase bar height to 4 px, add a warm gold fill that matches the title text, and show a small percentage label."
     },
     {
       "id": "top-hud-text-size",
-      "title": "Player names and scores too small in HUD",
-      "what": "The top bar shows 'ASMONGOLD 0' and 'HASANABI 0' in ~11 px light text with the 30-timer in a gold pill; names are hard to read on 390 px width.",
-      "why": "On a phone held in portrait, players cannot quickly confirm which side they are on or track the score without leaning in, breaking immersion during fast exchanges.",
-      "how": "Increase name/score font to 15 px, add 1 px warm outline, and give the timer pill a darker brown fill so the gold numerals pop."
+      "title": "Player names unreadable at top",
+      "what": "The top bar shows \u201cASMONGOlD\u201d and \u201cHASANABI\u201d in ~11 px font next to the large gold timer circle.",
+      "why": "On a 390 px phone the names are too small to read instantly, breaking score awareness in the first second of a round.",
+      "how": "Bump name size to 14 px, add a subtle white outline, and shorten the timer circle diameter so the row stays balanced."
     },
     {
-      "id": "technique-popup-size",
-      "title": "Move callout text too small and low-contrast",
-      "what": "The centered black pill showing 'FRONT KICK' or 'LUNGE PUNCH' uses small light text on a semi-transparent dark bar that sits above the bright dojo floor.",
-      "why": "During rapid exchanges the label is easy to miss, so players never learn which stick combination produced the move they just saw.",
-      "how": "Make the pill wider, use 18 px bold gold text with a thin dark outline, and keep it on screen for 800 ms with a quick fade."
+      "id": "joystick-touch-targets",
+      "title": "Joystick hit areas too small",
+      "what": "The stance and technique circles sit inside 120 px rings with 8 px arrow icons; the actual touch zone matches the ring exactly.",
+      "why": "Thumb occlusion on portrait phone makes precise 8-way inputs unreliable, especially during rapid stance changes.",
+      "how": "Expand each joystick\u2019s touch rect to 160 px, keep the visible ring at 120 px, and add a faint outer glow on press."
     },
     {
-      "id": "settings-toggle-contrast",
-      "title": "Settings toggles have poor off-state visibility",
-      "what": "In the settings modal the 'Reduced motion', 'High contrast' etc. switches show a tiny white circle on dark when off, with almost no track contrast.",
-      "why": "Players on a dim phone cannot tell at a glance which accessibility options are active, especially the left-handed layout toggle they just changed.",
-      "how": "Give the track a warm brown fill when off and a brighter gold fill when on; enlarge the thumb to 22 px with a 2 px ring."
+      "id": "move-name-overlay",
+      "title": "Move callout covers fighters",
+      "what": "When a technique executes, the black pill (\u201cREVERSE PUNCH\u201d, \u201cLUNGE PUNCH\u201d, \u201cIPPON\u201d) sits dead-center at eye level over the 3D models.",
+      "why": "It hides the exact moment of impact the player needs to see to learn timing.",
+      "how": "Move the pill 80 px higher or make it 30 % transparent with a 200 ms fade so the strike animation remains visible."
+    },
+    {
+      "id": "settings-toggle-focus",
+      "title": "Settings row has stray yellow border",
+      "what": "In the settings panel the \u201cShow performance HUD\u201d row carries a persistent gold outline while every other toggle does not.",
+      "why": "It looks like a stuck focus state and draws the eye away from the actual toggle switches on a touch screen.",
+      "how": "Remove the outline unless the row is actively highlighted by keyboard or controller navigation."
     }
   ],
   "raw": null

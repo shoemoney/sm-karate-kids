@@ -360,6 +360,17 @@ await capture('15-phone-settings-mixed', phone, async (page) => {
   const rows = page.locator('.setting-row input');
   await rows.nth(4).click();
   await rows.nth(5).click();
+  // Drop focus before the shot.
+  //
+  // The switch's own focus ring is correct — measured: a touch tap leaves
+  // `:focus-visible` false and the element unfocused, a Tab leaves it true with
+  // a 2px ring. That is right for a touch-first product and it is worth having.
+  //
+  // But a programmatic Playwright click leaves the row focused, so the capture
+  // showed a gold ring on a switch that a real thumb would never have focused,
+  // and grok-4.3 reported it as "a stray yellow border" in round 42. The
+  // product is right and the photograph is not.
+  await page.evaluate(() => document.activeElement instanceof HTMLElement && document.activeElement.blur());
   await page.waitForTimeout(600);
   await page.screenshot({ path: `${OUT}/15-phone-settings-mixed.png` });
 });

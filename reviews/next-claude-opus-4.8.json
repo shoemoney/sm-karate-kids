@@ -1,0 +1,84 @@
+{
+  "model": "anthropic/claude-opus-4.8",
+  "elapsed_s": 57.1,
+  "usage": {
+    "prompt_tokens": 17213,
+    "completion_tokens": 1991,
+    "total_tokens": 19204,
+    "cost": 0.13584,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.13584,
+      "upstream_inference_prompt_cost": 0.086065,
+      "upstream_inference_completions_cost": 0.049775
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighters-float-above-mat",
+      "title": "Both fighters cast no contact shadow and appear to hover above the tatami",
+      "what": "In every gameplay screenshot (e.g. the main idle stance frame and the FIGHT intro) the white and red fighters' bare feet meet the floor with no grounding contact shadow \u2014 there is only a soft, wide, symmetrical blob of darkness under each pair of feet that doesn't track foot placement. During the front kick and spinning back kick frames the raised foot has the same faint blob as the planted foot, so nothing reads as weight-bearing. The fighters look like flat cutouts pasted onto the 3D mat.",
+      "why": "This is the single most-noticed break in the photoreal illusion and it's visible in the first 5 seconds. It undercuts the entire premium 3D-dojo pitch and makes the sprite fighters feel like a cheap paste-up rather than characters in a space.",
+      "how": "Render a per-fighter blob/contact shadow projected onto the tatami plane, anchored at each foot's ground contact point and scaled by vertical height (tighter/darker when planted, softer/offset when a foot lifts). Even two cheap oval decals per fighter driven by foot-bone Y position, multiplied against the mat, will lock them to the floor."
+    },
+    {
+      "id": "empty-upper-two-thirds",
+      "title": "Fighters are pinned to a narrow mid-band with a large dead zone of empty mat/wall above",
+      "what": "On the idle gameplay screens the two fighters occupy roughly the vertical band from 40% to 65% of the play area, leaving the entire top third (shoji wall, banners, volumetric haze) empty and the mat below them empty until the control deck. The action lives in a thin horizontal slice; the composition's center of mass is well below the optical center of the frame.",
+      "why": "The most expensive, most beautiful part of the render \u2014 the fighters \u2014 reads small and lost. On a 390px-wide phone the characters feel tiny and the fight feels low-stakes, weakening the core spectacle the game is selling.",
+      "how": "Tighten the fight camera: raise the framing so the fighters fill ~55-70% of the play-area height and their eyeline sits near the upper third. Push the camera in slightly and lower it toward a hero low-angle so the fighters read big against the shoji, reducing both the top haze band and the mat gap below."
+    },
+    {
+      "id": "ippon-hit-clarity",
+      "title": "The scoring IPPON hit reads as pale spark scribbles instead of a clean impact",
+      "what": "On the IPPON / Spinning Back Kick screen the point-scoring impact on Asmongold's head is shown as a scatter of thin white-and-yellow tick marks floating around his hair, with no directional impact flash, no freeze emphasis on the connecting foot, and the kicking leg passing through/overlapping the head ambiguously. It looks like confetti, not a strike.",
+      "why": "This is the payoff moment of the entire game loop \u2014 the point that decides the bout. If the player can't instantly read WHO hit WHOM and WHERE, the win/loss feels arbitrary and unsatisfying, which is fatal for a point-karate game.",
+      "how": "Replace the scattered ticks with one bold directional impact burst originating at the contact point, a 1-2 frame white flash on the struck fighter, and a brief hit-stop/scale-punch on both sprites. Tint the burst to the scorer's color (red for Hasanabi) so the eye instantly attributes the point."
+    },
+    {
+      "id": "idle-static-fighters",
+      "title": "Fighters appear frozen in identical stance poses across separate frames \u2014 no idle life",
+      "what": "The countdown FIGHT screen, the two 'STARTING IN' frames, and the neutral idle gameplay frames show the fighters in what looks like the exact same rigid stance with no breathing sway, weight shift, or guard bob. Across the multiple idle captures the pose is indistinguishable, suggesting a single static sprite is held during neutral.",
+      "why": "Photoreal characters that don't move during the long pre-fight countdown and neutral beats look like paper standees, which is exactly the impression the 3D dojo is trying to avoid. Dead idle also makes the ~2-8 second countdowns feel longer and lower-energy.",
+      "how": "Add a looping neutral idle: a subtle 2-3 frame breathing/guard bob and slight weight shift per fighter, plus an occasional micro-adjust (reset step, glove touch). Even a small vertical bob and hand jitter at ~4-6px amplitude will make them read as alive during countdown and neutral."
+    },
+    {
+      "id": "landscape-controls-corner-exile",
+      "title": "In landscape the two sticks are exiled to the far bottom corners, far from thumb rest",
+      "what": "The landscape gameplay screenshot places the STANCE stick in the extreme bottom-left corner and TECHNIQUE in the extreme bottom-right corner, each hugging the screen edges, with a very wide empty black bar of dead space between them across the bottom. On a wide phone held in two hands the thumbs naturally rest inboard of those corners, not jammed into the outermost pixels.",
+      "why": "Twin-stick play demands the sticks sit under where thumbs actually rest; corner-pinned sticks force an awkward reach and reduce input accuracy on the game's only control surface, directly hurting playability in the landscape mode the game offers.",
+      "how": "Move the landscape sticks inboard and up slightly so their centers sit roughly a thumb's-width from the bottom-outer safe area rather than in the literal corners, and let the 'Large controls' / thumb-zone respect ergonomic reach. Keep the center gap for the scene but cap how far outboard the sticks travel."
+    }
+  ],
+  "raw": null
+}
