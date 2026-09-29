@@ -1,0 +1,84 @@
+{
+  "model": "z-ai/glm-4.5v",
+  "elapsed_s": 91.1,
+  "usage": {
+    "prompt_tokens": 14897,
+    "completion_tokens": 4514,
+    "total_tokens": 19411,
+    "cost": 0.0170634,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0170634,
+      "upstream_inference_prompt_cost": 0.0089382,
+      "upstream_inference_completions_cost": 0.0081252
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 3623,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fight-button-occlusion",
+      "title": "Pre-fight CTA obscures character stances",
+      "what": "In the 'Qualifier' ready screen (Screenshot 2), the large yellow 'FIGHT' call-to-action button is centered in the viewport, completely covering the lower legs and feet of both fighters.",
+      "why": "In a point-karate game, reading the opponent's footing and stance width is crucial for strategy. Obscuring the models during the countdown prevents players from visually 'sizing up' the opponent and creates immediate UI clutter.",
+      "how": "Reduce the button's vertical footprint by 40% or reposition it to overlay the bottom control area (which is inactive during the countdown) so the full character silhouettes are visible."
+    },
+    {
+      "id": "sprite-environment-disconnect",
+      "title": "Fighter sprites lack environmental integration",
+      "what": "The photorealistic fighter sprites (Screenshots 3, 4, 12) appear to have neutral studio lighting, creating a harsh contrast with the warm, volumetric tungsten lighting of the 3D dojo. The white gi looks 'blue-white' and floats visually above the mat.",
+      "why": "This 'sticker' effect breaks immersion and lowers the perceived production value. It reminds the player they are looking at layered images rather than a cohesive 3D world.",
+      "how": "Apply a specific color-grade lookup table (LUT) or a tint overlay to the sprite layer to shift its blacks towards amber/orange to match the background atmosphere. Add a soft, dark contact shadow directly under the fighters' feet."
+    },
+    {
+      "id": "move-hint-vertical-bloat",
+      "title": "Control legend wastes critical vertical space",
+      "what": "A persistent text bar ('STANCE: step, jump...', 'TECHNIQUE: back, forward...') sits between the gameplay arena and the virtual joysticks (Screenshots 3, 5).",
+      "why": "On a narrow portrait mobile screen (390px), this static text forces the camera to zoom out or shift upward to fit the UI. This makes the fighters appear smaller than necessary and hides the detailed tatami floor.",
+      "how": "Remove the persistent text bar. Instead, render the input labels ('step', 'jump') as small micro-text inside the outer ring of the virtual joysticks themselves, or show them only as a one-time tutorial tooltip."
+    },
+    {
+      "id": "subtle-hit-feedback",
+      "title": "Scoring events lack visual punch",
+      "what": "When an 'IPPON' is scored (Screenshot 12), the feedback is limited to a text banner at the top and a small, faint particle burst near the head. The screen remains stable.",
+      "why": "Mobile screens are small and often viewed in distracting environments. Without 'game juice'\u2014like screen shake, flash, or hit-stop\u2014the player may miss the confirmation of a successful hit, making the combat feel 'mushy' or unresponsive.",
+      "how": "Add a 120ms 'hit-freeze' (time dilation) on score. Trigger a brief white flash overlay and a 5-pixel camera shake. Scale up the 'IPPON' text with a bouncy elastic easing."
+    },
+    {
+      "id": "score-typography-polish",
+      "title": "End-game score uses awkward fractions",
+      "what": "The victory screen (Screenshot 8) displays the score as '0 \u2014 2\u00bd'. The vulgar fraction '\u00bd' is typographically misaligned with the tall numerals, and the em-dash spacing creates a loose visual gap.",
+      "why": "The victory screen is the player's reward loop. Clunky, misaligned typography here feels unfinished and cheapens the 'Cinematic Dojo' aesthetic established by the rest of the UI.",
+      "how": "Replace the fraction with decimal notation ('0 \u2013 2.5') or round to whole numbers if the game logic allows. Ensure the score font matches the weight and monospaced kerning of the main '30' timer seen in the top HUD."
+    }
+  ],
+  "raw": null
+}

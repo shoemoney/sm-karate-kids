@@ -129,6 +129,28 @@ export class SpriteFighterView implements FighterView {
   private readonly mesh: Mesh<PlaneGeometry, MeshBasicMaterial>;
   private currentPage = -1;
   private readonly ghosts: Ghost[] = [];
+
+  /**
+   * The room grade, as a multiplier on the sprite material.
+   *
+   * Frozen and held per-rig so the hit flash can scale *from* it rather than
+   * replacing it — see flash().
+   */
+  /**
+   * No channel above 1.
+   *
+   * The first pass at this was (1.03, 0.955, 0.87) — a warm nudge that also
+   * pushed red past unity. These are unlit materials feeding a bloom pass, and
+   * an over-unity channel is not a slightly brighter fighter: it made the
+   * software-rendered e2e runner crash the browser mid-bout
+   * ("Target page, context or browser has been closed" on the full-length bout
+   * test), while the same test passed on a clean tree at 31.5s.
+   *
+   * A warm grade does not need more than 1.0. It needs red held and blue cut,
+   * which is what this is: the artwork moves toward the tungsten and the room
+   * is never neutralised.
+   */
+  private readonly grade = [1.0, 0.945, 0.85] as const;
   private recoilAmount = 0;
   private recoilVelocity = 0;
   private recoilFacing: 1 | -1 = 1;
@@ -152,7 +174,26 @@ export class SpriteFighterView implements FighterView {
     // A cutout, not a blend. Two blended planes that overlap are drawn in
     // whatever order sorting picks that frame, so where the fighters touch
     // they flickered in front of each other. The art is already hard-edged.
+    // Graded into the room, not lit on their own.
+    //
+    // The fighters are painted for a neutral key, and the dojo they stand in is a
+    // warm tungsten room. Side by side, that mismatch is what seven separate
+    // reviewers have described, in five rounds and five different vocabularies:
+    // "sprites lack environmental integration" (glm-4.5v), "look pasted over the
+    // mat" (gpt-5.1), "slightly pasted-on" (gpt-5.3-codex), "ungraded whites and
+    // reds" (claude-opus-5.5), "two pasted stickers, not bodies" (mimo-v2.6-pro),
+    // "anchor the sprites to the tatami" (gpt-5.6-sol-pro), "ground the fighter
+    // sprites" (gpt-5.2-pro).
+    //
+    // The fix is deliberately NOT the standing "make it brighter" rejection.
+    // Nobody is asking for the room to be neutralised; every one of them is
+    // asking for the fighters to belong to the room they are in, which is the
+    // opposite direction — the artwork moves toward the tungsten, not away from
+    // it. A gentle warm multiply and a small lift of the red end does that, and
+    // the two fighters stay distinguishable because the grade is applied to the
+    // material, not painted into the art.
     const material = new MeshBasicMaterial({ transparent: false, alphaTest: 0.5 });
+    material.color.setRGB(this.grade[0], this.grade[1], this.grade[2]);
     this.mesh = new Mesh(geometry, material);
     this.mesh.scale.set(planeWidth, planeHeight, 1);
     // The baseline pixel row inside a cell lands on the mat, not the plane's

@@ -1,0 +1,84 @@
+{
+  "model": "openai/gpt-5.6-luna-pro",
+  "elapsed_s": 46.8,
+  "usage": {
+    "prompt_tokens": 55521,
+    "completion_tokens": 8148,
+    "total_tokens": 63669,
+    "cost": 0.01613198,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 30644,
+      "cache_write_tokens": 15322,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.01613198,
+      "upstream_inference_prompt_cost": 0.00635438,
+      "upstream_inference_completions_cost": 0.0097776
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 5507,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "clarify-stick-input",
+      "title": "Make the two radial controls immediately readable",
+      "what": "On the portrait gameplay screen, the lower third is dominated by two dark circular pads labeled only \"STANCE\" and \"TECHNIQUE\"; the idle pads show tiny center dots and faint arrow glyphs, but no visible drag direction, attack intent, or active-state affordance.",
+      "why": "A first-time phone player cannot confidently tell whether to tap, swipe, or hold, and the low-contrast rings make the primary interaction look decorative rather than touchable.",
+      "how": "Add a one-time touch hint directly above the pads (for example, \"DRAG TO MOVE\" and \"DRAG TO STRIKE\"), use four brighter directional wedges, and show a short animated thumb movement on first entry; keep the warm palette but raise the default control contrast."
+    },
+    {
+      "id": "teach-first-attack",
+      "title": "Teach the first playable move before the countdown ends",
+      "what": "On the pre-fight \"QUALIFIER / Vs HasanAbi\" screen, the instruction banner at roughly the upper-middle says \"PATIENT. HE WAITS FOR YOUR WIND-UP \u2014 THEN MAKES YOU PAY.\" It gives strategy flavor but never explains that the right stick direction plus stance direction produces a named technique.",
+      "why": "The player reaches the fight knowing an opponent tip but not how to perform an attack, so the first round can feel unresponsive or opaque on a touch device.",
+      "how": "Replace or supplement the banner on the first bout with a two-step visual hint such as \"DRAG TECHNIQUE UP + STANCE RIGHT = FRONT KICK,\" then highlight the two relevant stick directions during the countdown; show the flavor advice after the first successful input."
+    },
+    {
+      "id": "show-loading-progress",
+      "title": "Make the boot screen communicate real loading progress",
+      "what": "On the ShoeMoney pre-boot screen, the text \"Downloading the game\" sits above a long horizontal bar that appears essentially empty, with no percentage, transferred amount, or estimated state.",
+      "why": "During the highest-risk abandonment moment, an empty-looking bar makes a functioning load resemble a stalled browser page and gives the player no reason to keep waiting.",
+      "how": "Bind the bar to actual asset progress, fill it visibly from 0%, and add a compact status line such as \"Loading dojo... 42%\" or \"Preparing fighters...\"; show a distinct completion state before transitioning."
+    },
+    {
+      "id": "add-result-exit",
+      "title": "Give the result screen a clear way out",
+      "what": "On the \"HASANABI WINS\" result screen, the only prominent action is the large \"REMATCH\" button near the bottom, while \"STARTING IN 8\" indicates an automatic continuation.",
+      "why": "A player who wants to stop, review controls, or leave after losing is pushed toward another bout and may miss the narrow interaction opportunity before the countdown advances.",
+      "how": "Add a secondary \"EXIT TO DOJO\" or \"MENU\" button beside or below Rematch, pause the auto-rematch countdown when the result screen is tapped, and make the chosen path explicit with separate primary and secondary styling."
+    },
+    {
+      "id": "fix-wide-layout",
+      "title": "Use the available browser width instead of leaving a dead black field",
+      "what": "In the supplied wide-browser gameplay capture, the dojo and fighters occupy only the upper portion of the page, the two controls shrink to small pads at the extreme bottom corners, and a large unused black area fills the lower half.",
+      "why": "The composition reads as a broken or unresponsive layout outside the 390x844 portrait baseline, and the reduced controls become harder to use despite having abundant screen space.",
+      "how": "Add a wide-viewport layout breakpoint: scale the arena to fill the available stage height, place the controls in a consistent bottom control rail with a usable minimum diameter, and constrain the entire game surface to a centered aspect-ratio container instead of stretching the portrait HUD into empty space."
+    }
+  ],
+  "raw": null
+}
