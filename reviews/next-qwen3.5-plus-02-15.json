@@ -1,0 +1,84 @@
+{
+  "model": "qwen/qwen3.5-plus-02-15",
+  "elapsed_s": 173.8,
+  "usage": {
+    "prompt_tokens": 12282,
+    "completion_tokens": 10141,
+    "total_tokens": 22423,
+    "cost": 0.01901328,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.01901328,
+      "upstream_inference_prompt_cost": 0.00319332,
+      "upstream_inference_completions_cost": 0.01581996
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 9251,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-screen-logo-clash",
+      "title": "Cold blue logo clashes with warm art direction",
+      "what": "In the loading screen (Screenshot 1), the ShoeMoney logo is a bright, saturated cyan/blue, which violently contrasts with the 'tungsten and tatami' warm/brown/gold palette established in the game's UI and dojo environment.",
+      "why": "It breaks immersion immediately before the game starts, making the product feel like a generic template with a logo slapped on rather than a cohesive, cinematic experience.",
+      "how": "Apply a color filter to the logo to match the game's sepia/gold tone (e.g., #D4AF37), or use a monochrome version that fits the dark, warm background."
+    },
+    {
+      "id": "stance-legend-ambiguity",
+      "title": "Stance legend uses generic text for directional inputs",
+      "what": "In the gameplay HUD (Screenshot 3), the Stance legend lists the word 'step' for both the Left and Right arrow inputs, failing to distinguish between 'Step Left' and 'Step Right'.",
+      "why": "New players need to know exactly what each direction does. Generic text forces them to guess or experiment during a match, leading to early frustration and accidental movement.",
+      "how": "Update the legend text to explicitly say 'Step Left' and 'Step Right', or remove the word 'step' entirely and rely on the arrows if the context is clear."
+    },
+    {
+      "id": "stick-input-feedback-mismatch",
+      "title": "Stick visualizer shows raw touch position, not snapped input",
+      "what": "In the 'Lunge Punch' screenshot (Screenshot 5), the right stick's yellow indicator dot is positioned in the upper-right quadrant (suggesting a diagonal Up-Forward input), yet the move label says 'Lunge Punch' (which the move list defines as purely Forward).",
+      "why": "This disconnect creates confusion about the game's input buffer. Players won't know if they messed up the input or if the game registered it wrong, making controls feel 'slippery'.",
+      "how": "Snap the visual indicator (the dot or the highlight arc) to the nearest valid input sector (e.g., if 'Forward' is registered, visually snap the dot to the Right sector) to confirm the recognized move."
+    },
+    {
+      "id": "hit-impact-particle-style",
+      "title": "Hit sparks look like 2D UI overlays rather than 3D particles",
+      "what": "In the 'IPPON' screenshot (Screenshot 12), the impact sparks are flat, uniform yellow lines that look like vector art pasted on top of the screen, rather than particles existing in the 3D dojo space.",
+      "why": "Fighting games rely on 'juice' to sell impact. Flat, 2D sparks make a full-point score feel weightless and cheap, clashing with the 'photoreal sprite' aesthetic and reducing satisfaction.",
+      "how": "Replace 2D lines with a 3D particle burst (sprites that face the camera but have depth/color variation like white-hot centers fading to orange) or add screen-shake synchronized with the hit."
+    },
+    {
+      "id": "moves-list-cognitive-load",
+      "title": "Move list is a dense wall of text with abstract icons",
+      "what": "The 'Techniques' screen (Screenshot 6) presents 20+ moves in a single scrolling list with small text and abstract iconography (circles with arrows) that requires decoding.",
+      "why": "Mobile players scan; they don't read manuals. This density discourages learning the combo system, reducing gameplay depth and making the game feel harder to pick up than it is.",
+      "how": "Group moves by 'Stick Direction' using larger, distinct cards or accordion sections, and replace text descriptions like 'Right Stick Forward' with large, clear diagrams of the stick motion."
+    }
+  ],
+  "raw": null
+}

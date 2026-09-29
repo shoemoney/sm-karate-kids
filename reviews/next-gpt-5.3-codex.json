@@ -1,0 +1,84 @@
+{
+  "model": "openai/gpt-5.3-codex",
+  "elapsed_s": 26.0,
+  "usage": {
+    "prompt_tokens": 15325,
+    "completion_tokens": 1471,
+    "total_tokens": 16796,
+    "cost": 0.04741275,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.04741275,
+      "upstream_inference_prompt_cost": 0.02681875,
+      "upstream_inference_completions_cost": 0.020594
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 637,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "low-contrast-stick-affordance",
+      "title": "Default virtual sticks are too dim to read at a glance",
+      "what": "On the main fight screens (e.g., 390x844 gameplay shots), the stance/technique pads in the bottom third use very dark rings and faint arrow glyphs that nearly blend into the brown background; the directional chevrons are only slightly lighter than the panel behind them.",
+      "why": "In a touch-first game, players must instantly understand where and how to drag. Low affordance on the primary controls causes hesitation and input errors in the first seconds of play.",
+      "how": "Increase contrast of the stick UI in default mode: brighten outer ring/arrow strokes by ~25\u201335%, add a subtle inner glow or lighter plate behind arrows, and keep an always-visible active zone boundary. Preserve the warm palette, but separate luminance from the background."
+    },
+    {
+      "id": "combat-area-too-small-in-portrait",
+      "title": "Playable action is vertically squeezed by UI stack",
+      "what": "In portrait gameplay, fighters occupy a narrow middle band while the lower half is dominated by instruction strip + two large sticks + labels. The action zone feels compressed between the top HUD and bottom controls.",
+      "why": "Small on-screen fighters make reads (range, kick height, contact) harder, which directly hurts timing gameplay and perceived responsiveness.",
+      "how": "Rebalance vertical layout: reduce joystick diameter and dead padding between instruction strip and sticks, collapse duplicate text labels, and move the camera/framing so fighters render ~10\u201315% larger during rounds."
+    },
+    {
+      "id": "micro-text-under-pressure",
+      "title": "Key combat guidance text is too small for phone readability",
+      "what": "The command hints in the strip above the sticks (e.g., \"\u25c4 step \u25b2 jump\" / \"\u25c4 reverse \u25ba forward\") are very small and tightly spaced; similarly, tags like \"IN 2\" inside the Fight button are tiny.",
+      "why": "Players can\u2019t reliably parse move mapping under time pressure, especially on 390px-wide screens, increasing early churn from confusion rather than challenge.",
+      "how": "Bump critical instructional typography one size tier (and line height), reduce tracking on small caps, and simplify each side to 2\u20133 highest-value hints. For countdown chips, enlarge text and increase contrast against the gold button."
+    },
+    {
+      "id": "fighter-grounding-and-composite-mismatch",
+      "title": "Fighters look slightly pasted over the mat",
+      "what": "Across multiple combat shots, feet contact lacks convincing local shadowing and the sprite edges (especially around gi and hair) show mild cutout/fringe against the dojo background, making characters feel detached from the floor plane.",
+      "why": "This weakens hit believability and the premium visual impression, especially in a game selling cinematic dojo atmosphere.",
+      "how": "Add stronger dynamic contact shadows under each foot/stance center, plus subtle ambient occlusion decals tied to pose. Tighten sprite alpha edges (premultiplied-alpha cleanup/defringe) and apply a tiny color-match pass so edges inherit scene warmth."
+    },
+    {
+      "id": "loading-progress-visibility",
+      "title": "Boot/loading progress indicator is too subtle",
+      "what": "On the ShoeMoney loading screen, the progress bar is a very thin, low-contrast line near the lower middle; at a glance it reads almost like a divider, not a progress state.",
+      "why": "First impression quality suffers when users can\u2019t tell if the game is actively loading or stalled, increasing bounce risk before gameplay even starts.",
+      "how": "Thicken the bar and raise contrast (track + fill), add a clear percentage or staged status text beneath \"Downloading the game,\" and animate fill updates with short eased steps to signal activity."
+    }
+  ],
+  "raw": null
+}

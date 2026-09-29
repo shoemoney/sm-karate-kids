@@ -193,7 +193,7 @@
      the only thing telling a thumb which way the stick goes. 0.52 puts them at
      a shade above 5:1 without competing with the knob, which is the thing the
      thumb is actually tracking. */
-  --detent-idle: rgb(246 239 230 / 0.52);
+  --detent-idle: rgb(246 239 230 / 0.68);
   --detent-dim: rgb(232 185 92 / 0.42);
   --detent: 0.9rem;
   --detent-arm: 0.44rem;
@@ -920,11 +920,11 @@ body.show-perf #backend {
   bottom: var(--space-2);
   z-index: 2;
   text-align: center;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--track-wide);
   text-transform: uppercase;
-  color: var(--text-faint);
+  color: var(--text-muted);
   pointer-events: none;
   min-height: 1em;
 }
@@ -1684,7 +1684,7 @@ input:focus-visible,
      with a dot in it. A fixed lifted charcoal guarantees the track is a
      surface in both states, and the knob is then a position rather than the
      only mark on the control. */
-  background: #2a2019;
+  background: #352a20;
   border: 1px solid color-mix(in oklab, var(--gold) 26%, var(--edge-strong));
   border-radius: var(--radius-pill);
   cursor: pointer;
