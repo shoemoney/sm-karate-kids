@@ -1,0 +1,84 @@
+{
+  "model": "xiaomi/mimo-v2.6-pro-ultraspeed",
+  "elapsed_s": 44.9,
+  "usage": {
+    "prompt_tokens": 12269,
+    "completion_tokens": 9045,
+    "total_tokens": 21314,
+    "cost": 0.13206165,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.13206165,
+      "upstream_inference_prompt_cost": 0.05337015,
+      "upstream_inference_completions_cost": 0.0786915
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7530,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-progress-feedback",
+      "title": "Show real download progress on the ShoeMoney boot screen",
+      "what": "On the pre-boot screen (first frame shown) the status line reads 'Downloading the game' and the strip beneath it is a single hairline metallic rule roughly 480px wide and 4px tall in the 585x1284 capture \u2014 its left and right ends are the same brightness, there is no dim track, no gold fill, no moving head, and no percentage anywhere on the screen. It reads as a decorative divider, not a progress bar.",
+      "why": "This is literally the first thing a player sees. With no fill and no number, a slow or stalled asset download is indistinguishable from a hung tab, and on a phone connection people force-quit. The branded first impression becomes 'broken game'.",
+      "how": "Split the strip into a dim track plus a gold fill that grows left-to-right, put '34%' (or '12/34 MB') to the right of the status line in the same mono face used for 'Downloading the game', and rotate the status text through real stages ('Fetching textures\u2026', 'Warming shaders\u2026') so the bar is always visibly moving."
+    },
+    {
+      "id": "portrait-crop-loses-dojo",
+      "title": "Frame the dojo for portrait so the top fifth isn't dead space",
+      "what": "In the portrait bout captures the fight area runs roughly y\u2248120\u2013860 (585x1284 frame). From y\u2248120 to y\u2248300 \u2014 the top fifth of the screen \u2014 is near-featureless dark brown gradient with a few dust motes; the shoji window band only begins at y\u2248300. The wide capture of the exact same scene shows two pillars, red hanging banners and a full roof beam across the top; none of that appears in the portrait crop, so the dojo reads as a blurred brown wall. The fighters themselves only occupy y\u2248470\u2013800.",
+      "why": "The generated 3D dojo is a headline feature and the phone player \u2014 the target audience \u2014 never sees the pillars, banners or beams, only a flat blur. The dead band above the fighters' heads steals a fifth of the play area and pushes the action down, so the frame reads cheap rather than cinematic.",
+      "how": "Add a portrait camera preset (tilt down, pull in) so the shoji band and the two side pillars reach both edges of the frame with the fighters' heads at ~40% height and feet at ~75%; if the backdrop is a generated texture, produce a portrait-aspect generation instead of center-cropping the landscape one."
+    },
+    {
+      "id": "hit-fx-and-ippon-overlay",
+      "title": "Anchor impact sparks to the contact point and clear the IPPON text",
+      "what": "In the IPPON capture, HasanAbi's foot lands on Asmongold's jaw at roughly x\u2248230, y\u2248575, but the impact sparks \u2014 a small cluster of yellow/white dashes \u2014 sit at x\u2248190\u2013250, y\u2248375\u2013460, floating in empty background about 150px above the head. The 'IPPON / HASANABI / SPINNING BACK KICK' stack is centred at y\u2248265\u2013370, the word 'HASANABI' is overlapped by the white gi fighter's hair, and the technique line is ~12px grey on brown and barely legible.",
+      "why": "The hit is the whole game. Sparks that arrive above the head read as ambient dust, so the player cannot tell what landed or where, and the award text colliding with the fighters' heads is exactly the moment the game most wants to look premium.",
+      "how": "Spawn the spark burst at the attacker's foot / defender's head hitbox so it erupts at contact, and move the award stack above the top HUD bar or below the mat with a solid dark scrim: 'IPPON' large in gold, technique name directly beneath in the same gold, fighters dropped to ~40% opacity behind it for the 1.5s it is on screen."
+    },
+    {
+      "id": "countdown-reads-as-button",
+      "title": "Stop styling the countdown like the primary button",
+      "what": "On the pre-bout screen the gold double-ring pill centred at y\u2248815\u2013915 reads 'FIGHT IN 2', and on the results screen the identical pill reads 'REMATCH IN 8' \u2014 same gold fill, same 3px gold ring, same VERB-plus-numeral construction \u2014 while no other control exists on the results screen. The numerals are also set smaller and darker than the verb inside the same shape.",
+      "why": "It is the most tappable-looking object in the frame but its verb+timer mash-up tells the player neither 'tap to start' nor 'this is a timer'; after a loss the 8-second auto-rematch has no decline, so a player who wants to check the score or leave is dragged into the next bout and cannot tell whether tapping did anything.",
+      "how": "Render the countdown as bare gold numerals ('3\u2026 2\u2026 1\u2026') above a real button labelled only 'FIGHT' / 'REMATCH'; add an outlined secondary 'MENU' button beside it on the results screen; and hold the auto-start (cancel it on any tap outside the button) so the player keeps control."
+    },
+    {
+      "id": "control-legend-typography",
+      "title": "Make the always-on STANCE / TECHNIQUE legend readable",
+      "what": "The tan legend panel between the mat and the sticks (y\u2248865\u2013960 in the portrait captures) carries two columns of 12\u201313px lowercase grey text \u2014 '\u25c0 step  \u25b2 jump  \u25b6 step  \u25bc crouch' and '\u25c0 back  \u25b6 forward  \u25b2 up  \u25bc down' \u2014 with roughly 10px triangle glyphs at low contrast on brown, it stays visible during the bout, and its content is duplicated by the STANCE / TECHNIQUE labels already printed under each stick.",
+      "why": "This is the tutorial surface for a twin-stick combo game on a 390px phone: the direction-to-action mapping is the one thing a player must read mid-fight, and at this size and contrast it is unreadable at arm's length, while the panel permanently eats about 100px of screen that could be mat and action.",
+      "how": "Remove the duplicate panel during play and print the mapping on the stick rings themselves in 15px gold uppercase ('\u2191 JUMP', '\u2191 HIGH'), keeping one compact line under the sticks ('L STICK MOVES \u00b7 R STRICK STRIKES'); the full table already lives in the well-typeset MOVES sheet."
+    }
+  ],
+  "raw": null
+}

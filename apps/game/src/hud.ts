@@ -174,6 +174,7 @@ export class Hud {
 
   private result: HTMLElement | null = null;
   private resultButton: HTMLButtonElement | null = null;
+  private resultCount: HTMLElement | null = null;
 
   /**
    * The bout is over: a card you choose to leave, not a banner that times out
@@ -226,9 +227,28 @@ export class Hud {
     button.textContent = this.resultAction;
     button.addEventListener('click', opts.rematch, { once: true });
     this.resultButton = button;
+    // The countdown lives OUTSIDE the button, as a caption under it.
+    //
+    // This has been fought over across three rounds and the button has been
+    // redesigned each time: a bare numeral in a circle read as a point total
+    // (four reviewers), "FIGHT IN 3" in a bordered pill read as a second
+    // clickable control nested in the first (qwen3.5-397b), and the flattened
+    // version reads as an inactive/disabled button (gpt-5.5-pro,
+    // mimo-v2.6-pro-ultraspeed). Each of those is a reasonable reading of
+    // whatever the last version looked like, which is the tell: an element
+    // carrying two kinds of information inside one control is going to keep
+    // being read as whichever kind the player expects.
+    //
+    // So it is split. The button says one thing and does one thing. The
+    // countdown is a caption — readable, never pressable, and impossible to
+    // mistake for the control it sits under.
+    const count = document.createElement('p');
+    count.className = 'result-count';
+    count.setAttribute('aria-hidden', 'true');
+    this.resultCount = count;
     this.result.dataset['tone'] = opts.tone;
     this.result.dataset['phase'] = opts.phase ?? 'result';
-    this.result.replaceChildren(kicker, headline, score, detail, button);
+    this.result.replaceChildren(kicker, headline, score, detail, button, count);
     this.banner.classList.remove('show');
     this.result.classList.add('show');
     Hud.replay(this.result, 'slam');
@@ -242,10 +262,12 @@ export class Hud {
 
   setRematchCountdown(seconds: number): void {
     if (this.resultButton === null) return;
-    // Zero means no countdown is running: show the plain label.
+    // Zero means no countdown is running: the caption goes away entirely and
+    // the button is just its own label.
     if (seconds <= 0) {
       this.resultButton.textContent = this.resultAction;
       this.resultButton.setAttribute('aria-label', this.resultAction);
+      if (this.resultCount !== null) this.resultCount.textContent = '';
       return;
     }
     // This has now been reported four times across three rounds and the fix was
@@ -263,11 +285,7 @@ export class Hud {
     // So it says what it is. "FIGHT IN 3" cannot be misread as a round number,
     // and the action word stays the largest thing on the pill.
     this.resultButton.textContent = this.resultAction;
-    const clock = document.createElement('span');
-    clock.className = 'result-count';
-    clock.setAttribute('aria-hidden', 'true');
-    clock.textContent = `in ${seconds}`;
-    this.resultButton.appendChild(clock);
+    if (this.resultCount !== null) this.resultCount.textContent = `starting in ${seconds}`;
     this.resultButton.setAttribute(
       'aria-label',
       `${this.resultAction}, starting in ${seconds} second${seconds === 1 ? '' : 's'}`,

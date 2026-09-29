@@ -1,0 +1,84 @@
+{
+  "model": "openai/gpt-5.5-pro",
+  "elapsed_s": 258.1,
+  "usage": {
+    "prompt_tokens": 15325,
+    "completion_tokens": 8964,
+    "total_tokens": 24289,
+    "cost": 2.07327,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 2.07327,
+      "upstream_inference_prompt_cost": 0.45975,
+      "upstream_inference_completions_cost": 1.61352
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 8060,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "tiny-first-fight-legend",
+      "title": "Make the first-fight control legend readable",
+      "what": "On the main fight screen, the bottom-center brown legend above the sticks packs both STANCE and TECHNIQUE instructions into a short strip with very small arrow glyphs and text like \u201c\u25c4 step \u25b2 jump / \u25ba step \u25bc crouch\u201d; the duplicated \u201cstep\u201d labels require close reading.",
+      "why": "This is the player\u2019s first explanation of the twin-stick controls. On a phone, with thumbs already covering the lower third, the mapping is too slow to parse before the 30-second round starts.",
+      "how": "Replace the strip with two larger per-stick diagrams during onboarding: 16\u201318 CSS px labels, left/right labeled \u201cstep left/right,\u201d up \u201cjump,\u201d down \u201ccrouch,\u201d and the right stick labeled \u201cback/forward/up/down.\u201d Highlight one direction at a time during countdown, then collapse after the first round."
+    },
+    {
+      "id": "loading-progress-too-subtle",
+      "title": "Make loading progress unmistakable",
+      "what": "On the ShoeMoney pre-boot loading screen, the progress bar in the lower third is only a thin brown line with a faint center glint; there is no clear filled portion, percent, or changing phase text.",
+      "why": "A mobile WebGPU load can pause on assets or shader compilation. With this bar, the first screen can look stalled even while the game is working.",
+      "how": "Use a 10\u201312px-high track with a distinct warm-gold left-to-right fill, add a numeric percent, and rotate concrete status text such as \u201cLoading fighters,\u201d \u201cCompiling shaders,\u201d and \u201cPreparing dojo.\u201d Keep the palette warm; just make state visible."
+    },
+    {
+      "id": "countdown-cta-ambiguity",
+      "title": "Stop making countdowns look like inactive buttons",
+      "what": "On the pre-fight and results screens, the large gold rounded rectangle reads \u201cFIGHT IN 2\u201d or \u201cREMATCH IN 8,\u201d but it is styled exactly like the primary tap button while the sticks below are dimmed.",
+      "why": "Touch players will naturally tap the biggest button-shaped object and may think the game ignored them if it is only a timer.",
+      "how": "If it is not tappable, restyle it as a non-button countdown badge reading \u201cStarts in 2.\u201d If it is tappable, change the copy to \u201cTap to fight\u201d / \u201cRematch now\u201d and show the countdown as smaller secondary text."
+    },
+    {
+      "id": "techniques-list-overdense",
+      "title": "Turn the Techniques screen into a scannable phone reference",
+      "what": "The Techniques modal shows many rows at once, each with two tiny circular arrow icons, a plus sign, a move name, and small right-aligned point text; the \u201cRIGHT STICK DOWN\u201d section begins at the bottom edge with no visible scroll affordance.",
+      "why": "During a 30-second bout, this is too dense to use as a quick reference. Players need to recognize a move pattern at a glance, not decode a wall of symbols.",
+      "how": "Split the list into Forward/Back/Up/Down tabs or accordions, enlarge the combo icons and point tags, pin a \u201cstarter moves\u201d card at the top, and add a visible scroll bar or bottom fade so players know more content continues."
+    },
+    {
+      "id": "landscape-layout-letterboxed",
+      "title": "Lock or redesign the landscape layout",
+      "what": "In the landscape screenshot, the arena occupies only the upper band, the lower portion becomes a large empty black control area, the sticks sit far out in the corners, and the HUD text is tiny across the top.",
+      "why": "If a mobile browser opens while rotated, the game looks unfinished and the controls are harder to reach, even though the portrait layout is the intended experience.",
+      "how": "Either force portrait with a full-screen \u201cRotate your phone\u201d overlay, or build a real landscape layout: enlarge the fighters and HUD, center the arena vertically, and place larger sticks closer to natural thumb positions."
+    }
+  ],
+  "raw": null
+}

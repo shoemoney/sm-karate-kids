@@ -1,0 +1,84 @@
+{
+  "model": "google/gemini-3.5-flash-lite",
+  "elapsed_s": 6.5,
+  "usage": {
+    "prompt_tokens": 17704,
+    "completion_tokens": 969,
+    "total_tokens": 18673,
+    "cost": 0.0077337,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0077337,
+      "upstream_inference_prompt_cost": 0.0053112,
+      "upstream_inference_completions_cost": 0.0024225
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "matchup-screen-cramped-text",
+      "title": "Matchup Screen Text Overlap and Low Contrast",
+      "what": "In the pre-fight matchup screen (seen in the second screenshot), the subtitle 'PATIENT. HE WAITS FOR YOUR WIND-UP \u2014 THEN MAKES YOU PAY.' is placed directly over the glowing shoji window line and tightly sandwiched between 'vs HasanAbi' and the fighters. The dark pill container has a semi-transparent harsh edge that clashes with the warm volumetric glow.",
+      "why": "This is the screen where the player pauses before combat; readability is compromised by competing background high-contrast horizontal mullions crossing directly behind the text, inducing visual fatigue.",
+      "how": "Add a solid gradient scrim behind the upper-middle text block extending from the top HUD down to the fighter's head level, darkening the shoji grid backdrop to ensure the white serif typography punches through cleanly."
+    },
+    {
+      "id": "combat-floating-move-text-placement",
+      "title": "In-Game Move Notification Floats in Dead Space",
+      "what": "During active combat (seen in screenshot 5, 11, and 12), move notification pills like 'LUNGE PUNCH', 'FRONT KICK', or 'IPPON' appear floating in the upper-middle void right beneath the top score bar and above the fighters' heads, colliding awkwardly with the atmospheric bloom and hanging unanchored.",
+      "why": "It draws the player's eye away from the critical action zone where the fighters' feet and hands meet, breaking spatial immersion and looking like a floating debug text element rather than a game feel polish feature.",
+      "how": "Reposition move feedback labels to anchor dynamically to the attacking fighter's chest or head as a brief world-space punch-out scale animation that quickly fades upward."
+    },
+    {
+      "id": "settings-menu-orphan-career-stats",
+      "title": "Settings Menu Orphaned Career Line",
+      "what": "In the Settings overlay screen (seen in sixth screenshot), the bottom text line reading 'Career \u2014 played 0 \u00b7 won 0 \u00b7 best time \u2014' floats unstyled at the very bottom left below the toggle list with no card container or section header.",
+      "why": "It looks like an unformatted HTML text artifact slapped onto the screen post-layout, breaking the polished, premium rounded-card aesthetic established by the toggle rows above it.",
+      "how": "Wrap the career statistics inside a dedicated bottom summary card matching the dark rounded container style of the toggle items, with clear tabular labels for matches played, win rate, and best time."
+    },
+    {
+      "id": "victory-screen-score-fraction-rendering",
+      "title": "Victory Screen Score Fraction Typographic Clash",
+      "what": "On the match conclusion screen ('HASANABI WINS', screenshot 7), the final score reads '0 \u2014 2\u00bd'. The superscript half fraction '\u00bd' in the red text is rendered significantly smaller and misaligned baseline-wise with the large numbers.",
+      "why": "It looks typographically sloppy and unprofessional, diminishing the premium finish of the game's custom tungsten UI numbers.",
+      "how": "Use a consistent em-box layout for fractional scores or render scores using standardized integer steps or a clean decimal format (e.g., '0 - 2.5') matching the typeface's numeric height metrics."
+    },
+    {
+      "id": "combat-hud-dead-center-empty-void",
+      "title": "Combat Viewport Vertical Dead Space Balance",
+      "what": "During gameplay (screenshots 3, 4, 8, 9, 10, 13), the lower half of the screen is dominated by massive dual virtual thumbstick control plates, pushing the fighting stage upward. This leaves a vast empty vertical expanse of dark, blurred shoji background and particle dust between the top score header and the fighters' heads.",
+      "why": "The combat composition feels bottom-heavy and disconnected; the fighters are pinned in the lower-middle band of the screen rather than occupying the hero optical center.",
+      "how": "Lower the 3D virtual camera's framing slightly or scale up the fighters' sprite models by 10-15% so they occupy more vertical headroom, balancing the heavy thumbstick footprint at the bottom."
+    }
+  ],
+  "raw": null
+}

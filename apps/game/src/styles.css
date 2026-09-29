@@ -2384,22 +2384,25 @@ body.high-contrast .result-score {
 /* The countdown digit. Set apart from the verb so it cannot be misread as a
    point total — which is exactly what a bare numeral on a gold pill next to a
    scoreboard was. */
+/* The countdown, as a caption under the button.
+   Not inside it, not a pill, not a badge. Three rounds of reviewers read the
+   button-plus-countdown as a point total, then as a second clickable control,
+   then as a disabled button — every one of those a fair reading of whatever
+   the previous version looked like. One control, one job; the countdown is
+   prose sitting under it. */
 .result-count {
-  /* Not a badge, not a pill, no border and no fill.
-     Round 27 changed the text to "IN 3" and that fixed the ambiguity four
-     rounds of reviewers were reporting. qwen3.5-397b then reported the next
-     thing: "countdown timer looks like a clickable button" — which is right,
-     and is a fault of the *frame*, not the wording. A bordered pill sitting
-     inside a gold button reads as a second control nested in the first, and a
-     player is being invited to press something that does nothing. So the
-     wording stays and the container goes: it is now just quiet text, set apart
-     by space and colour only. */
-  margin-inline-start: var(--space-2);
-  letter-spacing: var(--track-wide);
-  font-family: var(--font-sans);
+  margin: var(--space-2) 0 0;
+  min-block-size: 1em;
+  font-size: var(--text-2xs);
   font-weight: var(--weight-bold);
-  font-size: 0.8em;
-  line-height: 1.5;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--gold);
+}
+
+.result-count:empty {
+  display: none;
 }
 
 .result-rematch {
