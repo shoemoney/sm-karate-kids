@@ -1,0 +1,78 @@
+{
+  "model": "openai/gpt-5.2",
+  "elapsed_s": 32.1,
+  "usage": {
+    "prompt_tokens": 10760,
+    "completion_tokens": 1828,
+    "total_tokens": 12588,
+    "cost": 0.044422,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.044422,
+      "upstream_inference_prompt_cost": 0.01883,
+      "upstream_inference_completions_cost": 0.025592
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 746,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png"
+  ],
+  "items": [
+    {
+      "id": "sprite-grounding-shadows",
+      "title": "Add strong contact shadows so fighters don\u2019t look pasted on",
+      "what": "Gameplay screens (e.g., the full-fight view with both sticks visible): both fighters\u2019 feet sit on the tatami with essentially no contact shadow/occlusion directly under the soles\u2014especially noticeable under the white gi fighter\u2019s front foot and the red gi fighter\u2019s lead foot, which read like they\u2019re floating a few pixels above the floor.",
+      "why": "This is an immediate \u201ccheap compositing\u201d tell in the first seconds of play; it breaks depth, reduces impact of strikes, and undermines the otherwise cinematic dojo lighting.",
+      "how": "Add a dedicated blob/contact shadow per fighter (elliptical dark decal) anchored to each foot or averaged between feet; fade/scale it with stance width and vertical motion (jump/crouch). If sprites can\u2019t receive 3D shadows, render a soft plane-projected shadow pass or draw a 2D shadow quad in world space under each fighter with a multiply blend and slight blur."
+    },
+    {
+      "id": "controls-too-dim",
+      "title": "Increase contrast of the twin-stick HUD and its labels",
+      "what": "Bottom third of gameplay screens: the stick rings, arrows, and especially the labels \u201cSTANCE\u201d / \u201cTECHNIQUE\u201d and the micro-instructions inside the circles (\u201cMOVE & JUMP\u201d, \u201cSTRIKE\u201d, step/jump/crouch, etc.) are so low-contrast they nearly disappear into the vignette (they\u2019re only faintly visible even on the brighter tatami).",
+      "why": "On a phone, players need to understand controls instantly; low-contrast UI reads as \u201cnon-interactive decoration,\u201d causing early confusion and missed inputs.",
+      "how": "Bump UI luminance/alpha for control strokes and text (e.g., +30\u201350%); add a subtle dark backing plate behind each stick (a soft radial gradient at ~30\u201340% opacity) to decouple it from the background; increase label size/weight by one step and apply a 1\u20132px shadow/outline for legibility."
+    },
+    {
+      "id": "loading-state-legibility",
+      "title": "Make the boot/loading progress unmistakable",
+      "what": "ShoeMoney pre-boot screen: \u201cStarting up \u00b7 0%\u201d is tiny and very dim at center-lower, and the progress bar is a hairline stroke near the bottom edge with almost no fill/contrast\u2014easy to miss against the dark background.",
+      "why": "If loading feedback is unclear, players assume the game is frozen and bounce (especially in a browser).",
+      "how": "Increase the percent text size and brightness (and/or move it closer to the bar); thicken the bar (min 6\u20138px), raise contrast between track and fill, and add a subtle animated shimmer/pulse so motion communicates \u201cworking\u201d even at 0\u20131%."
+    },
+    {
+      "id": "prefight-hierarchy-bloat",
+      "title": "Reduce the oversized title block so the fight and fighters read first",
+      "what": "Pre-fight \u201cQUALIFIER vs HasanAbi\u201d screen: the word \u201cQUALIFIER\u201d dominates the upper half, while the fighters sit relatively small in the middle with a lot of unused negative space above them; the primary action CTA (\u201cFIGHT \u00b7 2\u201d) competes with the huge headline rather than being the clear focal point.",
+      "why": "Players come for the bout; over-weighting the header delays comprehension of what to do next and makes the scene feel less punchy on a small portrait screen.",
+      "how": "Scale the \u201cQUALIFIER\u201d headline down ~20\u201330% (or move it up into the top HUD strip), tighten vertical spacing, and enlarge/raise the fighters slightly so their faces/hands sit closer to mid-screen. Keep the CTA as the largest interactive element in the lower third and ensure it\u2019s visually separated from the dimmed stick graphics behind it."
+    },
+    {
+      "id": "overlay-tap-targets-clarity",
+      "title": "Fix small hit targets and faint state indicators in Moves/Settings overlays",
+      "what": "Techniques and Settings overlays: the close \u201cX\u201d in the top-right is small relative to the screen and near the edge; in Settings, the checkboxes are thin-outline empty squares with no strong state mark (and low contrast against the dark panel), making toggles hard to parse at a glance.",
+      "why": "On touch, small/edge-adjacent targets cause mis-taps; unclear toggle state creates mistrust (\u201cdid that setting actually turn on?\u201d).",
+      "how": "Increase tap target sizes to at least ~44px (even if the icon stays smaller) with more inset from the screen edge; make checkbox states unambiguous (filled box + checkmark, or on/off pill switches). Raise contrast of secondary text (e.g., the small explanatory lines) by one step and ensure consistent divider/row spacing for scanability."
+    }
+  ],
+  "raw": null
+}

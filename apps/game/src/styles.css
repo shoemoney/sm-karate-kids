@@ -462,9 +462,12 @@ body {
   margin: 0 0 var(--space-2);
   align-self: stretch;
   text-align: center;
-  color: var(--text-muted);
+  /* The one number on this screen that is actually true and actually moving.
+     Lifted off --text-muted: at that value a 2-xs mono line in the lower
+     third of a phone screen was easy to miss entirely. */
+  color: var(--text);
   font-family: var(--font-mono);
-  font-size: var(--text-2xs);
+  font-size: var(--text-xs);
   letter-spacing: var(--track-normal);
   line-height: var(--leading-tight);
 }
@@ -899,7 +902,9 @@ body.show-perf #backend {
   font-weight: var(--weight-semibold);
   letter-spacing: var(--track-label);
   text-transform: uppercase;
-  color: var(--text-ghost);
+  /* Was --text-ghost. These two words are the only thing naming the control
+     the player is about to use with the hand already on it. */
+  color: var(--text-muted);
   transition: color var(--dur-fast) var(--ease-out);
 }
 
@@ -1270,10 +1275,13 @@ body:has(.result.show) .stick-zone {
   gap: 1px var(--space-2);
   justify-content: center;
   font-family: var(--font-mono);
-  font-size: 0.56rem;
+  font-size: 0.58rem;
   font-style: normal;
   line-height: 1.4;
-  color: var(--text-muted);
+  /* Was --text-muted. The coach mark is the one piece of text on the pad that
+     a player with no prior knowledge cannot decode from context, so it does not
+     get ghosted like a resting detent does. */
+  color: var(--text);
 }
 
 .coach-legend i {
@@ -1342,6 +1350,14 @@ body.reduced-motion .coach-mark {
 
   body.no-backdrop-filter .hud-actions .icon-btn {
     background: rgb(12 8 4 / 0.9);
+  }
+
+  /* Collapsing the header row put these two on top of the dojo, which is
+     correct during a bout and wrong on a card: they landed across the round
+     name. Nothing behind a card is actionable anyway, so they stand down for
+     as long as one is up. */
+  body:has(.result.show) .hud-actions {
+    display: none;
   }
 }
 
@@ -1479,10 +1495,25 @@ input:focus-visible,
 }
 
 .setting-row input[type="checkbox"] {
+  /* The box keeps its 22px optical size — a 44px white square in a settings
+     list looks like a bug — but the hit area is the full 44px minimum, via a
+     pseudo-element that extends past the box in every direction. Without this
+     the control was a 22px target on the one screen where a player is already
+     using a thumb. */
+  position: relative;
   width: 22px;
   height: 22px;
   flex: 0 0 auto;
   accent-color: var(--check);
+}
+
+.setting-row input[type="checkbox"]::after {
+  content: '';
+  position: absolute;
+  inset: 50%;
+  inline-size: 44px;
+  block-size: 44px;
+  transform: translate(-50%, -50%);
 }
 
 .setting-hint {
@@ -2014,6 +2045,29 @@ body.high-contrast .result-score {
   color: var(--text-muted);
 }
 
+/* The pre-fight round card is a doorway, not a payoff. At the result card's
+   rhythm it spent the top third of a phone on typography and pushed both
+   fighters down into the mat, on a screen whose entire job is to get the
+   player into the fight. Tighter rhythm, smaller headline, same ink. */
+.result[data-phase='prefight'] {
+  gap: var(--space-2);
+  padding-block-start: var(--space-2);
+}
+
+.result[data-phase='prefight'] .result-headline {
+  font-size: clamp(1.7rem, 8vw, 3.2rem);
+}
+
+.result[data-phase='prefight'] .result-score,
+.result[data-phase='prefight'] .result-detail,
+.result[data-phase='prefight'] .result-title {
+  padding-block: var(--space-1);
+}
+
+.result[data-phase='prefight'] .result-detail {
+  font-size: var(--text-xs);
+}
+
 .result-rematch {
   /* `auto`, not a fixed space: the result card is three bands — identity at the
      top, the fighters across the middle, the call to action on the mat below
@@ -2022,8 +2076,7 @@ body.high-contrast .result-score {
      across both fighters' faces, which is the one thing this screen must not
      do. */
   margin-top: auto;
-  min-width: 12rem;
-  min-height: 52px;
+  min-width: 12rem;  min-height: 52px;
   padding: 0 var(--space-5);
   border: 1px solid var(--button-edge);
   border-radius: var(--radius-pill);

@@ -450,6 +450,7 @@ async function boot(screen: BootScreen): Promise<void> {
       kicker: `Round ${run.round + 1} of ${TOURNAMENT.length}`,
       headline: round.name,
       tone: 'full',
+      phase: 'prefight',
       score: `vs ${state.fighters[1].spec.name}`,
       detail: STYLE[round.archetype] ?? '',
       action: 'FIGHT',

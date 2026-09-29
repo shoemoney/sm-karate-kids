@@ -102,12 +102,18 @@ interface Mote {
 /** How far the contact shadow reaches across the mat, and how deep it smears. */
 const SHADOW_SPAN = 0.98;
 const SHADOW_DEPTH = 0.66;
-/** Peak alpha right under the feet. The falloff lives in the texture, not here. */
-const SHADOW_OPACITY = 0.44;
+/**
+ * Peak alpha right under the feet. 0.44 read as a smudge BEHIND the soles
+ * rather than as contact — a crop of the mat showed the gi and the tatami
+ * meeting with no dark line between them, and both fighters looked pasted on.
+ * The feet need a definite dark core, not a soft average.
+ */
+const SHADOW_OPACITY = 0.66;
 /**
  * The key sits up and at +X+Z, so a body throws its shadow the other way. A
  * perfectly centred blob is the single clearest tell that nobody is standing
- * under a lamp.
+ * under a lamp. The offsets are small on purpose: a shadow that has visibly
+ * slid off the foot is worse than one that is merely soft.
  */
 const SHADOW_OFFSET_X = -0.06;
 const SHADOW_OFFSET_Z = -0.05;
@@ -696,10 +702,17 @@ function contactShadow(): CanvasTexture {
   const g = canvas.getContext('2d');
   if (g !== null) {
     const gradient = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    // A hard dark core, then a fast falloff. The first pass held 0.86 alpha all
+    // the way out to 22% radius and read as one soft smudge, so the eye had
+    // nothing to grab at and the feet looked pasted onto the mat. Contact is
+    // read from the small dark spot directly under the sole, and the wide soft
+    // spread around it is the cast shadow — two different things, two different
+    // strengths.
     gradient.addColorStop(0, 'rgba(0,0,0,1)');
-    gradient.addColorStop(0.22, 'rgba(0,0,0,0.86)');
-    gradient.addColorStop(0.45, 'rgba(0,0,0,0.42)');
-    gradient.addColorStop(0.7, 'rgba(0,0,0,0.13)');
+    gradient.addColorStop(0.1, 'rgba(0,0,0,1)');
+    gradient.addColorStop(0.24, 'rgba(0,0,0,0.72)');
+    gradient.addColorStop(0.42, 'rgba(0,0,0,0.4)');
+    gradient.addColorStop(0.68, 'rgba(0,0,0,0.14)');
     gradient.addColorStop(1, 'rgba(0,0,0,0)');
     g.fillStyle = gradient;
     g.fillRect(0, 0, size, size);

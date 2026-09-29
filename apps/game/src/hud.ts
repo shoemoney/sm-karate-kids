@@ -148,6 +148,13 @@ export class Hud {
     action?: string;
     /** A small line above the headline, e.g. the round. */
     kicker?: string;
+    /**
+     * Pre-fight round card or post-fight result. They share a class but want
+     * opposite vertical rhythms: the result is the payoff and can own the
+     * frame, while the round card is a doorway the player is waiting to walk
+     * through, and at full size it pushed the fighters off the screen.
+     */
+    phase?: 'prefight' | 'result';
   }): void {
     if (this.result === null) {
       const stage = document.getElementById('stage');
@@ -178,6 +185,7 @@ export class Hud {
     button.addEventListener('click', opts.rematch, { once: true });
     this.resultButton = button;
     this.result.dataset['tone'] = opts.tone;
+    this.result.dataset['phase'] = opts.phase ?? 'result';
     this.result.replaceChildren(kicker, headline, score, detail, button);
     this.banner.classList.remove('show');
     this.result.classList.add('show');
