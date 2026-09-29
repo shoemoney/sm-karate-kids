@@ -734,6 +734,22 @@ body.show-perf #backend {
   min-width: 2.2ch;
   text-align: center;
   text-shadow: 0 var(--space-1) 0 var(--shadow-ink);
+  /* Never shrink. The scoreline is a flex row, and a score is the one thing in
+     it that must never be abbreviated or clipped — the names next to it already
+     ellipsise gracefully on a narrow phone, and a fighter's name is worth
+     truncating where a score is not.
+
+     Without this the score box was the flexible item: `10½` is three glyphs
+     against a `min-width` of 2.2ch, and once the row ran short of space the
+     box shrank below its own content and the last glyph was cut. Measured
+     clipping at `10½`, `125½` and `1250½`; single digits and `2½` were fine,
+     which is why twenty-two rounds of review never saw it — a tournament that
+     has not reached ten points has nothing wrong with it.
+
+     grok-4.5 caught it by accident, reading "half-point scores collide with the
+     name plates". The name plates were not the problem; the score was being
+     squeezed by them. */
+  flex: 0 0 auto;
 }
 
 .side[data-side="0"] .points {
