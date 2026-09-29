@@ -41,7 +41,7 @@ successive rounds are not five variants of the same opinion.
 | 2 | `z-ai/glm-5.3-flash` | Zhipu | landed `bc53eda` |
 | 3 | `anthropic/claude-opus-5.5` | Anthropic | landed `e7762da`, `9e3bfe6` |
 | 4 | `openai/gpt-5.2` | OpenAI | landed `fc8425e` |
-| 5 | `x-ai/grok-4.20` | xAI | pending |
+| 5 | `x-ai/grok-4.20` | xAI | landed `b0197d6` |
 | 6 | `moonshotai/kimi-k3` | Moonshot | pending |
 | 7 | `qwen/qwen3.8-omni-flash` | Alibaba | pending |
 | 8 | `bytedance-seed/seed-2.0-code` | ByteDance | pending |
@@ -155,6 +155,51 @@ rather than a misplaced one.
   second time the fault was introduced by an earlier round's own fix. **Rounds
   are not independent, and a fix's real cost shows up in the next round's
   capture.**
+
+### Round 5 — x-ai/grok-4.20 — `b0197d6`
+
+- `loading-progress-stuck` — **the deepest find of the loop, and I nearly
+  rejected it.** Grok's screenshot said the bar "shows 0% indefinitely", and my
+  first instinct was that this was a still-frame artifact of a screenshot taken
+  at 600ms. Instrumenting it against the production bundle on a throttled link
+  said otherwise:
+
+      0.0s  MEASURING  "Downloading the game"
+      4.0s  determinate  7%  Lacing the fighters — 1/6 pages
+      4.3s  determinate 20%  Lacing the fighters — 3/6 pages
+      4.5s  determinate 67%  Starting the renderer
+      5.8s  determinate 100% Ready
+
+  **The app cannot report anything for the first four seconds, because the
+  module that would report it has not finished downloading.** The reporter is
+  inside the thing being measured. Every resource check agreed — in dev the
+  first app resource lands at 4.0s and `three_webgpu.js` at 9.1s. The card now
+  opens in an honest indeterminate state and the first advance that actually
+  moves the bar flips it to determinate.
+
+  The lesson is about method, not about Grok: a still frame cannot show you the
+  absence of motion, and I nearly dismissed a real bug because the evidence
+  "looked like" a capture artifact. **Probe the thing; do not reason about the
+  picture of the thing.**
+
+  Also: the first attempt at the fix flipped the state on *any* `advance()`
+  call, and the atlas reports 0/6 pages before it starts — so the shimmer
+  became the exact dead 0% bar it replaced. Only a second measurement caught it.
+- `score-timer-unreadable` — a dark stroke on the clock digits. Gold on warm
+  bloom was separating by luminance alone.
+- `control-labels-too-small` — coach legend up from 0.58rem to 0.66rem.
+- `technique-stick-visual-feedback-weak` — the pressed knob now scales 1.09×.
+  A 1px state change is not readable by a thumb that is already moving.
+- `fighters-too-low-in-frame` — **rejected.** This is the third model to
+  comment on vertical distribution and the second to ask for a camera change
+  in the opposite direction from the first two. The frame is full; there is no
+  version of this where the fighters are simultaneously larger, higher, and
+  fully visible with a pad below them. Rounds 1 and 2 already took the camera in
+  twice and once cropped the fighters at the knees.
+
+**Queue hygiene:** `x-ai/grok-4-vision` is not a real model ID and returns 400.
+The rest of the queue has now been validated against the live catalogue.
+
 
 
 
