@@ -1,0 +1,85 @@
+{
+  "model": "openai/gpt-5.6-terra-pro",
+  "elapsed_s": 45.1,
+  "usage": {
+    "prompt_tokens": 55809,
+    "completion_tokens": 5463,
+    "total_tokens": 61272,
+    "cost": 0.1268455,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 32470,
+      "cache_write_tokens": 16235,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.1268455,
+      "upstream_inference_prompt_cost": 0.0612895,
+      "upstream_inference_completions_cost": 0.065556
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 2229,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "unambiguous-countdown-cta",
+      "title": "Remove the conflict between the Fight button and auto-start countdown",
+      "what": "On the Qualifier intro screen, the large primary button says \u201cFIGHT\u201d while the text immediately beneath it says \u201cSTARTING IN 2/3/4.\u201d The same conflict appears on the result screen with \u201cREMATCH\u201d above \u201cSTARTING IN 8.\u201d",
+      "why": "In the first seconds of play, it is unclear whether the player must tap, can tap to skip, or should wait. That uncertainty is especially harmful in a touch game where the primary button is the strongest interaction cue.",
+      "how": "Choose one state at a time: if the bout is auto-starting, replace the button with a non-interactive countdown treatment such as \u201cFIGHT IN 3\u201d; if a tap is required, remove the automatic countdown and use a clear \u201cTAP TO FIGHT\u201d button. If tapping skips the timer, label the subtext \u201cTap to start now \u00b7 auto-starts in 3.\u201d"
+    },
+    {
+      "id": "fix-half-point-score-layout",
+      "title": "Keep half-point scores on one readable baseline",
+      "what": "In the Hasnabi win screenshot, the top-right red score for Hasnabi is visibly broken into a large \u201c2\u201d with the \u201c1/2\u201d stacked beneath it, while the center result correctly reads \u201c0 \u2014 2\u00bd.\u201d The header makes the score look like separate numbers rather than 2\u00bd.",
+      "why": "The score is the core competitive information. A malformed score at the moment a player loses makes the outcome harder to parse and makes the HUD feel unpolished.",
+      "how": "Render half points as a single score token with a proper fraction glyph (\u201c2\u00bd\u201d) or a compact inline fraction with fixed baseline alignment. Reserve a fixed-width score slot on both sides of the timer and scale score text down slightly before allowing any wrapping or vertical stacking."
+    },
+    {
+      "id": "clarify-live-control-inputs",
+      "title": "Make the two touch pads understandable without a reference card",
+      "what": "On the normal bout screen, the lower half contains two large circular pads with only four chevrons, a small center dot, and the labels \u201cSTANCE\u201d and \u201cTECHNIQUE.\u201d The meaning of each directional press is only explained in the narrow card above them, and that card is absent in the screenshot where the bare pads are shown.",
+      "why": "A new player must learn a two-stick command language while fighting. Bare arrow pads do not communicate that left stance input means step/back, up means jump, or that the right pad selects attack direction; players will spend early rounds guessing.",
+      "how": "Keep a compact, persistent directional legend immediately above or inside each pad until the player has performed each input: left pad should show step/jump/crouch labels, and right pad should show back/forward/up/down. On press, briefly show the selected stance plus resulting move near the fighter, not only as a small top-center toast."
+    },
+    {
+      "id": "reduce-control-footprint",
+      "title": "Recover gameplay space from the oversized twin-stick controls",
+      "what": "In the portrait gameplay screens, the two control circles occupy roughly the bottom 280 pixels, and the extra command legend panel sits directly above them. The fighters and their feet are compressed into the middle band, while the controls consume about the lower third of the 390\u00d7844 frame.",
+      "why": "The game\u2019s key action is reading fighter spacing, stance, and attacks, but the control UI competes heavily with the bout for attention and vertical room. It also leaves limited room for impact feedback without covering either fighters or controls.",
+      "how": "Reduce each default control pad diameter by about 15\u201320%, tighten the gap between the pads and their labels, and make the command legend fade after the opening tutorial or collapse to a small \u201c?\u201d button. Preserve the current larger option under \u201cLarge controls\u201d for players who need it."
+    },
+    {
+      "id": "make-moves-sheet-scannable",
+      "title": "Improve the moves sheet\u2019s phone-scale readability and scroll cue",
+      "what": "The Techniques screen presents a long, dense list of directional-icon combinations, move names, height, and point values. At the bottom, the next move row is visibly cut off, but there is no visible scrollbar, fade, or \u201cswipe for more\u201d cue; several icons and metadata labels are very small at 390 pixels wide.",
+      "why": "This is the player\u2019s only visible command reference, yet it asks them to decode many tiny symbols and discover scrolling on their own. That makes learning the move set harder than it needs to be between fast bouts.",
+      "how": "Add a bottom gradient with a \u201cSwipe for more moves\u201d affordance or a thin visible scroll indicator. Increase icon and metadata size, use stronger spacing between each command and its reward, and let tapping a row preview the move or pin it as a short in-bout reminder."
+    }
+  ],
+  "raw": null
+}

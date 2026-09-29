@@ -756,10 +756,17 @@ body.show-perf #backend {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  vertical-align: baseline;
-  line-height: 0.78;
+  /* Not `vertical-align: baseline`. For a column flex container the baseline it
+     aligns to is the FIRST item's — the 1 — so a stacked fraction sat up beside
+     the digits with its bar floating at cap height, reading as a superscript
+     rather than as a fraction. gpt-5.6-terra-pro put it as "keep half-point
+     scores on one readable baseline", and it is the first thing that reported
+     this: the frame that shows it is the played bout from round 55, because
+     every earlier frame in the set had the score at zero.
+     Dropped to the digit baseline instead. */
+  vertical-align: -0.3em;
+  line-height: 0.82;
   margin-inline-start: 0.04em;
-  translate: 0 -0.12em;
   font-size: 0.52em;
   font-weight: var(--weight-bold);
 }
