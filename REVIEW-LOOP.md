@@ -1395,3 +1395,42 @@ raised, which is a different and more useful signal than a fix.
 - `excessive-headroom-arena`, `callout-obscures-fighters` (grok-build-0.1) —
   framing, twenty-fourth iteration.
 - `google/gemma-3-4b-it` — 429, DeepInfra overloaded.
+
+### Round 42 — gpt-5.4, claude-opus-4.8, grok-4.3 — `cc99701`
+
+- `settings-toggle-focus: "settings row has stray yellow border"` (grok-4.3) —
+  **the product is right and the photograph was not.** Measured directly: a
+  touch tap leaves `:focus-visible` **false** and the element unfocused; a Tab
+  leaves it true with a 2px ring. Exactly right for a touch-first product, and
+  the ring was worth adding in round 27. But a programmatic Playwright click
+  leaves the row focused, so every mixed-state capture since round 31 has shown
+  a ring no thumb would have left, and a reviewer read it as a defect. The
+  capture now blurs first.
+
+  **Third instance of this shape, after round 32's half-faded boot card and
+  round 35's unstyled one: the product was fine and the instrument was lying.**
+  A harness that photographs a state no user can reach will produce confident,
+  specific, wrong findings indefinitely, and each one costs a round to disprove.
+- `fighters-float-above-mat: "both fighters cast no contact shadow and appear to
+  hover above the tatami"` (claude-opus-4.8) — **partly wrong, partly fair.**
+  Cropped the feet at 3x: the contact shadows are there under both fighters,
+  tight and correct, and the airborne foot in that frame is airborne because
+  it is a back kick mid-strike.
+
+  Fair part: they are soft enough that the strongest model in the set did not
+  register them. Not actioned, because the code records a prior round that
+  *raised* the peak and found 0.44 read as a smudge behind the soles with both
+  fighters looking pasted on — the current stops are a considered answer to a
+  measured failure, and pushing past them without new evidence would undo it.
+  Worth revisiting with a target: a shadow legible at 1x on a phone.
+- `sprite-cutout-halation: "reduce the visible glow/fringe around fighter
+  cutouts"` (gpt-5.4) — re-checked at 2x in round 37 and again here: hair, gi
+  edges and belt cut clean, no fringing. Two models and two zooms.
+- `idle-static-fighters: "fighters appear frozen in identical stance poses —
+  no idle life"` (claude-opus-4.8) — the atlas has a distinct idle pose and the
+  rig resolves per-phase cells; a still frame cannot show whether a loop plays.
+- `result-screen-empty-middle` (gpt-5.4),
+  `landscape-controls-corner-exile` (claude-opus-4.8) — layout, twenty-fifth
+  iteration, and the standing landscape argument.
+- `ippon-hit-clarity: "the scoring hit reads as pale spark scribbles"*
+  (claude-opus-4.8) — worth a look against the real impact frame.
