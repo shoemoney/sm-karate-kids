@@ -1201,3 +1201,34 @@ is what a corrected sample does.
   `portrait-fighter-scale`, `match-ui-occupies-combat`,
   `battlefield-cropped-by-control-dock` — framing, twenty-second iteration.
   Standing: warm and low, pad at 27.0% of an 844px screen.
+
+### Round 36 — gpt-5.2-pro, qwen3.6-27b — `35187f7`
+
+- `score-fraction-display` / `fraction-score-ambiguity` /
+  `score-fraction-notation` / `score-fraction-readability` /
+  `half-point-score-hard-to-parse` / `victory-screen-score-fraction-rendering`
+  — **six models, six rounds, FIXED.** The most persistent finding in the loop,
+  and it survived that long because every single report read as a small
+  legibility nit and none of them was persuasive on its own.
+
+  Two formatters. The in-match score is `points()` — `2½`. The result card, the
+  run total and the career best were all `toLocaleString()` — `2.5`. The product
+  taught one notation for the whole bout and switched the instant it ended, in
+  the place a score is read most carefully. And `2.5` is a decimal: two and a
+  half, or a tally of two and a bit?
+
+  **Six rounds of the same request, none individually persuasive, and the only
+  reason it got fixed is counting them.** That is the entire argument for
+  running a review loop instead of reading one review.
+- `sprite-edge-grounding: "fix cutout halos"` (gpt-5.2-pro) — the keying, and
+  possibly a consequence of round 29's re-encode at quality 82. Needs a zoomed
+  look at a fighter silhouette against the dojo before anything is touched.
+- `landscape-mode-bug: "game renders in landscape orientation"` (qwen3.6-27b) —
+  and now gemini-3.6-flash, qwen3.5-397b-a17b, gpt-5.1 and gpt-5.4-pro all in
+  on some version of it. **The most repeated unresolved request in the loop.**
+  The ADR makes portrait the baseline and desktop the scaled secondary, which
+  is a decision about what to optimise, not a claim that landscape is finished.
+  It is not finished, and five models have now said so.
+- `controls-contrast-and-feedback` (gpt-5.2-pro) — the detents were 0.36 → 0.52
+  → 0.68 across rounds 21, 30 and 33.
+- `mistralai/mistral-medium-3-5` — 8-image cap hit again, third time.
