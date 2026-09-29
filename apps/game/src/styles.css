@@ -274,13 +274,17 @@
   /* Four stops, not three. A single big jump to transparent left a faint
      perceptible ring where the falloff ended, which read as a drawn circle
      rather than as light running out. */
+  /* The pool is an ellipse inside a round element, so the last stop has to
+     reach zero alpha BEFORE the clipping edge — otherwise the element's own
+     circular border shows up as a visible ring around the mark. Fading out by
+     88% leaves the last 12% as pure transparent, which nothing can reveal. */
   --boot-pool: radial-gradient(
-    ellipse 64% 46% at 50% 36%,
-    rgb(232 185 92 / 0.22) 0%,
-    rgb(232 185 92 / 0.1) 34%,
-    rgb(232 185 92 / 0.04) 58%,
-    rgb(232 185 92 / 0.012) 78%,
-    transparent 100%
+    ellipse 62% 44% at 50% 36%,
+    rgb(232 185 92 / 0.24) 0%,
+    rgb(232 185 92 / 0.11) 30%,
+    rgb(232 185 92 / 0.045) 52%,
+    rgb(232 185 92 / 0.012) 70%,
+    transparent 88%
   );
   --boot-vignette: radial-gradient(
     ellipse 118% 82% at 50% 44%,
@@ -422,7 +426,7 @@ body {
 .boot-mark::before {
   content: '';
   position: absolute;
-  inset: -34%;
+  inset: -48%;
   background: var(--boot-pool);
   border-radius: var(--radius-circle);
 }
