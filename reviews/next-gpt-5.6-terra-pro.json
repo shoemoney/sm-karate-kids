@@ -1,0 +1,84 @@
+{
+  "model": "openai/gpt-5.6-terra-pro",
+  "elapsed_s": 71.7,
+  "usage": {
+    "prompt_tokens": 53789,
+    "completion_tokens": 6631,
+    "total_tokens": 60420,
+    "cost": 0.1319908,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 30644,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.1319908,
+      "upstream_inference_prompt_cost": 0.0524188,
+      "upstream_inference_completions_cost": 0.079572
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 3358,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "make-combat-controls-self-explanatory",
+      "title": "Label the two virtual sticks at the point of use",
+      "what": "On the portrait fight screen, the lower 40% is occupied by two large circular controls, but each only shows four chevrons and a colored center dot. The only explanation is a separate brown card above them with tiny mappings such as \"\u25c0 step\" and \"\u25b6 forward.\" When that card is absent, the player sees \"STANCE\" and \"TECHNIQUE\" but not what an up/down/left/right input will actually do.",
+      "why": "This is the primary interaction in the first bout. A player should not need to memorize a tiny legend or open MOVES before understanding how to step, jump, crouch, attack, or block.",
+      "how": "Keep the current stick art, but add persistent directional micro-labels inside or immediately around each ring: left stick: STEP, JUMP, STEP, CROUCH; right stick: BACK, UP, FORWARD, DOWN. During the first round, animate one direction at a time with a one-line prompt, then fade the labels to a lighter always-available state."
+    },
+    {
+      "id": "lock-or-reflow-landscape",
+      "title": "Prevent the visibly broken landscape combat layout",
+      "what": "In the landscape gameplay screenshot, the dojo and fighters occupy only the top roughly 570 px of the 800 px frame, while a large empty black slab fills the bottom. The two sticks are tiny and stranded at opposite lower corners, far below the action, and the HUD is compressed into a very thin top strip.",
+      "why": "If rotation is possible, this looks like an unfinished fallback rather than a deliberate alternate view and makes thumb reach, combat readability, and product polish substantially worse.",
+      "how": "Either lock the experience to portrait with an orientation prompt, or build a real landscape layout: make the dojo fill the full height, reserve a consistent bottom control band, enlarge the sticks to thumb-sized targets, and position them within the left and right safe touch zones rather than against the extreme corners."
+    },
+    {
+      "id": "remove-pre-fight-countdown-conflict",
+      "title": "Do not auto-start while presenting a FIGHT button and control tutorial",
+      "what": "The qualifier screen presents a large central \"FIGHT\" button, yet directly beneath it says \"STARTING IN 2\" or \"STARTING IN 4.\" The dimmed sticks and the introductory opponent advice remain visible below, leaving very little time to read the matchup or learn the controls before the bout begins.",
+      "why": "The screen gives conflicting interaction signals: tap to begin versus wait for an automatic start. For a control-heavy mobile fighter, an automatic countdown can send first-time players into combat before they understand the inputs.",
+      "how": "Make the first qualifier explicitly tap-to-start with no countdown. After the player taps FIGHT, run a short 3-2-1 countdown over the arena and allow the player to dismiss the control legend only after their first bout. Reserve auto-rematch countdowns for an optional setting or show a clear cancel/continue choice."
+    },
+    {
+      "id": "make-loading-progress-legible",
+      "title": "Give the branded loading screen a visible progress state",
+      "what": "On the ShoeMoney loading screen, \"Downloading the game\" is centered above a very thin dark-brown line around the middle-lower area. There is no clearly visible filled portion, percentage, stage change, or activity indication; most of the tall portrait frame is empty black.",
+      "why": "At boot, users cannot tell whether the game is loading, stalled, or waiting on a network issue. This is especially damaging for a browser/WebGPU first impression where loading can take long enough to create doubt.",
+      "how": "Use the existing bar but give its fill a clearly separated gold/blue highlight with at least a 4 px visual thickness at the design resolution. Update a percentage or named stage below it, such as \"Loading dojo 62%,\" and add a subtle looping activity treatment when exact asset progress is unavailable."
+    },
+    {
+      "id": "simplify-moves-reference",
+      "title": "Turn the MOVES sheet into a phone-scannable reference",
+      "what": "The TECHNIQUES screen shows many tightly stacked rows of small circular direction glyphs, move names, point values, and divider lines. At the bottom, the \"RIGHT STICK DOWN\" section starts but its contents are cut off, with no obvious scroll cue. On the 390 px baseline these input glyphs and the right-aligned \"mid \u00b7 Half point\" text will be especially small.",
+      "why": "Players checking a move during a match need to identify an input in seconds. The current dense all-moves list reads like a manual and makes it easy to miss that more content exists below the fold.",
+      "how": "Replace the single long sheet with four large directional tabs or accordions for Forward, Back, Up, and Down. Show the selected direction's five moves with larger input diagrams, add a visible scroll indicator when needed, and keep each row to input, move name, and value with the height/point metadata presented as compact colored chips."
+    }
+  ],
+  "raw": null
+}

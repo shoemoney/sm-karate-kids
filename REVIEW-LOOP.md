@@ -1328,3 +1328,36 @@ is what a corrected sample does.
   Twenty-three iterations of "the fighters are too small" were taste; this was
   the only verb in the game leaving the screen, and it took a model to name it
   and a burst of frames to prove it.
+
+### Round 40 — gpt-5.6-terra-pro, qwen3.5-9b, deepseek-v4.1-flash — no product change
+
+- `remove-pre-fight-countdown-conflict: "do not auto-start while presenting a
+  FIGHT button and control tutorial"` — **rejected against the code and the
+  capture.** There is no control tutorial on the pre-fight card. `coach.show()`
+  fires on `state.phase === 'fight'` — a comment in `main.ts` says why, and it
+  is right: a hint sitting over the round card teaches nothing about the sticks.
+  The card carries the round name, the tip, the FIGHT button and the countdown
+  caption, and the coach appears the instant the bout is live.
+- `make-combat-controls-self-explanatory: "label the two virtual sticks at the
+  point of use"` (gpt-5.6-terra-pro) — **already done, and visible in the same
+  frame.** STANCE and TECHNIQUE are labelled directly beneath their own sticks,
+  at the point of use, in the pre-fight capture. This is the fifth distinct
+  model to describe the sticks as unlabelled or self-explanatory-needing.
+- `lock-or-reflow-landscape: "prevent the visibly broken landscape combat
+  layout"` (gpt-5.6-terra-pro) — the sixth model on landscape. The backdrop
+  seam is closed (`90152ff`); what remains is the stage/pad split, and the
+  reasoning for leaving it is written down there. **This one is now the standing
+  noise of the loop** — the framing family's remaining requests, this, and the
+  loading family, between them account for most of every report since round 32.
+- `simplify-moves-reference` (gpt-5.6-terra-pro),
+  `fight-camera-scale` (deepseek-v4.1-flash) — density and framing.
+- `make-loading-progress-legible` (gpt-5.6-terra-pro) — the sixteenth
+  appearance, and unchanged since round 35 established the harness was
+  photographing an unstyled page.
+- `qwen/qwen3.5-9b` — provider returned no content. `deepseek-v4.1-flash`
+  returned prose around its JSON; the harness recovered it and the raw is on
+  disk.
+
+**A round with no product change is a real result.** It means the loop asked
+three models and the product had nothing left to answer on the things they
+raised, which is a different and more useful signal than a fix.
