@@ -1,0 +1,78 @@
+{
+  "model": "bytedance-seed/seed-2.0-code",
+  "elapsed_s": 80.4,
+  "usage": {
+    "prompt_tokens": 5266,
+    "completion_tokens": 5071,
+    "total_tokens": 10337,
+    "cost": 0.017846,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.017846,
+      "upstream_inference_prompt_cost": 0.002633,
+      "upstream_inference_completions_cost": 0.015213
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 4053,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png"
+  ],
+  "items": [
+    {
+      "id": "loading-progress-bar-empty",
+      "title": "Loading screen progress bar has no fill indicator",
+      "what": "On the ShoeMoney pre-boot loading screen (first screenshot), the horizontal progress bar directly below \"Downloading the game\" text is an empty outlined bar with no colored fill segment to display download progress.",
+      "why": "This is the first screen a player encounters; lack of progress feedback removes any sense of how long the load will take, increasing early user churn.",
+      "how": "Add a warm tungsten-gold fill (matching the \"FIGHT\" button's gold tone) that animates proportionally to actual download/load progress; match the fill's color to the game's existing warm HUD palette for consistency."
+    },
+    {
+      "id": "pre-fight-controls-unlabeled-hidden",
+      "title": "Touch controls are fully hidden/unlabeled during pre-fight countdown",
+      "what": "On pre-fight countdown screens (screenshots with \"FIGHT \u00b7 3\" / \"FIGHT \u00b7 2\" buttons), the two bottom touch joysticks are nearly fully transparent with no text labels or directional guides. By contrast, active fight screens show the same joysticks with clear labels (\"MOVE & JUMP\", \"STRIKE\") and directional prompts.",
+      "why": "New players have no way to preview or learn controls before the fight begins, leading to confused, missed inputs in the opening seconds of the round.",
+      "how": "Keep joysticks and all their labels/directional guides fully visible during pre-fight countdown; optionally dim them slightly to indicate they are inactive, but retain all text so players can review controls before the fight starts."
+    },
+    {
+      "id": "countdown-button-number-ambiguous",
+      "title": "Countdown numbers on fight/rematch buttons are unclear",
+      "what": "The pre-fight \"FIGHT\" and post-fight \"REMATCH\" buttons (e.g., \"FIGHT \u00b7 2\", \"REMATCH \u00b7 8\") display numbers separated only by a small dot, with no visual cue that these are second countdown timers (not round numbers, match counts, or required taps).",
+      "why": "Players cannot tell how long they will wait for the fight/rematch to start, or if they need to tap the button to trigger the action, leading to frustration and confusion.",
+      "how": "Add a clear timer indicator: either suffix the number with \"s\" (e.g., \"FIGHT \u00b7 2s\") to indicate seconds, or add a small circular countdown progress ring around the number to signal it is a ticking timer. Add a \"Tap to skip\" sub-label if tapping the button skips the countdown."
+    },
+    {
+      "id": "score-format-inconsistent",
+      "title": "Score/Point formatting is inconsistent between HUD and win screen",
+      "what": "In the top fight HUD (all fight screens), scores and timer are whole numbers (e.g., \"0\" for fighter scores, \"30\" for round timer). The win screen uses fractional formatting (\"2\u00bd\" for match score, \"0 \u2014 2\u00bd\" as the final result).",
+      "why": "This breaks player understanding of the scoring system; users cannot connect mid-round point gains to the final match score, making the scoring feel opaque.",
+      "how": "Standardize formatting across all score displays: either show fractional points (e.g., \"\u00bd\", \"1\u00bd\") in the fight HUD alongside whole numbers, or reformat the win screen to display round-based scores (e.g., \"0 - 2\" for rounds won) with point totals as subtext, matching the HUD's whole-number style."
+    },
+    {
+      "id": "settings-toggle-state-unclear",
+      "title": "Settings toggles have no visible active/inactive state",
+      "what": "On the Settings screen (7th screenshot), all toggle switches (next to \"Reduced motion\", \"High contrast\", etc.) are identical empty square outlines, with no visual difference between an enabled (active) and disabled (inactive) state.",
+      "why": "Players cannot tell if any accessibility, display, or audio options are enabled, leading to confusion when adjusting settings and inability to customize the game to their needs.",
+      "how": "Design a clear two-state toggle: use a warm gold-filled square (matching the HUD gold) with a white checkmark for active/on states, and keep the existing empty square outline for inactive/off states, ensuring the difference is immediately visible in the game's low-key color palette."
+    }
+  ],
+  "raw": null
+}

@@ -1227,12 +1227,18 @@ body.show-perf #backend {
   }
 }
 
-/* The sticks stay lit behind the settings sheet, the technique reference and
-   the bout card. Nothing behind a dialog is a live touch target, and a full
-   contrast control pad under a wall of text reads as clutter. `:has()` keeps
-   this in CSS — no JS has to know that sheets and controls are related. */
+/* The sticks stand down behind the settings sheet, the technique reference and
+   the post-fight result. Nothing behind a dialog is a live touch target, and a
+   full contrast control pad under a wall of text reads as clutter. `:has()`
+   keeps this in CSS — no JS has to know that sheets and controls are related.
+
+   NOT the pre-fight round card, and that exclusion is load-bearing. The round
+   card is a countdown that ENDS in the fight, not a dialog the player dismisses
+   to get back to one, so dimming its pad meant the controls were at 18% seconds
+   before the player had to use them. Dimming there is the opposite of the
+   intent. */
 body:has(.sheet:not([hidden])) #pad,
-body:has(.result.show) #pad {
+body:has(.result[data-phase='result'].show) #pad {
   opacity: 0.18;
   filter: saturate(0.6);
   transition:
@@ -1248,7 +1254,7 @@ body:has(.result.show) #pad {
 }
 
 body:has(.sheet:not([hidden])) .stick-zone,
-body:has(.result.show) .stick-zone {
+body:has(.result[data-phase='result'].show) .stick-zone {
   background: none;
   border-color: transparent;
   box-shadow: none;
@@ -2128,6 +2134,24 @@ body.high-contrast .result-score {
 
 .result[data-phase='prefight'] .result-detail {
   font-size: var(--text-xs);
+}
+
+/* The countdown digit. Set apart from the verb so it cannot be misread as a
+   point total — which is exactly what a bare numeral on a gold pill next to a
+   scoreboard was. */
+.result-count {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 1.6em;
+  margin-inline-start: var(--space-2);
+  padding: 0 0.4em;
+  border-radius: var(--radius-pill);
+  background: rgb(0 0 0 / 0.22);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.28);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8em;
+  line-height: 1.5;
 }
 
 .result-rematch {

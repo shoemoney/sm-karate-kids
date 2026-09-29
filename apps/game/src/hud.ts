@@ -201,7 +201,25 @@ export class Hud {
   setRematchCountdown(seconds: number): void {
     if (this.resultButton === null) return;
     // Zero means no countdown is running: show the plain label.
-    this.resultButton.textContent = seconds > 0 ? `${this.resultAction} · ${seconds}` : this.resultAction;
+    if (seconds <= 0) {
+      this.resultButton.textContent = this.resultAction;
+      this.resultButton.setAttribute('aria-label', this.resultAction);
+      return;
+    }
+    // "FIGHT · 3" put a bare number on a gold pill next to a score, and a bare
+    // number on that surface reads as a point total. The verb is the label and
+    // the number is a clock, so the clock gets its own mark and the two are
+    // marked apart for anything reading it aloud or navigating by voice.
+    this.resultButton.textContent = this.resultAction;
+    const clock = document.createElement('span');
+    clock.className = 'result-count';
+    clock.setAttribute('aria-hidden', 'true');
+    clock.textContent = String(seconds);
+    this.resultButton.appendChild(clock);
+    this.resultButton.setAttribute(
+      'aria-label',
+      `${this.resultAction}, starting in ${seconds} second${seconds === 1 ? '' : 's'}`,
+    );
   }
 
   private roundTag: HTMLElement | null = null;
