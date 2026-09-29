@@ -1,0 +1,84 @@
+{
+  "model": "x-ai/grok-build-0.1",
+  "elapsed_s": 41.0,
+  "usage": {
+    "prompt_tokens": 13524,
+    "completion_tokens": 5272,
+    "total_tokens": 18796,
+    "cost": 0.0239656,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 128,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0239656,
+      "upstream_inference_prompt_cost": 0.0134216,
+      "upstream_inference_completions_cost": 0.010544
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 4564,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "invisible-loading-progress",
+      "title": "Progress bar is invisible on loading screen",
+      "what": "In the first screenshot, the horizontal bar under 'Downloading the game' is a 1-2px dark brown line on near-black with no visible fill or track.",
+      "why": "Mobile users get zero feedback on whether the game is still downloading or frozen, increasing abandonment before the first screen.",
+      "how": "Make the bar 6-8px tall, use bright warm gold (#C9A227) for both track and fill, and add a small centered percentage label in matching gold."
+    },
+    {
+      "id": "excessive-headroom-arena",
+      "title": "Fighters are tiny due to excessive empty space above",
+      "what": "In every arena view (pre-fight qualifier, in-fight, win screen, etc.), the two characters sit in the bottom 35-40% of the frame with large empty tatami and window areas above their heads.",
+      "why": "On 390px portrait, the core action is too small to read or anticipate moves, especially during fast exchanges or hits.",
+      "how": "Raise the 3D camera target or tighten the vertical frustum so fighters occupy the middle third of the screen while preserving the low cinematic angle."
+    },
+    {
+      "id": "small-touch-sticks",
+      "title": "Virtual sticks are too small for accurate thumb input",
+      "what": "The two bottom circular pads (STANCE left, TECHNIQUE right) are ~90-100px diameter with thin gold borders and sit flush against the screen edge in all fight screens.",
+      "why": "Players will fat-finger or miss directional inputs during live bouts on a phone, directly causing lost points and frustration.",
+      "how": "Increase each stick to 130-140px diameter, add 12px edge padding, enlarge the center touch zone, and add a brighter press highlight ring."
+    },
+    {
+      "id": "tiny-techniques-menu",
+      "title": "Techniques list uses unreadable small text and icons",
+      "what": "In the MOVES panel (screenshot 5), each row has tiny ~12px icons, 11-12px font for names like 'Lunge Punch', and minimal row padding on dark brown.",
+      "why": "Players cannot quickly scan or tap the correct move on a small screen, making the list useless as a reference during or before fights.",
+      "how": "Bump body text to 15px, icons to 22px, add 12px vertical padding per row, and widen the panel or use larger tap targets."
+    },
+    {
+      "id": "callout-obscures-fighters",
+      "title": "Move callouts cover the fighters at key moments",
+      "what": "In the in-fight screenshot with 'LUNGE PUNCH' (and similar 'FRONT KICK', 'IPPON' overlays), the dark rounded banner sits directly across the characters' upper bodies.",
+      "why": "Players cannot see the actual animation or timing of the move being called, breaking visual feedback during the most important moments.",
+      "how": "Move callout text to a thin top banner above the score bar or use a compact floating label anchored to the performing fighter instead of screen-center overlay."
+    }
+  ],
+  "raw": null
+}

@@ -1362,6 +1362,20 @@ body:has(.sheet:not([hidden])) #pad {
   display: none;
 }
 
+/* And once the fight is actually OVER, the pad goes too, for the same reason a
+   sheet's does: there is nothing there to control. Dimming it was right for the
+   pre-fight card, which is a countdown that ends in a fight, and wrong for the
+   result, which is a card about a fight that already happened. seed-1.6 put it
+   as "post-fight controls — unnecessary visibility" and it is exactly right:
+   two dead rings under a REMATCH button read as a control the player has been
+   invited to use and cannot.
+
+   A result card is a card. Round 24 applied that to the sheets; this applies it
+   to the pad. */
+body:has(.result[data-phase='result'].show) #pad {
+  display: none;
+}
+
 body:has(.sheet:not([hidden])) .result[data-phase='result'].show,
 body:has(.result[data-phase='result'].show) #pad {
   opacity: 0.18;

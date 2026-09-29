@@ -1,0 +1,84 @@
+{
+  "model": "bytedance-seed/seed-1.6",
+  "elapsed_s": 54.2,
+  "usage": {
+    "prompt_tokens": 16322,
+    "completion_tokens": 2641,
+    "total_tokens": 18963,
+    "cost": 0.0093625,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0093625,
+      "upstream_inference_prompt_cost": 0.0040805,
+      "upstream_inference_completions_cost": 0.005282
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1916,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-bar-no-progress-indicator",
+      "title": "Add progress percentage and animation to pre-boot loading bar",
+      "what": "On the ShoeMoney pre-boot loading screen (390x844 portrait), the thin brown horizontal progress bar (positioned 70% from the top) lacks a percentage label and animated fill, remaining a static thin line",
+      "why": "Players cannot assess download completion time, increasing the likelihood of abandoning the game before it launches",
+      "how": "Overlay a centered white 14px percentage text label on the progress bar and animate the bar\u2019s fill from left to right with each download increment (e.g., 1% fill per 1% download completion)"
+    },
+    {
+      "id": "pre-fight-controls-no-inactivation-cue",
+      "title": "Visualize inactive control sticks on fight start screens",
+      "what": "On qualifier fight start screens (e.g., the screen with \"STARTING IN 2\" text), the left (STANCE) and right (TECHNIQUE) control sticks (bottom 20% of the frame) have identical gray arrow and dot styling to active sticks, with no opacity or color change to indicate inactivity",
+      "why": "Players attempt to input controls prematurely, leading to confusion about game responsiveness and potential frustration",
+      "how": "Reduce the control sticks\u2019 opacity to 30% and desaturate the arrow and dot colors to 50% saturation until the \"STARTING IN\" timer reaches 0, then restore full opacity and saturation"
+    },
+    {
+      "id": "post-fight-controls-unnecessary-visibility",
+      "title": "Hide control sticks on post-fight result screens",
+      "what": "On the Hasanabi wins post-fight screen, the left (STANCE) and right (TECHNIQUE) control sticks (bottom 20% of the frame) remain visible but inactive, cluttering the area around the \"REMATCH\" button",
+      "why": "Unnecessary UI elements distract players from core post-fight actions (e.g., initiating a rematch), slowing gameplay flow",
+      "how": "Set the display property of the control sticks to none when the post-fight result overlay (e.g., \"HASANABI WINS\") is active"
+    },
+    {
+      "id": "techniques-menu-no-selected-move-highlight",
+      "title": "Add selected move highlight to Techniques menu",
+      "what": "On the Techniques menu screen, none of the move entries (e.g., \"Lunge Punch\") have a visual highlight (e.g., border, background color) to indicate which move is currently selected or referenced in the fight screen",
+      "why": "Players cannot quickly identify their focused move, increasing the time spent planning strategies and reducing gameplay pace",
+      "how": "Add a 2-pixel gold border around the selected move entry and increase the entry\u2019s text opacity to 100% (from 80% for unselected entries)"
+    },
+    {
+      "id": "left-handed-layout-description-low-visibility",
+      "title": "Enhance readability of Left-handed layout toggle description",
+      "what": "On the Settings menu screen, the descriptive text for the \"Left-handed layout\" toggle (\"Swaps which side the stance and technique sticks sit on.\") is 12px, low-contrast gray, and positioned 5px below the toggle label, making it hard to read on portrait phones",
+      "why": "Players miss critical information about control layout customization, leading to suboptimal control setup and reduced gameplay performance",
+      "how": "Increase the text size to 14px, change the color to warm tan (matching HUD accents), and align the text 2px below the toggle label for clear visual association"
+    }
+  ],
+  "raw": null
+}
