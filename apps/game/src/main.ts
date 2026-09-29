@@ -17,6 +17,7 @@ import {
   step,
   type InputFrame,
   type MatchEvent,
+  type FighterState,
   type MatchState,
   type StickPair,
 } from '@smkk/sim';
@@ -451,6 +452,27 @@ async function boot(screen: BootScreen): Promise<void> {
     action?.();
   };
 
+  /**
+   * How far past its own centre a live strike reaches, in world units.
+   *
+   * Presentation only. The camera pulls back while a long limb is out so the
+   * player can see it land; the simulation never knows and the gap it reports
+   * is untouched. Punches are short and are already covered by the body
+   * half-width; kicks are not.
+   */
+  const strikeReach = (a: FighterState, b: FighterState): number => {
+    let reach = 0;
+    for (const fighter of [a, b]) {
+      const move = fighter.move;
+      if (move === null) continue;
+      if (move.kind !== 'strike') continue;
+      if (fighter.phase !== 'startup' && fighter.phase !== 'active') continue;
+      // A kick carries the leg a body length past the hip; a punch does not.
+      reach = Math.max(reach, move.id.includes('kick') || move.id.includes('knee') ? 0.62 : 0.2);
+    }
+    return reach;
+  };
+
   const clearBoutUi = (): void => {
     hud.clearCareer();
     hud.resetScores();
@@ -645,7 +667,7 @@ async function boot(screen: BootScreen): Promise<void> {
       views[index]!.root.position.z = attacking ? 0.08 : index === 0 ? 0.02 : -0.02;
     }
     const [left, right] = state.fighters;
-    stage.frame(spacing.mid, renderX(right.x) - renderX(left.x));
+    stage.frame(spacing.mid, renderX(right.x) - renderX(left.x), false, performance.now(), strikeReach(left, right));
     juice.update(now, frameDt);
     juice.applyCamera(now);
     hud.update(state, now);

@@ -580,7 +580,7 @@ export class Stage {
    * and never reaches the simulation, which is fed fixed steps from the clock in
    * the caller.
    */
-  frame(midpointX: number, gap: number, immediate = false, nowMs = performance.now()): void {
+  frame(midpointX: number, gap: number, immediate = false, nowMs = performance.now(), reach = 0): void {
     const aspect = this.width / Math.max(this.height, 1);
     const halfFov = (FOV * Math.PI) / 360;
     const tan = Math.tan(halfFov);
@@ -595,7 +595,18 @@ export class Stage {
     // The gap is measured centre to centre, but a fighter is not a point: a
     // wide lunge stance throws a foot well past its own centre, and framing on
     // the gap alone sliced that foot off at the frame edge on the strike pose.
-    const halfWidth = Math.max(MIN_HALF_WIDTH, Math.abs(gap) / 2 + margin + body);
+    // `reach` is how far past its own centre the currently-extended limb
+    // reaches. A fighter is framed by their body half-width, which covers a
+    // punch, but a back kick or a roundhouse extends most of a body length
+    // beyond the fighter's origin — and the frame was slicing that foot off at
+    // the edge exactly when it was landing.
+    //
+    // gpt-5.6-sol-pro put it as "keep both fighters fully visible during scoring
+    // hits", and a burst of 140 real frames found 15 with a fighter's pixels
+    // against the stage edge; the sampled one is a scored back kick with the
+    // foot cut off by the frame. That is the outcome of the only verb in the
+    // game, hidden at the moment it happens.
+    const halfWidth = Math.max(MIN_HALF_WIDTH, Math.abs(gap) / 2 + margin + body + reach);
     const target = Math.max(FRAME_HALF_HEIGHT / tan, halfWidth / (aspect * tan)) * 1.04;
 
     const ease = immediate ? 1 : 0.07;
