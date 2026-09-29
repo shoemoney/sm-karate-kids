@@ -1832,3 +1832,43 @@ clip, the tip contrast — were not found by looking harder at those frames. The
 were found by asking what a frame *cannot* show. The set has been thoroughly
 mined and it has nothing left, and the models are correctly reporting what they
 can actually see, which is a set of screenshots of a game at 0–0.
+
+### Round 55 — the instrument is extended, and it pays immediately — `83ae3f3`, `0f5b2a1`
+
+Round 54 returned an all-clear — fifteen findings, fifteen stale or refused —
+and the honest reading is that the *set* is exhausted, not the product. Every
+frame in it is the first fifteen seconds of a game.
+
+`16-phone-in-play` is now **played**, not posed: real CDP touch input on both
+zone anchors, the same grammar the e2e suite drives, run until the referee
+awards a point. Verified — 1–0, clock at 29. Round 43 tried this three times by
+forcing the DOM text and removed all three, because each lost to the HUD's
+per-frame write. *Posing a value the render loop owns cannot work.*
+
+**The first model shown the new frame found a real defect in the previous
+round's own fix.** gpt-5.6-terra-pro: "keep half-point scores on one readable
+baseline" — the stacked fraction built in round 53 used
+`vertical-align: baseline` on a column flex container, which aligns to the
+*first* item's baseline, so it sat at cap height reading as a superscript.
+
+Same reviewer, same review set, one round apart. The second found something the
+first could not, **not because the model got smarter but because it was shown a
+state that had never been photographed.** That is the entire argument for
+extending the instrument, in one concrete instance.
+
+### Known unstable gate — `boot.spec.ts` typing/focus pair
+
+Two tests in that file flake in the full suite and pass in isolation, on this
+tree and on clean `main`:
+
+- "a result card never pulls focus away from someone typing" — dies part-way
+  through a full 1800-tick bout with `Target page, context or browser has been
+  closed`. Passes at 31.5s on a settled machine, fails at 21–50s on a busy one.
+- "game keys still type into a text field" — failed once in 1.0s in a full run,
+  passes every time in isolation.
+
+Both are the typing/focus cases, and the pre-boot card's own rule is that it
+must never call `focus()`. **The two tests that guard that rule are the two that
+flake**, which is worth more than either failure: the rule is load-bearing and
+its coverage is the least reliable in the suite. Fixing that is a real piece of
+work and it is not something this review loop found.
