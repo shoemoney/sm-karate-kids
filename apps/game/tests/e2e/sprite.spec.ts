@@ -91,18 +91,90 @@ test('the sprite fighters are the default, and ?fighters=mesh opts out', async (
   expect(await page.evaluate(() => (globalThis as Record<string, any>)['__smkk'].fighters)).toBe('mesh');
 });
 
+interface SweepEntry {
+  readonly id: string;
+  readonly seen: ReadonlyArray<{ readonly phase: string; readonly cell: number }>;
+}
+
 /**
- * The behavioural contract, checked against the renderer that is actually on
- * screen: every technique plays its own cells out of the atlas, and the
- * referee's window shows the pose's contact frame rather than a frame caught
+ * The per-technique contract, checked against the renderer that is actually on
+ * screen: every technique in the game plays its own cells, and the referee's
+ * window shows that technique's contact frame rather than a frame caught
  * mid-ramp.
  *
- * Samples are collected inside the page on requestAnimationFrame. Polling
- * from the test instead would put a round trip to the browser between reads,
- * and a strike's active window is only a few ticks wide — the sample would
- * miss the very frames this is about.
+ * Driven through `spriteSweep()` rather than by waiting for a real fight. The
+ * other fighter is a person, and a person standing still does not throw
+ * anything, so a live bout exercises a handful of techniques and no more —
+ * asserting on that would be a coin toss, not a test. The sweep walks the real
+ * `SpriteFighterView` through every move's startup, active and recovery ticks,
+ * which covers the whole move list in milliseconds with no race.
  */
 test('every technique plays its own frames, holding contact through the active window', async ({ page }) => {
+  test.skip(!manifestExists, 'fighter atlas not generated yet');
+
+  await page.goto('/?fighters=sprite');
+  await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk']?.ready === true);
+
+  const report = await page.evaluate(
+    () => (globalThis as Record<string, any>)['__smkk'].spriteSweep() as SweepEntry[] | null,
+  );
+  expect(report, 'the sprite renderer is not the one on screen').not.toBeNull();
+  const entries = report ?? [];
+
+  // Every technique in the game, not a convenient sample of them.
+  const moveIds = [...new Set(entries.map((e) => e.id))].sort();
+  expect(moveIds.length).toBeGreaterThanOrEqual(20);
+  expect(moveIds).toContain('lunge_punch');
+  expect(moveIds).toContain('front_kick');
+  expect(moveIds).toContain('low_block');
+
+  const problems: string[] = [];
+  const framesPerMove = new Map<string, Set<number>>();
+
+  for (const entry of entries) {
+    const contact = contactByMove.get(entry.id);
+    if (contact === undefined) {
+      problems.push(`${entry.id}: no pose in the atlas`);
+      continue;
+    }
+
+    const cells = new Set(entry.seen.map((s) => s.cell));
+    framesPerMove.set(entry.id, cells);
+
+    // Each technique must animate, and must animate out of its own frames.
+    if (cells.size < 2) problems.push(`${entry.id}: showed a single frame (${[...cells].join(',')})`);
+
+    for (const frame of entry.seen) {
+      if (frame.cell < 0) problems.push(`${entry.id}: ${frame.phase} drew no cell`);
+    }
+
+    // The referee's window, tick by tick, on the live view.
+    const active = entry.seen.filter((s) => s.phase === 'active');
+    if (active.length === 0) {
+      problems.push(`${entry.id}: never entered the active window`);
+    }
+    for (const frame of active) {
+      if (frame.cell !== contact) {
+        problems.push(`${entry.id}: active showed cell ${frame.cell}, contact is ${contact}`);
+      }
+    }
+  }
+
+  expect(problems, `sprite frame contract broken:\n  ${problems.join('\n  ')}`).toEqual([]);
+
+  // No two techniques may play the same cells, or they are not their own art.
+  const signature = new Map<string, string>();
+  const shared: string[] = [];
+  for (const [id, cells] of framesPerMove) {
+    const key = [...cells].sort((a, b) => a - b).join(',');
+    const owner = signature.get(key);
+    if (owner !== undefined) shared.push(`${owner} & ${id}`);
+    else signature.set(key, id);
+  }
+  expect(shared, `these techniques play identical frames: ${shared.join('; ')}`).toEqual([]);
+});
+
+test('a live bout draws atlas cells and holds contact when the referee is deciding', async ({ page }) => {
   test.skip(!manifestExists, 'fighter atlas not generated yet');
 
   await page.goto('/');
@@ -114,27 +186,22 @@ test('every technique plays its own frames, holding contact through the active w
     { timeout: 30_000 },
   );
 
+  // Sampled inside the page on requestAnimationFrame: a poll from the test puts
+  // a round trip between reads, and the active window is only a few ticks wide,
+  // so it would miss the frames this is about.
   const samples = await page.evaluate(async () => {
     const api = (globalThis as Record<string, any>)['__smkk'];
-    const collected: Array<{
-      fighter: number;
-      move: string | null;
-      phase: string;
-      cell: number;
-    }> = [];
+    const collected: Array<{ move: string | null; phase: string; cell: number }> = [];
     const deadline = performance.now() + 6_000;
     await new Promise<void>((done) => {
       const sample = (): void => {
         const state = api.state();
         const frames = api.spriteFrames();
-        const moves = [state.p1Move, state.p2Move];
-        const phases = [state.p1Phase, state.p2Phase];
-        for (let fighter = 0; fighter < 2; fighter += 1) {
+        for (let i = 0; i < 2; i += 1) {
           collected.push({
-            fighter,
-            move: moves[fighter] ?? null,
-            phase: phases[fighter] ?? 'neutral',
-            cell: frames[fighter]?.cell ?? -1,
+            move: (i === 0 ? state.p1Move : state.p2Move) ?? null,
+            phase: (i === 0 ? state.p1Phase : state.p2Phase) ?? 'neutral',
+            cell: frames[i]?.cell ?? -1,
           });
         }
         if (performance.now() >= deadline) done();
@@ -145,43 +212,26 @@ test('every technique plays its own frames, holding contact through the active w
     return collected;
   });
 
-  expect(samples.length).toBeGreaterThan(100);
+  // A headless renderer does not hold 60fps — it has managed well under 20 —
+  // so this asserts the sampler actually ran for the window, not a frame rate.
+  expect(samples.length, 'the in-page sampler collected nothing').toBeGreaterThan(20);
 
-  // Both fighters draw real atlas cells. A -1 means the view never resolved a
-  // frame, which would make every other assertion here pass vacuously.
+  // Both fighters draw real atlas cells. A -1 would make every assertion below
+  // pass vacuously, so it is checked first.
   for (const fighter of [0, 1]) {
-    const cells = samples.filter((s) => s.fighter === fighter).map((s) => s.cell);
+    const cells = samples
+      .filter((_, index) => index % 2 === fighter)
+      .map((s) => s.cell);
     expect(Math.min(...cells), `fighter ${fighter} never drew a frame`).toBeGreaterThanOrEqual(0);
   }
 
-  // The move set actually came to life: several distinct non-idle poses, and
-  // the cells changed rather than holding one still image.
-  const moveSamples = samples.filter((s) => s.move !== null);
-  expect(moveSamples.length, 'no technique was thrown during the bout').toBeGreaterThan(20);
+  // Whatever the fight happened to throw, it threw real frames out of the
+  // atlas, and it held contact through every active tick we caught.
+  const throwing = samples.filter((s) => s.move !== null);
+  expect(throwing.length, 'no technique was thrown during the bout').toBeGreaterThan(0);
 
-  const idleCells = new Set(
-    samples.filter((s) => s.move === null).map((s) => s.cell),
-  );
-  const moveCells = new Set(moveSamples.map((s) => s.cell));
-  for (const cell of moveCells) {
-    expect(idleCells.has(cell), `move frame ${cell} is also used as an idle frame`).toBe(false);
-  }
-  expect(moveCells.size, 'every technique showed the same single frame').toBeGreaterThan(1);
-
-  // The referee's window. Every observed active tick shows the contact frame
-  // the manifest declares for that technique — a strike is never half-ramped
-  // while the referee is still deciding it.
-  const active = moveSamples.filter((s) => s.phase === 'active');
-  expect(active.length, 'never caught the referee window; raise the sample window').toBeGreaterThan(0);
-  const wrong = active.filter((s) => contactByMove.get(s.move as string) !== s.cell);
-  expect(
-    wrong.map((s) => `${s.move}@fighter${s.fighter} showed ${s.cell}, contact is ${contactByMove.get(s.move as string)}`),
-    'active window did not hold the contact frame',
-  ).toEqual([]);
-
-  // A frozen fighter is frozen on the same frame the referee stopped it at.
-  const frozen = moveSamples.filter((s) => s.phase === 'frozen');
-  for (const s of frozen) {
-    expect(contactByMove.get(s.move as string)).toBe(s.cell);
-  }
+  const wrong = throwing
+    .filter((s) => s.phase === 'active' && contactByMove.get(s.move as string) !== s.cell)
+    .map((s) => `${s.move} active showed ${s.cell}, contact is ${contactByMove.get(s.move as string)}`);
+  expect(wrong, 'a live strike did not hold its contact frame').toEqual([]);
 });

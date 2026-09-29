@@ -10,6 +10,8 @@ import {
   scoreBout,
   tallyCall,
   heightOf,
+  beginMove,
+  createFighter,
   createMatch,
   indexMoves,
   step,
@@ -585,6 +587,57 @@ async function boot(): Promise<void> {
        */
       spriteFrames: () =>
         views.map((view) => view.frameInfo?.() ?? { cell: -1, pose: 'none', phase: 'neutral' as const }),
+      /**
+       * Drives every technique in the game through the live view, one tick at
+       * a time, and reports the atlas cell the view actually drew.
+       *
+       * A real bout only ever throws a handful of techniques — the other
+       * fighter is a person, and a person standing still does not swing — so
+       * waiting for the fight to cover the whole move list is not a test, it
+       * is a coin toss. This walks the real `SpriteFighterView` through each
+       * move's startup, active and recovery ticks instead, which covers every
+       * technique in milliseconds and cannot race the render loop. The view is
+       * restored by the next animation frame, and no frame is drawn during the
+       * sweep because it is synchronous.
+       */
+      spriteSweep: () => {
+        const view = views[0];
+        if (view?.frameInfo === undefined) return null; // the mesh rig has no cells
+        const moves = indexMoves(content);
+        const report: Array<{
+          id: string;
+          seen: Array<{ phase: string; cell: number }>;
+        }> = [];
+
+        for (const move of moves.values()) {
+          // A throwaway fighter, stepped through the phase sequence the
+          // simulation would produce for this move.
+          const fighter = createFighter(content.fighters[0]!, -1.5, 1);
+          beginMove(fighter, move);
+          const seen: Array<{ phase: string; cell: number }> = [];
+          const total = move.startup + move.active + move.recovery;
+
+          for (let tick = 0; tick < total; tick += 1) {
+            if (tick < move.startup) {
+              fighter.phase = 'startup';
+              fighter.phaseTicks = tick;
+            } else if (tick < move.startup + move.active) {
+              fighter.phase = 'active';
+              fighter.phaseTicks = tick - move.startup;
+            } else {
+              fighter.phase = 'recovery';
+              fighter.phaseTicks = tick - move.startup - move.active;
+            }
+            view.apply(fighter, tick);
+            // Read the cell back after every apply: frameInfo() hands out a
+            // fresh record each call, so capturing one before the loop would
+            // report the same stale cell for every tick.
+            seen.push({ phase: fighter.phase, cell: view.frameInfo()?.cell ?? -1 });
+          }
+          report.push({ id: move.id, seen });
+        }
+        return report;
+      },
       checksum: () => checksumOf(state),
       tournament: () => ({
         active: tournament,

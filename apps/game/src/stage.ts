@@ -14,12 +14,14 @@ import {
   Mesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
+  NoColorSpace,
   PerspectiveCamera,
   PlaneGeometry,
   PointLight,
   RepeatWrapping,
   Scene,
   TextureLoader,
+  type Material,
 } from 'three/webgpu';
 import type { Texture } from 'three/webgpu';
 import type { ArenaSpec } from '@smkk/sim';
@@ -39,6 +41,31 @@ const EDGE_MARGIN = 0.6;
 const BACKDROP_Z = -13.9;
 const CROWD_Z = -8.2;
 const SHAFT_Z = -3.2;
+
+/** How far the contact shadow reaches across the mat, and how deep it smears. */
+const SHADOW_SPAN = 0.98;
+const SHADOW_DEPTH = 0.66;
+/** Peak alpha right under the feet. The falloff lives in the texture, not here. */
+const SHADOW_OPACITY = 0.44;
+/**
+ * The key sits up and at +X+Z, so a body throws its shadow the other way. A
+ * perfectly centred blob is the single clearest tell that nobody is standing
+ * under a lamp.
+ */
+const SHADOW_OFFSET_X = -0.06;
+const SHADOW_OFFSET_Z = -0.05;
+
+/** Radius and strength of the warm pool of light each fighter stands in. */
+const POOL_RADIUS = 1.5;
+const POOL_OPACITY = 0.24;
+
+/**
+ * How much of the room's actual light to lend the unlit sprite planes, as a
+ * chroma shift with the brightness held at 1. Full strength grades the fighter
+ * sepia; zero leaves them pasted on. This is the point where the effect reads
+ * without anyone being able to say why the frame suddenly looks warmer.
+ */
+const TINT_STRENGTH = 0.7;
 
 function loadTexture(url: string, opts: { srgb?: boolean; repeat?: number } = {}): Promise<Texture> {
   return new Promise<Texture>((resolve, reject) => {
@@ -76,9 +103,19 @@ export class Stage {
   private width = 1;
   private height = 1;
   private distance = 8;
-  private readonly leftShadow: Mesh<CircleGeometry, MeshBasicMaterial>;
-  private readonly rightShadow: Mesh<CircleGeometry, MeshBasicMaterial>;
-  private readonly pool: Mesh<CircleGeometry, MeshBasicMaterial>;
+  private readonly leftShadow: Mesh<PlaneGeometry, MeshBasicMaterial>;
+  private readonly rightShadow: Mesh<PlaneGeometry, MeshBasicMaterial>;
+  private readonly leftPool: Mesh<CircleGeometry, MeshBasicMaterial>;
+  private readonly rightPool: Mesh<CircleGeometry, MeshBasicMaterial>;
+  /** The light the unlit fighter planes are tinted toward, at unit brightness. */
+  private readonly fighterTint = new Color(1, 1, 1);
+  /**
+   * Materials that want this room's light but are built out of a material class
+   * that ignores it. Collected once, then re-tinted every frame — see
+   * {@link applyRoomLight} for why every frame.
+   */
+  private readonly unlitCutouts: MeshBasicMaterial[] = [];
+  private unlitScanned = false;
 
   constructor(arena: ArenaSpec, baseUrl: string) {
     const backdrop = new Color(arena.backdropColor);
@@ -144,7 +181,8 @@ export class Stage {
     const rim = new DirectionalLight('#7fb2e6', 1.1);
     rim.position.set(-5, 4, -3);
     this.scene.add(rim);
-    this.scene.add(new AmbientLight('#3a4658', 0.32));
+    const ambient = new AmbientLight('#3a4658', 0.32);
+    this.scene.add(ambient);
 
     // An overhead dojo lamp with real falloff, so the mat brightens toward the
     // centre of the ring instead of reading as one flat wash from the two
@@ -153,36 +191,57 @@ export class Stage {
     lamp.position.set(0, 5.4, -1.5);
     this.scene.add(lamp);
 
-    const shadowGeometry = new CircleGeometry(0.34, 24);
+    // The sprite fighters are drawn with a material that discards these lights,
+    // so the stage hands them the colour of the ones that actually reach them
+    // instead. Only the key and the ambient qualify — see planeChroma.
+    this.fighterTint.copy(planeChroma([key, ambient]));
+
+    // One soft blob per fighter, tight where the body meets the mat and gone
+    // well before the edge. A uniform disc of solid black reads as a hole cut in
+    // the floor: no falloff, no contact, and the hard rim is the giveaway.
+    const shadowGeometry = new PlaneGeometry(1, 1);
     const shadowMaterial = new MeshBasicMaterial({
       color: '#000000',
+      map: contactShadow(),
       transparent: true,
-      opacity: 0.38,
+      opacity: SHADOW_OPACITY,
       side: DoubleSide,
+      // The shadow darkens the light pool it sits on, so it is composited after
+      // it rather than left to a depth sort between two coplanar quads.
+      depthWrite: false,
     });
     this.leftShadow = new Mesh(shadowGeometry, shadowMaterial);
     this.rightShadow = new Mesh(shadowGeometry, shadowMaterial.clone());
     for (const blob of [this.leftShadow, this.rightShadow]) {
       blob.rotation.x = -Math.PI / 2;
-      blob.position.y = 0.008;
+      blob.scale.set(SHADOW_SPAN, SHADOW_DEPTH, 1);
+      blob.position.set(SHADOW_OFFSET_X, 0.008, SHADOW_OFFSET_Z);
+      blob.renderOrder = 2;
       this.scene.add(blob);
     }
 
-    // A pool of warm light on the mat that follows the fight, so wherever the
-    // exchange goes, that is where the room is brightest.
-    this.pool = new Mesh(
-      new CircleGeometry(3.2, 48),
+    // A pool of warm light on the mat per fighter, so the two of them are the
+    // brightest things in the room instead of one shared wash that ignores where
+    // either of them is standing. Overlapping during a clinch reads as the
+    // centre of the ring going bright, which is what a lamp does.
+    const poolGeometry = new CircleGeometry(POOL_RADIUS, 40);
+    this.leftPool = new Mesh(
+      poolGeometry,
       new MeshBasicMaterial({
         map: radialGlow('#ffcf8a'),
         transparent: true,
-        opacity: 0.32,
+        opacity: POOL_OPACITY,
         depthWrite: false,
         blending: AdditiveBlending,
       }),
     );
-    this.pool.rotation.x = -Math.PI / 2;
-    this.pool.position.set(0, 0.004, 0.2);
-    this.scene.add(this.pool);
+    this.rightPool = new Mesh(poolGeometry, this.leftPool.material.clone());
+    for (const glow of [this.leftPool, this.rightPool]) {
+      glow.rotation.x = -Math.PI / 2;
+      glow.position.set(0, 0.004, 0.2);
+      glow.renderOrder = 1;
+      this.scene.add(glow);
+    }
 
     // The generated art layer. Every piece is optional: a missing asset leaves
     // the procedural room exactly as it was, so the game still boots and still
@@ -214,7 +273,7 @@ export class Stage {
       // The generated mat is a bright, evenly-lit plate. Left at full strength
       // it out-competes the fighters for attention and the frame reads as one
       // flat wash. Tinted down and roughened so the mat sits UNDER the fight.
-      material.color.set('#8d7458');
+      material.color.set('#b89668');
       material.roughness = 0.97;
       material.needsUpdate = true;
       // The procedural seams exist to make spacing legible when there is no
@@ -232,7 +291,7 @@ export class Stage {
         new PlaneGeometry(34, 15),
         new MeshBasicMaterial({ map: backdrop, toneMapped: true }),
       );
-      panel.material.color.set('#7d6e5e');
+      panel.material.color.set('#968675');
       panel.position.set(0, 5.4, BACKDROP_Z + 0.05);
       this.scene.add(panel);
     }
@@ -324,9 +383,49 @@ export class Stage {
     this.camera.position.set(x, 1.18, this.distance);
     this.camera.lookAt(x, 1.18, 0);
 
-    this.pool.position.x += (midpointX - this.pool.position.x) * (immediate ? 1 : 0.08);
+    const follow = immediate ? 1 : 0.08;
+    this.leftPool.position.x += (midpointX - gap / 2 - this.leftPool.position.x) * follow;
+    this.rightPool.position.x += (midpointX + gap / 2 - this.rightPool.position.x) * follow;
     this.leftShadow.position.x = midpointX - gap / 2;
     this.rightShadow.position.x = midpointX + gap / 2;
+    this.applyRoomLight();
+  }
+
+  /**
+   * Hands the unlit fighter planes the colour of the light they are standing in.
+   *
+   * `MeshBasicMaterial` throws away every light in the scene, so a photoreal
+   * cutout drawn with one is lit by nothing at all while the mat around it is
+   * lit by a warm key. That mismatch — not the resolution, not the outline — is
+   * what makes a sprite read as pasted on. Multiplying the material colour is
+   * the only lever left, and it is a real one: the tint is the chromaticity of
+   * the light where the fighters stand, normalised to unit brightness so
+   * nothing about the exposure moves.
+   *
+   * Re-applied every frame on purpose. The impact flash writes
+   * `color.setScalar(1 + amount * 2.4)`, a pure brightness multiplier that
+   * would discard a tint left sitting on the material. Painting the resting
+   * tint back over on the way into the next frame means the flash still blows
+   * out to white while it lasts and the fighter lands back in the room when it
+   * ends, without the flash path having to know any of this.
+   */
+  private applyRoomLight(): void {
+    if (!this.unlitScanned) {
+      this.unlitScanned = true;
+      this.scene.traverse((object) => {
+        if (!(object instanceof Mesh)) return;
+        const material = object.material as Material | Material[];
+        if (!(material instanceof MeshBasicMaterial)) return;
+        // A cutout: a baked image behind a hard alpha edge. That is exactly the
+        // case where a light the material ignores shows up as a seam between the
+        // fighter and the room. It also keeps this off everything else in the
+        // scene — the stage's own planes are opaque or already hand-tinted, and
+        // the juice particles carry no map at all.
+        if (material.map === null || material.alphaTest <= 0) return;
+        this.unlitCutouts.push(material);
+      });
+    }
+    for (const material of this.unlitCutouts) material.color.copy(this.fighterTint);
   }
 }
 
@@ -390,4 +489,70 @@ function radialGlow(color: string): CanvasTexture {
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
   return texture;
+}
+
+/**
+ * A contact shadow: opaque black under the feet, gone before the edge of the
+ * quad, and gone quickly on the way out. The stops matter more than the peak
+ * alpha — a real contact shadow is small, tight and soft, and what makes a fake
+ * one look punched-out is a long flat plateau with a hard rim on the end of it.
+ */
+function contactShadow(): CanvasTexture {
+  const size = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const g = canvas.getContext('2d');
+  if (g !== null) {
+    const gradient = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    gradient.addColorStop(0, 'rgba(0,0,0,1)');
+    gradient.addColorStop(0.22, 'rgba(0,0,0,0.86)');
+    gradient.addColorStop(0.45, 'rgba(0,0,0,0.42)');
+    gradient.addColorStop(0.7, 'rgba(0,0,0,0.13)');
+    gradient.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gradient;
+    g.fillRect(0, 0, size, size);
+  }
+  const texture = new CanvasTexture(canvas);
+  // Only the alpha channel carries anything, so this is not a colour map and
+  // must not be decoded out of sRGB on the way in.
+  texture.colorSpace = NoColorSpace;
+  return texture;
+}
+
+/**
+ * The colour a plane facing +Z at the fighters' spot is standing in, taken from
+ * the lights this class builds, returned at unit brightness.
+ *
+ * Only what such a plane can physically see is counted. Its normal is +Z, so a
+ * directional light contributes `N·L` and a light behind the plane contributes
+ * nothing at all: the cool rim is behind them and the lamp is up and behind
+ * them, and both are excluded here for that reason rather than by taste. The
+ * ambient term is the one light with no direction, so it goes in whole. The
+ * weights are light intensities and the one `N·L` above — no shading model is
+ * being reproduced here, only the ratio between the two colours that reach a
+ * fighter, which is the part a missing light actually shows up in.
+ */
+function planeChroma(lights: readonly (DirectionalLight | AmbientLight)[]): Color {
+  const sum = new Color(0, 0, 0);
+  for (const light of lights) {
+    const weight =
+      light instanceof AmbientLight
+        ? light.intensity
+        : // Both directional lights target the origin, so their position is
+          // already the direction from the surface to the light. Only the z
+          // component matters: N is +Z, so N·L is L.z.
+          light.intensity * (Math.max(0, light.position.z) / Math.max(light.position.length(), 1e-6));
+    sum.r += light.color.r * weight;
+    sum.g += light.color.g * weight;
+    sum.b += light.color.b * weight;
+  }
+  const peak = Math.max(sum.r, sum.g, sum.b, 1e-6);
+  // Unit peak keeps this a hue shift. Anything that multiplies brightness is
+  // the impact flash's job, and it is expecting a plain scalar here.
+  sum.r /= peak;
+  sum.g /= peak;
+  sum.b /= peak;
+  sum.lerp(new Color(1, 1, 1), 1 - TINT_STRENGTH);
+  return sum;
 }

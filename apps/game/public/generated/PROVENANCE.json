@@ -47,5 +47,26 @@
     "holder": "Jeremy Schoemaker",
     "approved": true,
     "notes": "Alpha-cut particle sprite lit inside the light shaft. Original PNG master is kept out of the shipped bundle in assets/generated/. See docs/asset-provenance.md."
+  },
+  "generated/impact-flash.webp": {
+    "source": "Original impact-flash artwork created for this project by Jeremy Shoe Maker, downscaled and converted to WebP by tools/optimize-art.sh",
+    "license": "Proprietary artwork of Jeremy Shoe Maker. NOT covered by this repository's MIT grant.",
+    "holder": "Jeremy Shoe Maker",
+    "approved": true,
+    "notes": "Alpha-cut impact bloom sprite drawn on a hit. Original PNG master is kept out of the shipped bundle in assets/generated/. See docs/asset-provenance.md."
+  },
+  "generated/impact-ring.webp": {
+    "source": "Original impact-ring artwork created for this project by Jeremy Shoe Maker, downscaled and converted to WebP by tools/optimize-art.sh",
+    "license": "Proprietary artwork of Jeremy Shoe Maker. NOT covered by this repository's MIT grant.",
+    "holder": "Jeremy Shoe Maker",
+    "approved": true,
+    "notes": "Alpha-cut expanding shockwave sprite drawn on a hit. Original PNG master is kept out of the shipped bundle in assets/generated/. See docs/asset-provenance.md."
+  },
+  "generated/title-backdrop.webp": {
+    "source": "Original title-backdrop artwork created for this project by Jeremy Shoe Maker, downscaled and converted to WebP by tools/optimize-art.sh",
+    "license": "Proprietary artwork of Jeremy Shoe Maker. NOT covered by this repository's MIT grant.",
+    "holder": "Jeremy Shoe Maker",
+    "approved": true,
+    "notes": "Alpha-cut title-screen backdrop plate. Original PNG master is kept out of the shipped bundle in assets/generated/. See docs/asset-provenance.md."
   }
 }

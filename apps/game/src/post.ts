@@ -49,7 +49,7 @@ export function createPostStack(
   const bloomStrength = opts.bloomStrength ?? 0.42;
   const grainAmount = opts.grain ?? 0.06;
   const sat = opts.saturation ?? 1.14;
-  const vig = opts.vignetteIntensity ?? 0.52;
+  const vig = opts.vignetteIntensity ?? 0.38;
 
   const pipeline = new RenderPipeline(renderer);
 

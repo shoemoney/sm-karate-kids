@@ -1,18 +1,252 @@
-/* Mobile-first. 390x844 portrait is the design baseline; everything wider is an
-   adaptation of this layout, not the other way round. */
+/* ==========================================================================
+   SM Karate Kids — HUD & controls design system
+   --------------------------------------------------------------------------
+   Mobile-first. 390x844 portrait is the design baseline; everything wider is
+   an adaptation of this layout, not the other way round.
+
+   VISUAL IDENTITY — "Tungsten & Tatami"
+   The dojo is lit by one warm overhead lamp after dark: amber/tungsten key,
+   a painted shoji glowing pale behind, near-black tatami, the crowd in
+   silhouette. Every value below is a lamp colour. Nothing here is a neutral
+   grey-blue; a cool note is allowed only where the moonlight spills through
+   that paper, and it is always desaturated toward the room.
+
+   The HUD sits UNDER the render. Surfaces are warm, low-key and translucent;
+   accents are sparse. The single bright colour on screen at rest is the
+   clock, because that is the only thing a karate player is actually watching.
+
+   TOKEN RULES (the reason high-contrast works at all)
+   1. Every token is declared once, on :root.
+   2. A token NEVER contains a literal colour. It either IS the leaf value, or
+      it references other tokens. That is what lets `body.high-contrast` — or
+      anything else — re-point one value and have it propagate everywhere.
+   3. No colour literal may appear outside :root / body.high-contrast. If you
+      need a new colour, add a token; do not inline it.
+   4. A decorative alpha is itself a token, so contrast mode can flatten it.
+   ========================================================================== */
 
 :root {
-  --ink: #0c1018;
-  --ink-soft: #151c28;
-  --edge: rgba(255, 255, 255, 0.08);
-  --text: #eef2f8;
-  --muted: #8b97ab;
-  --blue: #1e90d6;
-  --blue-deep: #0b6fb0;
-  --amber: #e7b657;
-  --red: #c8443c;
-  --pad-height: clamp(210px, 34dvh, 280px);
+  color-scheme: dark;
+
+  /* ---- Typeface stacks ---------------------------------------------------- */
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* ---- Surfaces: the room at night ---------------------------------------- */
+  /* Four warm neutrals. Everything that used to be a hand-picked near-black
+     (#0c1018 / #151c28 / #0a0e15 / #10161f / #1d2836 / #202b3a …) resolves to
+     one of these. */
+
+  --surface-void: #100b08; /* deepest — behind the dojo, under the pad lip */
+  --surface-sunken: #1d1510; /* the pad's leather well */
+  --surface-raised: #251c15; /* plaques, cards, buttons */
+  --surface-overlay: #291f18; /* sheets and dialogs */
+
+  /* ---- Ink ---------------------------------------------------------------- */
+
+  --text: #f6efe6; /* warm off-white, the paper */
+  --text-muted: #b5a693; /* secondary copy */
+  --text-faint: #8e8071; /* tracked micro-labels */
+  --text-ghost: #6f6459; /* machine readouts, resting detents */
+
+  /* ---- Accents ------------------------------------------------------------ */
+
+  --gold: #e8b95c; /* the lamp: clock, primary buttons, active technique stick */
+  --gold-bright: #ffdc9a; /* highlight end of every gold gradient */
+  --gold-deep: #9a6f24; /* shadowed gold, gradient stops */
+  --gold-glow: rgb(232 185 92 / 0.55);
+  --gold-ink: #1a1206; /* text on gold */
+
+  --cool: #9ec3cd; /* moonlight through the shoji: focus, half points, stance stick */
+  --cool-bright: #d6ecf2;
+  --cool-glow: rgb(158 195 205 / 0.5);
+
+  --aka: #d9483c; /* the red gi */
+  --aka-bright: #ff8f84;
+  --aka-dim: #c07068;
+
+  --shiro: #f2f2ef; /* the white gi */
+  --shiro-dim: #a9a59d;
+
+  /* Scoreline identity, taken straight from packages/content/data/fighters.json
+     (`giColor`). These alias the gi colours above on purpose: the HUD must not
+     be able to disagree with the fighter wearing it. */
+  --fighter-0: var(--shiro);
+  --fighter-0-dim: var(--shiro-dim);
+  --fighter-1: var(--aka);
+  --fighter-1-dim: var(--aka-dim);
+
+  --outline: var(--cool); /* focus ring */
+  --check: var(--gold); /* checkbox / accent-color */
+
+  /* ---- Edges -------------------------------------------------------------- */
+
+  --edge-faint: rgb(255 234 205 / 0.06);
+  --edge: rgb(255 234 205 / 0.11);
+  --edge-highlight: rgb(255 240 214 / 0.16); /* the lit top lip of a raised thing */
+  --edge-strong: rgb(255 234 205 / 0.24);
+  --hair: rgb(255 234 205 / 0.14); /* separators */
+  --field: rgb(20 14 9 / 0.72); /* input wells */
+  --field-edge: rgb(255 234 205 / 0.24);
+
+  /* ---- Scrims, plates & overlays (each an alpha, so contrast can flatten) --- */
+
+  --scrim-hud: rgb(14 9 5 / 0.9);
+  --scrim-hud-mid: rgb(14 9 5 / 0.58);
+  --scrim-none: rgb(14 9 5 / 0);
+  --scrim-banner: rgb(10 6 3 / 0.68);
+  --scrim-soft: rgb(12 8 4 / 0.8);
+  --scrim-hard: rgb(9 6 3 / 0.96);
+  --plate: rgb(14 10 6 / 0.78); /* the technique caption's own ground */
+  --plate-text: #f0e6d8;
+  --plaque-top: rgb(38 27 19 / 0.86); /* desktop floating control plaque */
+  --plaque-bottom: rgb(20 14 10 / 0.82);
+  /* A warm lip where the pad meets the mat, and a pool of lamplight under it. */
+  --pad-lip: linear-gradient(180deg, rgb(232 185 92 / 0.07), transparent 22%);
+  --pad-wash: radial-gradient(
+    ellipse 62% 120% at 50% 100%,
+    rgb(232 185 92 / 0.06),
+    transparent 72%
+  );
+  --zone-well: radial-gradient(
+    ellipse 72% 68% at 50% 46%,
+    rgb(232 185 92 / 0.075),
+    transparent 74%
+  ); /* each stick sits in its own pool of lamplight */
+  /* One raking highlight, so a dish reads as a turned object rather than a disc. */
+  --sheen: linear-gradient(158deg, rgb(255 224 178 / 0.07), transparent 46%);
+  --button-edge: rgb(255 255 255 / 0.18);
+  --field-ink: var(--text);
+
+  /* ---- Shadows ------------------------------------------------------------ */
+
+  --shadow-ink: rgb(6 3 1 / 0.6);
+  --shadow-deep: rgb(4 2 1 / 0.78);
+  --shadow-soft: rgb(6 3 1 / 0.42);
+  --shadow-panel:
+    0 1px 0 rgb(255 240 214 / 0.05) inset, 0 0.4rem 1.1rem var(--shadow-soft);
+  --shadow-float: 0 0.6rem 1.8rem var(--shadow-ink);
+  --shadow-gold-glow: 0 0.4rem 1.6rem var(--gold-glow);
+
+  /* ---- Control faces ------------------------------------------------------ */
+
+  --bezel: rgb(232 185 92 / 0.24); /* brass ring around a stick's dish */
+  --bezel-hot: rgb(232 185 92 / 0.52);
+  /* The lit top edge is what stops a dish reading as a hole punched in the pad. */
+  --bezel-rim: inset 0 2px 1px -1px rgb(255 226 176 / 0.28);
+  --bezel-rim-hot: inset 0 1px 0 0 rgb(255 238 200 / 0.4);
+  --bezel-shadow:
+    inset 0 0 0 2px var(--bezel), var(--bezel-rim),
+    inset 0 0.4rem 1.3rem var(--shadow-deep);
+  --bezel-shadow-hot:
+    inset 0 0 0 2px var(--bezel-hot), var(--bezel-rim-hot),
+    inset 0 0.2rem 0.7rem var(--shadow-deep);
+
+  --stick-well: radial-gradient(circle at 50% 30%, #3b2d20, #1e1611 56%, #140e0a 100%);
+  --stick-well-hot: radial-gradient(circle at 50% 38%, #4a3826, #261c14 58%, #17100b 100%);
+
+  --gate: rgb(246 239 230 / 0.17); /* the dead-zone ring you feel for */
+  --gate-hot: rgb(246 239 230 / 0.34);
+  --gate-fill: radial-gradient(circle, rgb(0 0 0 / 0.34), transparent 68%);
+
+  --detent-idle: rgb(246 239 230 / 0.36);
+  --detent-dim: rgb(232 185 92 / 0.42);
+  --detent: 0.9rem;
+  --detent-arm: 0.44rem;
+  --detent-thick: 2.5px;
+
+  --knob-lip: #1b120c; /* the physical shelf the cap rests on */
+  --knob-lit: #a89070;
+  --knob-face: #5b4a3c;
+  --knob-shade: #241b15;
+  --knob-rim: rgb(255 226 176 / 0.34);
+  --knob-rise: 0.35rem;
+  --knob-blur: 0.7rem;
+  --knob: 36%;
+  --pip: 0.34rem;
+
+  /* Never taller than the pad that holds it: --pad-height substitutes
+     textually, so its clamp() folds straight into this calc(). */
+  --stick-size: min(44vw, 176px, calc(var(--pad-height) - 3.625rem));
+
+  /* ---- Spacing — 4px base ------------------------------------------------- */
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+
+  /* ---- Type scale — 1.2 minor third off a 1rem base ----------------------- */
+
+  --text-2xs: 0.625rem; /* tracked micro-labels: THE ONE uppercase size */
+  --text-xs: 0.75rem; /* metadata, tags */
+  --text-sm: 0.875rem; /* dense body: technique rows */
+  --text-md: 1rem; /* body + form fields */
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem; /* scores */
+  --text-2xl: 1.5rem; /* the clock */
+  --text-display: clamp(2.5rem, 15vw, 5.5rem); /* IPPON / WAZA-ARI */
+  --text-title: clamp(2.1rem, 11vw, 4.4rem); /* result headline */
+
+  /* Tracking. Four values, four jobs — nothing between them. */
+  --track-tight: 0.01em;
+  --track-normal: 0.04em;
+  --track-wide: 0.18em; /* body micro-labels */
+  --track-label: 0.24em; /* short shouted labels */
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-heavy: 800;
+  --weight-black: 900;
+
+  --leading-tight: 1;
+  --leading-snug: 1.35;
+
+  /* ---- Radius ------------------------------------------------------------- */
+
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --radius-pill: 999px;
+  --radius-circle: 50%;
+
+  /* ---- Motion ------------------------------------------------------------- */
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-snap: cubic-bezier(0.2, 1.6, 0.4, 1);
+  --ease-stamp: cubic-bezier(0.2, 1.4, 0.4, 1);
+  --dur-instant: 60ms;
+  --dur-fast: 110ms;
+  --dur-base: 180ms;
+  --dur-slow: 300ms;
+
+  /* ---- Stage treatments --------------------------------------------------- */
+
+  --vignette: radial-gradient(
+    ellipse 112% 88% at 50% 52%,
+    transparent 62%,
+    rgb(10 6 3 / 0.42) 100%
+  );
+  --flash-core: #fff6e2;
+  --flash-edge: rgb(255 246 226 / 0);
+  --glow-display: rgb(255 214 140 / 0.4);
+  --stroke-ink: rgb(8 4 2 / 0.6);
+
+  --perf-ink: #8be08b; /* instrumentation is meant to look like instrumentation */
+  --perf-plate: rgb(0 0 0 / 0.62);
+
+  --pad-height: clamp(202px, 27dvh, 232px);
 }
+
+/* ========================================================================== */
 
 * {
   box-sizing: border-box;
@@ -27,9 +261,11 @@ body {
 }
 
 body {
-  background: var(--ink);
+  background: var(--surface-void);
   color: var(--text);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  font-weight: var(--weight-regular);
   /* The pad is a control surface, not a document. Nothing here scrolls or selects. */
   touch-action: none;
   user-select: none;
@@ -44,25 +280,44 @@ body {
     env(safe-area-inset-left);
 }
 
-/* ---------- HUD ---------- */
+/* ---------- HUD: a lacquered scoreboard under a warm scrim ---------- */
 
+/* Two rows: the scoreboard plaque, then a single strip carrying the ladder
+   position on the left and the actions on the right. The round tag is appended
+   by hud.ts, so it is placed explicitly instead of landing on a row of its own. */
 #hud {
+  position: relative;
+  z-index: 6;
   flex: 0 0 auto;
-  padding: 0.5rem 0.75rem 0.35rem;
-  background: linear-gradient(180deg, rgba(11, 111, 176, 0.18), transparent);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: linear-gradient(
+    180deg,
+    var(--scrim-hud) 0%,
+    var(--scrim-hud-mid) 62%,
+    var(--scrim-none) 100%
+  );
+  border-bottom: 1px solid var(--edge-faint);
 }
 
 .scoreline {
+  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--surface-raised), var(--surface-sunken));
+  box-shadow: var(--shadow-panel);
 }
 
 .side {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   min-width: 0;
 }
 
@@ -71,53 +326,88 @@ body {
 }
 
 .name {
-  font-size: 0.75rem;
-  letter-spacing: 0.14em;
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--text-faint);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.side[data-side="0"] .name {
+  color: var(--fighter-0-dim);
+}
+
+.side[data-side="1"] .name {
+  color: var(--fighter-1-dim);
+}
+
 .points {
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-heavy);
   font-variant-numeric: tabular-nums;
-  line-height: 1;
+  line-height: var(--leading-tight);
   color: var(--text);
   min-width: 2.2ch;
   text-align: center;
+  text-shadow: 0 var(--space-1) 0 var(--shadow-ink);
 }
 
 .side[data-side="0"] .points {
-  color: #f2f2ef;
+  color: var(--fighter-0);
 }
 
 .side[data-side="1"] .points {
-  color: var(--red);
+  color: var(--fighter-1);
 }
 
 .clock {
   display: flex;
   flex-direction: column;
   align-items: center;
-  line-height: 1;
+  line-height: var(--leading-tight);
 }
 
+/* The one bright thing on screen: a lamp-lit brass clock face. */
 #timer {
-  font-size: 1.9rem;
-  font-weight: 800;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-black);
   font-variant-numeric: tabular-nums;
-  color: var(--amber);
+  color: var(--gold-bright);
+  text-shadow:
+    0 0 0.7rem var(--gold-glow),
+    0 var(--space-1) 0 var(--shadow-ink);
 }
 
 #backend {
-  margin-top: 0.15rem;
-  font-size: 0.55rem;
-  letter-spacing: 0.16em;
+  margin-top: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-wide);
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--text-ghost);
+}
+
+.round-tag {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: start;
+  margin-top: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--plate);
+  border: 1px solid var(--edge-faint);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--cool);
+}
+
+.round-tag[hidden] {
+  display: none;
 }
 
 /* ---------- Stage ---------- */
@@ -138,14 +428,15 @@ body {
   position: absolute;
   inset-inline: 0;
   top: 18%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1em;
   text-align: center;
-  font-size: clamp(1.5rem, 9vw, 3rem);
-  font-weight: 800;
-  letter-spacing: 0.08em;
   text-transform: uppercase;
-  text-shadow: 0 0.12em 0 rgba(0, 0, 0, 0.55);
   opacity: 0;
-  transition: opacity 140ms ease-out;
+  transition: opacity var(--dur-fast) var(--ease-out);
   pointer-events: none;
 }
 
@@ -153,140 +444,388 @@ body {
   opacity: 1;
 }
 
+/* A pool of shadow under the referee's call. The shoji behind it is the
+   brightest thing in the game; without this the word is unreadable. */
+.banner::before {
+  content: "";
+  position: absolute;
+  inset: -34% -14%;
+  z-index: -1;
+  background: radial-gradient(ellipse at 50% 50%, var(--scrim-banner), transparent 72%);
+  pointer-events: none;
+}
+
 .banner[data-tone="full"] {
-  color: var(--amber);
+  color: var(--gold-bright);
 }
 
 .banner[data-tone="half"] {
-  color: var(--blue);
+  color: var(--cool-bright);
 }
 
 .banner[data-tone="neutral"] {
   color: var(--text);
 }
 
+.banner .call-word {
+  font-size: var(--text-display);
+  font-weight: var(--weight-black);
+  line-height: 0.95;
+  letter-spacing: var(--track-normal);
+  -webkit-text-stroke: 1.5px var(--stroke-ink);
+  text-shadow:
+    0 0 0.9rem var(--glow-display),
+    0 0.35em 0.9rem var(--shadow-ink);
+}
+
+.banner .call-name {
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-label);
+  color: var(--text);
+  opacity: 0.88;
+}
+
+/* The dojo's edges fall into shadow so the fighters own the frame. */
+#stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: var(--vignette);
+}
+
+.banner-sub {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(18% + clamp(2.6rem, 12vw, 4.4rem));
+  z-index: 3;
+  text-align: center;
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-shadow: 0 var(--space-1) 0 var(--shadow-ink);
+  pointer-events: none;
+}
+
+/* The caption sat on bare mat and vanished. Give it its own ground — solid, not
+   blurred: a backdrop-filter over the live canvas costs framerate. */
 .technique {
   position: absolute;
   inset-inline: 0;
-  bottom: 0.5rem;
+  bottom: var(--space-2);
+  z-index: 2;
   text-align: center;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--track-wide);
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--text-faint);
   pointer-events: none;
   min-height: 1em;
 }
 
-/* ---------- Control pad ---------- */
+.technique:not(:empty) {
+  display: block;
+  width: fit-content;
+  max-width: calc(100% - 2 * var(--space-4));
+  margin-inline: auto;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--plate);
+  border: 1px solid var(--edge-faint);
+  color: var(--plate-text);
+  box-shadow: 0 var(--space-1) 0 var(--shadow-ink);
+}
+
+/* ---------- Control pad: brass-ringed pucks in their own lamplight ---------- */
 
 #pad {
   flex: 0 0 var(--pad-height);
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem 0.9rem;
-  background: linear-gradient(180deg, var(--ink-soft), #0a0e15);
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  background:
+    var(--pad-lip),
+    var(--pad-wash),
+    linear-gradient(180deg, var(--surface-sunken), var(--surface-void));
   border-top: 1px solid var(--edge);
 }
 
 .stick-zone {
+  --stick-accent: var(--cool);
+  --stick-glow: var(--cool-glow);
+
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  border-radius: 1.1rem;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid var(--edge);
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-2) 0;
+  border-radius: var(--radius-lg);
+  background: var(--zone-well);
+}
+
+#zone-right {
+  --stick-accent: var(--gold);
+  --stick-glow: var(--gold-glow);
 }
 
 .stick-label {
-  font-size: 0.55rem;
-  letter-spacing: 0.22em;
-  color: var(--muted);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--text-ghost);
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
+/* The dish: a hollow of dark leather inside a brass bezel, lit from above. */
 .stick {
   position: relative;
-  width: min(42vw, 168px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 42%, #1d2836, #10161f 70%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 0.35rem 1rem rgba(0, 0, 0, 0.6);
   display: grid;
   place-items: center;
+  width: var(--stick-size);
+  aspect-ratio: 1;
+  border-radius: var(--radius-circle);
+  background: var(--stick-well);
+  border: 1px solid var(--edge);
+  box-shadow: var(--bezel-shadow), 0 var(--space-2) var(--space-5) var(--shadow-ink);
+  transition:
+    background var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
-/* The gate is drawn, because a glass stick has no detents to feel for. */
+/* The gate ring: a glass joystick has nothing to feel for, so the threshold is
+   drawn — a shallow well the thumb has to push out of. */
+.stick::before {
+  content: "";
+  position: absolute;
+  inset: 24%;
+  z-index: 0;
+  border-radius: var(--radius-circle);
+  border: 1px solid var(--gate);
+  background: var(--gate-fill);
+  transition: border-color var(--dur-base) var(--ease-out);
+}
+
+/* A single raking highlight, so the dish reads as a solid turned object. */
+.stick::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: var(--sheen);
+  pointer-events: none;
+}
+
+/* Detents are drawn as chevrons, not glyphs: the triangles the HTML ships are
+   tiny, mismatched in weight, and have no stem. font-size:0 hides the text so
+   the shape below is the whole glyph. */
 .glyph {
   position: absolute;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.18);
-  transition: color 90ms linear;
+  z-index: 3;
+  width: var(--detent);
+  height: var(--detent);
+  margin: 0;
+  font-size: 0;
+  color: var(--detent-idle);
+  transform: scale(1);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    filter var(--dur-fast) var(--ease-out);
 }
 
-.glyph-up { top: 6%; }
-.glyph-down { bottom: 6%; }
-.glyph-left { left: 6%; }
-.glyph-right { right: 6%; }
+.glyph::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: var(--detent-arm);
+  height: var(--detent-arm);
+  /* Two borders, not four: an open corner rotated 45 degrees is a chevron. A
+     closed box reads as a diamond and says nothing about direction. */
+  border-top: var(--detent-thick) solid currentcolor;
+  border-right: var(--detent-thick) solid currentcolor;
+  border-top-right-radius: var(--radius-xs);
+}
+
+.glyph-up {
+  top: 9%;
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+}
+
+.glyph-down {
+  bottom: 9%;
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+}
+
+.glyph-left {
+  left: 9%;
+  top: 0;
+  bottom: 0;
+  margin-block: auto;
+}
+
+.glyph-right {
+  right: 9%;
+  top: 0;
+  bottom: 0;
+  margin-block: auto;
+}
+
+.glyph-up::before {
+  transform: rotate(-45deg);
+}
+
+.glyph-down::before {
+  transform: rotate(135deg);
+}
+
+.glyph-left::before {
+  transform: rotate(-135deg);
+}
+
+.glyph-right::before {
+  transform: rotate(45deg);
+}
+
+/* The thumb cap: lit from above, sitting on a physical lip. */
+.knob {
+  position: relative;
+  z-index: 2;
+  width: var(--knob);
+  height: var(--knob);
+  border-radius: var(--radius-circle);
+  background: radial-gradient(
+    circle at 50% 21%,
+    var(--knob-lit) 0%,
+    var(--knob-face) 38%,
+    var(--knob-shade) 92%
+  );
+  /* Ordered top-first: the lip is a hard 2px shelf, the drop sits behind it. */
+  box-shadow:
+    0 2px 0 0 var(--knob-lip),
+    0 var(--knob-rise) var(--knob-blur) var(--shadow-ink),
+    inset 0 1px 0 var(--edge-highlight);
+  /* transform is owned by touch.ts: never touch it from CSS. A 60ms lerp gives
+     the cap mass so it leads the thumb instead of snapping to it. */
+  transition:
+    transform var(--dur-instant) linear,
+    box-shadow var(--dur-fast) var(--ease-out);
+  will-change: transform;
+}
+
+.knob::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--space-1) * -0.5);
+  border-radius: inherit;
+  border: 1px solid var(--knob-rim);
+  transform: scale(0.94);
+  opacity: 0.9;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+/* The pip is the control's own colour, dim at rest so the two sticks are
+   told apart without a label, lit when held. */
+.knob::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: var(--pip);
+  height: var(--pip);
+  border-radius: var(--radius-circle);
+  background: var(--stick-accent);
+  opacity: 0.4;
+  transform: scale(0.9);
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+/* ---------- Held: the puck takes the press ---------- */
+
+.stick-zone.engaged .stick {
+  background: var(--stick-well-hot);
+  box-shadow: var(--bezel-shadow-hot), 0 0.15rem 0.4rem var(--shadow-ink);
+}
+
+.stick-zone.engaged .stick::before {
+  border-color: var(--gate-hot);
+}
+
+.stick-zone.engaged .stick-label {
+  color: var(--stick-accent);
+}
+
+.stick-zone.engaged .knob {
+  /* Pressed: the drop collapses, the lip thins, the cap glows with its accent. */
+  box-shadow:
+    0 1px 0 0 var(--knob-lip),
+    0 0.1rem 0.25rem var(--shadow-ink),
+    0 0 1rem -0.15rem var(--stick-glow),
+    inset 0 1px 0 var(--edge-highlight);
+}
+
+.stick-zone.engaged .knob::before {
+  transform: scale(1);
+  border-color: var(--stick-accent);
+  opacity: 1;
+}
+
+.stick-zone.engaged .knob::after {
+  opacity: 1;
+  transform: scale(1);
+  box-shadow: 0 0 0.5rem var(--stick-glow);
+}
+
+/* A held puck keeps every detent legible; only the live one is hot. */
+.stick-zone.engaged .glyph {
+  color: var(--detent-dim);
+}
 
 .stick[data-dir="up"] .glyph-up,
 .stick[data-dir="down"] .glyph-down,
 .stick[data-dir="left"] .glyph-left,
 .stick[data-dir="right"] .glyph-right {
-  color: var(--blue);
+  color: var(--stick-accent);
+  filter: drop-shadow(0 0 6px var(--stick-glow));
+  transform: scale(1.3);
 }
 
-#stick-right[data-dir="up"] .glyph-up,
-#stick-right[data-dir="down"] .glyph-down,
-#stick-right[data-dir="left"] .glyph-left,
-#stick-right[data-dir="right"] .glyph-right {
-  color: var(--amber);
-}
-
-.knob {
-  width: 40%;
-  height: 40%;
-  border-radius: 50%;
-  background: linear-gradient(180deg, #3b4a5f, #202b3a);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 0.25rem 0.6rem rgba(0, 0, 0, 0.55);
-  transform: translate3d(0, 0, 0);
-  transition: transform 60ms linear;
-  will-change: transform;
-}
-
-.stick-zone.engaged .stick {
-  border-color: rgba(30, 144, 214, 0.5);
-}
-
-#zone-right.engaged .stick {
-  border-color: rgba(231, 182, 87, 0.55);
-}
-
-/* ---------- Wider screens: the pad tucks into the corners ---------- */
+/* ---------- Wider screens: the pad becomes two control plaques ---------- */
 
 @media (min-width: 720px), (orientation: landscape) and (min-height: 420px) {
   :root {
     --pad-height: clamp(170px, 30dvh, 230px);
+    --stick-size: min(20vw, 150px);
   }
 
   #pad {
     position: absolute;
     inset: auto 0 0 0;
+    padding: 0 2vw var(--space-5);
     background: transparent;
     border-top: 0;
     pointer-events: none;
-    padding-inline: 2vw;
-  }
-
-  .stick-zone {
-    background: transparent;
-    border: 0;
-    pointer-events: auto;
   }
 
   #app {
@@ -297,79 +836,118 @@ body {
     flex: 1 1 auto;
   }
 
+  /* Floated over the mat, each control is a brass-cornered plaque rather than
+     a stray circle: the hit area shrinks to the plaque, not a screen half. */
+  .stick-zone {
+    justify-self: center;
+    align-self: end;
+    width: auto;
+    padding: var(--space-3) var(--space-5) var(--space-2);
+    background: linear-gradient(180deg, var(--plaque-top), var(--plaque-bottom));
+    border: 1px solid var(--edge-faint);
+    box-shadow: var(--shadow-panel);
+    pointer-events: auto;
+  }
+
+  .stick-zone.engaged {
+    border-color: var(--edge-strong);
+  }
+
   .stick {
-    width: min(20vw, 150px);
-    opacity: 0.85;
+    opacity: 0.9;
   }
 }
 
 /* A real keyboard is present, so the glass sticks are advisory only. */
 @media (hover: hover) and (pointer: fine) {
   .stick {
-    opacity: 0.6;
+    opacity: 0.62;
+  }
+
+  .stick-zone.engaged .stick {
+    opacity: 0.85;
   }
 }
 
-/* ---------- HUD actions (settings / technique reference) ---------- */
+/* ---------- HUD actions ---------- */
 
 .hud-actions {
+  grid-column: 2;
+  grid-row: 2;
   display: flex;
   justify-content: flex-end;
-  gap: 0.4rem;
-  margin-top: 0.35rem;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
 .icon-btn {
-  min-width: 44px;
-  min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--edge);
-  border-radius: 0.6rem;
-  color: var(--text);
-  font-size: 1.15rem;
-  line-height: 1;
-  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0;
+  background: linear-gradient(180deg, var(--surface-raised), var(--surface-sunken));
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: inherit;
+  font-size: var(--text-lg);
+  line-height: var(--leading-tight);
+  cursor: pointer;
+  box-shadow: 0 1px 0 var(--edge-highlight) inset;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+/* A kanji with no label is a guess for most players; the reference button says
+   what it opens. */
+.icon-btn.text-btn {
+  width: auto;
+  min-width: 44px;
+  padding-inline: var(--space-3);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-wide);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .icon-btn:hover {
+    border-color: var(--edge-strong);
+  }
+}
+
+.icon-btn:active {
+  transform: translateY(1px);
+  box-shadow: none;
 }
 
 .icon-btn:focus-visible,
 input:focus-visible,
 .setting-row:focus-within {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--outline);
   outline-offset: 2px;
-}
-
-.banner-sub {
-  position: absolute;
-  inset-inline: 0;
-  top: calc(18% + clamp(2.4rem, 11vw, 4.2rem));
-  text-align: center;
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  pointer-events: none;
 }
 
 /* ---------- Performance HUD ---------- */
 
 .perf-hud {
   position: absolute;
-  top: calc(env(safe-area-inset-top) + 0.35rem);
-  left: 0.5rem;
-  margin: 0;
-  padding: 0.3rem 0.5rem;
-  background: rgba(0, 0, 0, 0.55);
-  color: #8be08b;
-  font-family: ui-monospace, "SF Mono", "Menlo", monospace;
-  font-size: 0.6rem;
-  line-height: 1.35;
-  border-radius: 0.4rem;
-  pointer-events: none;
+  top: calc(env(safe-area-inset-top) + var(--space-2));
+  left: var(--space-2);
   z-index: 25;
+  margin: 0;
+  padding: var(--space-1) var(--space-2);
+  background: var(--perf-plate);
+  color: var(--perf-ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  line-height: var(--leading-snug);
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--edge-faint);
+  pointer-events: none;
   white-space: pre;
 }
 
@@ -377,7 +955,7 @@ input:focus-visible,
   display: none;
 }
 
-/* ---------- Settings sheet / technique reference ---------- */
+/* ---------- Sheets: settings / technique reference ---------- */
 
 .sheet {
   position: absolute;
@@ -385,9 +963,9 @@ input:focus-visible,
   z-index: 30;
   display: flex;
   flex-direction: column;
-  background: rgba(9, 12, 18, 0.97);
+  background: linear-gradient(180deg, var(--surface-overlay), var(--surface-void));
   transform: translateY(100%);
-  transition: transform 220ms ease;
+  transition: transform var(--dur-slow) var(--ease-out);
   overflow: hidden;
 }
 
@@ -404,31 +982,34 @@ input:focus-visible,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--edge);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--hair);
 }
 
 .sheet-header h2 {
   margin: 0;
-  font-size: 1rem;
-  letter-spacing: 0.08em;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-heavy);
+  letter-spacing: var(--track-wide);
   text-transform: uppercase;
+  color: var(--gold);
 }
 
 .sheet-body {
   flex: 1 1 auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0.75rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  padding: var(--space-3) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
 }
 
 .setting-row {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  min-height: 44px;
-  padding: 0.35rem 0.25rem;
-  border-bottom: 1px solid var(--edge);
+  gap: var(--space-3);
+  min-height: 48px;
+  padding: var(--space-2) var(--space-1);
+  border-bottom: 1px solid var(--hair);
   cursor: pointer;
 }
 
@@ -436,32 +1017,34 @@ input:focus-visible,
   width: 22px;
   height: 22px;
   flex: 0 0 auto;
-  accent-color: var(--blue);
+  accent-color: var(--check);
 }
 
 .setting-hint {
-  margin: 0.25rem 0 0.5rem;
-  font-size: 0.7rem;
-  color: var(--muted);
+  margin: var(--space-1) 0 var(--space-2);
+  font-size: var(--text-xs);
+  line-height: var(--leading-snug);
+  color: var(--text-muted);
 }
 
 .career-summary {
-  margin-top: 0.9rem;
-  font-size: 0.7rem;
-  letter-spacing: 0.03em;
-  color: var(--muted);
+  margin-top: var(--space-4);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-tight);
+  color: var(--text-muted);
 }
 
 .tech-group {
-  margin-bottom: 1.1rem;
+  margin-bottom: var(--space-6);
 }
 
 .tech-group h3 {
-  margin: 0 0 0.35rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.1em;
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-heavy);
+  letter-spacing: var(--track-wide);
   text-transform: uppercase;
-  color: var(--amber);
+  color: var(--gold);
 }
 
 .tech-list {
@@ -473,71 +1056,195 @@ input:focus-visible,
 .tech-item {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 0.5rem;
+  gap: var(--space-2);
   align-items: center;
-  padding: 0.5rem 0.25rem;
-  border-bottom: 1px solid var(--edge);
-  font-size: 0.8rem;
+  padding: var(--space-2) var(--space-1);
+  border-bottom: 1px solid var(--hair);
+  font-size: var(--text-sm);
 }
 
 .tech-combo {
-  color: var(--blue);
+  color: var(--cool);
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .tech-name {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .tech-meta {
   text-align: right;
   white-space: nowrap;
-  font-size: 0.68rem;
-  color: var(--muted);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-tight);
+  color: var(--text-faint);
 }
 
-/* ---------- Accessibility settings ---------- */
-
-body.reduced-motion .banner,
-body.reduced-motion .sheet {
-  transition: none;
-}
+/* ==========================================================================
+   HIGH CONTRAST
+   Every value the file can paint is a token, so re-pointing them here is the
+   whole feature: opaque blacks, white ink, no hairlines below ~50% alpha, and
+   a render that gets pushed apart instead of relying on the room's own grade.
+   ========================================================================== */
 
 body.high-contrast {
+  --surface-void: #000000;
+  --surface-sunken: #080808;
+  --surface-raised: #141414;
+  --surface-overlay: #0d0d0d;
+
   --text: #ffffff;
-  --muted: #dfe6f2;
-  --amber: #ffd400;
-  --blue: #55c7ff;
-  --red: #ff5a52;
-  --edge: rgba(255, 255, 255, 0.4);
+  --text-muted: #f0f0f0;
+  --text-faint: #dcdcdc;
+  --text-ghost: #c8c8c8;
+
+  --gold: #ffd400;
+  --gold-bright: #fff3b0;
+  --gold-deep: #ffd400;
+  --gold-glow: rgb(255 212 0 / 0.85);
+  --gold-ink: #000000;
+
+  --cool: #6fe4ff;
+  --cool-bright: #dff8ff;
+  --cool-glow: rgb(111 228 255 / 0.85);
+
+  --aka: #ff6a5c;
+  --aka-bright: #ffb0a6;
+  --aka-dim: #ff9d92;
+
+  --shiro: #ffffff;
+  --shiro-dim: #f2f2f2;
+
+  --fighter-0: #ffffff;
+  --fighter-0-dim: #f2f2f2;
+  --fighter-1: var(--aka-bright);
+  --fighter-1-dim: var(--aka);
+
+  --outline: #ffffff;
+  --check: #ffd400;
+
+  --edge-faint: rgb(255 255 255 / 0.5);
+  --edge: rgb(255 255 255 / 0.7);
+  --edge-highlight: rgb(255 255 255 / 0.9);
+  --edge-strong: rgb(255 255 255 / 1);
+  --hair: rgb(255 255 255 / 0.65);
+  --field: rgb(0 0 0 / 0.9);
+  --field-edge: rgb(255 255 255 / 0.85);
+
+  --scrim-hud: rgb(0 0 0 / 0.97);
+  --scrim-hud-mid: rgb(0 0 0 / 0.85);
+  --scrim-none: rgb(0 0 0 / 0);
+  --pad-lip: linear-gradient(180deg, rgb(255 212 0 / 0.14), transparent 26%);
+  --pad-wash: radial-gradient(
+    ellipse 62% 120% at 50% 100%,
+    rgb(255 212 0 / 0.12),
+    transparent 74%
+  );
+  --sheen: linear-gradient(158deg, rgb(255 255 255 / 0.14), transparent 48%);
+  --button-edge: rgb(255 255 255 / 0.5);
+  --scrim-banner: rgb(0 0 0 / 0.9);
+  --scrim-soft: rgb(0 0 0 / 0.9);
+  --scrim-hard: rgb(0 0 0 / 0.99);
+  --plate: rgb(0 0 0 / 0.92);
+  --plate-text: #ffffff;
+  --plaque-top: rgb(0 0 0 / 0.92);
+  --plaque-bottom: rgb(0 0 0 / 0.88);
+  --zone-well: radial-gradient(
+    ellipse 72% 68% at 50% 46%,
+    rgb(255 212 0 / 0.16),
+    transparent 76%
+  );
+  --field-ink: #ffffff;
+
+  --shadow-ink: rgb(0 0 0 / 0.95);
+  --shadow-deep: rgb(0 0 0 / 1);
+  --shadow-soft: rgb(0 0 0 / 0.9);
+  --shadow-panel:
+    0 1px 0 rgb(255 255 255 / 0.35) inset, 0 0.4rem 1.1rem var(--shadow-soft);
+  --shadow-float: 0 0.6rem 1.8rem var(--shadow-ink);
+  --shadow-gold-glow: 0 0.4rem 1.6rem var(--gold-glow);
+
+  --bezel: rgb(255 212 0 / 0.55);
+  --bezel-hot: rgb(255 212 0 / 0.95);
+
+  --stick-well: radial-gradient(circle at 50% 32%, #1a1a1a, #0a0a0a 60%, #000 100%);
+  --stick-well-hot: radial-gradient(circle at 50% 40%, #2e2e2e, #141414 60%, #000 100%);
+
+  --gate: rgb(255 255 255 / 0.65);
+  --gate-hot: rgb(255 255 255 / 1);
+  --gate-fill: rgb(0 0 0 / 0.6);
+
+  --detent-idle: rgb(255 255 255 / 0.8);
+  --detent-dim: rgb(255 212 0 / 0.7);
+
+  --knob-lip: #000000;
+  --knob-lit: #8a8a8a;
+  --knob-face: #565656;
+  --knob-shade: #2b2b2b;
+  --knob-rim: rgb(255 255 255 / 0.6);
+
+  --vignette: radial-gradient(ellipse 112% 88% at 50% 52%, transparent 66%, rgb(0 0 0 / 0.5) 100%);
+  --flash-core: #ffffff;
+  --flash-edge: rgb(255 255 255 / 0);
+  --glow-display: rgb(255 255 255 / 0.6);
+  --stroke-ink: rgb(0 0 0 / 0.95);
+
+  --perf-ink: #a6ffa6;
+  --perf-plate: rgb(0 0 0 / 0.95);
 }
 
-body.high-contrast .glyph {
-  color: rgba(255, 255, 255, 0.55);
+/* Even the treatment *on* the render gets pushed apart. */
+body.high-contrast #view {
+  filter: contrast(1.18) saturate(0.8);
 }
 
-body.high-contrast .banner {
-  text-shadow: 0 0 0.4em rgba(0, 0, 0, 0.95), 0 0.12em 0 rgba(0, 0, 0, 0.95);
+/* ==========================================================================
+   REDUCED MOTION
+   Covers every animated surface, including the sticks, which it never used to
+   touch. Durations collapse to 1ms rather than to `none` so `transitionend`
+   still fires — main.ts waits on it to finish hiding the sheets.
+   ========================================================================== */
+
+body.reduced-motion :is(
+    .banner,
+    .banner-sub,
+    .technique,
+    .sheet,
+    .icon-btn,
+    .points,
+    .stick,
+    .stick-label,
+    .glyph,
+    .knob,
+    .result,
+    .result-rematch,
+    .result-entry-send,
+    .impact-flash
+  ),
+body.reduced-motion .stick::before,
+body.reduced-motion .knob::before,
+body.reduced-motion .knob::after {
+  transition-duration: 1ms;
+  transition-delay: 0ms;
 }
 
-body.high-contrast .stick {
-  border-color: rgba(255, 255, 255, 0.45);
+body.reduced-motion :is(.impact-flash.go, .banner.slam, .result.slam, .points.pop) {
+  animation: none;
 }
+
+/* ---------- Layout preferences ---------- */
 
 body.large-controls {
-  --pad-height: clamp(260px, 42dvh, 340px);
-}
-
-body.large-controls .stick {
-  width: min(52vw, 210px);
-}
-
-body.large-controls .glyph {
-  font-size: 0.95rem;
+  --pad-height: clamp(248px, 40dvh, 320px);
+  --stick-size: min(45vw, 196px, calc(var(--pad-height) - 3.625rem));
+  --detent: 0.95rem;
+  --detent-arm: 0.44rem;
+  --pip: 0.4rem;
 }
 
 /* Screen position swaps; #zone-left/#zone-right keep their stance/technique
-   roles, since input.ts binds listeners to the ids, not to a screen side. */
+   roles, since touch.ts binds listeners to the ids, not to a screen side. */
 body.left-handed #zone-left {
   order: 2;
 }
@@ -546,118 +1253,88 @@ body.left-handed #zone-right {
   order: 1;
 }
 
-
-/* A kanji with no label is a guess for most players; the reference button says
-   what it opens. */
-.icon-btn.text-btn {
-  width: auto;
-  min-width: 44px;
-  padding-inline: 0.7rem;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-}
-
-/* The caption sat on bare mat and vanished. Give it its own ground. */
-.technique:not(:empty) {
-  display: block;
-  width: fit-content;
-  max-width: calc(100% - 2rem);
-  margin-inline: auto;
-  padding: 0.22rem 0.7rem;
-  border-radius: 999px;
-  background: rgba(8, 12, 18, 0.66);
-  color: #dfe7f2;
-  backdrop-filter: blur(2px);
-}
-
-.technique {
-  text-align: center;
-}
-
-
-/* ---------- Juice ---------- */
-
-/* The dojo's edges fall into shadow so the fighters own the frame. */
-#stage::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse 110% 85% at 50% 55%, transparent 70%, rgba(4, 6, 10, 0.32) 100%);
-}
+/* ==========================================================================
+   JUICE
+   ========================================================================== */
 
 .impact-flash {
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at 50% 55%, #fff8e6, rgba(255, 248, 230, 0) 70%);
-  opacity: 0;
   z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 55%,
+    var(--flash-core),
+    var(--flash-edge) 70%
+  );
+  opacity: 0;
 }
 
 .impact-flash.go {
-  animation: impact-flash 260ms ease-out;
+  animation: impact-flash 260ms var(--ease-out);
 }
 
 @keyframes impact-flash {
-  0% { opacity: var(--peak, 0.5); }
-  100% { opacity: 0; }
-}
-
-.banner {
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.1em;
-}
-
-.banner .call-word {
-  font-size: clamp(2.4rem, 14vw, 5rem);
-  line-height: 0.95;
-  letter-spacing: 0.04em;
-  font-weight: 900;
-  -webkit-text-stroke: 1.5px rgba(0, 0, 0, 0.55);
-}
-
-.banner .call-name {
-  font-size: clamp(0.8rem, 3.6vw, 1.1rem);
-  letter-spacing: 0.3em;
-  color: var(--text);
-  opacity: 0.9;
+  0% {
+    opacity: var(--peak, 0.5);
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* Overshoot, then settle: a stamp hitting paper. */
 .banner.slam {
-  animation: call-slam 420ms cubic-bezier(0.2, 1.4, 0.4, 1);
+  animation: call-slam 420ms var(--ease-stamp);
+}
+
+.result.slam {
+  animation: call-slam 520ms var(--ease-stamp);
 }
 
 @keyframes call-slam {
-  0% { transform: scale(2.4) rotate(-4deg); opacity: 0; filter: blur(4px); }
-  45% { transform: scale(0.9) rotate(1deg); opacity: 1; filter: blur(0); }
-  70% { transform: scale(1.06) rotate(0deg); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(2.4) rotate(-4deg);
+    opacity: 0;
+    filter: blur(4px);
+  }
+  45% {
+    transform: scale(0.9) rotate(1deg);
+    opacity: 1;
+    filter: blur(0);
+  }
+  70% {
+    transform: scale(1.06) rotate(0deg);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .points.pop {
-  animation: score-pop 480ms cubic-bezier(0.2, 1.6, 0.4, 1);
+  animation: score-pop 480ms var(--ease-snap);
 }
 
 @keyframes score-pop {
-  0% { transform: scale(1); }
-  30% { transform: scale(1.9); color: var(--amber); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  30% {
+    transform: scale(1.9);
+    filter: brightness(1.75) saturate(1.1);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
 }
 
-body.reduced-motion .impact-flash.go,
-body.reduced-motion .banner.slam,
-body.reduced-motion .points.pop {
-  animation: none;
-}
-
-
-/* ---------- Result card ---------- */
+/* ==========================================================================
+   RESULT CARD
+   `display` toggles because the e2e suite asserts toBeHidden() — never
+   animate show/hide with opacity or transform.
+   ========================================================================== */
 
 .result {
   position: absolute;
@@ -667,29 +1344,40 @@ body.reduced-motion .points.pop {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  padding: 1rem;
+  gap: var(--space-3);
+  padding: var(--space-4);
   text-align: center;
-  background: radial-gradient(ellipse at 50% 45%, rgba(8, 12, 18, 0.55), rgba(8, 12, 18, 0.88));
+  background: radial-gradient(
+    ellipse at 50% 45%,
+    var(--scrim-soft),
+    var(--scrim-hard)
+  );
 }
 
 .result.show {
   display: flex;
 }
 
-.result.slam {
-  animation: call-slam 520ms cubic-bezier(0.2, 1.4, 0.4, 1);
+.result-kicker {
+  min-height: 1em;
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-heavy);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--cool);
 }
 
 .result-headline {
-  text-transform: uppercase;
-  font-size: clamp(2rem, 11vw, 4.4rem);
-  font-weight: 900;
+  font-size: var(--text-title);
+  font-weight: var(--weight-black);
   line-height: 0.95;
-  letter-spacing: 0.03em;
-  color: var(--amber);
-  -webkit-text-stroke: 1.5px rgba(0, 0, 0, 0.55);
-  text-shadow: 0 0.1em 0 rgba(0, 0, 0, 0.5);
+  letter-spacing: var(--track-normal);
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  -webkit-text-stroke: 1.5px var(--stroke-ink);
+  text-shadow:
+    0 0 0.8rem var(--glow-display),
+    0 0.12em 0 var(--shadow-ink);
 }
 
 .result[data-tone="neutral"] .result-headline {
@@ -697,109 +1385,100 @@ body.reduced-motion .points.pop {
 }
 
 .result-score {
-  font-size: clamp(1.6rem, 8vw, 2.6rem);
-  font-weight: 800;
+  font-size: clamp(var(--text-lg), 8vw, 2.6rem);
+  font-weight: var(--weight-heavy);
   font-variant-numeric: tabular-nums;
   color: var(--text);
 }
 
 .result-detail {
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-wide);
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--text-muted);
 }
 
 .result-rematch {
-  margin-top: 0.8rem;
-  min-width: 11rem;
+  margin-top: var(--space-3);
+  min-width: 12rem;
   min-height: 52px;
-  padding: 0 1.4rem;
-  border: 0;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #2aa3ea, var(--blue-deep));
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  box-shadow: 0 0.35rem 1.2rem rgba(30, 144, 214, 0.45);
+  padding: 0 var(--space-5);
+  border: 1px solid var(--button-edge);
+  border-radius: var(--radius-pill);
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold) 62%, var(--gold-deep));
+  color: var(--gold-ink);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
   cursor: pointer;
+  box-shadow: var(--shadow-float), var(--shadow-gold-glow);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .result-rematch:focus-visible {
-  outline: 3px solid var(--amber);
+  outline: 3px solid var(--outline);
   outline-offset: 3px;
 }
 
-body.reduced-motion .result.slam {
-  animation: none;
+.result-rematch:active {
+  transform: translateY(1px);
+  box-shadow: 0 var(--space-1) var(--space-3) var(--shadow-ink);
 }
-
-
-.result-kicker {
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--blue);
-  min-height: 1em;
-}
-
-.round-tag {
-  margin-top: 0.1rem;
-  text-align: center;
-  font-size: 0.55rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--blue);
-}
-
 
 .result-entry {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 0.5rem;
+  gap: var(--space-2);
   width: min(100%, 22rem);
-  margin-top: 0.4rem;
+  margin-top: var(--space-2);
 }
 
 .result-entry-label {
   display: contents;
-  font-size: 0.68rem;
-  letter-spacing: 0.2em;
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-wide);
   text-transform: uppercase;
-  color: var(--amber);
+  color: var(--gold);
 }
 
 .result-entry input {
   grid-column: 1;
   min-height: 48px;
-  padding: 0 0.9rem;
-  border-radius: 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(8, 12, 18, 0.7);
-  color: var(--text);
-  font-size: 1rem;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--field-edge);
+  background: var(--field);
+  color: var(--field-ink);
+  font-family: inherit;
+  font-size: var(--text-md);
   user-select: text;
   -webkit-user-select: text;
 }
 
 .result-entry-send {
   min-height: 48px;
-  padding: 0 1rem;
+  padding: 0 var(--space-4);
   border: 0;
-  border-radius: 0.8rem;
-  background: var(--amber);
-  color: #1a1206;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  border-radius: var(--radius-md);
+  background: var(--gold);
+  color: var(--gold-ink);
+  font-family: inherit;
+  font-weight: var(--weight-heavy);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
 .result-entry-status {
   grid-column: 1 / -1;
   min-height: 1.2em;
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
   color: var(--text);
 }
