@@ -1719,3 +1719,33 @@ bout and sets a 180s timeout for exactly this reason, so the assertion is not
 the problem — the renderer is. It wants a real fix (probably a memory ceiling
 or a shorter bout for that one test), and that is a separate piece of work from
 anything the review loop has found.
+
+### Round 52 — seed-2.0-code — `16a8af4`
+
+- `moves-list-no-scroll-indicator: "moves list has no scroll indicator, hiding
+  lower content"` (seed-2.0-code) — **accepted, and it is a regression caused by
+  the previous round's own fix.**
+
+  Round 24 left the Techniques sheet with an *accidental* affordance: the next
+  section header happened to land at the fold, so the list visibly continued.
+  It was never designed and it survived twenty-eight rounds because it happened
+  to be doing the right thing. Round 51 put the key and the rules above the
+  list — a genuine improvement in its own right — which pushed that header below
+  the fold, and the list now ends on a clean row boundary that reads exactly
+  like the end of the reference.
+
+  A static, unconditional bottom fade now says it properly. An element that only
+  appears when the scroll position is known needs JS, and "there is more below"
+  is true from the first frame. Sixteen of the eighteen moves are under it.
+
+  **A fix that improves one thing and silently removes another is two bugs, and
+  the second one gets found by whoever happens to look at the screen next.**
+- `win-screen-rematch-skippability-unclear` (seed-2.0-code) — the whole button is
+  the skip, which round 34's "STARTING IN 8" caption now states.
+- `control-terminology-inconsistent-hints-incomplete` (seed-2.0-code) — the coach
+  legend was aligned to the moves sheet's vocabulary in round 28.
+- `x-ai/grok-4.3:batch`, `openai/gpt-5.6-terra-pro:batch` — `:batch` slugs
+  cannot be used against `/chat/completions`; they need the batch API. The whole
+  `:batch` family in the catalogue is therefore **not reachable by this harness**,
+  which is worth knowing: it is roughly a fifth of the entries the live API lists
+  and none of them can be asked a question this way.
