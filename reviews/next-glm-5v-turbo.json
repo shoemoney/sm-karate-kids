@@ -1,0 +1,84 @@
+{
+  "model": "z-ai/glm-5v-turbo",
+  "elapsed_s": 113.8,
+  "usage": {
+    "prompt_tokens": 14897,
+    "completion_tokens": 4650,
+    "total_tokens": 19547,
+    "cost": 0.0364764,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0364764,
+      "upstream_inference_prompt_cost": 0.0178764,
+      "upstream_inference_completions_cost": 0.0186
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 3812,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "portrait-vertical-waste",
+      "title": "Excessive floor space between fighters and UI",
+      "what": "In the portrait gameplay view (Screenshot 3), there is a significant vertical gap of empty tatami texture between the fighters' feet and the 'STANCE/TECHNIQUE' control labels.",
+      "why": "This forces the camera to zoom out to fit the UI, making the fighter sprites appear smaller and less impactful. It wastes valuable screen real estate on a narrow mobile device where vertical space is limited.",
+      "how": "Tighten the camera FOV or move the camera closer (Z-axis) by approximately 15-20%, and allow the bottom UI panel to overlap the floor area slightly to maximize the size of the combatants."
+    },
+    {
+      "id": "impact-vfx-style-clash",
+      "title": "Flat impact effects break cinematic immersion",
+      "what": "The hit-spark effects shown during an 'IPPON' (Screenshot 12) are hard-edged, flat yellow 2D lines that do not blend with the game's volumetric lighting, bloom, or film grain.",
+      "why": "The game establishes a high-fidelity, moody cinematic aesthetic. These specific vector-like effects look like unpolished placeholders or default debug drawings, which cheapens the most critical feedback moment (landing a hit).",
+      "how": "Replace the hard geometry with a soft particle system or a textured sprite sheet that reacts to the TSL post-processing chain (glow/blur) to match the warm, hazy atmosphere."
+    },
+    {
+      "id": "unstyled-move-tooltip",
+      "title": "Generic styling on technique name callout",
+      "what": "The floating tooltip that appears during actions, such as 'LUNGE PUNCH' (Screenshot 5), uses a standard black system-font bubble that ignores the custom 'Tungsten and Tatami' UI theme.",
+      "why": "It creates a visual inconsistency that looks like a developer debug label was left visible. It clashes with the gold-accented, custom-typeface buttons and headers used elsewhere in the HUD.",
+      "how": "Restyle the callout to match the 'FIGHT' button or 'HASANABI WINS' header\u2014utilize the gold accent color, the game's specific display font, and a translucent dark background with a thin gold border."
+    },
+    {
+      "id": "prefight-text-obstruction",
+      "title": "Opaque pre-fight text box hides character models",
+      "what": "On the Qualifier screen (Screenshot 2), the opponent description ('PATIENT. HE WAITS...') is contained in a solid, opaque dark rectangle that covers the fighters' midsections.",
+      "why": "This is the primary showcase moment for the character art and stances. Obscuring the models with a heavy text wall reduces the visual hype and prevents players from reading the opponent's posture before the round starts.",
+      "how": "Increase the background opacity to create a glassmorphism effect (e.g., 0.6 alpha) so the fighters are visible behind the text, or relocate the instructional text to the top header area."
+    },
+    {
+      "id": "control-legend-clutter",
+      "title": "Persistent move legend crowds the control zone",
+      "what": "The input legend bar (Screenshot 3) listing 'step', 'jump', 'crouch' sits permanently between the gameplay field and the virtual sticks.",
+      "why": "On a 390px wide phone screen, this static element pushes the virtual joysticks toward the bottom edge of the screen (the 'thumb reach' danger zone) and unnecessarily shrinks the vertical viewport for the 3D scene.",
+      "how": "Implement a 'grace period' where this legend fades out after the first 10 seconds of gameplay or after the first successful input, allowing the sticks to animate upward into that freed space."
+    }
+  ],
+  "raw": null
+}

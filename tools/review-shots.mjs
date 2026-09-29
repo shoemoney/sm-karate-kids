@@ -282,9 +282,19 @@ await capture('15-phone-settings-mixed', phone, async (page) => {
   await waitFight(page);
   await page.locator('.hud-actions button').last().click();
   await page.waitForTimeout(600);
+  // Rows 4 and 5 — Mute sound and Show performance HUD — NOT rows 1 and 3.
+  //
+  // The first version of this capture toggled High contrast, which meant every
+  // reviewer saw the settings sheet rendered in its best-case theme and could
+  // not judge the contrast of the default one. Two models reported "the
+  // settings menu lacks sufficient contrast" off a frame that was, in fact,
+  // the high-contrast theme.
+  //
+  // Toggling a state must not change the conditions under which the state is
+  // being reviewed. These two have no effect on how the sheet paints.
   const rows = page.locator('.setting-row input');
-  await rows.nth(1).click();
-  await rows.nth(3).click();
+  await rows.nth(4).click();
+  await rows.nth(5).click();
   await page.waitForTimeout(600);
   await page.screenshot({ path: `${OUT}/15-phone-settings-mixed.png` });
 });

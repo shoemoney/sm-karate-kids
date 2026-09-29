@@ -981,3 +981,40 @@ refutation, because it looks like diligence.
 file-wide pattern. It reported success, changed a different rule 400 lines
 earlier, and left `.technique` untouched. All three edits are now whole-rule
 matches with an `assert count == 1`, so a miss is loud.
+
+### Round 31 — glm-5v-turbo, qwen3-vl-30b-a3b, ernie-4.5-vl-424b-a47b — `9d1e4b6`
+
+- **A sampling bug I introduced one round ago, caught by the models disagreeing
+  with the thing they were shown.** qwen3-vl-30b and ernie-4.5-vl both reported
+  "the settings menu lacks sufficient contrast". Round 25's mixed-state capture
+  toggled rows 1 and 3 — High contrast and Left-handed — so every reviewer saw
+  the sheet in its *best-case theme* and could not judge the default one at all.
+
+  **Toggling a state must not change the conditions under which the state is
+  being reviewed.** It now toggles Mute sound and Show performance HUD, which
+  have no effect on how the sheet paints. Re-captured: the default theme with a
+  genuine mix, and the labels read white on near-black. The finding was a true
+  observation of a frame that was not the product's default.
+
+  This is the loop's recurring lesson arriving from a new direction. Rounds 17,
+  18 and 25 were all "the sample never varied a dimension". This one is "the
+  sample varied a dimension *too much*, and in doing so hid the thing".
+- `vignette-overkill: "excessive vignette darkens the center of the screen"`
+  (qwen3-vl-30b) — **rejected on measurement.** Centre 10% mean luminance 81.7,
+  centre 20% 89.1, centre 35% 77.8, outer ring 31.6, corners 16.5. The centre
+  is the brightest region on screen and the corners are the darkest, which is
+  precisely what a vignette is for. The claim describes the inverse of the
+  effect.
+- `settings-contrast` / `settings-menu-contrast` — see above. Default theme
+  re-captured and legible.
+- `fight-result-screen-delay` (ernie) — the 8s auto-start, skipped by tapping
+  the button, which is the whole button.
+- `prefight-text-obstruction: "opaque pre-fight text box hides character models"`
+  (glm-5v-turbo) — the pre-fight card is deliberately translucent over a live
+  arena, and it is a countdown that ends in the fight, not a dialog.
+- `hud-clutter` (ernie), `move-list-clutter` / `moves-list-cognitive-load`
+  (qwen3-vl-30b, qwen3.5-plus r30), `controls-overlap` /
+  `control-overlap: "control stick overlap"` (qwen3-vl-30b, ernie),
+  `portrait-vertical-waste`, `control-legend-clutter` — framing and density, in
+  its twentieth iteration. Standing: warm and low, and the pad is 27.0% of an
+  844px screen.
