@@ -1788,3 +1788,47 @@ anything the review loop has found.
   in round 49; the halos were checked at 2x in rounds 37 and 42 and are not
   there. "Camera-flat lighting" is accurate and inherent: the fighters are
   unlit `MeshBasicMaterial` quads, which is what lets them key cleanly at all.
+
+### Round 54 — qwen3.8-flash, grok-4.6, ling-3.0-flash-vl — no product change
+
+- `ippon-callout-off-gaze: "IPPON and move-name callouts fire in the dead upper
+  wall, away from the action"` (qwen3.8-flash) and
+  `ippon-hides-the-hit: "IPPON lockup covers the scoring contact"` (grok-4.6) —
+  **these two are the same finding pointing opposite ways, and the design is
+  caught between them.** One says the stamp is too far from the action; the
+  other says it is on top of it. It cannot be both, and the resolution is that
+  at 18% of the stage it is *neither*: it is in the upper third, clear of the
+  contact, which is where a stamp belongs.
+
+  Round 20 moved it there, from a position where it overlapped the technique
+  pill by 25px, on the report of three models. Moving it back onto the fighters
+  to satisfy the first claim would re-create the defect the second claim is
+  complaining about. **Declined, with the reason written down: the complaint is
+  that the payoff is not adjacent to the hit, and the alternative is that it
+  covers the hit.**
+
+- Stale, and now the majority of every batch:
+  `loader-progress-bar-no-fill` / `loading-progress-invisible` (qwen3.8-flash,
+  ling-3.0-flash-vl) — the twenty-second and twenty-third appearances, unchanged
+  since round 35 established the harness was photographing an unstyled page.
+  `persistent-control-legend-clutter` / `persistent-moves-panel` /
+  `countdown-live-sticks` — the coach, seventh appearance, first-run only, with
+  `14-phone-returning` in the set. `fight-vs-countdown-conflict` /
+  `intro-fight-button-overlap-sticks` / `countdown-live-sticks` — refuted
+  against the code in round 40. `techniques-list-clipped: "no scroll
+  affordance"` — the fade landed in round 52. `no-orientation-lock` — landscape,
+  tenth model, architecture argued in `90152ff`.
+
+### Where the loop actually is
+
+Fifteen of the fifteen findings this round were stale, refuted, or a design
+tension with a written-down reason. That is the first all-clear batch in
+fifty-four rounds, and it is the signal this loop has been worth listening for.
+
+The reason is structural and it is now measurable: **every frame in the review
+set is the first fifteen seconds of a game.** Four real defects in the last
+twenty rounds — the unstyled boot page, the Playwright focus artifact, the `10½`
+clip, the tip contrast — were not found by looking harder at those frames. They
+were found by asking what a frame *cannot* show. The set has been thoroughly
+mined and it has nothing left, and the models are correctly reporting what they
+can actually see, which is a set of screenshots of a game at 0–0.

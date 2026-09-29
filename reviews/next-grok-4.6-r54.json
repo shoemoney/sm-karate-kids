@@ -1,0 +1,84 @@
+{
+  "model": "x-ai/grok-4.6",
+  "elapsed_s": 78.6,
+  "usage": {
+    "prompt_tokens": 13655,
+    "completion_tokens": 7763,
+    "total_tokens": 21418,
+    "cost": 0.073696,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 128,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.073696,
+      "upstream_inference_prompt_cost": 0.027118,
+      "upstream_inference_completions_cost": 0.046578
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 6950,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "faint-download-bar",
+      "title": "Loading progress is a nearly invisible hairline",
+      "what": "The ShoeMoney loading screen shows 'Downloading the game' above a 1px gold rule that is the only progress indicator, lost on the black field under the glowing logo.",
+      "why": "First 5\u201310 seconds on a phone (WebGPU/Three.js compile + assets) look frozen; players force-quit before the bout even appears.",
+      "how": "Replace the rule with a 6\u20138px rounded, glowing gold fill bar centered under the logo, plus a short status ('Compiling\u2026' / percent) so progress is obvious at a glance."
+    },
+    {
+      "id": "fight-vs-countdown-conflict",
+      "title": "FIGHT button and auto-countdown contradict each other",
+      "what": "Qualifier intro (and the rematch screen) place a large gold FIGHT/REMATCH button directly above 'STARTING IN 2/4/8'. Sticks are already visible and live.",
+      "why": "New players freeze: tap or wait? Missed or accidental starts kill the opening tension of a point-karate bout.",
+      "how": "Auto-start screens should drop the button and use a shrinking ring or giant numerals; rematch should be tap-only with the timer paused until the player acts."
+    },
+    {
+      "id": "controls-crush-viewport",
+      "title": "Twin-sticks plus legend steal the portrait dojo",
+      "what": "Every portrait fight frame has two oversized analog sticks and a full-width STANCE/TECHNIQUE legend bar occupying the bottom ~300px; fighters' feet sit on the bar and the 3D dojo is letterboxed into a short strip.",
+      "why": "The cinematic night dojo and photoreal sprites\u2014the game's visual hook\u2014are minimized; jump/crouch reads become tiny and thumbs cover even more of the playfield.",
+      "how": "Default to smaller sticks (Large controls already exists as a toggle), auto-hide the legend after first input, draw sticks at ~70% opacity, and reclaim 80\u2013100px of vertical space for the Three.js scene."
+    },
+    {
+      "id": "techniques-list-clipped",
+      "title": "Move list truncates with no scroll affordance",
+      "what": "The TECHNIQUES overlay lists Forward/Back/Up then clips 'Roundhouse Kick' at the bottom with a fade and no scrollbar, chevron, or hint that Down techniques exist.",
+      "why": "The HUD itself advertises \u25bc down, yet players never see those moves, so they spam the 5\u20136 visible punches and the kit feels shallow.",
+      "how": "Make the panel a scroll view with a thin gold scrollbar or bottom gradient + chevron; or tab the four directions so every move fits on 844px without scrolling."
+    },
+    {
+      "id": "ippon-hides-the-hit",
+      "title": "IPPON lockup covers the scoring contact",
+      "what": "The IPPON / name / technique name block is centered over the fighters, burying the spinning-back-kick contact and the white-gi reaction that the bloom/split-tone chain was meant to sell.",
+      "why": "Point karate lives or dies on seeing the clean hit; a UI popup instead of a visible payoff makes scoring feel cheap.",
+      "how": "Pin the IPPON treatment to the top third (with the score bar), freeze or slow-mo the 3D contact fully visible, and put a small technique label near the impact, not over it."
+    }
+  ],
+  "raw": null
+}

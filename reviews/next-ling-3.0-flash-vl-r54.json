@@ -1,0 +1,84 @@
+{
+  "model": "inclusionai/ling-3.0-flash-vl",
+  "elapsed_s": 40.4,
+  "usage": {
+    "prompt_tokens": 12313,
+    "completion_tokens": 7260,
+    "total_tokens": 19573,
+    "cost": 0.000705789,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000705789,
+      "upstream_inference_prompt_cost": 0.000258573,
+      "upstream_inference_completions_cost": 0.000447216
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 5991,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "bottom-controls-overflow",
+      "title": "Sticks and their labels are cut off on the 844px baseline",
+      "what": "In the pre-fight and in-fight screenshots (2, 3, 10, 11) the STANCE/TECHNIQUE sticks begin around y=810 and their 'STANCE'/'TECHNIQUE' labels sit around y=1030-1060. On the stated 390x844 baseline the sticks are visible for only ~34px and the labels are entirely off-screen.",
+      "why": "A touch-first karate game whose player cannot see which stick is stance and which is technique loses reliable input at the exact moment it matters, and the unlabeled sticks invite wrong-thumb taps.",
+      "how": "Bind the bottom stack (moves panel + sticks + labels) to viewport height so it fits 844px: raise the sticks to roughly 690-880 and keep labels at ~900-940, or shrink the sticks so the full circle plus label fits. Treat 'Large controls' as an in-bounds option, not the default."
+    },
+    {
+      "id": "loading-progress-invisible",
+      "title": "Loading bar shows no visible progress",
+      "what": "Screenshot 1: the bar under 'Downloading the game' is a ~2px dark hairline against the near-black background, with no fill, percentage, or animation anywhere on it.",
+      "why": "This is the player's first 5 seconds with the product. With no feedback, a download that takes seconds feels frozen and players will reload or close, hurting retention and making ShoeMoney's branded moment wasted.",
+      "how": "Fill the bar with the warm gold accent used on the FIGHT button, add a subtle shimmer or tick animation, and append a percentage or 'Downloading\u2026 N%' line so progress is legible at a glance."
+    },
+    {
+      "id": "no-orientation-lock",
+      "title": "Game runs unfixed in landscape and the layout stretches",
+      "what": "Screenshot 9 shows the dojo rendered in landscape: the fighters shrink to the middle ~40% of frame height, the dojo columns and tatami stretch horizontally, and the STANCE/TECHNIQUE sticks sit at the extreme bottom corners with their labels lost in the black bar.",
+      "why": "A phone twin-stick in landscape puts both sticks beyond comfortable thumb reach and shrinks the fighters, so hit read, timing, and touch accuracy all degrade; the warm cinematic composition is also broken.",
+      "how": "Lock the viewport to portrait (screen.orientation.lock('portrait')). If landscape must be tolerated, letterbox it and scale the fighters to fill the short axis instead of stretching the generated backdrop."
+    },
+    {
+      "id": "countdown-live-sticks",
+      "title": "Sticks and FIGHT button stay live during the countdown",
+      "what": "Screenshots 2 and 15 show 'STARTING IN 2' / 'STARTING IN 4' with the FIGHT button still on screen and the full STANCE/TECHNIQUE sticks active below it.",
+      "why": "A player mashing stance or technique during the countdown enters the bout out of their intended setup, or triggers a stray move before the exchange begins; it punishes early engagement instead of rewarding it.",
+      "how": "Disable both sticks and dim the FIGHT button until the countdown hits zero, then start the bout with a brief 'GO' flash so the first input is intentional."
+    },
+    {
+      "id": "persistent-moves-panel",
+      "title": "Moves hint panel stays up during the bout",
+      "what": "Screenshots 3, 4, 10, 11: the STANCE/TECHNIQUE key-hint panel (step/jump/crouch, back/forward/up/down) remains visible during live play, occupying ~60-70px directly above the sticks.",
+      "why": "It adds visual noise over the combat zone during exchanges and, on the baseline phone, pushes the already-overflowing controls further off-screen, compounding the bottom-stack problem.",
+      "how": "Auto-dismiss the panel after the first round or on the first clean landing, and add a small toggle to recall it; keep it hidden by default during combat."
+    }
+  ],
+  "raw": null
+}

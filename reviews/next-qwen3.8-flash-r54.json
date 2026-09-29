@@ -1,0 +1,84 @@
+{
+  "model": "qwen/qwen3.8-flash",
+  "elapsed_s": 95.8,
+  "usage": {
+    "prompt_tokens": 12320,
+    "completion_tokens": 6783,
+    "total_tokens": 19103,
+    "cost": 0.00503601,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00503601,
+      "upstream_inference_prompt_cost": 0.001848,
+      "upstream_inference_completions_cost": 0.00318801
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 5286,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighters-out-of-range-whiff-read",
+      "title": "Fighters stand so far apart that techniques visually never connect",
+      "what": "In the idle fight frames (screenshots 3, 4, 15) the two fighters hold a gap of roughly 1.5 body-widths between them. In screenshot 13 the white fighter's FRONT KICK is fully extended yet its foot stops a clear body-length short of the red fighter's torso, with no contact spark, no recoil, and no hit-flash on the red side. The single hit-spark that does exist (screenshot 12, the yellow lines at the white fighter's head) only appears on the IPPON frame, so ordinary exchanges have no impact tell at all.",
+      "why": "Point karate sells itself on 'one clean contact ends the exchange.' If the player cannot tell, in the first half-second of an attack, whether their technique landed or whiffed, the core loop reads as broken and the warm cinematic mood just looks like two guys posing. This is the single most damaging readability failure because it is present on every exchange, not just one screen.",
+      "how": "Tighten the default starting separation by ~25% so the guard poses sit inside striking range, and give the forward-step a visible closing lunge so an extended kick/punch overlaps the opponent's silhouette. Anchor a contact flash + a small recoil on the receiving fighter to the point of impact (reuse the screenshot-12 spark, but parented to the fighters, not the banner) on every scoring contact, and add a distinct 'whiff' tell (no spark, slightly over-extended recovery) so hit vs. miss is legible without reading the score."
+    },
+    {
+      "id": "loader-progress-bar-no-fill",
+      "title": "Loading screen shows an empty groove with no progress signal",
+      "what": "On the pre-boot screen (screenshot 1) the thin rounded bar under 'Downloading the game' (sitting at roughly the 62% height mark) is a uniform dark groove with no lighter fill, no percentage, and no animation visible in the capture. The only text is the static 'Downloading the game'.",
+      "why": "This is the literal first thing a player sees, and on a browser/WebGPU build the asset download can take several seconds. A bar that looks empty reads as a hang or a dead link, and a perceived hang at the very top of the funnel is the highest-abandonment risk in the whole product.",
+      "how": "Drive the bar's fill width from actual bytes-loaded with a warm gold gradient that matches the HUD, and show a small % or a subtle shimmer. If the total size is unknown, run an indeterminate gold sweep inside the groove so the bar is never a flat dark line; keep the tungsten palette, do not brighten the page."
+    },
+    {
+      "id": "ippon-callout-off-gaze",
+      "title": "IPPON and move-name callouts fire in the dead upper wall, away from the action",
+      "what": "In screenshot 12 the 'IPPON / HASANABI / SPINNING BACK KICK' stack renders at about the 20-30% height band, while the fighters and the player's thumbs/eyes are at 50-90%. The same misplacement repeats for the player's own move toasts 'LUNGE PUNCH' (screenshot 5) and 'FRONT KICK' (screenshot 13), which all pop up over the empty shoji-screen wall.",
+      "why": "IPPON is the emotional peak of a point-karate bout \u2014 it is the reward/penalty feedback \u2014 and the player is looking at the fighters and the sticks, not at the top of the frame. Putting the most important callout in the one region nobody watches means the player often realizes they scored only after reading the top HUD, killing the moment's punch.",
+      "how": "Move the IPPON / technique-name callout into a band just above the fighters' heads (~55-65% height, centered), or parent it to the scoring fighter so it lands in the player's line of sight. Keep the existing gold glow and letterforms; only the vertical placement changes."
+    },
+    {
+      "id": "intro-fight-button-overlap-sticks",
+      "title": "Pre-fight screen: FIGHT button covers the fighters and the sticks look live",
+      "what": "On the qualifier intro (screenshots 2, 11, 14) the gold FIGHT pill sits directly on top of both fighters' legs, clipping the white fighter's thighs and the red fighter's knees. Below it, the full STANCE and TECHNIQUE sticks are rendered in their active style even though the bout hasn't started and the screen is showing a 'STARTING IN n' countdown.",
+      "why": "This is the first in-game impression after the loader. The button overlapping the hero fighters looks like a layering bug and makes the characters feel like a backdrop rather than the star, while the always-on sticks invite thumb input that does nothing yet \u2014 a confusing affordance on the one screen that should sell the game.",
+      "how": "Lift the FIGHT button onto the empty mat below the fighters (or shrink the hero framing so the button never intersects their bodies), and during the intro either hide the two sticks or render them in a dimmed, disabled state so they read as 'not yet live'. Re-enable them only on the FIGHT tap."
+    },
+    {
+      "id": "persistent-control-legend-clutter",
+      "title": "The STANCE/TECHNIQUE legend panel is pinned over the mat during play",
+      "what": "In the early fight frames (screenshots 3, 4, 5, 12, 13) a translucent rounded panel spelling out 'STANCE step/jump/crouch' and 'TECHNIQUE back/forward/up/down' sits across the lower third, overlapping the front edge of the tatami and the fighters' foot space, before disappearing entirely in later frames (screenshot 15).",
+      "why": "The fighters are already small and sit low in the frame; a permanent text panel eating ~12% of the height compresses the actual play area and duplicates the STANCE/TECHNIQUE labels already printed under the sticks. It reads as onboarding that forgot to leave, adding clutter to the cinematic composition on every early bout.",
+      "how": "Convert the legend into an explicit, dismissible first-round hint (tap-to-acknowledge or auto-fade after the first technique) rather than a fixed panel, so the mat and the fighters get the full vertical space back from the start. The stick labels already name each zone, so the directional text is redundant once shown once."
+    }
+  ],
+  "raw": null
+}
