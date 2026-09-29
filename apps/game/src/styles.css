@@ -1663,6 +1663,34 @@ input:focus-visible,
   padding: var(--space-3) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
 }
 
+/* The settings sheet is full-screen since round 24 — that was for the
+   Techniques list, which needed the whole height and now shows all eighteen
+   moves. Settings did not need it, and paying the cost anyway left a short
+   six-row list floating in the top third with the career line stranded under
+   it and a void beneath that.
+   gemini-3.5-flash-lite reported it as "orphaned career stats", which is what
+   it looked like.
+
+   So the settings body sizes to its content and the career line becomes a real
+   footer, pinned to the bottom of the sheet. The empty space moves to between
+   the list and the footer, where it reads as deliberate room rather than as a
+   truncated panel. The Techniques sheet keeps `flex: 1` and its scroll. */
+#settings-sheet .sheet-body {
+  /* Fills the sheet, so the career line's `margin-block-start: auto` has free
+     space to push it down. Sized to its own content the auto margin has
+     nothing to consume and the footer lands directly under the list with the
+     void beneath it, which is the layout it was meant to replace. */
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+#settings-sheet .career-summary {
+  margin-block-start: auto;
+  padding-block-start: var(--space-4);
+  border-block-start: 1px solid var(--edge-faint);
+}
+
 .setting-row {
   display: flex;
   align-items: center;
