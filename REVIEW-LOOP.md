@@ -769,3 +769,36 @@ remaining.** The local snapshot was inventing IDs — `glm-4.7v` and
   `virtual-stick-knobs-too-small`, `portrait-camera-wastes-frame`,
   `tighten-portrait-fight-framing`, `repair-landscape-layout` — framing, in its
   fifteenth iteration. Standing: warm and low.
+
+### Round 25 — mistral-medium-3-5 — `fb40131`
+
+- `settings-toggle-clarity: "settings toggles lack visual state feedback"` —
+  **rejected, and the rejection is the finding.** The toggles have had a legible
+  state in both directions since round 21, when they were rebuilt as switches
+  with a knob that holds a position either way.
+
+  They are also all-off in every settings frame this harness has ever produced,
+  because the harness never clicked one. A reviewer looking at six identical
+  dark tracks was reasoning correctly from a one-sided sample and reached a
+  false conclusion — the same failure as the returning-player pad in round 18,
+  and the same one five models produced in round 15 before I finally made the
+  mixed-state capture that existed only in a verification screenshot and never
+  in the review set.
+
+  `15-phone-settings-mixed` fixes it: two on, four off.
+
+  **A fix that is only ever verified in a screenshot you looked at alone is not
+  in the loop. It has to be in the set the next reviewer sees.** Round 15 made
+  this exact capture and then did not ship it, and four models paid for it.
+- `hud-score-legibility: "score text is hard to read mid-fight"` — the scoreline
+  plate is opaque and the scores are `--text` and `--fighter-1`, the two
+  brightest values in the palette, on top of it. Rounds 5 and 10 took both as
+  far as the art direction allows.
+- `rematch-button-visibility: "rematch button blends into the background"` — it
+  is a gold plate with a bright ring and a glow, on a stage the round-20 veil
+  deliberately darkened. It is the loudest control in the result card.
+- `loading-logo-contrast` — the ShoeMoney mark is proprietary and may not be
+  recoloured, filtered or restyled. A plate behind it is the only available
+  lever and is not yet warranted; the boot card measured at 8.4:1.
+- `fighter-vertical-placement` — framing, in its sixteenth iteration. Standing:
+  warm and low.
