@@ -1,0 +1,84 @@
+{
+  "model": "xiaomi/mimo-v2.6-pro",
+  "elapsed_s": 228.8,
+  "usage": {
+    "prompt_tokens": 12269,
+    "completion_tokens": 8477,
+    "total_tokens": 20746,
+    "cost": 0.012712005,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.012712005,
+      "upstream_inference_prompt_cost": 0.005337015,
+      "upstream_inference_completions_cost": 0.00737499
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7027,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fix-qualifer-typo",
+      "title": "Title card spells 'QUALIFER' \u2014 one letter short of QUALIFIER",
+      "what": "On the pre-bout opponent card (the 'vs HasanAbi' screen), the big gold heading at y\u2248186 reads 'QUALIFER'. The chip directly below it at y\u224898 ('ROUND 1/5 \u00b7 QUALIFIER') spells the same word correctly, so both spellings are on screen at once.",
+      "why": "This is the first branded screen after boot. A misspelled headline word is the single fastest way to read as an unfinished build, and it's a word the game prints twice per round.",
+      "how": "Correct the title-card string to 'QUALIFIER' and put both strings in one shared constant so the card and the round chip cannot drift apart again; add the word to a copy-lint pass in the build."
+    },
+    {
+      "id": "loading-progress-and-palette",
+      "title": "Loading bar shows no fill and the logo is the wrong temperature",
+      "what": "On the ShoeMoney pre-boot screen, the track at y\u2248813 is a 2px full-width dark brown line with no visible gold fill and no percentage \u2014 it reads as a divider, not a progress bar. 'Downloading the game' at y\u2248777 is set in a monospace face used nowhere else. The 'S' diamond at y\u2248520 is bright cyan/white on black \u2014 the only cool-blue element in an otherwise tungsten-gold product.",
+      "why": "This is literally the first five seconds. With no fill and no number the player cannot tell whether bytes are moving or the tab has hung, which is the top reason a browser game gets closed at boot; the cold logo also reads as a different brand than the game that follows it.",
+      "how": "Fill the track with the same gold gradient as the FIGHT button, drive it from real byte progress and print '34%' in the game's letterspaced warm sans at the right end; re-key the logo to warm gold on charcoal (or add a warm rim/glow around the existing mark) and set 'Downloading the game' in the game's sans instead of monospace."
+    },
+    {
+      "id": "sync-move-label-with-pose",
+      "title": "Move callout fires while the fighter is still standing in idle",
+      "what": "In-bout, the 'LUNGE PUNCH' pill at y\u2248313 appears while the white fighter is in the exact idle stance used in every other frame (feet at y\u2248785, both fists at guard) \u2014 no lunge, no punch. The right-stick knob is visibly deflected forward with the gold ring, so the input registered. In the 'FRONT KICK' frame the sprite does swap, but the kicking photo is a different size: feet at y\u2248745 instead of y\u2248785 and the head ~15px lower, so the fighter shrinks and floats ~40px above the mat line mid-attack.",
+      "why": "The callout is the game's confirmation that your twin-stick chord worked. If the text says lunge punch and the body isn't punching, the player reads it as dropped input; when the pose finally changes and the fighter levitates off the ground, the hit stops feeling physical at the one moment it must.",
+      "how": "Fire the callout on the same frame the sprite swaps to the attack pose (hold it if the pose is late by more than 100ms), and re-export every attack sprite on a shared canvas: feet anchored to the same y, standing height matched within 2%, identical crop margins \u2014 so the swap is a pose change, not a scale change."
+    },
+    {
+      "id": "raise-fighters-in-frame",
+      "title": "The bout is a thin strip; the top third of the frame is empty ceiling",
+      "what": "On the in-bout screen the fighters occupy roughly y\u2248470\u2013790 of the 844-tall screen \u2014 about a quarter of the frame. From the MOVES/gear buttons at y\u2248145 down to the window grid at y\u2248430 is near-empty dark ceiling and wall, and the bottom 32% (y\u2248860\u20131266) is the permanent STANCE/TECHNIQUE legend card plus the two stick wells. The action is a ~320px band squeezed between a dead zone and a chrome zone.",
+      "why": "On a 390x844 phone the fighters are already small; at this size a fist, a belt knot or a hit spark is only a few pixels, so it is genuinely hard to see which technique landed or who got hit \u2014 the core read of the game.",
+      "how": "Raise the camera/horizon so the fighters sit around y\u2248330\u2013720 and scale the sprites up ~20% (crowns just under the window grid), and move the STANCE/TECHNIQUE legend into a first-run tutorial overlay so the bottom band is reclaimed once the player has played a bout."
+    },
+    {
+      "id": "ground-and-layer-fighter-sprites",
+      "title": "At contact the fighters read as two pasted stickers, not bodies",
+      "what": "In the result screen (HASANABI WINS, y\u2248650\u2013900) and the IPPON frame the sprites physically interpenetrate: the red fighter's fist is drawn over the white fighter's chest while the white fighter's forearm is drawn over the red gi \u2014 impossible for flat art, so the draw order is wrong at the seam. Both fighters sit on a soft elliptical blob shadow that ignores the set's light (the windows and volumetric glow are the key, coming from behind/above, but the fighters are lit flat from the camera), and the white fighter's hair silhouette carries a light fringe from the photo matting.",
+      "why": "The dojo is a real lit 3D set; the instant the fighters touch, the collage illusion breaks and the hit reads as two PNGs sliding over each other. These are the frames players screenshot and the frames that back up the 'photoreal' promise of the fighters.",
+      "how": "Give each technique an explicit draw order (striker's striking limb always over the defender, or one combined contact sprite per exchange), erode the alpha 1px to kill the hair fringe, and replace the blob shadow with a short hard ellipse directly under each foot oriented to the window key, plus a warm rim highlight on the camera-facing edge of each sprite so the fighters pick up the tungsten light."
+    }
+  ],
+  "raw": null
+}

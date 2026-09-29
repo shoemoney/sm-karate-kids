@@ -1720,6 +1720,20 @@ input:focus-visible,
 #settings-sheet {
   inset-block-end: auto;
   max-block-size: 100%;
+  /* A scrim, as a spread shadow rather than a pseudo-element: one line, and it
+     covers the whole viewport behind a panel whose height is content-sized.
+
+     Round 44 removed the void and in exchange put a hard horizontal edge across
+     both fighters at chest height, which gpt-5.6-sol-pro reported as the panel
+     "visibly slicing through the fight". Both were symptoms of not having a
+     boundary: a full-height sheet had no edge to read, and a content-height one
+     had an edge that read as a cut rather than as a boundary.
+
+     Dimming the scene behind is what makes the edge a panel edge. The player
+     still sees they are in a fight — which was the point of letting the dojo
+     show through in round 44 — but the fight is now clearly behind something
+     rather than sliced by it. */
+  box-shadow: 0 0 0 100vmax rgb(8 5 3 / 0.62);
 }
 
 #settings-sheet .sheet-body {

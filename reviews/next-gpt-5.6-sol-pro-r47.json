@@ -1,0 +1,84 @@
+{
+  "model": "openai/gpt-5.6-sol-pro",
+  "elapsed_s": 95.2,
+  "usage": {
+    "prompt_tokens": 56220,
+    "completion_tokens": 9972,
+    "total_tokens": 66192,
+    "cost": 0.1646618,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 30644,
+      "cache_write_tokens": 15322,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.1646618,
+      "upstream_inference_prompt_cost": 0.0649418,
+      "upstream_inference_completions_cost": 0.09972
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7449,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "reframe-portrait-fight",
+      "title": "Use more of the portrait arena for the fighters",
+      "what": "On the active portrait bout screen, the fighters' heads do not begin until roughly 310 px down the 844 px canvas, leaving about 250 px of mostly empty wall and windows below the HUD. The fighters occupy only the middle quarter of the screen while the controls consume the lower third.",
+      "why": "Faces, limb positions, contact, and spacing are harder to read on a phone, weakening the central action despite the detailed fighter art.",
+      "how": "Tilt or crop the portrait camera downward, scale both fighter sprites up about 15\u201320%, and keep their feet near the current mat line. Reclaim additional height by collapsing the stance/technique instruction card after the player's first valid input."
+    },
+    {
+      "id": "clarify-fight-countdown",
+      "title": "Remove the conflict between the Fight button and auto-start countdown",
+      "what": "On the qualifier screen, a large tappable-looking FIGHT button sits directly above text such as STARTING IN 2 or STARTING IN 4. The screen simultaneously suggests that the player must tap and that the bout will begin automatically.",
+      "why": "This creates hesitation at the first gameplay transition and can make a player think a missed tap caused the fight to start unexpectedly.",
+      "how": "Choose one behavior visually: if tapping skips the countdown, label the button START NOW and add SKIPS COUNTDOWN beneath it; if the start is fully automatic, replace the button with a non-interactive FIGHT title and a clearly animated countdown indicator."
+    },
+    {
+      "id": "ground-fighter-sprites",
+      "title": "Add contact shadows so the fighters sit on the tatami",
+      "what": "Across the idle and attack screens, the fighters' bare feet terminate with sharp cutout edges against the floor and have no visible contact shadows. The effect is especially obvious under the white fighter's extended feet and during the front-kick pose.",
+      "why": "The photoreal sprites read as flat stickers floating over the 3D dojo, reducing visual cohesion and making foot placement less legible during stance changes.",
+      "how": "Render soft, warm-gray elliptical shadows beneath each planted foot, deform and fade them by foot height, and add a faint broader body shadow. Match blur and opacity to the dojo's low-key lighting rather than using a hard black drop shadow."
+    },
+    {
+      "id": "fix-settings-overlay-edge",
+      "title": "Stop the Settings panel from visibly slicing through the fight",
+      "what": "On the Settings screen, the opaque panel ends at a hard horizontal edge around mid-screen. The underlying fighters resume immediately below it with their heads and torsos clipped by that edge, leaving only partial bodies visible.",
+      "why": "The panel looks like a rendering or layout failure rather than an intentional modal, and the exposed moving scene competes with accessibility settings.",
+      "how": "Add a full-screen dark scrim behind the panel and either extend the settings surface to the bottom safe area or present it as a clearly bounded sheet with rounded lower corners. Pause or heavily dim the fight while the sheet is open."
+    },
+    {
+      "id": "rebalance-landscape-controls",
+      "title": "Rework the landscape touch layout instead of stretching the portrait UI",
+      "what": "In the 1280\u00d7800 landscape screenshot, the two sticks are small and pinned to the extreme lower corners while most of the lower black band is empty. The arena spans the full width above, creating a disconnected control strip with a very large unused center.",
+      "why": "The controls become visually secondary and require players to target relatively small stick areas during fast directional combinations, especially on a rotated phone.",
+      "how": "Increase each landscape stick diameter by roughly 20%, move both inward to comfortable thumb arcs, and reduce the empty lower band. Keep the fight stage vertically larger or place compact move hints between the sticks so the layout uses the available width deliberately."
+    }
+  ],
+  "raw": null
+}
