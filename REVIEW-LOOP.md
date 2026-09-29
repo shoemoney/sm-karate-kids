@@ -1106,3 +1106,46 @@ is what a corrected sample does.
 - `landscape-viewport-pillarboxing` (gemini-3.6-flash),
   `landscape-camera-framing` (qwen3.5-397b-a17b) — landscape, second
   appearance in two rounds and the only framing request with a fresh argument.
+
+### Round 34 — gpt-5.5-pro, mimo-v2.6-pro-ultraspeed, gemini-3.5-flash-lite — `7a8446d`
+
+- `countdown-cta-ambiguity: "stop making countdowns look like inactive buttons"`
+  (gpt-5.5-pro) and `countdown-reads-as-button` (mimo-v2.6-pro-ultraspeed) —
+  **accepted, and the finding is the disagreement, not either claim.**
+
+  Three rounds, three readings of one element: a bare numeral in a circle read
+  as a point total (r24–r27, four reviewers); "FIGHT IN 3" in a bordered pill
+  read as a second clickable control nested in the first (r33); the flattened
+  version reads as a disabled button (r34). Each is a fair reading of whatever
+  the previous version looked like, and *that* is the finding. An element
+  carrying two kinds of information inside one control will be read as whichever
+  kind the reader brings to it. Redesigning it a fourth time would have produced
+  a fifth reading.
+
+  Split instead. The button is `FIGHT` and does one thing; the countdown is a
+  caption — "STARTING IN 3" — under it in gold, readable, never pressable.
+  The aria-label has carried the countdown since r24 and was always right.
+
+  **Three rounds of a review loop arguing with itself about one button is a
+  signal that the button was carrying too much, not that the button was wrong.**
+- `matchup-screen-cramped-text: "text overlap and low contrast"`
+  (gemini-3.5-flash-lite) — re-captured and read: QUALIFIER in condensed gold,
+  "vs HasanAbi" in white over the shoji, the tip on its own dark plate. No
+  overlap; the tip measures well clear of its plate.
+- `settings-menu-orphan-career-stats` (gemini-3.5-flash-lite) — real, and a
+  consequence of round 24. The settings sheet is now full-screen and its
+  content is short, so the career line sits with a large void beneath it. The
+  sheet was made full-screen to give the *Techniques* list room; the settings
+  list did not need it and now looks unanchored.
+- `tiny-first-fight-legend` (gpt-5.5-pro),
+  `control-legend-typography: "make the always-on STANCE/TECHNIQUE legend
+  readable"` (mimo-v2.6-pro-ultraspeed) — third appearance. It is first-run
+  only; `14-phone-returning` exists precisely to show that and is in the set.
+- `hit-fx-and-ippon-overlay: "anchor impact sparks to the contact point and
+  clear the IPPON text"` (mimo-v2.6-pro-ultraspeed) — the sparks are emitted at
+  the contact point from `impact({x, y})`; the IPPON text moved out of the
+  technique pill in round 20 but the stamp is still 75px tall.
+- `portrait-crop-loses-dojo`, `combat-hud-dead-center-empty-void`,
+  `combat-floating-move-text-placement` — framing, in its twenty-first
+  iteration, and the one family of request that has never once produced a
+  change. Standing: warm and low.
