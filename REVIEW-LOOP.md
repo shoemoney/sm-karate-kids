@@ -1513,3 +1513,24 @@ raised, which is a different and more useful signal than a fix.
 - `qwen/qwen3.5-27b-instruct` — not a valid slug; the catalogue entry has an
   `-instruct` suffix the API does not accept.
   `mistralai/mistral-large-2512` — 429, Mistral's shared pool again.
+
+### Round 45 — the moves-sheet key, `d0a91c4`
+
+- `technique-list-input-legibility: "make the move-list input recipes readable
+  at phone size"` (gpt-5.6-terra) and
+  `moves-notation-cryptic: "two unlabeled icons plus a bare '+' with no key"`
+  (glm-5.3-flash, first raised round 28 and carried every round since) —
+  **accepted, and neither model named the cause. Both were right about the
+  symptom.**
+
+  The size was fine. The glyphs were fine. There was no key. Every row reads
+  `[stance] + [technique]`; the group heading explains the second pip by where
+  you are, and nothing on the sheet ever explained the first.
+
+  One line under a rule at the top: `· STANCE + · TECHNIQUE`. Eighteen moves
+  still fit, the rows are unchanged, and the compact notation stays — it is the
+  right notation for a phone, it just needed saying out loud once.
+
+  **A compact notation is not a cryptic one. A compact notation with no key
+  is.** Seventeen rounds carried this one because each report described the
+  symptom, and the symptom is what a reviewer can see.
