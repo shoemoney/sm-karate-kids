@@ -11,7 +11,7 @@
     "preview": "pnpm --filter @smkk/game preview",
     "typecheck": "tsc -b --force && tsc -p tools/tsconfig.json",
     "test": "vitest run",
-    "test:e2e": "pnpm --filter @smkk/game test:e2e",
+    "test:e2e": "pnpm build && pnpm --filter @smkk/game exec playwright test",
     "validate:content": "tsx tools/validate-content.ts",
     "validate:assets": "tsx tools/validate-assets.ts",
     "check": "pnpm typecheck && pnpm test && pnpm validate:content && pnpm validate:assets"
