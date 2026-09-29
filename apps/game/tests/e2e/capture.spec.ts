@@ -15,7 +15,15 @@ const DRILL_SPACING = 1.95;
 
 /**
  * Not a test of behaviour — this is the committed proof that the emblem reads
- * on a real phone frame, regenerated every CI run so it can never go stale.
+ * on a real phone frame, and the only automated check that the sprite fighters
+ * are what actually renders.
+ *
+ * Freshness is a manual step, and deliberately so: CI runs this and writes the
+ * frame, but the runner is discarded and nothing commits the result, so the
+ * PNG in the repo is only as current as the last local `pnpm test:e2e` whose
+ * output somebody committed. Do not read a green CI run as "the preview is
+ * up to date". What CI *does* guarantee is that capturing still works and the
+ * emblems still render.
  */
 test('captures the portrait preview frame', async ({ page }, info) => {
   test.skip(info.project.name !== 'phone-portrait', 'the preview frame is portrait');

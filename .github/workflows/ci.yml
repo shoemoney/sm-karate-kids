@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   build-and-test:
-    name: Typecheck, test, validate, build, e2e
+    name: Typecheck, test, validate, e2e
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

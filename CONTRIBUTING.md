@@ -10,7 +10,8 @@ DCO required right now. That may change (a CLA/DCO gets added only if counsel or
 later requires one) — this file will say so clearly if it does.
 
 The MIT grant covers this repository's original code and project-authored documentation only. It
-does **not** cover the ShoeMoney brand mark, or the *Karate Champ* name and any other Data
+does **not** cover the ShoeMoney brand marks or the fighter sprite atlases (all Jeremy
+Schoemaker's own work, used with permission), or the *Karate Champ* name and any other Data
 East / G-MODE / Technōs intellectual property. See `THIRD_PARTY_NOTICES.md`.
 
 ## 🛠️ Getting set up
@@ -23,9 +24,9 @@ pnpm dev            # Vite dev server for apps/game
 ```
 
 Read `CLAUDE.md` first — it has the real command list and the architecture rules (what
-`packages/sim` may and may not import, the mobile-first standing rule, the ShoeMoney-emblem
-standing rule). It is kept in sync with `package.json`; if they ever disagree, `package.json` wins
-and `CLAUDE.md` needs a fix.
+`packages/sim` may and may not import, the mobile-first standing rule, the ShoeMoney brand-marks
+standing rule, and the `tools/` table). It is a byte-for-byte mirror of `AGENTS.md`; if they ever
+disagree with `package.json`, `package.json` wins and the docs need a fix.
 
 ## ✅ Before opening a pull request
 
@@ -44,6 +45,10 @@ pnpm test:e2e
 No `pnpm build` first — `pnpm test:e2e` builds the bundle it serves. Running the browser
 suite against a `dist/` you forgot to rebuild is how a green suite ends up testing last
 week's code.
+
+Locally the suite reuses an existing server on port **4173** if it finds one, so a stray
+`vite preview` from another repo turns into a cascade of failures that have nothing to do with
+your change. Check `lsof -ti:4173` first — it should print nothing.
 
 CI (`.github/workflows/ci.yml`) runs all of the above plus a secret scan on every push and pull
 request — it will not pass just because `pnpm check` passed locally if you skipped the e2e
@@ -64,15 +69,36 @@ run it after any content edit. It checks (among other things):
 
 ## 🖼️ Adding assets
 
-Every binary asset shipped under `apps/game/public/` needs a provenance entry (see
-`docs/asset-provenance.md` and `apps/game/public/brand/PROVENANCE.json` for the shape) with a
-non-empty `source`, `license`, `holder`, and `approved: true`. `pnpm validate:assets` enforces
-this, plus a 512 KB per-file size cap and a ban on ROM-adjacent file extensions (`.rom`, `.bin`,
-`.zip`, `.7z`) — **no extracted ROM art, sprites, recordings, or cabinet scans**, ever, per
-the product spec, section "Rights and provenance".
+Every binary asset shipped under `apps/game/public/` needs a provenance entry with a non-empty
+`source`, `license`, `holder`, and `approved: true` (see `docs/asset-provenance.md` for the shape).
+`pnpm validate:assets` enforces this, plus a 512 KB per-file size cap and a ban on ROM-adjacent file
+extensions (`.rom`, `.bin`, `.zip`, `.7z`) — **no extracted ROM art, sprites, recordings, or cabinet
+scans**, ever, per the product spec, section "Rights and provenance".
+
+**You do not have to register a new directory anywhere.** The validator *discovers* every
+`PROVENANCE.json` under `apps/game/public/` and applies the nearest one to each asset, so adding
+`apps/game/public/<newdir>/` plus a `PROVENANCE.json` next to it is the whole job. Two exist today:
+`brand/PROVENANCE.json` (also covering `fighters/`) and `generated/PROVENANCE.json`.
 
 Generated (AI-produced or otherwise non-original) assets need human review and `approved: true`
 before they're wired into runtime code — don't set that flag yourself just to unblock a validator.
+
+### The generated art set has extra rules
+
+`apps/game/public/generated/` is guarded more tightly than provenance alone, so a half-finished art
+drop can't pass:
+
+- `tools/art-manifest.tsv` is the single source of truth, read by both `tools/gen-art.sh` and
+  `tools/optimize-art.sh`. Add a row there — name, maxWidth, alpha, prompt.
+- Every shipped `generated/*.webp` must be **referenced from app source** (`apps/game/src/` or
+  `apps/game/index.html`). Assets loaded through `artLoader.ts` count; an asset nothing loads is a
+  build failure.
+- The manifest and the shipped files must agree **both ways** — no manifest row without a file, no
+  file without a row.
+
+Adding a row is not enough on its own: you also need a source PNG in `assets/generated/`, an
+approved `generated/PROVENANCE.json` entry, and the reference from app source. Then run
+`tools/optimize-art.sh` and `pnpm validate:assets`.
 
 ## 🐛 Reporting bugs / proposing features
 

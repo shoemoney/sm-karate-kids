@@ -23,11 +23,11 @@ silently drifting away from what the product spec says.
 - **Touch is the primary input device.** Keyboard and gamepad remain fully supported but are
   secondary — they don't get first claim on UX or layout decisions the way they would under a
   desktop-first plan.
-- **The twin-stick command grammar is preserved exactly.** Nothing about the 24-technique grammar
-  (`packages/sim/src/grammar.ts`) changes for touch. Every input device — touch, keyboard, gamepad,
-  replay playback, CPU — is an adapter that emits the same normalized four-way `StickPair`
-  (`packages/sim/src/input.ts`). `packages/sim` never learns, and must never learn, which physical
-  device produced a given frame.
+- **The twin-stick command grammar is preserved exactly.** Nothing about the 24-command grammar
+  (20 techniques plus 4 movement commands, `packages/sim/src/grammar.ts`) changes for touch. Every
+  input device — touch, keyboard, gamepad, replay playback, CPU — is an adapter that emits the same
+  normalized four-way `StickPair` (`packages/sim/src/input.ts`). `packages/sim` never learns, and
+  must never learn, which physical device produced a given frame.
 
 This keeps the architecture boundary from `CLAUDE.md` intact: the simulation layer stays
 deterministic and platform-free, and "mobile-first" is entirely a presentation/input-adapter

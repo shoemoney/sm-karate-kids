@@ -102,8 +102,18 @@ not by good intentions.
 |---|---|
 | `packages/sim` | Clock, grammar, fighter state machine, hit resolution, referee, replay, CPU. Zero browser. |
 | `packages/content` | Zod-validated move / fighter / arena / ruleset data. Importing it *is* the validation. |
-| `apps/game` | Three.js presentation, input adapters, HUD, audio, the mobile layout. |
-| `tools/` | Content and asset validators run by CI. |
+| `apps/game` | Three.js presentation, input adapters, HUD, audio, the mobile layout, the pre-boot loading card. |
+| `tools/` | Standalone utilities run by CI and by hand: the content and asset validators, the balance-report harness, the art generator/optimizer shell scripts, the fighter-atlas builder, and two throwaway look-at-the-game scripts. Full table in [`AGENTS.md`](AGENTS.md). |
+
+### 🎨 The art pipeline is checked, not trusted
+
+Every shipped binary has a provenance record and a human approval behind it, and
+`pnpm validate:assets` refuses the build if any of that is missing. On top of that it proves
+the generated art set is coherent: `tools/art-manifest.tsv` is the single source of truth shared by
+the generator and the optimizer, and the validator checks that it parses, that every row is approved,
+that it and the shipped files agree **in both directions**, and that every
+`public/generated/*.webp` is actually referenced from app source. An orphan texture is tens or
+hundreds of KB of download for a black rectangle, so that last one is a build failure, not a nitpick.
 
 ---
 
@@ -121,7 +131,7 @@ pnpm dev          # http://127.0.0.1:5173
 | `pnpm test` | Simulation unit + soak tests (vitest) |
 | `pnpm test:e2e` | Builds the bundle, then Playwright, portrait phone + desktop |
 | `pnpm validate:content` | Every grammar move has frame data, and nothing is orphaned |
-| `pnpm validate:assets` | Every shipped asset has provenance |
+| `pnpm validate:assets` | Every shipped asset has provenance, and the generated art set is approved, manifest-consistent, and actually wired |
 | `pnpm check` | All of the above — run it before you call anything done |
 
 ### 🔧 URL switches
@@ -150,9 +160,17 @@ state, that test goes red.
 ## ✅ Verify
 
 ```bash
-pnpm check                              # typecheck, unit, content, assets
-pnpm --filter @smkk/game test:e2e       # real touch events via CDP, on a 390×844 viewport
+pnpm check        # typecheck, unit, content, assets
+pnpm test:e2e     # builds the bundle, then real touch events via CDP on a 390×844 viewport
 ```
+
+`pnpm test:e2e` **builds the bundle it serves**, on purpose — the suite runs against `apps/game/dist/`
+via `vite preview`, so a run that skipped the build would happily pass against whatever was last on
+disk. Don't add a separate `pnpm build` in front of it.
+
+⚠️ Locally the suite reuses an existing server on port **4173** if it finds one. Before you trust a
+run, make sure nothing else is squatting on it (`lsof -ti:4173` should print nothing) — a foreign
+server is silently reused and produces a cascade of failures that aren't yours.
 
 The end-to-end suite plays an actual bout with **nothing but two synthetic thumbs**,
 dispatched through the browser's real input pipeline rather than fabricated in page
@@ -177,9 +195,10 @@ The source code and project-authored documentation are **MIT** — see [LICENSE]
 
 **The MIT grant does not cover everything in this repository:**
 
-- 🛡️ The **ShoeMoney emblem** on the fighters' gi is Jeremy Schoemaker's brand mark, used
-  with permission and carved out of the MIT grant. See
-  [`apps/game/public/brand/PROVENANCE.json`](apps/game/public/brand/PROVENANCE.json).
+- 🛡️ The **ShoeMoney brand marks** — the emblem on the fighters' gi (and the favicon), and the
+  publisher mark on the pre-boot loading card — are Jeremy Schoemaker's, used with permission and
+  carved out of the MIT grant, as are the **fighter sprite atlases** built from his own artwork.
+  See [`apps/game/public/brand/PROVENANCE.json`](apps/game/public/brand/PROVENANCE.json).
 - 🚫 Nothing here grants any right to the **Karate Champ** name, logos, characters, cabinet
   art, or audio, or to any Data East / G-MODE intellectual property. This project ships
   **original assets only** and carries no ROM-derived material.

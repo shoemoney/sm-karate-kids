@@ -7,6 +7,17 @@ regenerated art.
 
 ## 🏃 Running it
 
+> ⚠️ **Read this first: the source sheets are not in the repository.** `assets/<move_id>/` and
+> `assets/guard/` are covered by the `/assets/*` rule in `.gitignore` (only `/assets/generated/` is
+> re-included), so **a fresh clone contains no fighter source art at all.** What *is* tracked is the
+> packed output: `apps/game/public/fighters/*.webp` and `manifest.json`.
+>
+> Run the tool without them and it fails loudly and writes nothing:
+> `FileNotFoundError: missing required idle art: <repo>/assets/guard/white.png`. That's deliberate —
+> it would otherwise overwrite a good tracked atlas with an empty one. If you need to rebuild, get
+> the contact sheets back from whoever generated them first. To undo a bad run:
+> `git checkout -- apps/game/public/fighters/`.
+
 ```bash
 python3 tools/build-fighter-atlas.py                # writes apps/game/public/fighters/
 python3 tools/build-fighter-atlas.py --dry-run       # reports what it would do, writes nothing
@@ -21,16 +32,20 @@ move folder missing one or both sheets is skipped with a log line, not a crash.
 After running, `pnpm validate:assets` must exit 0 — it enforces the per-file 512KB cap and that
 every file under `apps/game/public/` has a `PROVENANCE.json` entry.
 
+> These source sheets are the *fighter* pipeline and are entirely separate from
+> `tools/art-manifest.tsv`, which governs the generated dojo/juice art in `apps/game/public/generated/`.
+> Nothing in the manifest feeds this tool, and this tool writes nothing the manifest describes.
+
 ## 📥 Inputs
 
 - `assets/<move_id>/{white,red}-sheet.png` — 1024×1536 RGBA contact sheets. Each fighter's
   own `animation.json` (see below) says whether that particular sheet packs a 2×3 or 3×2 grid of
-  six frames — it is **not** uniform across sheets, and a few sheets even differ *between* the two
-  fighters for the same move (`front_kick`, `high_block`, `reverse_punch` are 3×2 for white, 2×3
-  for red).
-- `assets/<move_id>/animation.json` — per fighter: `grid.columns`, `grid.rows`, `frames`
-  (the 00→05 naming, defining frame order), `facing`, and `fps`. Read for grid shape and facing;
-  the pre-sliced `white-00.png` … `red-05.png` files next to it are naive fixed-grid crops and are
+  six frames — it is **not** uniform across sheets, and two moves differ *between* the two fighters
+  for the same move id (`front_kick` and `reverse_punch` are 3×2 for white, 2×3 for red; the other
+  nineteen are 2×3 for both).
+- `assets/<move_id>/animation.json` — keyed `{"move", "fps", "fighters": {"white"|"red": {"sheet",
+  "grid": {"columns", "rows"}, "frames", "facing"}}}`. Read for grid shape and facing; the
+  pre-sliced `white-00.png` … `red-05.png` files next to it are naive fixed-grid crops and are
   **not** used — they inherit exactly the limb-chopping this pipeline exists to avoid.
 - `assets/guard/{white,red}.png` — one full-body idle pose per fighter, no grid, no
   `animation.json`.
@@ -103,16 +118,19 @@ below.
 
 ## 📄 Manifest schema (`apps/game/public/fighters/manifest.json`)
 
+Current shipped values, measured 2026-09-29 — abridged, but the `cell`/`baseline`/`cols`/`rows`
+numbers are the real ones:
+
 ```json
 {
   "version": 1,
-  "cell": { "w": 394, "h": 306 },
+  "cell": { "w": 406, "h": 276 },
   "baseline": 268,
-  "metresPerCell": 2.0,
+  "metresPerCell": 1.8046,
   "facing": "right",
   "fighters": {
-    "shiro": { "pages": ["shiro-0.webp", "shiro-1.webp"], "cols": 11, "rows": 3 },
-    "aka":   { "pages": ["aka-0.webp", "..."],            "cols": 11, "rows": 3 }
+    "shiro": { "pages": ["shiro-0.webp", "shiro-1.webp", "shiro-2.webp"], "cols": 11, "rows": 4 },
+    "aka":   { "pages": ["aka-0.webp", "aka-1.webp", "aka-2.webp"],   "cols": 11, "rows": 4 }
   },
   "poses": {
     "idle":        { "frames": [0], "contact": 0 },
@@ -135,7 +153,8 @@ below.
 - `fps` is carried through from `animation.json` for reference; the renderer maps frames to
   technique phases (startup/active/recovery), not to a frame rate.
 - Only poses that were actually produced appear here — `idle` plus whichever move ids had usable
-  source art this run.
+  source art this run. **As shipped there are 22: `idle`, all 20 grammar moves, and the bonus
+  `high_kick`.**
 
 ## 🚨 Two-person sparring shots (contamination detection)
 
@@ -171,22 +190,29 @@ Neither reached "no red limbs, no chopped white limbs" on all 6 frames, so conta
   for, so this degrades the same way, just without a half-isolated, occasionally-chopped limb
   flickering in during the referee's decision window.
 
-## ✅ Segmentation / quality report (this run, 2026-09-27 art set)
+**This is a workaround, not a permanent state.** On the night of 2026-09-27 the three sheets that
+tripped it (`foot_sweep`, `low_sweep`, `leg_sweep`) were regenerated as true solo shots and the
+atlas was rebuilt. The shipped manifest now has all 22 poses with full 6-frame animation for both
+fighters, and nothing holds idle. The detection, the thresholds, and both fallback branches are all
+still in the tool — a future contaminated sheet should hit them, not the rotation.
+
+## ✅ Segmentation / quality report (shipped atlas, 2026-09-29)
 
 | Move | Status | Notes |
 |---|---|---|
 | All 20 canonical moves | ✅ segmented | Both fighters, all `animation.json` grid shapes (2×3 and 3×2) handled |
 | `high_kick` | ✅ segmented, packed as bonus pose | Not one of the grammar's 20 ids — harmless extra, listed separately by the tool |
-| `foot_sweep` | ⚠️ partial | `white-sheet.png` is a two-person sparring shot (48% red-gi pixels) — **shiro holds idle**; `aka` is clean and fully animated |
-| `low_sweep` | ⚠️ partial | Same issue, same fix — `white-sheet.png` 48% contaminated, `aka` clean |
-| `leg_sweep` | ❌ dropped | **Both** `white-sheet.png` (46%) and `red-sheet.png` (24%) are two-person sparring shots — no clean solo source for either fighter; pose omitted from the manifest (renders as idle) until regenerated |
+| `foot_sweep`, `low_sweep`, `leg_sweep` | ✅ segmented | Were two-person sparring shots on the 2026-09-27 pass (`shiro` held idle, `leg_sweep` was dropped entirely). Source sheets regenerated as solo shots later that day; all three now carry real 6-frame poses for both fighters. |
 | `low_block` | ✅ segmented, but low confidence in `contact` | The source sheet's 6 frames barely differ from each other (near-identical guard-ish stance; no visible downward block motion) — `contact` is whatever tiny reach difference exists, which is closer to noise than signal. Not a segmentation bug; worth regenerating with a more pronounced block motion |
 | Several sheets (e.g. `back_kick`, `somersault_kick`) | ℹ️ cosmetic only | Background vignette leaves a handful of low-alpha (17–100) stray pixels per sheet that occasionally read as faint specks near a figure; doesn't affect silhouette bbox/position, purely cosmetic |
 
+Manifest pose count, straight from the shipped `manifest.json`: **22** = `idle` + 20 grammar moves
++ `high_kick`. The only pose with fewer than 6 frames is `idle`, which is 1 by design.
+
 Row-band and column-split fallback: **none needed** on the current art set once segmentation used
-each sheet's own `animation.json` grid shape — the three sheets that looked like fallback cases in
-an earlier pass (`front_kick`, `high_block`, `reverse_punch`, all white) turned out to simply be 3×2
-instead of 2×3, not genuinely hard-to-segment.
+each sheet's own `animation.json` grid shape — the sheets that looked like fallback cases in an
+earlier pass (`front_kick`, `reverse_punch`, and back then `high_block`, all white) turned out to
+simply be 3×2 instead of 2×3, not genuinely hard-to-segment.
 
 ## 🐛 Bugs found and fixed during build (kept here so they don't recur)
 
@@ -208,17 +234,36 @@ instead of 2×3, not genuinely hard-to-segment.
 
 ## 🧪 Verifying changes
 
-There is no automated visual check checked into the repo (deliberately — the guidance for this
-pipeline was to build throwaway verification scripts per session, not ship them). To re-verify by
-eye after touching the script:
+**There are automated checks, but none of them are a *visual* check.** `apps/game/tests/e2e/sprite.spec.ts`
+does guard the atlas: it reads the shipped `manifest.json`, and asserts that both fighters report a
+bound sprite texture with real dimensions, that every technique plays its own distinct frames, that
+contact is held through the active window, and that a live bout draws atlas cells. It also refuses
+to pass vacuously — if the manifest is missing the file skips *and* fails the run, because Playwright
+still exits 0 when every test in a file is skipped.
+
+None of that looks at the pixels. Whether a foot lands on the baseline, whether a frame is chopped,
+whether `contact` is the visually furthest extension — that is still a human job, and it stays one
+(deliberately: the guidance for this pipeline was to build throwaway verification scripts per
+session, not ship them). To re-verify by eye after touching the script:
 
 1. Run the tool for real (not `--dry-run`).
 2. Composite each pose's frames into a filmstrip with a baseline guide line drawn across every
    cell, for both fighters.
 3. Look for: feet on a common line, steady scale frame-to-frame, the `contact` frame actually being
    the furthest extension, no chopped limbs.
-4. `pnpm validate:assets` must exit 0.
+4. `pnpm validate:assets` must exit 0, and `pnpm test:e2e` must pass.
 
 ## 🗜️ Size
 
-Measured 2026-09-27 on the full art set: **2.14MB across 6 pages** (3 per fighter), down from 3.29MB across 10 at quality 82 with the default encoder method. `method=6` does most of that work. A rebuild that needs fewer pages than the last one now deletes the extra page files and their provenance entries itself — before that, stale pages silently kept shipping in the bundle.
+Two measurements, both real — the atlas has been rebuilt since the first:
+
+| Date | Pages | Total | Note |
+|---|---|---|---|
+| 2026-09-27, quality 82, default encoder | 10 | 3.29MB | The "before". |
+| 2026-09-27, quality 62, `method=6` | 6 | 2.14MB | The byte-budget pass — `method=6` does most of the work. |
+| **2026-09-29, shipped** | **6** | **2.27MB** | 3 per fighter. The rebuild that fixed the floor-standing bug traded ~130KB for correct baselines; the manifest's `cols`/`rows` also went 11×3 → 11×4. |
+
+A rebuild that needs fewer pages than the last one now deletes the extra page files and their
+provenance entries itself — before that, stale pages silently kept shipping in the bundle. That
+stale-page deletion is why `validate:assets` and the git diff both stay quiet after a rebuild that
+only shrinks.

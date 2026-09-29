@@ -15,17 +15,28 @@ terms.
 Both are used under the terms of the MIT License. See each project's own repository for its full
 license text and copyright notice.
 
-## 🥋 ShoeMoney brand mark — carved out of the MIT grant
+## 🥋 ShoeMoney brand marks and fighter artwork — carved out of the MIT grant
 
-`apps/game/public/brand/shoemoney-emblem.png` (applied to both fighters' gi chests) is **Jeremy
-Schoemaker's proprietary ShoeMoney brand mark**, used with the owner's permission. It is:
+Jeremy Schoemaker's own work appears in this repository in several places, and **none of it is
+covered by the MIT grant**:
+
+- `apps/game/public/brand/shoemoney-emblem.png` — the ShoeMoney brand mark, applied to both
+  fighters' gi chests and used as the favicon.
+- `apps/game/public/brand/shoemoney-logo.png` and `apps/game/public/brand/shoemoney-logo.webp` —
+  the ShoeMoney publisher mark, shown on the pre-boot loading card. The PNG is the conversion
+  source; the WebP is the one that ships. Resized and re-encoded only, never recoloured, filtered,
+  blended or distorted.
+- `apps/game/public/fighters/*.webp` and `apps/game/public/fighters/manifest.json` — the packed
+  sprite atlases, built from Jeremy Schoemaker's own karateka artwork, which carries the emblem.
+
+All of it is:
 
 - **Not** licensed under this repository's MIT License.
 - **Not** available for reuse, redistribution, or relicensing outside this project without
   separate permission from Jeremy Schoemaker.
 
-See `apps/game/public/brand/PROVENANCE.json` and `docs/asset-provenance.md` for its full
-provenance record.
+See `apps/game/public/brand/PROVENANCE.json` and `docs/asset-provenance.md` for the full
+provenance records. `AGENTS.md` carries this as a standing rule.
 
 ## ⚠️ *Karate Champ* and related intellectual property
 
