@@ -45,7 +45,7 @@ successive rounds are not five variants of the same opinion.
 | 6 | `moonshotai/kimi-k3` | Moonshot | landed `f1fd3cf` |
 | 7 | `qwen/qwen3.8-omni-flash` | Alibaba | landed `dd37810` |
 | 8 | `bytedance-seed/seed-2.0-code` | ByteDance | landed `d5336dd` |
-| 9 | `deepseek/deepseek-v4.1-flash` | DeepSeek | pending |
+| 9 | `deepseek/deepseek-v4.1-flash` | DeepSeek | landed `e627548` |
 | 10 | `mistralai/mistral-medium-3.1` | Mistral | pending |
 | 11 | `meta-llama/llama-4-maverick` | Meta | pending |
 | 12 | `cohere/command-a-plus` | Cohere | pending |
@@ -295,3 +295,37 @@ rule were each correct where they were written and wrong one context away. The
 loop only found them because each round re-captured the whole product, and a
 model looking at a composition that a *previous* round had just created is
 looking at something no reviewer had seen before.
+
+### Round 9 — deepseek/deepseek-v4.1-flash — `e627548`
+
+- `loading-screen-identity` — **half right, and the right half was the best
+  product finding of the round.** The card named the studio and never the
+  game: a publisher card with no product name on it. Now "SM Karate Kids /
+  Asmongold vs HasanAbi", as markup rather than injection, because the card has
+  to be on screen before `main.ts` runs at all. The other half — "the bar reads
+  as empty" — is the MEASURING state, round 5's finding.
+- `control-naming-inconsistency` — accurate, and worse than it sounds. The same
+  two controls carried three names: the pad says STANCE/TECHNIQUE, the
+  aria-labels say "Stance stick"/"Technique stick", the sheet says
+  "Techniques" — and the coach, added in round 3, said STRIKE. I introduced the
+  fourth name myself.
+- `in-stick-label-clutter` — accurate and a consequence of round 3: the legend
+  was set dead centre in the ring, which is the hit area, which is where the
+  thumb rests. Now biased to the upper half.
+- `hud-top-safe-area` — **rejected on one line of CSS.** The claim is that the
+  score row sits flush under the notch. `#app` carries
+  `padding: env(safe-area-inset-top) …` and `#hud` is its first child, so the
+  scoreboard already starts below the inset, and the viewport meta sets
+  `viewport-fit=cover`, which is what makes `env()` resolve at all. This is the
+  exact class of finding that looks certain in a screenshot and is settled by
+  reading the cascade.
+- `settings-checkbox-state` — third rejection, same reason: every toggle in the
+  capture is off.
+
+**Pattern across nine rounds.** The findings that survive verification cluster
+in three kinds: a thing that does not exist (no onboarding, no product name, a
+stale debug badge), a thing in the wrong place (text over faces, controls under
+a thumb, a diagnostic in the clock's slot), and a rule that was right in one
+context and wrong in another (dimming during a countdown, hiding a knob that
+was the affordance). The findings that die are almost all reads of a still
+frame — motion, depth, and state that the capture cannot show.
