@@ -1434,3 +1434,44 @@ raised, which is a different and more useful signal than a fix.
   iteration, and the standing landscape argument.
 - `ippon-hit-clarity: "the scoring hit reads as pale spark scribbles"*
   (claude-opus-4.8) — worth a look against the real impact frame.
+
+### Round 43 — grok-4.5, and a capture attempt that failed and was removed
+
+- `scoreboard-half-point-crowding: "half-point scores collide with name plates
+  at the top edge"` (grok-4.5) — **accepted, and it is the fourth one-sided
+  sample in the loop, through a new door.** Measured across the scoreline:
+  `2½` fits, **`10½` is clipped**, as are `125½` and `1250½`. `.points` is
+  `flex: 0 0 auto` now; verified unclipped at 390px and 320px through `1250½`.
+
+  Twenty-three rounds of review never saw it because **every frame the loop has
+  ever reviewed shows the score at 0–0.** Every bout in the capture set is
+  photographed seconds after it starts. A tournament that has not reached ten
+  points has nothing wrong with it, and that is exactly the problem with a set
+  that only ever shows the start.
+
+  Same failure as the returning-player pad (r18), the all-off toggles (r25) and
+  the 320px phone (r17). **A capture set that only ever shows the beginning of
+  a game will never find the bugs in the middle of one.**
+
+- **A capture was attempted to fix that and has been removed.** Forcing the
+  score onto the live HUD failed three ways: a one-shot assignment is gone
+  before the screenshot, an interval at 8ms is overwritten by the next rAF, and
+  pinning `textContent` with a getter/setter still lost, because the HUD writes
+  somewhere below the element. Every attempt photographed a scoreline reading
+  0–0.
+
+  Removed rather than shipped. **A capture that silently shows the wrong state
+  is worse than no capture**, because it looks exactly like evidence and it will
+  be read as evidence — that is the whole failure mode of rounds 32, 35 and 42
+  in one more shape. The fix itself is verified by direct DOM measurement, and
+  that is what it rests on.
+
+- `move-list-truncated-bottom` (grok-4.5) — the Techniques sheet is full-screen
+  and shows all 18 moves with a section header at the fold.
+- `ippon-result-obscures-action: "IPPON calligraphy covers the decisive impact
+  pose"` (grok-4.5) — fifth report on the stamp; it is at 18% of the stage and
+  the fighters' heads are below it since round 20.
+- `twin-stick-labels-too-small` (grok-4.5) — `--text-2xs` beneath each stick,
+  raised to `--text-sm` in round 30 for the coach legend but not these.
+- `openai/gpt-5.6-sol-pro-ultra` and `qwen/qwen3.8-flash:free` — invalid and
+  retired slugs respectively.
