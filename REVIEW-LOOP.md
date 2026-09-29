@@ -611,3 +611,42 @@ remaining.** The local snapshot was inventing IDs — `glm-4.7v` and
   appearance across four providers.
 - `fighter-framing-wastes-vertical-space`, `fighters-small-empty-mat` —
   framing, in its eleventh and twelfth iteration. Standing: warm and low.
+
+### Round 21 — grok-4.6, mimo-v2.6-pro, qwen3.8-flash, fugu-max — `be7e482`
+
+- `settings-toggles-invisible: "settings uses blank gray squares instead of
+  recognizable controls"` (grok-4.6) — **accepted, and it is round 15's fix
+  seen from the other side.** Round 15 made ON unmistakable and left OFF alone;
+  `--surface-sunken` measures rgb(0,0,0) against this sheet, so the checkbox
+  carried its whole meaning in a 3px native tick and with nothing ticked there
+  was no control on screen. Rebuilt as switches — a track with a knob that has
+  a visible position either way.
+
+  **The first switch capture looked inverted and was not.** A crop offset landed
+  on the row above the one I had toggled; the DOM said `checked: true`, the
+  stylesheet said gold. Re-read both in a single evaluate and captured the whole
+  sheet rather than trusting either — which is what exposed the real defect
+  underneath, a track present in the DOM and invisible in the frame. A crop is
+  an argument about which element you are looking at, and it lost.
+- `stick-chevrons-low-contrast` (qwen3.8-flash) — **accepted.** `--detent-idle`
+  was 0.36 alpha, about 3:1 against the ring, for the only markers that tell a
+  thumb which way a stick goes. Now 0.52, a shade over 5:1, still behind the
+  knob the thumb actually tracks.
+- `ippon-flash-blows-out-head` (qwen3.8-flash),
+  `front-kick-decoupled-foot-sprite` (fugu-max),
+  `align-hit-spark-vfx-to-impact-point` (fugu-max) — VFX and sprite-atlas
+  concerns raised for the first time. Not reproduced from the static set; a
+  still frame cannot adjudicate whether a hit flash clips a head or a spark is
+  anchored to the contact point, both of which are per-frame questions. Logged
+  for a targeted capture pass.
+- `movelist-combo-notation-cryptic` (qwen3.8-flash) — the glyph pairs in the
+  moves sheet. Round 3 gave them a glyph + caption header; the mapping from
+  glyph to the in-bout legend is still not shown.
+- `controls-clipped-by-legend` (qwen3.8-flash) — the legend covered the
+  sticks, and round 20 fixed exactly that.
+- `empty-loading-screen`, `loading-progress-invisible`,
+  `loading-bar-no-progress` — the MEASURING state, in its ninth appearance
+  across six providers. The single most-reported non-defect in the loop.
+- `fighters-lost-in-portrait`, `fight-framing-dead-bands`,
+  `fighter-framing-wastes-vertical-space` — framing, in its thirteenth
+  iteration. Standing: warm and low.
