@@ -691,3 +691,43 @@ remaining.** The local snapshot was inventing IDs — `glm-4.7v` and
   defect: the art set has no recoil frames. Logged for the asset backlog.
 - `make-score-and-countdowns-legible` (gpt-5.6-terra) — the numbered bout badge
   on the FIGHT button; deliberate, and sized to 20px in round 12.
+
+### Round 23 — glm-5.3-flashx, qwen3.6-35b-a3b, qwen3.5-27b — `69d579e`
+
+- `endscreen-ghost-ui-and-round-context: "ghost legend bleeds through the REMATCH
+  button"` (glm-5.3-flashx) — **accepted, exactly as described.** The first-run
+  coach strip outlived the bout, so the result card rendered REMATCH on top of
+  it and "◄ step ▼ crouch" stayed readable through the one control the player is
+  asked to press. Now retires at every point a result is shown.
+
+  Worth recording the first attempt: `coach.dismiss()` went into `clearBoutUi`,
+  which runs when the *next* bout starts — after the card the player is looking
+  at has already gone up. Correct-looking, in the right function, inert.
+- `add-hit-and-guard-reactions: "fighters idle straight through being struck"`
+  (glm-5.3-flashx) and `hit-feedback-scale: "impact effects are too subtle"`
+  (qwen3.5-27b), separately — **accepted as one finding.** The impact stack is
+  not subtle: 95ms hitstop, 26 particles, a painted burst, a shockwave ring on
+  a full point, shake, saturation punch, white flash, vibration. The struck
+  fighter simply does not react, which is what all of that serves.
+
+  The shove went in the **view**, not the sim. Point-karate ends the exchange
+  on contact and the sim is deterministic and checksummed, so moving a fighter
+  would be a lie about the rules. A spring recoil in `SpriteFighterView`,
+  applied to the root so the afterimage trails it rather than sitting in the
+  pre-hit spot, settling to exactly zero.
+
+  **A finding about a feeling is usually a finding about a mechanism.** Neither
+  model could see the sim; both could see that nobody moved.
+- `ippon-impact-underdelivers` (glm) vs `impact-text-obstruction: scale down the
+  IPPON text` (qwen3.6-35b) — two models giving opposite instructions on the
+  same element. That is what an element at roughly the right size looks like.
+- `technique-callout-ownership: "LUNGE PUNCH appears while nobody lunges"`
+  (glm) — the round-19 stale-chip finding arriving from a model that has not
+  seen the fix.
+- `loading-screen-branding` (qwen3.5-27b) — the boot card carries name, matchup,
+  logo and publisher line.
+- `fight-button-countdown-contrast` (qwen3.6-35b) — 20px in round 12.
+- `reclaim-stage-from-controls`, `joystick-oversize`,
+  `portrait-composition-waste`, `control-occlusion-hud` — framing, in its
+  fourteenth iteration. Standing: warm and low. The pad measures 27.0% of an
+  844px screen, which is thumb reach, and 40% was never true.
