@@ -1,0 +1,82 @@
+{
+  "model": "google/gemma-4-26b-a4b-it",
+  "elapsed_s": 12.9,
+  "usage": {
+    "prompt_tokens": 4188,
+    "completion_tokens": 705,
+    "total_tokens": 4893,
+    "cost": 0.00086832,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00086832,
+      "upstream_inference_prompt_cost": 0.00058632,
+      "upstream_inference_completions_cost": 0.000282
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "control-legibility-clash",
+      "title": "Control labels overlap move prompts",
+      "what": "In the gameplay screenshots, the white text for 'STANCE' and 'TECHNIQUE' at the bottom of the screen sits directly underneath the directional input glyphs (arrows/triangles).",
+      "why": "It creates visual noise and makes it harder for the player to quickly parse the control scheme during high-intensity combat.",
+      "how": "Increase the vertical padding between the joystick visual assets and the text labels, or move the labels to a dedicated HUD area above the sticks."
+    },
+    {
+      "id": "score-readability-low-contrast",
+      "title": "Score HUD lacks sufficient contrast",
+      "what": "The score numbers (e.g., '30' and '0') in the top HUD are rendered in a thin, gold font against a dark, textured background with volumetric light particles.",
+      "why": "In a fast-paced fighting game, players need to glance at the score instantly; the current low-contrast/thin weight makes it difficult to read at a glance.",
+      "how": "Add a subtle dark drop shadow or a semi-transparent dark backing plate behind the score numbers to pop them from the background."
+    },
+    {
+      "id": "ui-layering-occlusion",
+      "title": "Techniques menu obscures gameplay context",
+      "what": "The 'TECHNIQUES' overlay screen covers nearly 80% of the vertical viewport, leaving only a tiny sliver of the dojo visible at the top.",
+      "why": "Players often check move lists mid-match; completely obscuring the fighters prevents them from maintaining situational awareness of the opponent's position.",
+      "how": "Convert the Techniques menu into a semi-transparent side-panel or a bottom-sheet that only occupies the lower 40% of the screen."
+    },
+    {
+      "id": "visual-feedback-clutter",
+      "title": "Hit sparks compete with character silhouettes",
+      "what": "During the 'IPPON' animation, the bright yellow/white impact sparks are rendered with high bloom, overlapping the fighters' heads and torsos.",
+      "why": "The bloom effect on the impact particles is so strong it washes out the character models, making it hard to see the actual contact point of the strike.",
+      "how": "Reduce the bloom intensity specifically for combat particle effects or use a more localized, less 'glowy' particle sprite for hits."
+    },
+    {
+      "id": "input-visual-ambiguity",
+      "title": "Joystick center-point ambiguity",
+      "what": "The 'Stance' and 'Technique' joysticks use a very subtle, low-contrast dot to indicate the neutral center position.",
+      "why": "On a mobile screen, players need a clear visual anchor to know where their thumb is relative to the 'zero' position for precise directional inputs.",
+      "how": "Increase the brightness and size of the center-point dot, or add a subtle ring around the neutral center to provide a clear visual target."
+    }
+  ],
+  "raw": null
+}

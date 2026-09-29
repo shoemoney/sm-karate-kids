@@ -1,0 +1,46 @@
+{
+  "model": "qwen/qwen3.8-27b",
+  "elapsed_s": 338.0,
+  "usage": {
+    "prompt_tokens": 10880,
+    "completion_tokens": 12000,
+    "total_tokens": 22880,
+    "cost": 0.024132,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.024132,
+      "upstream_inference_prompt_cost": 0.001632,
+      "upstream_inference_completions_cost": 0.0225
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 11451,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": null,
+  "raw": "\n\n[\n  {\n    \"id\": \"combat-hint-panel-clutter\",\n    \"title\": \"Permanent instruction wall crowds the lower third and collides with the dual-stick cluster\",\n    \"what\": \"In every in-bout frame (the 0\u20130 'LUNGE PUNCH', 'FRONT KICK' and 'IPPON' screens) a full-width dark panel reading 'STANCE \u25c4 step \u25b2 jump \u25ba step \u25bc crouch / TECHNIQUE \u25c4 reverse \u25ba forward \u25b2 high \u25bc low' is pinned across the lower-middle of the screen, sitting directly on top of the upper arc of both stick rings so the panel's rounded bottom edge merges with the controls. Its second text row ('\u25ba step \u25bc crouch') lands over the lighter tatami, dropping contrast, and the whole block plus the two rings plus the 'STANCE'/'TECHNIQUE' labels consumes roughly the bottom 28% of the 844px screen. The panel never clears between moves.\",\n    \"why\": \"This is the actual gameplay surface. A wall of tiny caps text sitting between the action and the player's thumbs, touching the controls they're reading, is the first thing wrong the moment combat starts and it's wrong for the entire bout \u2014 it shrinks the readable action band and forces the eye to parse eight labels while trying to time a punch.\",\n    \"how\": \"Make the panel a transient tutorial cue, not a permanent HUD: fade it out after the first registered technique on each stick (or after ~4s / on first touch of each stick). If a persistent hint is required, collapse it to a single line of two tiny direction-glyphs hugging the top of each ring, give the panel's bottom edge \u226516px clearance from the ring tops, and lift the lower text row onto the solid part of the panel so it never sits over the bright mat.\"\n  },\n    {\n    \"id\": \"landscape-letterbox-controls-void\",\n    \"title\": \"Wide/landscape layout letterboxes the arena and flings both sticks into a black void at the screen corners\",\n    \"what\": \"In the wide-viewport frame the dojo 3D view is squeezed into a horizontal band in the middle of the screen, with a large black band above it (holding the stretched top HUD) and an even larger black band below it (\u22482/3 of the height). The"
+}

@@ -1,0 +1,82 @@
+{
+  "model": "openai/gpt-5.6-luna",
+  "elapsed_s": 25.2,
+  "usage": {
+    "prompt_tokens": 13499,
+    "completion_tokens": 1813,
+    "total_tokens": 15312,
+    "cost": 0.0055502,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 13496,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0055502,
+      "upstream_inference_prompt_cost": 0.0033746,
+      "upstream_inference_completions_cost": 0.0021756
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1034,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "clipped-fight-cta",
+      "title": "Keep the pre-fight CTA fully inside the portrait viewport",
+      "what": "On the Qualifier intro screen at 390x844, the FIGHT button is centered around y=870, so only its top edge and text are visible at the bottom of the screenshot; most of the rounded button extends below the viewport.",
+      "why": "The primary action is partially clipped exactly when the player needs to start the bout, making the game look broken and reducing the usable tap target.",
+      "how": "Reserve a fixed bottom-safe-area region for the CTA, position it above the control deck with bottom: 16px plus env(safe-area-inset-bottom), and verify the full button remains visible at 390x844."
+    },
+    {
+      "id": "stalled-loading-feedback",
+      "title": "Make loading progress visibly communicate movement",
+      "what": "On the ShoeMoney pre-boot screen, the 'Downloading the game' message sits above a long progress track that appears uniformly dark with no visible fill, percentage, or byte status.",
+      "why": "The player cannot tell whether downloading is progressing or stalled, which creates an immediate abandonment risk before gameplay starts.",
+      "how": "Fill the track proportionally with the existing gold accent, add a numeric percentage or 'x MB / y MB' below it, and show explicit stalled/error text with Retry after a timeout."
+    },
+    {
+      "id": "combat-callout-collision",
+      "title": "Separate hit confirmation from move-name notifications",
+      "what": "In the impact screenshot, the large IPPON confirmation around y=250 overlaps the dark 'SPINNING BACK KICK' callout directly beneath it, causing the two messages to visually merge over the fighters.",
+      "why": "The most important combat feedback is difficult to parse during the hit moment, so players may miss whether they scored and which move caused it.",
+      "how": "Give hit results and move names separate vertical lanes: reserve the upper center for IPPON/score feedback and place move names below it, with a minimum 12px gap and independent fade timings."
+    },
+    {
+      "id": "result-overlay-collision",
+      "title": "Stop the win screen from stacking result labels",
+      "what": "On the HasanAbi wins screen, the 'ROUNDHOUSE KICK' notification is partially hidden behind the 'BOUTS WON 0 / 1' pill around the center of the result overlay.",
+      "why": "The end-of-round screen looks like two systems are fighting for the same space, and the obscured move label makes the decisive event harder to understand.",
+      "how": "Clear transient move notifications when entering the result state, or move them into a dedicated line above the score with a fixed layout that never overlaps the winner, score, or bout summary."
+    },
+    {
+      "id": "landscape-empty-control-layout",
+      "title": "Use the wide layout instead of leaving the arena controls stranded",
+      "what": "In the landscape gameplay screenshot, the dojo ends around y=570 and the two small sticks sit at the extreme lower-left and lower-right corners, leaving most of the large black control area empty between them.",
+      "why": "The controls become harder to reach and visually disconnected from the playfield, while the wide viewport wastes space and makes the interface feel like an unadapted portrait layout.",
+      "how": "Either lock the game to portrait with an orientation prompt, or implement a landscape layout that enlarges and vertically centers both sticks, adds a central action/status region, and keeps each control within comfortable thumb reach."
+    }
+  ],
+  "raw": null
+}

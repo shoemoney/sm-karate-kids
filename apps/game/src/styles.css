@@ -685,6 +685,19 @@ body.show-perf #backend {
   text-overflow: ellipsis;
 }
 
+/* A 320px phone is still a phone. At that width the scoreline's three columns
+   do not leave room for two full names at the tracked-out size, and both were
+   ellipsising to "ASMONG…" and "HASANA…" — which is worse than useless, since
+   the two names become indistinguishable. Tightening the tracking and dropping
+   a step buys back enough to keep them whole. The ellipsis above stays as the
+   last resort for a name genuinely longer than this. */
+@media (max-width: 359px) {
+  .name {
+    font-size: 0.5rem;
+    letter-spacing: var(--track-tight);
+  }
+}
+
 .side[data-side="0"] .name {
   color: var(--fighter-0-dim);
 }
