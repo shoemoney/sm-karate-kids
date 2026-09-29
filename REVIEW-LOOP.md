@@ -1068,3 +1068,41 @@ finding to surface it.
 - `hud-performance-toggle: "clarify the 'Show performance HUD' toggle"**
   (gemma-3-12b) — worth a look: the name does not say what it does.
 - `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` — 404, no endpoints.
+
+### Round 33 — gemini-3.6-flash, gpt-5.1, qwen3.5-397b-a17b — `2fc48a9`
+
+The boot-card fix moved the noise off the loading screen and onto the HUD, which
+is what a corrected sample does.
+
+- `countdown-button-affordance: "countdown timer looks like a clickable button"`
+  (qwen3.5-397b-a17b) — **accepted, and it is the second half of the round-27
+  finding.** The label became "FIGHT IN 3" and that fixed the ambiguity; the
+  count was then a bordered, filled pill *inside* a gold button, which reads as
+  a second control nested in the first. The wording was right and the frame was
+  wrong. Fill, border and radius removed; it is quiet text now.
+- `low-contrast-score-hud` (gemini-3.6-flash) and `low-contrast-top-hud-text`
+  (gpt-5.1) — **rejected on measurement, off the live DOM.** Against the
+  scoreline's own plate: Asmongold 17.66:1, round clock 15.05:1, **HasanAbi's
+  red 5.44:1**, fighter names 8.07:1 and 5.43:1. The red is the lowest of the
+  five and clears the 4.5:1 floor for *normal* text at a size that qualifies as
+  large. There is nothing to increase.
+- `cyan-logo-palette-mismatch: "recolor the cyan diamond emblem to match the
+  warm tungsten aesthetic"` (gemini-3.6-flash) — **hard no.** The ShoeMoney
+  emblem is proprietary, carved out of this repo's MIT grant, and may not be
+  recoloured. A standing constraint, not a judgement call. This is the third
+  round a model has asked to restyle a protected brand mark.
+- `fighter-contrast-issue: "white gi fighter blends with background"`
+  (qwen3.5-397b-a17b) — the white gi is the brightest thing in a dim room by
+  design; it is the point of the silhouette. Grading the fighters *into* the
+  room was logged in round 30 as a legitimate opposite request and has not been
+  actioned, because it is an art decision and not a legibility fix.
+- `control-legend-accuracy: "in-game control legend is misleading"`
+  (qwen3.5-397b-a17b), `control-legend-overlay-clutter` (gemini-3.6-flash) —
+  the coach, third appearance in three rounds and the reason the returning-
+  player capture exists. It is first-run only.
+- `moves-list-density-on-phone` (gpt-5.1),
+  `techniques-list-legibility` (qwen3.5-397b-a17b) — the Techniques sheet, now
+  full-screen and showing all 18 moves grouped by stick direction.
+- `landscape-viewport-pillarboxing` (gemini-3.6-flash),
+  `landscape-camera-framing` (qwen3.5-397b-a17b) — landscape, second
+  appearance in two rounds and the only framing request with a fresh argument.
