@@ -21,6 +21,7 @@ import {
   type StickPair,
 } from '@smkk/sim';
 import { Audio } from './audio.js';
+import { mountBootScreen, type BootScreen } from './bootScreen.js';
 import type { FighterView } from './fighterView.js';
 import { Hud } from './hud.js';
 import { PlayerInput } from './input/index.js';
@@ -166,7 +167,7 @@ function bindSettingsUI(settings: SettingsStore, hud: Hud, audio: Audio): void {
   });
 }
 
-async function boot(): Promise<void> {
+async function boot(screen: BootScreen): Promise<void> {
   const params = query();
   const mode = params.get('mode') ?? 'tournament';
   const seed = Number.parseInt(params.get('seed') ?? '1337', 10) || 1337;
@@ -194,12 +195,29 @@ async function boot(): Promise<void> {
   // The photoreal sprite fighters are the default. ?fighters=mesh selects the
   // procedural 3D rigs, which are also the fallback if the atlas fails to load.
   const wantSprite = params.get('fighters') !== 'mesh';
+  // The atlas arrives a page at a time, and each page that lands moves the bar.
+  // The whole 2.3 MB as one lump would leave the card sitting still for the
+  // longest part of the wait and then jumping, which is the shape a progress
+  // bar has when it is not measuring anything.
+  const onAtlasPage = (done: number, total: number): void => {
+    if (total === 0) return;
+    screen.advance('fighters', done / total, `Lacing the fighters — ${done}/${total} pages`);
+  };
   const [{ renderer, label }, spriteViews] = await Promise.all([
     createRenderer(canvas, forceWebGL),
     wantSprite
-      ? tryLoadSpriteViews(state.fighters.map((fighter) => fighter.spec), import.meta.env.BASE_URL)
+      ? tryLoadSpriteViews(
+          state.fighters.map((fighter) => fighter.spec),
+          import.meta.env.BASE_URL,
+          onAtlasPage,
+        )
       : Promise.resolve(null),
   ]);
+  // Counted whole, whether or not the atlas actually loaded: a mesh fallback
+  // has finished the same work by a different route, and the bar must not be
+  // left short of the truth either way.
+  screen.advance('renderer');
+  screen.advance('fighters', 1, 'Lacing the fighters');
   hud.setBackend(label);
 
   let fighterMode: 'sprite' | 'mesh';
@@ -219,6 +237,12 @@ async function boot(): Promise<void> {
   const stage = new Stage(state.arena, import.meta.env.BASE_URL);
   for (const view of views) stage.scene.add(view.root);
   hud.setNames(state.fighters[0].spec.name, state.fighters[1].spec.name);
+
+  // The last real transfer. Waiting for it here is what lets the pre-boot card
+  // show an honest bar, and what stops the dojo changing its clothes in front
+  // of the player the instant that card lifts.
+  await stage.ready;
+  screen.advance('dojo');
 
   // Bloom, grade, grain and vignette. This runs on the same node system under
   // both backends — `forceWebGL` selects the identical WebGL2 backend the
@@ -504,6 +528,12 @@ async function boot(): Promise<void> {
   let perfFrames = 0;
   let perfTicks = 0;
 
+  // Flipped on the first frame that reaches the screen. The pre-boot card
+  // lifts then, and not a moment sooner: nothing underneath it should ever be
+  // a blank canvas, and __smkk.ready is the e2e contract for "the game is
+  // visible", so a test that screenshots on it must never find the card.
+  let handedOver = false;
+
   const frame = (now: number): void => {
     const frameDt = now - previous;
     // Hit-stop and slow motion only change how much time the clock is given.
@@ -541,6 +571,12 @@ async function boot(): Promise<void> {
     post.punch.value = juice.impactPunch() * 6;
     post.render();
 
+    if (!handedOver) {
+      handedOver = true;
+      screen.advance('firstFrame');
+      void screen.close().then(publishTestSurface);
+    }
+
     perfFrames += 1;
     perfTicks += ticks;
     const perfElapsed = now - perfWindowStart;
@@ -554,126 +590,141 @@ async function boot(): Promise<void> {
 
     requestAnimationFrame(frame);
   };
+
   if (tournament) newRun(performance.now());
   else hud.setRound('');
   requestAnimationFrame(frame);
 
   // Test surface. Read-only: nothing here can score a point or move a fighter.
-  Object.defineProperty(globalThis, '__smkk', {
-    value: {
-      ready: true,
-      backend: label,
-      mode,
-      fighters: fighterMode,
-      state: () => ({
-        tick: state.tick,
-        phase: state.phase,
-        timerTicks: state.timerTicks,
-        scores: [state.fighters[0].score, state.fighters[1].score] as [number, number],
-        positions: [state.fighters[0].x, state.fighters[1].x] as [number, number],
-        winner: state.winner,
-        draw: state.draw,
-        lastCall: state.lastCall,
-        p1Move: state.fighters[0].move?.id ?? null,
-        lastStarted,
-        p1Phase: state.fighters[0].phase,
-        p2Move: state.fighters[1].move?.id ?? null,
-        p2Phase: state.fighters[1].phase,
-      }),
-      /**
-       * The atlas cell each fighter last drew, with the pose it came from and
-       * the phase the simulation was in. Lets the e2e suite assert the real
-       * renderer is running the same frame rule the unit tests pin down.
-       */
-      spriteFrames: () =>
-        views.map((view) => view.frameInfo?.() ?? { cell: -1, pose: 'none', phase: 'neutral' as const }),
-      /**
-       * Drives every technique in the game through the live view, one tick at
-       * a time, and reports the atlas cell the view actually drew.
-       *
-       * A real bout only ever throws a handful of techniques — the other
-       * fighter is a person, and a person standing still does not swing — so
-       * waiting for the fight to cover the whole move list is not a test, it
-       * is a coin toss. This walks the real `SpriteFighterView` through each
-       * move's startup, active and recovery ticks instead, which covers every
-       * technique in milliseconds and cannot race the render loop. The view is
-       * restored by the next animation frame, and no frame is drawn during the
-       * sweep because it is synchronous.
-       */
-      spriteSweep: () => {
-        const view = views[0];
-        if (view?.frameInfo === undefined) return null; // the mesh rig has no cells
-        const moves = indexMoves(content);
-        const report: Array<{
-          id: string;
-          seen: Array<{ phase: string; cell: number }>;
-        }> = [];
+  // Published only once the pre-boot card has left the DOM, which is the whole
+  // contract: every e2e test that screenshots does so off `__smkk.ready`.
+  const publishTestSurface = (): void => {
+    Object.defineProperty(globalThis, '__smkk', {
+      value: {
+        ready: true,
+        backend: label,
+        mode,
+        fighters: fighterMode,
+        state: () => ({
+          tick: state.tick,
+          phase: state.phase,
+          timerTicks: state.timerTicks,
+          scores: [state.fighters[0].score, state.fighters[1].score] as [number, number],
+          positions: [state.fighters[0].x, state.fighters[1].x] as [number, number],
+          winner: state.winner,
+          draw: state.draw,
+          lastCall: state.lastCall,
+          p1Move: state.fighters[0].move?.id ?? null,
+          lastStarted,
+          p1Phase: state.fighters[0].phase,
+          p2Move: state.fighters[1].move?.id ?? null,
+          p2Phase: state.fighters[1].phase,
+        }),
+        /**
+         * The atlas cell each fighter last drew, with the pose it came from and
+         * the phase the simulation was in. Lets the e2e suite assert the real
+         * renderer is running the same frame rule the unit tests pin down.
+         */
+        spriteFrames: () =>
+          views.map((view) => view.frameInfo?.() ?? { cell: -1, pose: 'none', phase: 'neutral' as const }),
+        /**
+         * Drives every technique in the game through the live view, one tick at
+         * a time, and reports the atlas cell the view actually drew.
+         *
+         * A real bout only ever throws a handful of techniques — the other
+         * fighter is a person, and a person standing still does not swing — so
+         * waiting for the fight to cover the whole move list is not a test, it
+         * is a coin toss. This walks the real `SpriteFighterView` through each
+         * move's startup, active and recovery ticks instead, which covers every
+         * technique in milliseconds and cannot race the render loop. The view is
+         * restored by the next animation frame, and no frame is drawn during the
+         * sweep because it is synchronous.
+         */
+        spriteSweep: () => {
+          const view = views[0];
+          if (view?.frameInfo === undefined) return null; // the mesh rig has no cells
+          const moves = indexMoves(content);
+          const report: Array<{
+            id: string;
+            seen: Array<{ phase: string; cell: number }>;
+          }> = [];
 
-        for (const move of moves.values()) {
-          // A throwaway fighter, stepped through the phase sequence the
-          // simulation would produce for this move.
-          const fighter = createFighter(content.fighters[0]!, -1.5, 1);
-          beginMove(fighter, move);
-          const seen: Array<{ phase: string; cell: number }> = [];
-          const total = move.startup + move.active + move.recovery;
+          for (const move of moves.values()) {
+            // A throwaway fighter, stepped through the phase sequence the
+            // simulation would produce for this move.
+            const fighter = createFighter(content.fighters[0]!, -1.5, 1);
+            beginMove(fighter, move);
+            const seen: Array<{ phase: string; cell: number }> = [];
+            const total = move.startup + move.active + move.recovery;
 
-          for (let tick = 0; tick < total; tick += 1) {
-            if (tick < move.startup) {
-              fighter.phase = 'startup';
-              fighter.phaseTicks = tick;
-            } else if (tick < move.startup + move.active) {
-              fighter.phase = 'active';
-              fighter.phaseTicks = tick - move.startup;
-            } else {
-              fighter.phase = 'recovery';
-              fighter.phaseTicks = tick - move.startup - move.active;
+            for (let tick = 0; tick < total; tick += 1) {
+              if (tick < move.startup) {
+                fighter.phase = 'startup';
+                fighter.phaseTicks = tick;
+              } else if (tick < move.startup + move.active) {
+                fighter.phase = 'active';
+                fighter.phaseTicks = tick - move.startup;
+              } else {
+                fighter.phase = 'recovery';
+                fighter.phaseTicks = tick - move.startup - move.active;
+              }
+              view.apply(fighter, tick);
+              // Read the cell back after every apply: frameInfo() hands out a
+              // fresh record each call, so capturing one before the loop would
+              // report the same stale cell for every tick.
+              seen.push({ phase: fighter.phase, cell: view.frameInfo()?.cell ?? -1 });
             }
-            view.apply(fighter, tick);
-            // Read the cell back after every apply: frameInfo() hands out a
-            // fresh record each call, so capturing one before the loop would
-            // report the same stale cell for every tick.
-            seen.push({ phase: fighter.phase, cell: view.frameInfo()?.cell ?? -1 });
+            report.push({ id: move.id, seen });
           }
-          report.push({ id: move.id, seen });
-        }
-        return report;
+          return report;
+        },
+        checksum: () => checksumOf(state),
+        tournament: () => ({
+          active: tournament,
+          round: run.round,
+          roundId: TOURNAMENT[run.round]?.id ?? null,
+          score: run.score,
+          held,
+        }),
+        /**
+         * Runs a fresh seeded bout to a tick count with no wall clock involved,
+         * then reports the fingerprint. Two renderer backends must agree here:
+         * the simulation is not allowed to notice which one is drawing.
+         */
+        bench: (ticks: number, benchSeed: number) => {
+          const probe = createMatch({ content });
+          const driver = new CpuController(ARCHETYPES.sensei, benchSeed, 0);
+          const foil = new CpuController(ARCHETYPES.pressure, benchSeed + 7, 1);
+          for (let i = 0; i < ticks && probe.phase !== 'over'; i += 1) {
+            step(probe, { p1: driver.poll(probe), p2: foil.poll(probe) });
+          }
+          return {
+            checksum: checksumOf(probe),
+            tick: probe.tick,
+            phase: probe.phase,
+            scores: [probe.fighters[0].score, probe.fighters[1].score] as [number, number],
+          };
+        },
+        sticks: () => input.read(),
+        emblems: () => views.map((view) => view.emblemInfo()),
       },
-      checksum: () => checksumOf(state),
-      tournament: () => ({
-        active: tournament,
-        round: run.round,
-        roundId: TOURNAMENT[run.round]?.id ?? null,
-        score: run.score,
-        held,
-      }),
-      /**
-       * Runs a fresh seeded bout to a tick count with no wall clock involved,
-       * then reports the fingerprint. Two renderer backends must agree here:
-       * the simulation is not allowed to notice which one is drawing.
-       */
-      bench: (ticks: number, benchSeed: number) => {
-        const probe = createMatch({ content });
-        const driver = new CpuController(ARCHETYPES.sensei, benchSeed, 0);
-        const foil = new CpuController(ARCHETYPES.pressure, benchSeed + 7, 1);
-        for (let i = 0; i < ticks && probe.phase !== 'over'; i += 1) {
-          step(probe, { p1: driver.poll(probe), p2: foil.poll(probe) });
-        }
-        return {
-          checksum: checksumOf(probe),
-          tick: probe.tick,
-          phase: probe.phase,
-          scores: [probe.fighters[0].score, probe.fighters[1].score] as [number, number],
-        };
-      },
-      sticks: () => input.read(),
-      emblems: () => views.map((view) => view.emblemInfo()),
-    },
-    writable: false,
-    configurable: true,
-  });
+      writable: false,
+      configurable: true,
+    });
+  };
 }
 
-void boot().catch((error: unknown) => {
+// Taken before boot() is called, so the card is already under this module's
+// control — and so a boot that throws on its very first line still has
+// something to tear it down.
+const screen = mountBootScreen();
+
+void boot(screen).catch((error: unknown) => {
+  // Straight out, with no dissolve. This boot has already cost the player the
+  // whole of their wait; the banner underneath is the only thing that says
+  // what went wrong, and a card fading politely over it would hide the answer
+  // behind an animation.
+  screen.abandon();
   const banner = document.getElementById('banner');
   if (banner !== null) {
     banner.textContent = 'FAILED TO START';
