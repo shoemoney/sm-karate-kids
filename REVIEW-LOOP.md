@@ -848,3 +848,36 @@ remaining.** The local snapshot was inventing IDs — `glm-4.7v` and
   state, in its eleventh appearance across eight providers. The single most
   reported non-defect in the loop; it is the honest state of a bundle still
   downloading, and every model that has ever called it a bug has been wrong.
+
+### Round 27 — gpt-5.4, deepseek-v4-flash-vision-exp, qwen3.6-plus, reka-edge — `6d45283`
+
+- `countdown-button-affordance` / `unexplained-action-button-badges` /
+  `countdown-button-ambiguity` (deepseek-v4-flash, kimi-k2.7-code r24,
+  minimax-m3 r24, qwen3.6-plus) — **accepted after two failed answers.** The
+  button read "FIGHT ③". A bare numeral in a circle on a gold pill beside a
+  score reads as a point total, because that is what a numeral in a circle
+  beside a score means everywhere else in this HUD.
+
+  The first fix gave the number its own badge and marked the two apart for
+  screen readers — that fixed the accessibility and not the picture, which is
+  why the finding came back twice. It now says what it is: "FIGHT IN 2", a
+  small rectangular label in the sans face, circle removed. The aria-label was
+  always correct and nobody reads it while looking at the picture.
+- `browser-focus-ring: "ugly browser focus outline on Settings toggle"`
+  (qwen3.6-plus) — **accepted.** The native outline drew a second, squarer box
+  around a control that is already a pill, on every keyboard pass through the
+  sheet. Own `:focus-visible` ring; the default is suppressed.
+- `rekaai/reka-edge` — **cannot take this set.** 16,384-token context ceiling
+  against 35,603 requested, 23,120 of it image. Not a prompt defect.
+- `score-fraction-readability: "2 1/2" is hard to parse` (qwen3.6-plus) —
+  `points()` emits `2½`; the glyph and its lack of a space are the complaint,
+  and the moves sheet spells the rule out in full beside it.
+- `stick-arrow-contrast` (deepseek-v4-flash) — `--detent-idle` went 0.36 → 0.52
+  in round 21, a shade over 5:1 against the ring.
+- `top-right-touch-targets: "MOVES and settings buttons are too small"`
+  (deepseek-v4-flash) — 60px plaques with a 56px minimum hit area, raised to
+  the bezel edge in round 3.
+- `fighters-too-small-on-phone`, `controls-dominating-lower-half`,
+  `top-hud-crowded-and-uneven`, `fight-scene-composition`,
+  `landscape-camera-zoom` — framing, in its eighteenth iteration. Standing:
+  warm and low.
