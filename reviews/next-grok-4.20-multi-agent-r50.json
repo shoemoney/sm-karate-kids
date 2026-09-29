@@ -1,0 +1,84 @@
+{
+  "model": "x-ai/grok-4.20-multi-agent",
+  "elapsed_s": 112.4,
+  "usage": {
+    "prompt_tokens": 231597,
+    "completion_tokens": 25493,
+    "total_tokens": 257090,
+    "cost": 0.14551355,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 197824,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.14551355,
+      "upstream_inference_prompt_cost": 0.14551355,
+      "upstream_inference_completions_cost": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 21249,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighter-framing",
+      "title": "Fighters sit too low with excess foreground mat",
+      "what": "In all in-game and ready screens (e.g. images showing stance/technique sticks and fighters in white/red gis), the two characters stand in the lower third of the 3D viewport, leaving a large empty tatami floor area visible in the foreground below their feet and shadows.",
+      "why": "On portrait phone (390x844 baseline), this makes the detailed photoreal fighters appear small (~35% screen height). Players immediately notice the distant, cramped action instead of cinematic close combat, reducing impact of the Three.js models and TSL bloom.",
+      "how": "Adjust the Three.js camera position or FOV to raise the view angle and zoom ~18% tighter vertically so fighters' heads approach the bottom of the top HUD and feet sit just above the control UI. Rebalance the composition in the dojo scene."
+    },
+    {
+      "id": "control-overlay-clutter",
+      "title": "Overwhelming direction labels above sticks",
+      "what": "Gameplay screenshots (2,3,4,9,12,14) show a wide semi-transparent panel directly above the two large circular sticks that lists all stance directions (\u25c0 step \u25b2 jump \u25b6 step \u25bc crouch) and technique directions with icons, plus persistent STANCE/TECHNIQUE labels below.",
+      "why": "The bottom ~30% of the portrait screen is visually noisy and text-heavy. New players cannot quickly parse the twin-stick mappings while focusing on the opponent, especially the patient AI that 'waits for your wind-up'. Hurts learnability and touch-first play in first bouts.",
+      "how": "Make the full direction legend toggleable via the existing top-right MOVES button (hide by default). Simplify persistent UI to only show current stance/technique name or highlighted active direction. Increase stick hit area contrast."
+    },
+    {
+      "id": "loading-progress-feedback",
+      "title": "Loading screen lacks progress indicator",
+      "what": "First screenshot displays 'Downloading the game' in gold above a thin, completely unfilled horizontal progress bar on dark background, with static S logo, title, and 'A SHOEMONEY AI LABS GAME' footer. No percentage or animation visible.",
+      "why": "This is the entry point. Without visible loading state (especially for WebGPU/Three.js asset download), players feel uncertainty or perceive a hang. Weakens first impression before reaching the warm dojo and fighters.",
+      "how": "Wire the loader to fill the bar with animated gold gradient (matching title text). Overlay large, centered white percentage text (e.g. '42%') that updates live. Add subtle shimmer or pulse to the bar while keeping the cinematic dark aesthetic."
+    },
+    {
+      "id": "qualifier-text-contrast",
+      "title": "Hard-to-read AI behavior hint in qualifier",
+      "what": "Qualifier screens (images 1,10,13) overlay white text 'PATIENT. HE WAITS FOR YOUR WIND-UP \u2014 THEN MAKES YOU PAY.' inside a dark translucent rounded rectangle, set against the dimly lit warm dojo background with volumetric lighting.",
+      "why": "Low contrast makes the critical opponent tip difficult to read in the 2-4 seconds before the FIGHT button and countdown. Players enter the bout blind to the AI's counter style, leading to quick losses and frustration in the 1/5 qualifier round.",
+      "how": "Increase the background rectangle's opacity or add a localized vignette. Apply a thin warm gold outline or glow to the text. Slightly enlarge the font while preserving the low-key cinematic tone. Test on device."
+    },
+    {
+      "id": "hit-visual-impact",
+      "title": "IPPON hit effects feel weak",
+      "what": "In the IPPON screen (image 11), HasanAbi's spinning back kick connects with only subtle yellow streak particles/lines near Asmongold's head and a mild reaction pose; 'IPPON HASANABI SPINNING BACK KICK' text appears but the TSL post-processing doesn't emphasize the strike.",
+      "why": "Scoring an ippon (full point, as listed in techniques menu) should feel rewarding and cinematic. The understated feedback fails to convey the power of the move or the 2\u00bd point victory, diminishing satisfaction especially vs the patient AI on mobile where touches must feel precise.",
+      "how": "Add a bright localized bloom flash at impact point, stronger screen-space impact lines or distortion, brief camera shake, and a red edge vignette on the receiver. Sync with existing film grain/vignette chain. Increase particle count for the kick."
+    }
+  ],
+  "raw": null
+}

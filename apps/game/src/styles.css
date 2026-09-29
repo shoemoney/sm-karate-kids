@@ -2383,6 +2383,15 @@ body.reduced-motion .boot[data-measuring='true'] .boot-bar::after {
 .result-score,
 .result-detail {
   padding: var(--space-2) var(--space-5);
+  /* Measured at 3.25:1 against its own plate — below the 4.5:1 floor for the
+     size it is set at. grok-4.20-multi-agent called it "hard-to-read AI
+     behaviour hint in the qualifier", and it is the third plate in this game
+     that has been tuned for looking right and never measured for being read.
+
+     Set explicitly rather than inherited: the plate is a dark warm brown, and
+     a neutral off-white clears the floor against it by a wide margin without
+     shouting over the round name above it. */
+  color: #cfc4b4;
   background: var(--result-plate);
   backdrop-filter: blur(14px) saturate(0.85);
   -webkit-backdrop-filter: blur(14px) saturate(0.85);
