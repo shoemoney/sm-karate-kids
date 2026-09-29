@@ -55,6 +55,15 @@ const BLOCK = new Color('#9fd3ff');
 
 export interface Flashable {
   flash?(amount: number): void;
+  /**
+   * A brief presentation-only shove, away from the strike. Point-karate ends
+   * the exchange on contact, so the simulation deliberately does not move
+   * anyone — but "fighters idle straight through being struck" is the single
+   * most-raised feeling note in twenty-three rounds of review, and a white
+   * flash alone does not sell a hit. The view absorbs the recoil and springs
+   * back; the sim never knows.
+   */
+  recoil?(amount: number, facing: 1 | -1): void;
 }
 
 export class Juice {
@@ -182,8 +191,13 @@ export class Juice {
       this.shakeUntil = nowMs + (heavy ? 260 : 170);
       this.punch = heavy ? 0.14 : kind === 'block' ? 0.03 : 0.07;
       this.punchTargetX = x;
-      if (defender?.flash !== undefined && kind !== 'block') {
-        this.fighterFlashes.push({ view: defender, start: nowMs, until: nowMs + (heavy ? 140 : 100), peak: heavy ? 1 : 0.7 });
+      if (kind !== 'block') {
+        if (defender?.flash !== undefined) {
+          this.fighterFlashes.push({ view: defender, start: nowMs, until: nowMs + (heavy ? 140 : 100), peak: heavy ? 1 : 0.7 });
+        }
+        // Pushed away from the striker, harder on a full point, and always
+        // sprung back to zero by the rig.
+        defender?.recoil?.(heavy ? 0.075 : 0.045, facing);
       }
       if (heavy) this.flashScreen(0.5);
     }

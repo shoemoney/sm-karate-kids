@@ -378,7 +378,11 @@ async function boot(screen: BootScreen): Promise<void> {
         } else {
           const [a, b] = state.fighters;
           const best = record.bestWinTicks === null ? '—' : `${(record.bestWinTicks / 60).toFixed(1)}s`;
-          hud.showResult({
+          // The lesson belongs to a live bout. See clearBoutUi.
+        coach.dismiss();
+        // The lesson belongs to a live bout. See clearBoutUi.
+    coach.dismiss();
+    hud.showResult({
             headline: winner === null ? 'DRAW' : `${state.fighters[winner].spec.name} WINS`,
             tone: winner === null ? 'neutral' : 'full',
             score: `${points(a.score)} — ${points(b.score)}`,
@@ -416,6 +420,13 @@ async function boot(screen: BootScreen): Promise<void> {
     hud.clearCareer();
     hud.resetScores();
     hud.clearTechnique();
+    // The first-run coach is an in-bout aid. It used to survive the end of the
+    // bout, so the result card rendered REMATCH on top of it and the legend
+    // stayed readable straight through the button — "◄ step ▼ crouch" legible
+    // behind the one control the player has to press. glm-5.3-flashx reported
+    // it as "ghost legend bleeds through the REMATCH button", which is exactly
+    // and only what it is. A lesson about a fight is finished when the fight is.
+    coach.dismiss();
     hud.hideResult();
   };
 
@@ -457,6 +468,8 @@ async function boot(screen: BootScreen): Promise<void> {
     // the headline below is the round's own name, so a third statement of the
     // same two facts stacked 60px apart was pure redundancy — and it was the
     // loudest thing on a screen whose job is to start the fight.
+    // The lesson belongs to a live bout. See clearBoutUi.
+    coach.dismiss();
     hud.showResult({
       headline: round.name,
       tone: 'full',
@@ -490,7 +503,9 @@ async function boot(screen: BootScreen): Promise<void> {
 
     if (won && !last) {
       const next = TOURNAMENT[run.round + 1]!;
-      hud.showResult({
+      // The lesson belongs to a live bout. See clearBoutUi.
+    coach.dismiss();
+    hud.showResult({
         kicker: `Round ${run.round + 1} cleared`,
         headline: `+${earned.toLocaleString()}`,
         tone: 'full',
@@ -507,6 +522,8 @@ async function boot(screen: BootScreen): Promise<void> {
     }
 
     const { record, newBest } = recordRun(run.score, run.round, won && last);
+    // The lesson belongs to a live bout. See clearBoutUi.
+    coach.dismiss();
     hud.showResult({
       kicker: won ? 'Tournament complete' : `Out in the ${round.name}`,
       headline: won ? 'CHAMPION' : 'DEFEATED',

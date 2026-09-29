@@ -129,6 +129,9 @@ export class SpriteFighterView implements FighterView {
   private readonly mesh: Mesh<PlaneGeometry, MeshBasicMaterial>;
   private currentPage = -1;
   private readonly ghosts: Ghost[] = [];
+  private recoilAmount = 0;
+  private recoilVelocity = 0;
+  private recoilFacing: 1 | -1 = 1;
   private ghostCursor = 0;
   private lastGhostTick = -99;
   private frameCell = { page: 0, offsetX: 0, offsetY: 0, repeatX: 1, repeatY: 1 };
@@ -293,8 +296,38 @@ export class SpriteFighterView implements FighterView {
     this.mesh.material.color.setScalar(1 + amount * 2.4);
   }
 
+  /**
+   * Presentation-only knockback. The simulation owns position and deliberately
+   * does not move anyone on contact — a point-karate exchange ends on the hit,
+   * so a shove would be a lie about the rules. But the sprite is a view, and a
+   * view is allowed to be shoved and spring back, which is what makes a contact
+   * land in the body rather than only in the eye.
+   *
+   * Applied to `root` and therefore to the ghosts with it, so the afterimage
+   * trails the recoil instead of sitting in the pre-hit spot.
+   */
+  recoil(amount: number, facing: 1 | -1): void {
+    this.recoilAmount = amount;
+    this.recoilFacing = facing;
+  }
+
+  private applyRecoil(): void {
+    if (this.recoilAmount === 0) return;
+    // Critically damped-ish spring: fast out, slower back, so the fighter
+    // settles rather than oscillating.
+    this.recoilVelocity += (0 - this.recoilAmount) * 0.28;
+    this.recoilVelocity *= 0.74;
+    this.recoilAmount += this.recoilVelocity;
+    if (Math.abs(this.recoilAmount) < 0.0004 && Math.abs(this.recoilVelocity) < 0.0004) {
+      this.recoilAmount = 0;
+      this.recoilVelocity = 0;
+    }
+    this.root.position.x += this.recoilAmount * this.recoilFacing;
+  }
+
   apply(fighter: FighterState, elapsedTicks: number, renderX = fighter.x): void {
     this.root.position.x = renderX;
+    this.applyRecoil();
     // The art draws the pose, the simulation owns the altitude. Without this a
     // jump plays on the mat while the sim has the fighter clearing low strikes.
     this.root.position.y = heightOf(fighter);

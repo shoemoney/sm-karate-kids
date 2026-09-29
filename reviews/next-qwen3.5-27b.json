@@ -1,0 +1,83 @@
+{
+  "model": "qwen/qwen3.5-27b",
+  "elapsed_s": 17.3,
+  "usage": {
+    "prompt_tokens": 11562,
+    "completion_tokens": 808,
+    "total_tokens": 12370,
+    "cost": 0.00351507,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00351507,
+      "upstream_inference_prompt_cost": 0.00225459,
+      "upstream_inference_completions_cost": 0.00126048
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "portrait-composition-waste",
+      "title": "Fighters are too small in portrait mode",
+      "what": "In the Portrait screenshots (e.g., Image 3), the fighters occupy only the middle third of the screen, leaving massive empty space above their heads and below their feet. The camera is zoomed out too far for a vertical aspect ratio.",
+      "why": "On mobile, players need to see hitboxes clearly. This distance makes the characters look like tiny dolls, reducing the impact of hits and making it harder to judge spacing for attacks.",
+      "how": "Move the camera significantly closer to the center of action. Crop the view so the fighters' waists are near the bottom edge and their heads are near the top edge, maximizing the use of the vertical screen real estate."
+    },
+    {
+      "id": "control-occlusion-hud",
+      "title": "Instructional HUD blocks gameplay view",
+      "what": "The 'STANCE / TECHNIQUE' instruction panel (visible in Image 3) sits directly on top of the tatami mat between the fighters, obscuring the floor texture where foot placement matters.",
+      "why": "This creates visual clutter in the most critical area of the screen. It forces the player's eye to jump over the text to see the game state, breaking immersion during combat.",
+      "how": "Remove the permanent instructional panel from the active gameplay loop. Move these controls to the 'MOVES' menu or make them a toggleable overlay that disappears when the fight starts."
+    },
+    {
+      "id": "stick-feedback-clarity",
+      "title": "Twin-stick input feedback is ambiguous",
+      "what": "In the 'Technique' stick (Image 5), the inner ring rotates to show direction, but there is no clear indicator showing *which* quadrant corresponds to which move without looking at the hidden legend.",
+      "why": "Players cannot intuitively map 'Up = High Punch' vs 'Down = Low Kick' just by looking at the stick. They have to memorize abstract positions rather than seeing a direct visual cue.",
+      "how": "Add subtle directional icons (arrows or symbols) inside the deadzone of the analog sticks, or highlight the specific segment of the outer ring being activated with a distinct color change."
+    },
+    {
+      "id": "loading-screen-branding",
+      "title": "Loading screen lacks game context",
+      "what": "The loading screen (Image 1) shows a generic logo and 'Downloading the game', but does not show the fighters or the dojo environment.",
+      "why": "This is a missed opportunity to build hype. Players want to see the characters they are about to play as immediately, rather than staring at a corporate logo.",
+      "how": "Replace the static background with a looping render of the two fighters sparring in the dojo, or a cinematic pan across the arena, while keeping the loading bar centered."
+    },
+    {
+      "id": "hit-feedback-scale",
+      "title": "Impact effects are too subtle",
+      "what": "When Hasanabi lands an Ippon (Image 12), the 'spark' particles around Asmongold's head are very small and sparse, barely registering against the dark background.",
+      "why": "Fighting games rely on 'juice'. If the visual feedback for a major hit is weak, the game feels floaty and unresponsive, even if the mechanics work correctly.",
+      "how": "Increase the scale and brightness of the impact particle system. Add a brief screen shake and a flash of light on the opponent's body upon impact to sell the weight of the blow."
+    }
+  ],
+  "raw": null
+}

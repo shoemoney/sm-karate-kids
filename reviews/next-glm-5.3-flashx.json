@@ -1,0 +1,83 @@
+{
+  "model": "z-ai/glm-5.3-flashx",
+  "elapsed_s": 73.8,
+  "usage": {
+    "prompt_tokens": 15972,
+    "completion_tokens": 7098,
+    "total_tokens": 23070,
+    "cost": 0.01478214,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.01478214,
+      "upstream_inference_prompt_cost": 0.00590964,
+      "upstream_inference_completions_cost": 0.0088725
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 5668,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "reclaim-stage-from-controls",
+      "title": "Sticks plus permanent legend occupy ~40% of the portrait frame; the fight itself is the smallest element on screen",
+      "what": "In every in-bout portrait frame (e.g. the idle 30-second frame), the two dial clusters and the tan STANCE/TECHNIQUE legend band consume the bottom ~40% of the 390x844 viewport. The fighters occupy a band only ~25% of screen height in the center, and the top ~25% of the scene is empty dark wall above the glowing window row. The product \u2014 the bout \u2014 is visually subordinate to its own UI.",
+      "why": "On a phone the first-5-seconds read is 'big buttons, tiny game'. Photoreal fighters only pay off if you can see faces, gi fold and footwork; at ~25% height the animation detail that differentiates this from a stick figure fighter is unreadable, and thumb zones that large signal the scene is an afterthought.",
+      "how": "Remove the always-on legend band after the first two bouts (it duplicates the MOVES overlay) or fade it to ~30% opacity between inputs; let the stick wells overlap ~80-100px up into the scene as translucent circles; zoom/tilt the camera in 15-20% so fighter heads sit near the callout line and feet land just above the sticks, closing off the empty upper-wall band."
+    },
+    {
+      "id": "add-hit-and-guard-reactions",
+      "title": "Fighters idle straight through being struck \u2014 no flinch, guard, or defeat poses exist",
+      "what": "In the IPPON frame, HasanAbi's kick passes through Asmongold's head while Asmongold holds the exact neutral stance he holds in every other screenshot. On the HASANABI WINS frame the loser is again in the same untouched idle stance. In the FRONT KICK frame the red fighter neither guards nor reacts to the kick coming at him.",
+      "why": "A karate game where bodies never respond to contact reads as two cutouts taking turns posing. Players cannot tell from body language whether their technique landed, was blocked, or whiffed, which removes the feedback loop the entire twin-stick system depends on.",
+      "how": "Add three layered states on top of the existing sprites: hit-stun (torso lean-back + head snap, 250-350ms), guard (forearms raised when an incoming strike is defended), and a dazed/dropped pose on the round-ending point. These can be faked convincingly with sprite rotation, slight squash, offset and a cloth-flap shimmer, triggered from the scoring events that already exist."
+    },
+    {
+      "id": "ippon-impact-underdelivers",
+      "title": "The IPPON payoff is visually quieter than the FIGHT button",
+      "what": "On the IPPON frame the entire impact is roughly a dozen small gold confetti slivers near the defender's temple \u2014 no kick-arc trail, no contact flash, no debris. The technique subline 'SPINNING BACK KICK' is tiny letter-spaced text placed directly on the brightest window band in the backdrop, where it nearly vanishes.",
+      "why": "Ippon is the emotional peak of the bout and the screenshot players will share. If the moment of scoring lands with confetti-scale VFX while a gold FIGHT button glows brighter than anything in the scene, the point system's drama (half point vs full point) never registers and bouts feel flat regardless of the AI quality.",
+      "how": "Compose a directional impact: a white-hot radial flash at the contact point, a motion-streak arc traced along the kick path for ~150ms, 2-3x the particle count with gravity on the debris, a brief hit-stop plus camera punch-in and shake, and a short chromatic-aberration/bloom spike pumped into the existing TSL post chain. Give the technique subline a dark pill behind it or drop it below the IPPON baseline off the windows."
+    },
+    {
+      "id": "technique-callout-ownership",
+      "title": "Technique callouts float unowned and unsynced \u2014 'LUNGE PUNCH' appears while nobody lunges",
+      "what": "In the LUNGE PUNCH frame the pill sits centered in the upper scene while both fighters stand in identical idle stances; nothing on screen is punching. Same pattern in the FRONT KICK frame. The callout has no name, color chip, or anchor to a fighter, and its only companion signal is the technique stick's deflection trail at the bottom of the screen, far from the text.",
+      "why": "If the label telegraphs the opponent's incoming attack, the player can't react because they can't tell it's the opponent acting; if it echoes the player's own input, it's noise. Text that disagrees with the bodies on screen trains players to ignore all UI, including the telegraphs that matter.",
+      "how": "Anchor the pill beside the attacker's head, tinted with that fighter's identity color (white/blue for player, red for opponent), with a small name or arrow prefix on incoming attacks ('HASANABI \u2192 LUNGE PUNCH'). Gate display on the attacker's actual wind-up frame so text and sprite agree, and route the player's own move confirmations to a small badge on the technique stick instead of mid-screen."
+    },
+    {
+      "id": "endscreen-ghost-ui-and-round-context",
+      "title": "Ghost legend bleeds through the REMATCH button, and the round indicator exists only pre-fight",
+      "what": "On the HASANABI WINS screen the REMATCH button sits directly over the half-faded move legend \u2014 the words 'forward', 'high' and 'low' are visibly readable around the button's edges. Meanwhile the 'ROUND 1/5 \u00b7 QUALIFIER' pill from the intro appears in no in-fight frame at all: during active play there is zero indication which of the 5 career rounds you are in.",
+      "why": "Leftover UI under a primary CTA reads as unfinished at the exact moment players screenshot or decide to retry, and it sits in the highest-attention region of the screen. Losing round context undermines the ROUND x/5 career ladder that gives a 30-second bout its stakes.",
+      "how": "On bout end, fully remove (display:none, not opacity) the legend and any UI not part of the results stack so REMATCH sits on clean scene. Keep a compact 'R2/5' chip beside the central timer for the entire bout \u2014 intro, fight, and results \u2014 so the career structure is legible at every moment."
+    }
+  ],
+  "raw": null
+}

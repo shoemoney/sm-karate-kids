@@ -1,0 +1,83 @@
+{
+  "model": "qwen/qwen3.6-35b-a3b",
+  "elapsed_s": 100.1,
+  "usage": {
+    "prompt_tokens": 11560,
+    "completion_tokens": 9524,
+    "total_tokens": 21084,
+    "cost": 0.011258,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.011258,
+      "upstream_inference_prompt_cost": 0.001734,
+      "upstream_inference_completions_cost": 0.009524
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7183,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "impact-text-obstruction",
+      "title": "Scale down the 'IPPPON' impact text",
+      "what": "In the screenshot showing 'IPPPON HASANABI', the text 'IPPPON' is scaled excessively large, occupying the upper-middle screen and obscuring the fighters' heads and upper bodies during the critical moment of impact.",
+      "why": "Blocking the view of the fighters' faces and upper bodies during a hit removes the visual feedback of the action (the connection), making the hit feel less impactful and confusing the player about who was hit.",
+      "how": "Reduce the scale of the 'IPPPON' text by 30-40% and increase its vertical offset so it sits above the fighters' heads rather than overlapping them. Ensure it fades out quickly."
+    },
+    {
+      "id": "joystick-oversize",
+      "title": "Reduce virtual joystick size and visual weight",
+      "what": "The 'STANCE' and 'TECHNIQUE' joysticks (visible in the start screen and gameplay) are excessively large, occupying nearly 30% of the vertical screen height and featuring thick, heavy rings that compete with the game world.",
+      "why": "On a 390x844 mobile screen, these joysticks dominate the lower third, obscuring the fighters' feet and the tatami floor. This reduces the visible play area and makes the UI feel cluttered and aggressive.",
+      "how": "Reduce the joystick diameter by 20-25%. Make the outer ring thinner and slightly more transparent (e.g., 50% opacity) so the game world is visible through them. Move them slightly closer to the bottom edge."
+    },
+    {
+      "id": "control-overlay-height",
+      "title": "Collapse the persistent 'MOVES' reference overlay",
+      "what": "The semi-transparent control reference box (visible in screenshots 3, 4, 5) is too tall, displaying a full grid of 'STANCE' and 'TECHNIQUE' commands that covers the lower legs of the fighters.",
+      "why": "This overlay blocks the view of the fighters' footwork and the floor, which is crucial for a fighting game. It creates a 'wall' of UI between the player and the action.",
+      "how": "Reduce the height of this overlay to a thin strip at the very bottom of the screen (just above the joysticks), or make it collapsible. Only show the essential directional inputs, not the full list of moves."
+    },
+    {
+      "id": "score-fraction-notation",
+      "title": "Clarify fractional scoring notation",
+      "what": "In the results screen, the score is displayed as '2 1/2'. This looks like a date or a confusing fraction rather than a clear game score.",
+      "why": "Players need to instantly understand the score. '2 1/2' requires a moment of cognitive processing to realize it means '2.5 points' (based on the 'Half point' terminology in the techniques menu).",
+      "how": "Change the display to '2.5' or '2 pts + 1/2'. If using fractions is stylistic, ensure the font clearly distinguishes the fraction (e.g., stacked fraction) or use a decimal point for clarity."
+    },
+    {
+      "id": "fight-button-countdown-contrast",
+      "title": "Improve readability of the 'FIGHT' countdown",
+      "what": "In the start screen, the countdown number inside the 'FIGHT' button (e.g., 'FIGHT 2') is small and rendered in a color that blends with the gold button background, making it hard to read.",
+      "why": "The countdown is the most critical information at the start of a round. If the player misses the number, they don't know when to start playing, leading to a disadvantage.",
+      "how": "Increase the size of the countdown number. Change its color to a high-contrast white or black, or place it inside a distinct, high-contrast circle that stands out against the gold button."
+    }
+  ],
+  "raw": null
+}
