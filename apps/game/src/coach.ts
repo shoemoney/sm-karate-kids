@@ -18,7 +18,14 @@ export interface ControlCoach {
   /** True when this is genuinely a first run and the marks should be shown. */
   shouldShow(): boolean;
   show(): void;
-  /** Called on the first real stick input, which is the moment the hint has done its job. */
+  /**
+   * Records that a stick was used. The marks retire once BOTH have been, not
+   * on the first touch of either: a player who has learned to step but has
+   * never seen the technique stick has not finished the lesson, and retiring
+   * on the first input threw away half of it.
+   */
+  used(zone: 'left' | 'right'): void;
+  /** Force-retires the marks, for a bout that ended or a sheet that opened. */
   dismiss(): void;
 }
 
@@ -33,6 +40,7 @@ const LESSONS: ReadonlyArray<{
 
 export function createControlCoach(): ControlCoach {
   let shown = false;
+  const touched = new Set<'left' | 'right'>();
 
   const clear = (): void => {
     for (const node of document.querySelectorAll('.coach-mark')) node.remove();
@@ -40,8 +48,7 @@ export function createControlCoach(): ControlCoach {
     shown = false;
   };
 
-  const dismiss = (): void => {
-    if (!shown) return;
+  const retire = (): void => {
     clear();
     saveValue(SEEN_KEY, true);
   };
@@ -85,6 +92,12 @@ export function createControlCoach(): ControlCoach {
       document.body.classList.add('coach-active');
     },
 
-    dismiss,
+    used(zone: 'left' | 'right'): void {
+      if (!shown) return;
+      touched.add(zone);
+      if (touched.size >= 2) retire();
+    },
+
+    dismiss: retire,
   };
 }

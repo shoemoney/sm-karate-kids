@@ -255,6 +255,9 @@ async function boot(screen: BootScreen): Promise<void> {
   for (const view of views) stage.scene.add(view.root);
   hud.setNames(state.fighters[0].spec.name, state.fighters[1].spec.name);
   const coach = createControlCoach();
+  // The stance stick has no simulation event of its own — moving is not a move —
+  // so the coach learns about it from the input layer instead.
+  input.touch.onEngage = (side) => coach.used(side);
   let coachOffered = false;
 
   // The last real transfer. Waiting for it here is what lets the pre-boot card
@@ -330,9 +333,12 @@ async function boot(screen: BootScreen): Promise<void> {
     for (const event of events) {
       if (event.type === 'move_start') {
         lastStarted = { player: event.player, moveId: event.moveId, tick: state.tick };
-        if (event.player === 0) hud.showTechnique(moveName(event.moveId));
-        // The first committed technique is proof the hint has landed; retire it.
-        coach.dismiss();
+        if (event.player === 0) {
+          hud.showTechnique(moveName(event.moveId));
+          // The technique stick has been used. The marks retire once both
+          // sticks have been, not on the first technique.
+          coach.used('right');
+        }
         audio.play('strike');
       } else if (event.type === 'contact') {
         const at = impactAt(event.player, event.moveId);
@@ -446,8 +452,11 @@ async function boot(screen: BootScreen): Promise<void> {
     clearBoutUi();
     held = true;
     hud.setRound(`Round ${run.round + 1}/${TOURNAMENT.length} · ${round.name}`);
+    // No kicker. The HUD strip directly above already reads "Round 1/5" and
+    // the headline below is the round's own name, so a third statement of the
+    // same two facts stacked 60px apart was pure redundancy — and it was the
+    // loudest thing on a screen whose job is to start the fight.
     hud.showResult({
-      kicker: `Round ${run.round + 1} of ${TOURNAMENT.length}`,
       headline: round.name,
       tone: 'full',
       phase: 'prefight',

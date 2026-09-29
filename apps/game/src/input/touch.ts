@@ -13,6 +13,9 @@ interface StickBinding {
 
 const KNOB_TRAVEL = 34;
 
+/** Which sticks have ever been grabbed, module-scoped so a rematch keeps it. */
+const sideEngaged = new Set<'left' | 'right'>();
+
 function bind(zoneId: string, stickId: string): StickBinding {
   const zone = document.getElementById(zoneId);
   const face = document.getElementById(stickId);
@@ -35,12 +38,19 @@ export class TouchInput {
   private readonly latch = new PressLatch<StickPair>();
   /** True once any real pointer has driven the pad. */
   active = false;
+  /** Called the first time each stick is actually grabbed, never before. */
+  onEngage: ((side: 'left' | 'right') => void) | null = null;
 
   constructor() {
-    for (const stick of [this.left, this.right]) this.attach(stick);
+    for (const [side, stick] of [
+      ['left', this.left],
+      ['right', this.right],
+    ] as const) {
+      this.attach(side, stick);
+    }
   }
 
-  private attach(stick: StickBinding): void {
+  private attach(side: 'left' | 'right', stick: StickBinding): void {
     const down = (event: PointerEvent): void => {
       if (stick.pointerId !== null) return;
       stick.pointerId = event.pointerId;
@@ -49,6 +59,13 @@ export class TouchInput {
       stick.zone.setPointerCapture(event.pointerId);
       stick.zone.classList.add('engaged');
       this.active = true;
+      // Fires on the first grab of this stick only, so a caller can treat it
+      // as "the player has now discovered this control" rather than "a pointer
+      // is down".
+      if (!sideEngaged.has(side)) {
+        sideEngaged.add(side);
+        this.onEngage?.(side);
+      }
       event.preventDefault();
     };
 

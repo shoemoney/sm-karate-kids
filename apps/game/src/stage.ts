@@ -352,21 +352,25 @@ export class Stage {
       // it wider flattens every figure into a bowling pin, which reads as
       // blobs on the mat rather than as a distant row of people.
       const row = new Mesh(
-        new PlaneGeometry(9, 3),
+        new PlaneGeometry(11, 2.4),
         new MeshBasicMaterial({
           map: crowd,
           transparent: true,
           depthWrite: false,
-          opacity: 0.46,
+          // 0.46 read as cutouts rather than as a crowd. Four models have now
+          // flagged this row; the warmth fix in round 2 helped the colour but
+          // not the depth. What sells distance is the row being *smaller*,
+          // *lower* and *further back* than the fighters, and fainter than the
+          // mat it sits on. Big and dark at 46% put it in the fighting plane.
+          opacity: 0.3,
           toneMapped: true,
         }),
       );
       // Warm, not neutral. A MeshBasicMaterial takes no light, so the row is
       // painted with whatever colour it is given — and at a neutral brown it
-      // read as grey cutouts pasted onto a tungsten scene, the one thing in
-      // the frame that was not standing in the same room as the fighters.
+      // read as grey cutouts pasted onto a tungsten scene.
       row.material.color.set('#4a3320');
-      row.position.set(0, 0.85, CROWD_Z);
+      row.position.set(0, 0.62, CROWD_Z);
       this.scene.add(row);
     }
 

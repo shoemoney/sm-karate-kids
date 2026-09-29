@@ -1,0 +1,78 @@
+{
+  "model": "moonshotai/kimi-k3",
+  "elapsed_s": 110.3,
+  "usage": {
+    "prompt_tokens": 12063,
+    "completion_tokens": 5516,
+    "total_tokens": 17579,
+    "cost": 0.1188723,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 21,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.1188723,
+      "upstream_inference_prompt_cost": 0.0361323,
+      "upstream_inference_completions_cost": 0.08274
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 4024,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png"
+  ],
+  "items": [
+    {
+      "id": "portrait-action-squeezed",
+      "title": "Fighters are small in a compressed middle band while a fixed control deck eats the bottom third",
+      "what": "In the portrait gameplay screenshots, the two fighters are only ~25% of the 844px frame height (heads ~y300, feet ~y510). Below their feet is ~100px of empty tatami, then a hard divider line, then a dedicated control deck from ~y615 to y844 \u2014 roughly 27% of the screen holding two static stick graphics. The actual karate is squeezed into a letterboxed strip between the HUD and the deck.",
+      "why": "This is a fighting game: the fighters are the product. On a 390px-wide phone each fighter renders ~90px wide, so faces, gi detail, and wind-up telegraphs \u2014 the core point-karate read \u2014 are lost. The empty mat band plus deck means over a third of the portrait frame shows no action at all, and the player notices this in the first second of play.",
+      "how": "Do in portrait what the landscape build already does (see the landscape screenshot): overlay the sticks as translucent widgets on the bottom corners of the playfield and delete the deck and divider. Push the camera in so fighters' feet sit near ~72% of frame height and each fighter is ~1.3x taller, and float the 'LUNGE PUNCH' technique pill in the reclaimed space above the sticks."
+    },
+    {
+      "id": "loading-no-progress-feedback",
+      "title": "Loading screen gives no sense of progress \u2014 a static hairline bar, no percent, no motion",
+      "what": "The pre-boot screen shows the ShoeMoney logo at ~44% height, 'Downloading the game', and a thin ~3px bar whose fill already appears to span nearly the full track while the label still says downloading. There is no percentage, no byte count, no shimmer or indeterminate animation, and the top and bottom ~35% of the screen are empty black.",
+      "why": "This is the very first screen a new player sees, on mobile web where connections are slow and assets are large. A bar that looks full but hasn't finished \u2014 or that can't be seen moving \u2014 reads as 'stuck', and players bounce during exactly this window. The dead space also wastes the one moment you have the player's undivided attention for brand-setting.",
+      "how": "Add a numeric percent (and optionally MB loaded) beside 'Downloading the game', animate the fill with a moving highlight stripe so motion is visible even at 2%/s, and switch to an indeterminate shimmer if total size is unknown. Fill the lower void with a subtle living element \u2014 a slow-breathing glow behind the logo or a rotating tip line ('Half points win bouts') \u2014 so the screen never reads as frozen."
+    },
+    {
+      "id": "crowd-cardboard-cutouts",
+      "title": "Crowd is a row of identical semi-transparent bust silhouettes that float into the fight plane",
+      "what": "In every gameplay screenshot, the crowd behind the fighters is the same head-and-shoulders silhouette repeated at even intervals along the wall line, all at one depth and similar opacity. One head floats at chest height directly between the two fighters, and several silhouettes overlap the fighters' bodies, sitting on the same visual plane as the duel instead of behind it.",
+      "why": "The rest of the scene \u2014 photoreal sprite fighters, graded light, tatami texture \u2014 is aiming for cinematic realism, and the copy-paste paper-doll crowd is the one element that breaks the illusion every single frame. A spectator head visually colliding with a fighter's torso also muddies the silhouette read of the fighters themselves.",
+      "how": "Cut the count by half and keep a clear corridor behind the two fighters with no silhouettes. Vary the remaining ones: 3\u20134 different bust shapes, randomized scale (0.8\u20131.2x) and opacity, pushed ~15% darker, with a slight blur or fog so they sit behind the action plane. A slow 1\u20132px idle sway on a few of them would sell 'living crowd' for almost no cost."
+    },
+    {
+      "id": "intro-card-duplicate-round-info",
+      "title": "Pre-fight card states the round twice, stacked 60px apart",
+      "what": "The bout-intro screenshot shows a pill reading 'ROUND 1/5 \u00b7 QUALIFIER' at ~y60, and immediately beneath it the versus card opens with 'ROUND 1 OF 5' in letterspaced caps, then 'QUALIFIER' again as the giant headline. The same two facts \u2014 round number and stage name \u2014 are rendered twice each within ~100 vertical pixels, on top of a HUD that already shows both fighter names.",
+      "why": "The intro card is the cinematic beat that sets up every bout, and the duplicated stack makes it read as two UI layers accidentally shown at once rather than one designed moment. It also burns vertical space in a 390x844 portrait frame, pushing the fighters and the FIGHT button down.",
+      "how": "Suppress the 'ROUND 1/5 \u00b7 QUALIFIER' pill while the versus card is visible and reveal it (or the standard HUD) when the card dismisses. Keep the card's own 'ROUND 1 OF 5' eyebrow line, since it is styled as part of the poster. One source of truth per screen region."
+    },
+    {
+      "id": "stick-legend-microtype",
+      "title": "The twin-stick control legend is tiny low-contrast microtype that vanishes after first touch",
+      "what": "In the gameplay screenshots the stick faces carry the entire control reference \u2014 'MOVE & JUMP / \u25c0 step \u25b2 jump / \u25b6 step \u25bc crouch' and 'STRIKE / \u25c0 reverse \u25b6 forward / \u25b2 high \u25bc low' \u2014 in roughly 11px grey-on-dark-grey text inside the rings. In the later gameplay screenshot the legend is gone entirely, leaving blank stick faces, so the only in-game reminder of an 8-direction, two-stick scheme disappears exactly once play starts.",
+      "why": "This is a touch-first game whose whole skill ceiling lives in stick semantics (step vs jump vs crouch, high vs low, forward vs reverse). A new player cannot read 11px low-contrast text at arm's length, and once it fades they must either memorize it or open the MOVES overlay mid-bout. That is a direct learnability and retention cost in the first session.",
+      "how": "Raise the legend to the equivalent of \u226513px in a warm off-white at higher contrast, and move the direction labels outside the rings (small captions at the four cardinal points of each stick) so thumbs don't cover them. Instead of clearing the legend on first input, fade it to a dim persistent state and only remove each direction's hint after the player has actually used that direction once."
+    }
+  ],
+  "raw": null
+}
