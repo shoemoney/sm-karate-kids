@@ -802,3 +802,49 @@ remaining.** The local snapshot was inventing IDs — `glm-4.7v` and
   lever and is not yet warranted; the boot card measured at 8.4:1.
 - `fighter-vertical-placement` — framing, in its sixteenth iteration. Standing:
   warm and low.
+
+### Round 26 — perceptron-mk1.5, grok-4.5, gpt-5.5, qwen3.8-max-0902 — `5f775bc`
+
+- **The hit flash was deleting the fighter it was supposed to sell.** Five
+  models across three rounds, none able to name it:
+  perceptron-mk1.5 "a bright white glow completely obscures the fighter in
+  white"; gpt-5.6-sol "preserve fighter readability during scoring hits";
+  gpt-5.5 "reduce hit flash clipping"; qwen3.8-max-0902 "the receiver clips to
+  a featureless white blob on IPPON"; minimax-m3 "reads as face paint, not
+  impact".
+
+  The captured impact frame shows exactly what they saw — face, gi, arms and
+  chest emblem all clipped to one flat white silhouette, for 140ms, at the
+  moment the player is trying to see that the hit landed.
+
+  One line of arithmetic: `flash()` was `color.setScalar(1 + amount * 2.4)` and
+  a full point passes `amount: 1`. A 3.4x multiplier on an already-lit texture.
+  No mask, no post-pass, no bloom to blame — the sprite was told to render at
+  three and a half times its own light. Now 1.75, and 95ms instead of 140ms.
+  Re-captured: bright, obviously struck, completely readable.
+
+  Round 23 fixed the half of this that was motion and left the half that was
+  light, and it took two more rounds before the light was reported loudly
+  enough to act on. **Five reviewers agreeing is not the signal. Five reviewers
+  pointing at the same frame is.**
+- `kick-sprite-crop-artifacts: "floating limb fragment and a kick foot that
+  vanishes into the torso"` (qwen3.8-max-0902) — **rejected against the burst.**
+  The four-frame back-kick sequence shows a clean wind-up, a fully extended kick
+  with the foot attached to the leg and the standing leg planted, and a return
+  to guard. The foot is *near* the torso in frame 1 because that is the tucked
+  wind-up, and at a glance a tucked foot reads as a swallowed one.
+- `technique-callout-attribution: "anchor technique callouts to the acting
+  fighter and mark who performed them"` (qwen3.8-max-0902) — the chip is only
+  ever written for `event.player === 0`, so it is always the player's own move.
+  There is nothing to attribute.
+- `pre-fight-countdown-occlusion` (grok-4.5), `crop-empty-wall-enlarge-fighters`
+  (gpt-5.5), `portrait-camera-dead-headroom` (qwen3.8-max-0902),
+  `fighter-scale-framing` (grok-4.5) — framing, in its seventeenth iteration.
+  Standing: warm and low.
+- `handle-landscape-or-lock-portrait` (gpt-5.5) — landscape is a real, supported
+  second target; the ADR makes portrait the baseline and desktop the scaled
+  secondary, not the only one.
+- `make-loading-progress-readable`, `loading-bar-no-progress` — the MEASURING
+  state, in its eleventh appearance across eight providers. The single most
+  reported non-defect in the loop; it is the honest state of a bundle still
+  downloading, and every model that has ever called it a bug has been wrong.
