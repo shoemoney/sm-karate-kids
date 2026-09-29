@@ -351,11 +351,15 @@ export class Stage {
           map: crowd,
           transparent: true,
           depthWrite: false,
-          opacity: 0.55,
+          opacity: 0.46,
           toneMapped: true,
         }),
       );
-      row.material.color.set('#2e241a');
+      // Warm, not neutral. A MeshBasicMaterial takes no light, so the row is
+      // painted with whatever colour it is given — and at a neutral brown it
+      // read as grey cutouts pasted onto a tungsten scene, the one thing in
+      // the frame that was not standing in the same room as the fighters.
+      row.material.color.set('#4a3320');
       row.position.set(0, 0.85, CROWD_Z);
       this.scene.add(row);
     }

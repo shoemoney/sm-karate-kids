@@ -49,7 +49,11 @@ export function createPostStack(
   const bloomStrength = opts.bloomStrength ?? 0.42;
   const grainAmount = opts.grain ?? 0.06;
   const sat = opts.saturation ?? 1.14;
-  const vig = opts.vignetteIntensity ?? 0.38;
+  // 0.38 was pulling the frame edges well under the point where the dojo's
+  // upper structure still reads, which left the top third of a portrait phone
+  // screen as a featureless dark band above the fighters. Eased, not removed:
+  // the falloff is what seats the fighters in the middle of the frame.
+  const vig = opts.vignetteIntensity ?? 0.28;
 
   const pipeline = new RenderPipeline(renderer);
 

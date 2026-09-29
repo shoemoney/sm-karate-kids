@@ -178,7 +178,12 @@ export function mountBootScreen(): BootScreen {
       const percent = Math.min(100, Math.round((earned / TOTAL_WEIGHT) * 100));
       fill.style.inlineSize = `${percent}%`;
       bar.setAttribute('aria-valuenow', String(percent));
-      stage.textContent = note ?? UNITS[unit].label;
+      // The percentage rides along with the stage name. The first unit of real
+      // work is a bundle fetch, so on a slow connection the bar legitimately
+      // sits at 0% for a second and a half — and a gauge reading zero with no
+      // number looks broken rather than busy. The number is the same real
+      // value the bar is showing, not a spinner standing in for one.
+      stage.textContent = `${note ?? UNITS[unit].label} · ${percent}%`;
     },
 
     close(): Promise<void> {

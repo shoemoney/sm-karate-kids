@@ -39,7 +39,11 @@
             fetchpriority="high"
           />
         </div>
-        <p class="boot-stage" id="boot-stage" role="status" aria-live="polite">Starting up</p>
+        <!-- Carries the 0% from the very first paint. The first unit of real
+             work is a bundle fetch, so on a slow connection this line sits
+             unchanged for a second and a half; without a number it reads as a
+             stuck gauge rather than a busy one. -->
+        <p class="boot-stage" id="boot-stage" role="status" aria-live="polite">Starting up · 0%</p>
         <div
           class="boot-bar"
           id="boot-bar"
@@ -69,13 +73,15 @@
           </div>
           <div class="clock">
             <span id="timer">30</span>
-            <small id="backend">…</small>
           </div>
           <div class="side right" data-side="1">
             <span class="points" id="points-1" aria-label="Player two score">0</span>
             <span class="name" id="name-1">HasanAbi</span>
           </div>
         </div>
+        <!-- The renderer badge used to live under the timer, in the one slot
+             the eye returns to most. It is diagnostics, not score. -->
+        <small id="backend">…</small>
         <div class="hud-actions">
           <button
             type="button"

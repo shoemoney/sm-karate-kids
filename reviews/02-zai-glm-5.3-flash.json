@@ -1,0 +1,78 @@
+{
+  "model": "z-ai/glm-5.3-flash",
+  "elapsed_s": 101.6,
+  "usage": {
+    "prompt_tokens": 11916,
+    "completion_tokens": 8886,
+    "total_tokens": 20802,
+    "cost": 0.0062304,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0062304,
+      "upstream_inference_prompt_cost": 0.0017874,
+      "upstream_inference_completions_cost": 0.004443
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7647,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png"
+  ],
+  "items": [
+    {
+      "id": "blackout-hides-dojo-on-boot-and-result",
+      "title": "Pre-fight and result screens crush the rendered dojo to pure black",
+      "what": "In the 'ROUND 1 OF 5 / QUALIFIER' screen and the 'HASANABI WINS' screen, everything behind the text is near-pure black \u2014 only a faint warm floor gradient survives at the very bottom edge. The dojo, fighters, banners and volumetric light that render clearly in the bout screenshots are completely invisible at the two moments when the player is paying the most attention.",
+      "why": "The first thing a new player sees after loading is a black void with gold text, and the victory moment is the same void. The game's single biggest visual asset is missing from its own establishing shot and its payoff shot, which makes the product feel like a text menu with a fighting minigame attached rather than a 3D dojo brawler.",
+      "how": "Reduce the overlay so the scene reads at roughly 30-40% brightness instead of ~5%, keep both fighters in frame dimmed with a warm backlight rim so their silhouettes are legible, and let the existing vignette \u2014 not a flat black layer \u2014 do the falloff. Keep the gold typography at current contrast; it will still dominate a low-key but visible dojo."
+    },
+    {
+      "id": "portrait-fight-framing-too-loose",
+      "title": "Portrait camera leaves the fighters small and low with a dead dark top third",
+      "what": "In the portrait bout view the two fighters occupy only about 40% of the scene band's height and sit in its lower half: roughly three head-heights of near-empty dark wall sit above their fists while a strip of unused tatami runs beneath their feet. The landscape screenshot shows the same scene filling the frame with the fighters, so the loose framing is specific to portrait.",
+      "why": "On a 390x844 phone the scene band is already squeezed between the scoreboard and the dials; spending its top 40% on empty wall shrinks the fighters \u2014 the only things the player actually reads \u2014 making stance, wind-up and technique height (mid/high/low) harder to judge at glance speed.",
+      "how": "Add a portrait-specific camera preset: dolly in or narrow the FOV until each fighter is roughly 55-60% of the scene-band height, frame so heads sit about 15% below the scene top and feet about 10% above the scene bottom, and verify both fighters stay fully in frame at maximum separation."
+    },
+    {
+      "id": "boot-progress-bar-invisible",
+      "title": "Loading screen shows no visible progress",
+      "what": "On the ShoeMoney boot screen, the bar under 'Starting up' renders as a faint hairline track with no discernible fill \u2014 the screen reads as a static logo plus two lines of small dim text. The status string never changes and there is no percentage or stage indication anywhere.",
+      "why": "WebGPU initialization and asset loading can take several seconds on mid-range phones; a bar that appears empty reads as a frozen page, which is a top driver of instant tab abandonment on mobile web. The player gets zero confirmation that anything is happening.",
+      "how": "Fill the existing track with the same gold as the FIGHT button, drive its width from real load progress, clamp it to a minimum ~10% fill from the first frame so it never looks stuck, and rotate the 'Starting up' string through real stages ('Compiling shaders...', 'Loading fighters...', 'Warming up the dojo...')."
+    },
+    {
+      "id": "crowd-silhouettes-read-as-cutouts",
+      "title": "Crowd silhouettes are flat neutral-gray blobs that pop out of the warm scene",
+      "what": "Behind the fighters, the audience is a single row of uniform mid-gray silhouette shapes \u2014 a couple with ponytail bumps \u2014 with crisp edges, sitting directly on the tatami/wall seam with no contact shadow, and their cool gray is visibly lighter than the amber wall behind them. In the landscape shot they float at full brightness mid-frame, level with the fighters' torsos.",
+      "why": "They occupy the exact depth band the eye uses to anchor the fighters, so the cheapest-looking element in the frame sits directly behind the most expensive ones; the neutral gray also breaks the tungsten grade and makes the generated dojo read as a placeholder diorama.",
+      "how": "Keep them as silhouettes but integrate them: tint to a warm near-black, drop their brightness below the wall behind them, add a soft dark contact band where they meet the floor, and split into two rows with the back row smaller, darker and slightly blurred so they read as a backlit audience receding into haze."
+    },
+    {
+      "id": "webgpu-tag-in-scoreboard",
+      "title": "'WEBGPU' tech watermark sits in the scoreboard's prime center slot",
+      "what": "Every HUD screenshot shows 'WEBGPU' in letter-spaced small caps directly beneath the gold timer, dead center of the scoreboard between both fighters' scores. It is styled exactly like a game label but names a rendering API.",
+      "why": "The center scoreboard slot is the highest-value HUD real estate and the timer is the most-glanced number in a timed point-karate bout; a tech credit there reads as a debug tag left in the shipping build, and players parse 'WEBGPU' instead of the clock every single frame.",
+      "how": "Remove it from the bout HUD and move the credit to the boot screen footer (which already carries 'A SHOEMONEY AI LABS GAME') or the settings page; use the freed sub-timer line for live context such as the current round ('ROUND 1 \u00b7 QUALIFIER') so the center slot earns its position."
+    }
+  ],
+  "raw": null
+}

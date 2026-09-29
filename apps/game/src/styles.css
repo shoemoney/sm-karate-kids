@@ -112,6 +112,13 @@
      the focus, but the art is visible behind it now. */
   --scrim-soft: rgb(14 9 5 / 0.55);
   --scrim-hard: rgb(10 7 4 / 0.86);
+  /* The result screen's own pair: dark enough for gold display type to hold
+     contrast, sheer enough that the dojo is still visibly behind it. */
+  --result-veil-soft: rgb(12 8 4 / 0.3);
+  --result-veil-hard: rgb(8 5 3 / 0.74);
+  --plate-clear: rgb(8 5 3 / 0.12);
+  --result-plate: rgb(10 7 4 / 0.62);
+  --result-plate-solid: rgb(10 7 4 / 0.88);
   /* The flat knock-down between the round card's readability scrim and the
      painted dojo plate beneath it. Sits at the scrim's own corner value: any
      lighter and the plate's lit centre survives as a bright bloom right where
@@ -295,7 +302,7 @@
      stray gold dash rather than as a meter that is nearly empty. It is a
      sunken leather well, and the hairline is what draws its edge against a
      ground that is the same value. */
-  --boot-well: rgb(38 27 19 / 0.92);
+  --boot-well: rgb(56 41 28 / 0.95);
   --boot-well-edge: rgb(255 234 205 / 0.1);
   --boot-fill: linear-gradient(90deg, var(--gold-deep), var(--gold) 58%, var(--gold-bright));
   --boot-glint: rgb(255 246 226 / 0.42); /* the light running through the fill */
@@ -464,7 +471,8 @@ body {
 
 /* 6px, not the 2px hairline it started as: on a phone the bar is the only
    thing reporting real progress, and at 2px against a dark well it read as a
-   rule rather than as a gauge. */
+   rule rather than as a gauge. The well is lifted off the page background for
+   the same reason — a 0% bar still has to look like a gauge waiting to fill. */
 .boot-bar {
   position: relative;
   overflow: hidden;
@@ -580,6 +588,25 @@ body {
     var(--scrim-none) 100%
   );
   border-bottom: 1px solid var(--edge-faint);
+}
+
+/* The renderer badge, demoted to a corner tab. It is a diagnostic: the useful
+   moment for it is when someone is already debugging, and the cost of putting
+   it in the clock was the most-watched pixel on screen being spent on it. */
+#backend {
+  position: absolute;
+  inset-block-end: var(--space-1);
+  inset-inline-start: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-normal);
+  color: var(--text-ghost);
+  opacity: 0.5;
+}
+
+#backend:hover,
+#backend:focus-visible {
+  opacity: 1;
 }
 
 .scoreline {
@@ -1750,16 +1777,42 @@ body.left-handed #zone-right {
   gap: var(--space-3);
   padding: var(--space-4);
   text-align: center;
+  /* A whisper of a veil, so the dojo is still a place and not a black card.
+     It cannot do the legibility work on its own — at these values the detail
+     line vanished against a white gi — so legibility is bought locally, with
+     a blurred plate under the text column and nowhere else. */
   background-image: radial-gradient(
       ellipse at 50% 45%,
-      var(--scrim-soft),
-      var(--scrim-hard)
+      var(--result-veil-soft),
+      var(--result-veil-hard)
     ),
-    linear-gradient(var(--plate-dim), var(--plate-dim)),
-    var(--card-plate, none);
+    linear-gradient(var(--plate-clear), var(--plate-clear));
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
+}
+
+/* Everything in the result column sits on this. Tight to the text, so the
+   fighters either side stay clear, and blurred rather than opaque, so the
+   dojo reads through it instead of being replaced by it. */
+.result > * {
+  position: relative;
+}
+
+.result-title,
+.result-score,
+.result-detail {
+  padding: var(--space-2) var(--space-5);
+  background: var(--result-plate);
+  backdrop-filter: blur(14px) saturate(0.85);
+  -webkit-backdrop-filter: blur(14px) saturate(0.85);
+  border-radius: var(--radius-md);
+}
+
+body.no-backdrop-filter .result-title,
+body.no-backdrop-filter .result-score,
+body.no-backdrop-filter .result-detail {
+  background: var(--result-plate-solid);
 }
 
 .result.show {
