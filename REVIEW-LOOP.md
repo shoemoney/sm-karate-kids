@@ -2046,3 +2046,38 @@ new frame: a bout in its last exchange, a jump, a block, a bout where the player
 lost, the high-contrast theme, the large-controls theme. Each is a state the
 review set has never shown anyone, and each is a place where a defect can hide
 with the same confidence as the ones already found.
+
+### Round 61 — the new dimensions, attempted and removed
+
+Round 60's analysis said the next dimension is a frame, not a model. Two were
+built — a bout in its last exchange (played to a clock under ten seconds) and a
+mid-jump — and **both attempts have been removed.**
+
+What went wrong, in order:
+
+1. An unused `drive` helper was left in with a stray object key. Syntax error.
+2. Removing it left an orphaned `};`. Syntax error again.
+3. The jump capture probed `__smkk.state().fighters`, which is not the shape the
+   debug state actually has. Replaced with fixed timing.
+4. The run then died with `browserContext.newPage: Target page, context or
+   browser has been closed` — the browser falling over part-way through, after
+   thirteen frames.
+
+`tools/review-shots.mjs` is reverted to `HEAD` and verified: syntax clean, 17
+frames, `pnpm check` green.
+
+**This is the third time a capture has been thrown away in this loop, and all
+three times for the same reason: it would not verify.** Round 43's mid-bout
+score, round 52's played bout before it worked, and this. The difference is that
+the others were one attempt and this was four, and the fourth is the one that
+broke the instrument.
+
+**The instrument is the only thing in this loop that is load-bearing.** Every
+real defect in fifty-nine rounds came from a frame, and every one of the five
+false reports came from a bad frame. Trading a working instrument for an
+unverified one to chase the next finding is a bad trade at any yield, and
+"the loop is saturating" is not a reason to make it.
+
+Logged rather than attempted again, because the honest state of this is: *the
+next dimension is the right idea, the implementation is not working, and it needs
+a session to do properly rather than the last few percent of one.*
