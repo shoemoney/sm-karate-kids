@@ -90,6 +90,13 @@ test('game keys still type into a text field', async ({ page }) => {
 });
 
 test('a result card never pulls focus away from someone typing', async ({ page }) => {
+  // This one has to outlast a whole bout: the ruleset runs 1800 ticks and the
+  // clock hands out at most 15 per frame, so a software-rendered CI runner
+  // needs 120+ frames to reach the bell. At the default 60s budget that is a
+  // race the runner can lose, and losing it says nothing about focus — which
+  // is what this test is actually about.
+  test.setTimeout(180_000);
+
   await page.goto('/?mode=dojo');
   await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk']?.ready === true);
   await page.evaluate(() => {
@@ -100,7 +107,7 @@ test('a result card never pulls focus away from someone typing', async ({ page }
   await page.locator('#probe').click();
   await page.keyboard.type('Asm');
   // Force the bout to end the only way the rules allow: let the clock run out.
-  await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk'].state().phase === 'over', null, { timeout: 60_000 });
+  await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk'].state().phase === 'over', null, { timeout: 150_000 });
   await expect(page.locator('.result')).toBeVisible();
   await page.keyboard.type('ongold');
   await expect(page.locator('#probe')).toHaveValue('Asmongold');
