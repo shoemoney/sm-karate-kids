@@ -881,3 +881,43 @@ remaining.** The local snapshot was inventing IDs — `glm-4.7v` and
   `top-hud-crowded-and-uneven`, `fight-scene-composition`,
   `landscape-camera-zoom` — framing, in its eighteenth iteration. Standing:
   warm and low.
+
+### Round 28 — claude-opus-5.5, gpt-5.4-pro, seed-2.0-lite, qwen3.5-122b-a10b
+
+- **`floating-fist-sprite-artifact` / `floating-hand-animation-bug` /
+  `floating limb fragment` / `severed foot` — CONFIRMED, five models, and the
+  round-22 refutation was scoped to the wrong move.** Enumerated the full input
+  grammar to find the move none of the bursts had reached — Front Kick is
+  `neutral+up` — and burst-captured it. A **detached foot, complete with toes,
+  floats in mid-air at the left of the figure** through the extension frames.
+
+  Round 22 refuted this on the *back* kick, correctly, and I let a correct
+  refutation of one move dismiss a finding about a different one. The models
+  kept saying fist, hand, foot and limb because the fragment is small and
+  skin-coloured; nobody could name it because it is not a limb, it is a limb
+  that is not attached to anything.
+
+  **Open.** The artifact is in the shipped atlas (`apps/game/public/fighters/
+  shiro-1.webp`, `front_kick` frames 61–66), so the fix is in
+  `build-fighter-atlas.py` against a regenerated contact sheet, and the source
+  sheets are gitignored. Not attempted blind: a half-verified edit to a keyed
+  alpha atlas is how you get a worse bug than the one you were fixing.
+- `control-legend-contradicts-moves` (claude-opus-5.5) — **accepted.** The coach
+  legend taught the technique stick as ◀ reverse / ▶ forward / ▲ high / ▼ down
+  while the Moves sheet groups the same four directions under RIGHT STICK
+  FORWARD / BACK / UP / DOWN. Two vocabularies for one control. The coach now
+  follows the sheet, because the sheet is what a player opens to look a move up.
+- `hide-dead-controls-on-overlays` (gpt-5.4-pro) — the pre-fight card is
+  excluded from the modal dimming on purpose, and the comment says why: it is a
+  countdown that ends in the fight, not a dialog, and dimming its pad meant the
+  controls were at 18% seconds before the player had to use them.
+- `loading-bar-*` (gpt-5.4-pro, seed-2.0-lite, qwen3.5-122b) — the MEASURING
+  state, in its twelfth appearance across nine providers.
+- `unskippable-rematch-countdown` (seed-2.0-lite) — the whole button is the skip
+  affordance, which is what "FIGHT IN 2" now says on the first line of it.
+- `half-point-score-hard-to-parse` / `fraction-score-ambiguity` (gpt-5.4-pro,
+  seed-2.0-lite) — third and fourth report of the same thing across two rounds.
+  Real, and the fix is glyph choice, not layout: see next round.
+- `fighters-too-small-on-phone`, `fighter-vertical-cramping`,
+  `portrait-combat-framing-too-wide`, `control-legend-too-small` — framing, in
+  its nineteenth iteration. Standing: warm and low.

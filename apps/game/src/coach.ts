@@ -43,7 +43,14 @@ const LESSONS: ReadonlyArray<{
   pairs: readonly string[];
 }> = [
   { zone: 'zone-left', title: 'Stance', pairs: ['◀ step', '▲ jump', '▶ step', '▼ crouch'] },
-  { zone: 'zone-right', title: 'Technique', pairs: ['◀ reverse', '▶ forward', '▲ high', '▼ low'] },
+  // The Moves sheet groups every technique under RIGHT STICK FORWARD / BACK /
+  // UP / DOWN. The legend used to say reverse/forward/high/low for the same
+  // four directions, so a player who learned the controls from the coach and
+  // then opened the reference to look up a move was matching two vocabularies.
+  // claude-opus-5.5 called it "the on-screen stick legend is ambiguous and
+  // conflicts with the Moves list", and they are right — the sheet is what
+  // people actually go and look things up in, so the coach follows it.
+  { zone: 'zone-right', title: 'Technique', pairs: ['◀ back', '▶ forward', '▲ up', '▼ down'] },
 ];
 
 export function createControlCoach(): ControlCoach {

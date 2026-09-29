@@ -1,0 +1,84 @@
+{
+  "model": "anthropic/claude-opus-5.5",
+  "elapsed_s": 65.3,
+  "usage": {
+    "prompt_tokens": 17215,
+    "completion_tokens": 4534,
+    "total_tokens": 21749,
+    "cost": 0.15954,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.15954,
+      "upstream_inference_prompt_cost": 0.06886,
+      "upstream_inference_completions_cost": 0.09068
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 2103,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "camera-clips-fighters-at-climax",
+      "title": "Camera crops the fighters off-screen during the biggest moments",
+      "what": "On the IPPON screenshot, HasanAbi's spinning back kick is cut by the right edge of the frame. His back, rear arm, and supporting leg run past x=591, so the scoring technique is only half visible. On the 'HASANABI WINS' screen, Asmongold's rear foot and heel are cut by the left edge near x=0, y=820. In neutral, both fighters fit with about 25px to spare. Once a technique extends a sprite, nothing reframes the shot.",
+      "why": "The point-scoring strike and the finishing blow are the payoff frames of the game. They are also what players screenshot and share. Cropping the attacker makes the hit read as an error and hides which technique scored, so the player learns nothing from losing the point.",
+      "how": "Drive the camera from the union of both fighters' live sprite bounds, not their root positions. Each frame, compute the screen-space AABB of both sprites, including extended limbs, and add about 8% horizontal padding. Ease the camera zoom and x-offset toward that target over about 120ms. During hit-stop and on the IPPON/WIN overlays, lock the framing to that fitted box. Also clamp stage bounds so fighters cannot be pushed within one sprite-width of the frustum edge."
+    },
+    {
+      "id": "floating-fist-sprite-artifact",
+      "title": "Detached fist floats behind Asmongold in the Front Kick frame",
+      "what": "In both FRONT KICK screenshots, a small disembodied fist floats in empty air at about x=90, y=635, left of Asmongold's hip. It is not connected to any arm, and his actual guard hands are up at his chest. The sprite cutout or atlas frame for the front kick includes a stray limb fragment.",
+      "why": "Front Kick is one of the first moves a new player will throw, since it is technique-up from neutral. A floating hand on a photoreal character looks broken immediately and undercuts the premium look of the rest of the scene.",
+      "how": "Open the front-kick frames in the sprite atlas and erase the orphaned alpha island, or re-matte the source frame. Then add an atlas-build check that flags any frame with more than one disconnected alpha region above about 40px\u00b2 (a connected-components pass on the alpha channel). Run it across every technique frame, not just this one."
+    },
+    {
+      "id": "sprites-not-graded-into-scene",
+      "title": "Fighters look pasted on: ungraded whites and reds, and shadows that float",
+      "what": "Everything in the dojo is split-toned amber: backdrop, shoji, tatami, and crowd. The fighters are not. Asmongold's gi renders near-neutral white with cool grey folds, and HasanAbi's gi is a fully saturated pure red with none of the warm cast. Neither has a rim or key light matching the bright window wall behind them. The contact-shadow ellipses sit 5\u201310px below the soles (e.g., neutral shot, feet at y\u2248778, shadow at y\u2248790), so both fighters appear to hover over the mat.",
+      "why": "This is visible in the first second of every bout. The cinematic tungsten look is the game's main visual identity, and the fighters, the one thing the eye tracks, break it. It reads as a photo cutout over a render rather than characters standing in the room.",
+      "how": "Render the sprites through the same TSL grade as the environment. If they are drawn in a separate pass or as HUD, move them into the scene before bloom and split-tone. In the sprite material, multiply albedo by a warm ambient (about #FFE2B8 at 0.85) and add a back-rim term tied to the window light. Clamp gi whites to about 0.9 luminance so bloom does not eat them. Anchor the shadow to the lowest opaque pixel row of each frame, not the sprite origin. Use a tighter, darker core ellipse plus a wider soft falloff so the feet visibly press into the tatami."
+    },
+    {
+      "id": "control-legend-contradicts-moves",
+      "title": "On-screen stick legend is ambiguous and conflicts with the Moves list",
+      "what": "The legend panel above the sticks reads '\u25c0 step \u25b6 step', which gives no indication which direction is advance and which is retreat. It also reads 'TECHNIQUE \u25b2 high \u25bc low', but the TECHNIQUES sheet says technique-up gives Front Kick (mid), Rising Knee (mid), and High Block. Up actually means 'kicks', not 'high'. In the Moves sheet, each row shows two unlabeled circles followed by a trailing '+' (e.g., '(\u00b7)(\u25b6) +  Lunge Punch'). The '+' belongs between the circles, and nothing says which circle is which stick. The neutral input is a tiny dot that reads as an empty icon.",
+      "why": "Twin-stick chords are the entire control scheme. When the only persistent teaching aid gives a wrong mental model, players throw kicks expecting high strikes and cannot map the move list back to their thumbs. The 0\u20132\u00bd loss in 3 seconds on the results screen is exactly what that confusion looks like.",
+      "how": "Change the stance legend to '\u25c0 back  \u25b6 advance  \u25b2 jump  \u25bc crouch'. Relabel technique as '\u25c0 reverse  \u25b6 punch  \u25b2 kick  \u25bc low', or whatever the four families actually are. Use the same family names as the section headers in the Moves sheet. In each Moves row, render the chord as '[L \u00b7] + [R \u25b6]': a small 'L'/'R' tag inside each circle, the '+' between them, and 'neutral' or a hollow ring in place of the dot. Tint the L circle blue and the R circle amber to match the stick nub colors already used in-game."
+    },
+    {
+      "id": "landscape-letterbox-and-backdrop-seam",
+      "title": "Landscape wastes a third of the screen and exposes a hard-edged backdrop plane",
+      "what": "In the 1280\u00d7800 landscape capture, the scene is squeezed into a band from y\u2248105 to y\u2248570. There are about 60px of dead black between the score bar and the scene, and about 230px of empty black below the tatami, where the two sticks float. The tatami ends in a hard horizontal cut at y\u2248570. Across the top, the ceiling reveals a flat rectangular backdrop plane with a visible edge, from x\u2248200 to x\u22481080 and y\u2248105 to y\u2248205, sitting in front of the rafters. The fighters occupy only about 25% of the screen height.",
+      "why": "Players rotate phones, and tablets and foldables open in landscape. There the game looks like an unfinished embed: tiny fighters, a visible geometry seam, and large black voids. This throws away the cinematic presentation that portrait gets right.",
+      "how": "In landscape, fill the viewport with the 3D scene. Extend the camera frustum and tatami floor to the bottom edge, and overlay the sticks translucently on the mat, as portrait does with its bottom panel. Refit the camera so the fighters span about 55\u201360% of the viewport height. Either extend the ceiling backdrop geometry past the frustum at the widest supported aspect, or feather its edges with an alpha gradient and push it behind the rafters. Add 21:9 and 4:3 captures to the screenshot suite so seams like this get caught."
+    }
+  ],
+  "raw": null
+}

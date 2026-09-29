@@ -1,0 +1,48 @@
+{
+  "model": "qwen/qwen3.5-122b-a10b",
+  "elapsed_s": 43.1,
+  "usage": {
+    "prompt_tokens": 12284,
+    "completion_tokens": 906,
+    "total_tokens": 13190,
+    "cost": 0.00507832,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00507832,
+      "upstream_inference_prompt_cost": 0.00319384,
+      "upstream_inference_completions_cost": 0.00188448
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": null,
+  "raw": "[\n  {\n    \"id\": \"in-game-hud-contrast\",\n    \"title\": \"HUD text blends into the background\",\n    \"what\": \"In the gameplay screenshots (e.g., 'Lunge Punch' and 'Front Kick'), the white text for the move name ('FRONT KICK') and the instruction overlay ('STANCE', 'TECHNIQUE') has very low contrast against the dark, warm-toned dojo background. The text is barely legible.\",\n    \"why\": \"During a fast-paced fight, players need to instantly recognize what they are doing or what move just happened. If the UI text is hard to read, it breaks immersion and makes the game feel unpolished and frustrating to play.\",\n    \"how\": \"Apply a subtle black drop-shadow or a semi-transparent dark background behind all in-game HUD text elements to ensure they pop against the cinematic backdrop.\"\n  },\n  {\n    \"id\": \"loading-screen-text\",\n    \"title\": 'Loading screen text is too small and monospaced',\n    \"what\": \"On the loading screen, the subtitle 'Downloading the game' uses a small, monospaced font that looks out of place compared to the stylized title and logo. It's difficult to read on a phone screen.\",\n    \"why\": \"The loading screen is the first thing a player sees. Poor typography here creates a negative first impression and suggests a lack of attention to detail, which can make players question the quality of the entire game.\",\n    \"how\": \"Replace the monospaced font with a clean, modern sans-serif font that matches the game's branding. Increase the font size and weight to improve readability on mobile devices.\"\n  },\n  {\n    \"id\": \"control-overlay-opacity\",\n    \"title\": \"Control labels obscure the fighters\",\n    \"what\": \"The semi-transparent brown bar containing the control instructions ('STANCE', 'TECHNIQUE') is positioned directly over the lower bodies of the fighters. In many frames, this bar covers their legs and feet, which are crucial for understanding stance and movement.\",\n    \"why\": \"Blocking the view of the characters' actions, especially their feet and legs, makes it harder for the player to see the result of their inputs and react to the opponent. This directly interferes with the core gameplay loop.\",\n    \"how\": \"Move the control instruction bar higher up, above the fighters, or reduce its opacity so it doesn't obstruct the view of the action. Alternatively, make the bar smaller and less intrusive.\"\n  },\n  {\n    \"id\": \"moves-list-readability\",\n    \"title\": \"Moves list is cluttered and hard to scan\",\n    \"what\": \"The 'Techniques' menu shows a long, dense list of moves. The icons representing stick inputs are small and the text is cramped. It's difficult to quickly find a specific move or understand the combinations at a glance.\",\n    \"why\": \"A complex moveset needs to be easily accessible for learning and reference. A cluttered menu forces the player to squint and scroll unnecessarily, breaking their flow and making it harder to master the game's mechanics.\",\n    \"how\": \"Reorganize the moves list into a more scannable grid or use collapsible sections for each direction. Increase the size of the input icons and add more whitespace between entries to improve readability.\"\n  },\n  {\n    \"id\": \"settings-toggle-visibility\",\n    \"title\": \"Settings toggles are hard to distinguish\",\n    \"what\": \"In the settings menu, the toggle switches are very subtle. When 'off', they are a dark grey circle on a dark grey track. When 'on', they become yellow. The difference between the 'off' state and the background is minimal, making it hard to tell if a setting is enabled without looking closely.\",\n    \"why\": \"Players need to quickly and accurately change settings. If the current state of a toggle is ambiguous, they might accidentally enable or disable something, leading to frustration and a poor user experience.\",\n    \"how\": \"Increase the contrast of the 'off' state by using a lighter grey for the toggle circle and/or the track. Make the visual distinction between the 'on' and 'off' states much more obvious.\"\n  }\n]"
+}

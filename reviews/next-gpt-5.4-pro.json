@@ -1,0 +1,84 @@
+{
+  "model": "openai/gpt-5.4-pro",
+  "elapsed_s": 336.0,
+  "usage": {
+    "prompt_tokens": 15325,
+    "completion_tokens": 6775,
+    "total_tokens": 22100,
+    "cost": 1.67925,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 1.67925,
+      "upstream_inference_prompt_cost": 0.45975,
+      "upstream_inference_completions_cost": 1.2195
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 5883,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-bar-too-subtle",
+      "title": "Make the loading state visibly readable at a glance",
+      "what": "On the ShoeMoney loading screen, the progress bar in the lower third is only a very thin dark-brown line on a nearly black background, and the \"Downloading the game\" text above it is small and low-contrast. On a phone, the bar is easy to miss entirely.",
+      "why": "This is the first thing players see. If they cannot instantly tell that loading is in progress, the game feels stalled or broken and early drop-off goes up.",
+      "how": "Increase the bar height to roughly 8\u201310 px, brighten the fill within the same warm palette, add a clearly different track color, and show a percentage or file-progress value under the status line."
+    },
+    {
+      "id": "hide-dead-controls-on-overlays",
+      "title": "Remove the inactive sticks from countdown and rematch screens",
+      "what": "On the \"QUALIFIER / FIGHT IN 2\u20134\" screens and the \"HASANABI WINS / REMATCH IN 8\" screen, the two giant joysticks still fill the entire lower half of the display even though the player cannot interact yet.",
+      "why": "It creates noise, steals space from the matchup/result message, and implies the controls are live when they are not. On mobile, that is immediate confusion.",
+      "how": "Fade the sticks, stick labels, and legend panel fully out during pre-fight and post-fight overlays, then animate them in only when the round becomes playable."
+    },
+    {
+      "id": "control-legend-too-small",
+      "title": "Make the core control legend legible instead of tiny",
+      "what": "In the live fight screens, the bottom legend strip above the sticks packs 8 tiny labels and arrows (\"step\", \"jump\", \"crouch\", \"reverse\", \"forward\", \"high\", \"low\") into a short brown panel. Despite taking a lot of vertical space, the text itself is still very small at phone size.",
+      "why": "This is a novel twin-stick control scheme; if the always-visible explanation is hard to read, onboarding suffers right when the player is trying to learn how to play.",
+      "how": "Reduce each stick diameter slightly, increase the legend text size/weight, and simplify the wording into larger one-line cues or a first-round tutorial that can collapse after the player has seen it once."
+    },
+    {
+      "id": "portrait-combat-framing-too-wide",
+      "title": "Tighten the portrait camera so the fight reads larger",
+      "what": "In the portrait gameplay shots, both fighters occupy a relatively small middle band of the screen. There is a large block of empty glowing dojo background above them and a large control block below, so punches and kicks read smaller than they should on a 390\u00d7844 phone.",
+      "why": "This hurts the main game read: distance, contact, and timing are harder to parse when the actual combatants are not using enough of the available portrait height.",
+      "how": "Push the camera in about 10\u201315%, reduce headroom above the fighters, and raise the tatami horizon so torsos and strike range dominate the center of the frame without clipping jump attacks."
+    },
+    {
+      "id": "half-point-score-hard-to-parse",
+      "title": "Redesign the half-point display so scores parse instantly",
+      "what": "On the HUD and the result screen, HasanAbi\u2019s score appears as a small superscript-like \"2\u00bd\". The half is much smaller than the main digit, especially in the top-right scoreboard, so it reads like an annotation instead of part of the score.",
+      "why": "Scoring is the player\u2019s primary feedback. If a half point cannot be read immediately, the game feels unclear at the exact moment it should be most understandable.",
+      "how": "Render half points with full visual weight\u2014use \"2.5\", \"2 + \u00bd\", or a dedicated half-point chip\u2014and apply the same treatment consistently in the top HUD and the end-of-bout score card."
+    }
+  ],
+  "raw": null
+}

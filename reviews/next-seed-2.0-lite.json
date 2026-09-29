@@ -1,0 +1,84 @@
+{
+  "model": "bytedance-seed/seed-2.0-lite",
+  "elapsed_s": 65.5,
+  "usage": {
+    "prompt_tokens": 20849,
+    "completion_tokens": 3143,
+    "total_tokens": 23992,
+    "cost": 0.01149825,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.01149825,
+      "upstream_inference_prompt_cost": 0.00521225,
+      "upstream_inference_completions_cost": 0.006286
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 2299,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "floating-hand-animation-bug",
+      "title": "Front kick animation has detached floating hand rendering artifact",
+      "what": "On the active fight screen when the player executes a front kick, a disembodied, floating hand mesh is visible ~20px left of the player character's raised kicking leg, completely separated from the fighter's arm rig.",
+      "why": "This is immediately visible to players the first time they use this move, breaks immersion, and makes the game feel unpolished and buggy on first play.",
+      "how": "Fix the front kick animation rig to remove the orphaned hand mesh that is incorrectly positioned outside the fighter model during the kick pose."
+    },
+    {
+      "id": "loading-bar-no-progress-indication",
+      "title": "Initial loading screen has static empty progress bar with no load feedback",
+      "what": "On the pre-boot ShoeMoney loading screen, the horizontal progress bar below the 'Downloading the game' text is completely unfilled, with no animation or percentage indicating how much of the load is complete.",
+      "why": "Players cannot tell if the game is stuck, and will often close the browser tab assuming the game failed to load, increasing launch drop-off significantly.",
+      "how": "Bind the progress bar fill to actual asset load/download progress, add a subtle horizontal shimmer animation to the bar if progress is temporarily indeterminate to show the game is actively loading."
+    },
+    {
+      "id": "fighter-vertical-cramping",
+      "title": "Fighters are too small on portrait screen with excessive empty dead space",
+      "what": "On the 390x844 portrait fight screen, the two opposing fighters only occupy ~35% of total vertical screen real estate, with ~30% unused empty background space above their heads, while the twin stick controls take up the full bottom 25% of the frame.",
+      "why": "Small fighter size makes it harder for players to read subtle animation tells for incoming attacks, reducing gameplay clarity and reaction time.",
+      "how": "Adjust the in-game camera FOV and vertical offset to zoom in on the fighters, shifting them down slightly so they occupy ~60% of the vertical frame, cutting down on unused empty background space."
+    },
+    {
+      "id": "fraction-score-ambiguity",
+      "title": "Match score uses unclear half-point fraction notation with no explanation",
+      "what": "On post-fight results and top HUD score displays, partial points are shown using a mixed fraction character e.g. '2\u00bd' with no on-screen explanation of what half vs full points mean for new players.",
+      "why": "New players cannot quickly parse how scoring works, and will not understand the difference between minor strikes and full Ippon wins without external context.",
+      "how": "Replace the fraction character with explicit decimal formatting e.g. '2.5', and add a 1-time onboarding tooltip explaining that full points = Ippon wins, half points = minor successful strikes."
+    },
+    {
+      "id": "unskippable-rematch-countdown",
+      "title": "Post-fight rematch has no skip option for the auto-start countdown",
+      "what": "On the end of match results screen, the only interactive element is a 'REMATCH IN X' button, with no visible option to skip the 8+ second countdown and start the next bout immediately.",
+      "why": "Players who want to replay immediately after a loss are forced to wait through dead unskippable time, increasing post-match drop-off between rounds.",
+      "how": "Add a small tappable 'Skip' label next to the rematch countdown, that lets players immediately launch the next fight if they do not want to wait for the auto-start timer."
+    }
+  ],
+  "raw": null
+}
