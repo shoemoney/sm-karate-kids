@@ -1,0 +1,83 @@
+{
+  "model": "google/gemini-3.7-flash",
+  "elapsed_s": 26.2,
+  "usage": {
+    "prompt_tokens": 16626,
+    "completion_tokens": 2945,
+    "total_tokens": 19571,
+    "cost": 0.02351325,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.02351325,
+      "upstream_inference_prompt_cost": 0.0124695,
+      "upstream_inference_completions_cost": 0.01104375
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 2066,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "sprite-front-kick-artifact",
+      "title": "Fix corrupted sprite and floating severed limb artifact on front kick",
+      "what": "In Screenshot 9, during Asmongold's front kick, the extended right leg terminates abruptly at the trouser cuff with no visible foot, while an orphaned foot/hand fragment floats in mid-air behind his rear left hip.",
+      "why": "This severe visual glitch destroys the photoreal aesthetic on a core combat action and looks like an uncleaned AI sprite extraction error.",
+      "how": "Re-slice or touch up the 'front kick' sprite frame in the animation atlas to remove the rogue floating limb asset behind the pelvis and properly composite the extended barefoot onto the kicking leg."
+    },
+    {
+      "id": "bottom-hud-label-clipping",
+      "title": "Resolve bottom-edge text clipping beneath twin-stick controls",
+      "what": "In Screenshots 3, 4, 7, 9, and 11, the bottom-most text labels 'STANCE' and 'TECHNIQUE' underneath the joystick discs are clipped horizontally along the bottom screen boundary, showing only the top halves of the letters.",
+      "why": "Violates mobile safe area insets; on physical devices with home indicators or rounded corners, this text is partially or completely cut off.",
+      "how": "Add bottom safe-area padding (`env(safe-area-inset-bottom)`) or eliminate redundant sub-stick labels entirely since the 'STANCE' / 'TECHNIQUE' headers already exist in the control legend card immediately above the sticks."
+    },
+    {
+      "id": "overlay-modal-fighter-obstruction",
+      "title": "Reposition intro and rematch action buttons off fighters' feet",
+      "what": "In Screenshots 2, 7, 8, and 10, the gold 'FIGHT (N)' and 'REMATCH (N)' pill buttons are centered directly over the fighters' shins, feet, and grounding shadows.",
+      "why": "Obstructs character presentation during dramatic face-offs and win screens, creating awkward layering where UI elements slice across the focal character art.",
+      "how": "Shift the action button down into the empty dark space located between the twin sticks, or position it directly beneath the match title/score card in the upper third."
+    },
+    {
+      "id": "opponent-hud-score-contrast",
+      "title": "Increase brightness and contrast of red opponent HUD elements",
+      "what": "Across all battle and modal headers (Screenshots 2-5, 7-11), the opponent name 'HASANABI' and his score numbers ('0', '1', '2\u00bd') are rendered in a low-luminance dark red against the near-black top bar.",
+      "why": "Fails mobile contrast legibility at a glance, especially when compared to the crisp off-white text and gold timer badge for Player 1.",
+      "how": "Shift the red accent from dark maroon to a higher-luminance coral red (#FF5A5A or #FF6B6B) and apply a subtle warm backlight/glow to match the game's tungsten aesthetic."
+    },
+    {
+      "id": "ippon-impact-defender-flinch",
+      "title": "Add hit-reaction / recoil sprite frames on strike connection",
+      "what": "In Screenshot 11 ('IPPON'), HasanAbi lands a spinning back kick directly into Asmongold's face accompanied by impact sparks, but Asmongold remains rigidly locked in his neutral standing idle guard stance.",
+      "why": "The lack of defender recoil or head-snap makes strikes feel disconnected and non-physical, weakening the kinetic satisfaction of landing a scoring blow.",
+      "how": "Trigger a dedicated 1-to-2 frame flinch/recoil sprite state (head snapped back, guard broken) whenever hit sparks and point banners are displayed."
+    }
+  ],
+  "raw": null
+}

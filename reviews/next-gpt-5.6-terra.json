@@ -1,0 +1,83 @@
+{
+  "model": "openai/gpt-5.6-terra",
+  "elapsed_s": 29.9,
+  "usage": {
+    "prompt_tokens": 14412,
+    "completion_tokens": 1651,
+    "total_tokens": 16063,
+    "cost": 0.0558405,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 14409,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0558405,
+      "upstream_inference_prompt_cost": 0.0360285,
+      "upstream_inference_completions_cost": 0.019812
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 463,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "clarify-dual-stick-input",
+      "title": "Make the two fight controls understandable before the first exchange",
+      "what": "On the active portrait fight screen, the bottom half contains two large circular pads with only tiny arrow glyphs and the labels \"STANCE\" and \"TECHNIQUE.\" The mapping is only explained by the small two-column strip above them (for example, \"\u25c0 step \u25b2 jump\" and \"\u25c0 reverse \u25b6 forward\"), while the round-intro screen shows the same unexplained controls behind the FIGHT button.",
+      "why": "A first-time touch player has to infer that each pad accepts eight directions, that the left pad changes movement, and that the right pad selects attacks. In a 30-second bout, that learning cost is likely to cause immediate misses and make the game feel unresponsive rather than tactical.",
+      "how": "During the first qualifier, add a short, dismissible input tutorial: pulse the left pad with \"Drag: step / jump / crouch,\" then pulse the right pad with \"Drag a direction to attack.\" Show the selected direction and resulting move name directly beside the active thumb position for the first few inputs, then reduce the permanent legend to a cleaner compact version."
+    },
+    {
+      "id": "fix-bottom-control-cropping",
+      "title": "Keep the control labels and touch targets clear of the bottom edge",
+      "what": "In multiple portrait gameplay screenshots, the lower part of the right control is pressed into the viewport edge: the \"TECHNIQUE\" label is visibly cut off or obscured at the very bottom. In the lunge-punch frame, the label is mostly hidden behind the selected-stick treatment and screen edge.",
+      "why": "The right stick is the attack control, so any clipping at the bottom makes the most important input feel unsafe to touch and makes its role harder to read. It also looks like the HUD has failed to fit the phone screen.",
+      "how": "Reserve a fixed bottom safe-area for both pads and their labels. Scale the dials down slightly or move the whole controls block upward so every ring, directional indicator, and label has at least 16 px of bottom clearance on the 390x844 baseline; test with browser UI/safe-area insets enabled."
+    },
+    {
+      "id": "tame-hit-flash-clipping",
+      "title": "Reduce the hit flash that destroys fighter readability",
+      "what": "In the impact screenshot with the \"IPPON\" callout, the white-gi fighter becomes a near-solid white shape from the waist through the head, while a huge pale bloom spreads across the left-middle of the tatami. The opponent's kick and the defender's actual body pose become difficult to parse at the moment the game needs to communicate the result.",
+      "why": "A decisive hit should be the clearest frame in the bout. Here the exposure/bloom treatment reads more like a rendering blowout than a precise combat confirmation, weakening both readability and the premium photoreal-sprite presentation.",
+      "how": "Keep a localized impact burst, but clamp bloom before compositing and protect the fighter sprite luminance with a mask or lower bloom threshold on character layers. Use a short radial spark/shock-ring centered on the contact point instead of flooding the defender's full torso and the floor with white."
+    },
+    {
+      "id": "repair-sprite-pose-edges",
+      "title": "Clean up the fighter sprite cutouts and awkward kick silhouette",
+      "what": "The fighters read as sharply cut photographic sprites against the rendered dojo: their outlines, especially hair, sleeves, and feet, have a pasted-on edge rather than matching the scene's soft volumetric lighting. The \"FRONT KICK\" screenshot is most distracting: the raised white trouser leg ends in a broad, flat-looking white shape with a tiny disconnected-looking foot edge on its left.",
+      "why": "The dojo has convincing warm depth and floor perspective, so rough sprite edges stand out immediately. The front-kick silhouette can make a core move look broken or visually unfinished instead of powerful.",
+      "how": "Re-export the offending pose with a corrected alpha matte and intact foot silhouette, then apply consistent contact shadows beneath each planted foot. Add a restrained warm rim/ambient grade and depth-aware softening to sprite edges so they inherit the dojo lighting without flattening the deliberately cinematic scene."
+    },
+    {
+      "id": "make-score-and-countdowns-legible",
+      "title": "Disambiguate the score fractions and small numbered button badges",
+      "what": "The result screen shows \"HASANABI WINS\" and a score of \"0 \u2014 2\u00bd,\" while the header also displays Hasanabi's score as \"2\u00bd.\" Separately, the large round-intro button reads \"FIGHT\" with a small dark circle containing \"2\" in one screenshot and \"4\" in another; the circle has no visible label explaining whether it is a countdown, round number, or input prompt.",
+      "why": "Point-karate scoring already needs quick comprehension. Fractional scores without a visible scoring key, plus unexplained numerals attached to the primary action, leave players uncertain about who is ahead and whether they must wait or tap to begin.",
+      "how": "Label the scoring unit where it first appears, such as a brief \"Half points enabled\" tooltip or an always-readable result breakdown (for example, \"2 points + 1 half point\"). Replace the unlabeled FIGHT badge with explicit copy such as \"FIGHT \u2014 starts in 2\" and animate it as a countdown; remove the badge entirely when the button is immediately actionable."
+    }
+  ],
+  "raw": null
+}

@@ -100,6 +100,30 @@ interface Ghost {
   life: number;
 }
 
+/**
+ * How far a ghost may trail its fighter, in world units, and how bright it may
+ * get.
+ *
+ * The trail used to draw each ghost at the exact world spot it was dropped,
+ * which means the offset is whatever the fighter covered in three ticks. On a
+ * walk that is nothing and the trail reads as speed. On a lunging punch or a
+ * stepping kick it is most of a body width, and at 0.32 opacity a full
+ * silhouette sitting a body width behind its owner does not read as a trail at
+ * all — it reads as a second fighter standing behind the first one.
+ *
+ * Four reviewers across three rounds described something wrong in the kick
+ * frames (a "severed foot", a leg "passing through" the opponent) and none of
+ * them named it, because the thing they were actually reacting to was a
+ * duplicate. A burst of real frames caught it in two shots: the sprite is
+ * clean, and there is a translucent second Asmongold behind him.
+ *
+ * So the trail is capped to a short offset and dimmed. It still says the strike
+ * was fast; it no longer says there is someone else in the room.
+ */
+const GHOST_TRAIL_MAX = 0.1;
+const clampTrail = (v: number): number => (v < -GHOST_TRAIL_MAX ? -GHOST_TRAIL_MAX : v > GHOST_TRAIL_MAX ? GHOST_TRAIL_MAX : v);
+const GHOST_PEAK_OPACITY = 0.17;
+
 export class SpriteFighterView implements FighterView {
   readonly root = new Group();
   private readonly mesh: Mesh<PlaneGeometry, MeshBasicMaterial>;
@@ -249,14 +273,19 @@ export class SpriteFighterView implements FighterView {
         ghost.mesh.visible = false;
         continue;
       }
-      // Ghosts live in the fighter's group, so hold them at the world spot
-      // they were dropped, not wherever the fighter has moved since.
+      // Ghosts live in the fighter's group, so hold them near the world spot
+      // they were dropped, not wherever the fighter has moved since — but
+      // clamped, or a fast strike leaves a full silhouette a body width back.
+      const offset = clampTrail(ghost.worldX - this.root.position.x);
       ghost.mesh.position.set(
-        ghost.worldX - this.root.position.x,
+        offset,
         this.mesh.position.y + ghost.worldY - this.root.position.y,
         -0.02,
       );
-      ghost.mesh.material.opacity = ghost.life * 0.32;
+      // Dimmer the further behind it has fallen, so the newest ghost is the
+      // brightest and the trail reads as depth rather than as copies.
+      const staleness = 1 - Math.abs(offset) / GHOST_TRAIL_MAX;
+      ghost.mesh.material.opacity = ghost.life * GHOST_PEAK_OPACITY * (0.35 + 0.65 * staleness);
     }
   }
 
