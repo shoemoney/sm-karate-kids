@@ -1726,7 +1726,11 @@ body.high-contrast .setting-row input[type="checkbox"]:checked {
   white-space: nowrap;
   font-size: var(--text-2xs);
   letter-spacing: var(--track-tight);
-  color: var(--text-faint);
+  /* Was --text-faint, a deliberate ghost for a column of secondary metadata.
+     But this column carries the scoring rule — "mid · Half point" is the whole
+     reason a point-karate game has no health bars, and reading it should not
+     take more contrast than the move name it qualifies. */
+  color: var(--text-muted);
 }
 
 /* ==========================================================================

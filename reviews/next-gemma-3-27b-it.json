@@ -1,0 +1,82 @@
+{
+  "model": "google/gemma-3-27b-it",
+  "elapsed_s": 22.4,
+  "usage": {
+    "prompt_tokens": 4078,
+    "completion_tokens": 615,
+    "total_tokens": 4693,
+    "cost": 0.000608282,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000608282,
+      "upstream_inference_prompt_cost": 0.000485282,
+      "upstream_inference_completions_cost": 0.000123
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-text",
+      "title": "Loading Screen Text Clarity",
+      "what": "The loading screen text (\u201cDownloading the game\u201d) is very small and low contrast against the background. It's difficult to read quickly, especially on a phone.",
+      "why": "Players may be unsure if the game is actually loading, leading to frustration and potential app abandonment.",
+      "how": "Increase the font size of the text and/or add a subtle background shape to improve contrast. Consider a progress bar."
+    },
+    {
+      "id": "hud-score-contrast",
+      "title": "Score Contrast",
+      "what": "The player scores (0 and 30) in the top HUD are a very similar color to the warm background, making them hard to read at a glance.",
+      "why": "Players need to quickly understand the score. Low contrast hinders this, impacting engagement and competitive play.",
+      "how": "Increase the contrast of the score text. A slightly brighter white or a subtle dark outline would help."
+    },
+    {
+      "id": "control-overlap",
+      "title": "Control Overlap with HUD",
+      "what": "The bottom control circles overlap slightly with the HUD elements, especially the 'Moves' button. This is visible in multiple screenshots.",
+      "why": "This overlap makes it harder to accurately tap the HUD elements and can lead to accidental button presses.",
+      "how": "Adjust the padding or positioning of the control circles and/or HUD elements to ensure they do not overlap."
+    },
+    {
+      "id": "technique-list-readability",
+      "title": "Technique List Text Size",
+      "what": "The text within the technique list modal (e.g., \u201cRIGHT STICK FORWARD\u201d) is very small and dense, making it difficult to scan and read on a phone screen.",
+      "why": "Players will struggle to quickly learn and understand the available techniques, hindering gameplay and creating a frustrating experience.",
+      "how": "Increase the font size of the technique list text and add more line spacing to improve readability."
+    },
+    {
+      "id": "fighter-mat-spacing",
+      "title": "Fighter and Mat Spacing",
+      "what": "The fighters are positioned too high in the frame, leaving a large, empty area of the tatami mat below them. This is consistent across most fight scenes.",
+      "why": "The wasted space feels unbalanced and detracts from the focus on the fighters. It makes the scene feel less dynamic.",
+      "how": "Adjust the camera position or fighter scale to lower the fighters in the frame, reducing the empty space below them. Consider a slight zoom-out."
+    }
+  ],
+  "raw": null
+}

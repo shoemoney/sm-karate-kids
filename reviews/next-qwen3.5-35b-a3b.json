@@ -1,0 +1,82 @@
+{
+  "model": "qwen/qwen3.5-35b-a3b",
+  "elapsed_s": 66.9,
+  "usage": {
+    "prompt_tokens": 10838,
+    "completion_tokens": 10300,
+    "total_tokens": 21138,
+    "cost": 0.0119257,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0119257,
+      "upstream_inference_prompt_cost": 0.0016257,
+      "upstream_inference_completions_cost": 0.0103
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 8629,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "permanent-control-overlay",
+      "title": "Remove permanent control hint overlay",
+      "what": "A semi-transparent black box labeled \"STANCE\" and \"TECHNIQUE\" with arrow icons is permanently visible above the virtual joysticks in gameplay screenshots (e.g., Screenshot 3, 10, 12).",
+      "why": "This overlay consumes valuable screen real estate in the lower third and distracts from the fighters' footwork, which is critical visual information in a fighting game.",
+      "how": "Remove the permanent overlay. Instead, make the control hints appear only during the first tutorial run or add a toggleable \"Help\" button that opens the Techniques menu."
+    },
+    {
+      "id": "missing-pre-fight-navigation",
+      "title": "Add navigation buttons to Pre-Fight screen",
+      "what": "The Pre-Fight screen (Screenshot 2) lacks the \"MOVES\" and \"Settings\" buttons that are present in the top-right corner during the actual fight (Screenshot 3).",
+      "why": "Players often want to verify controls or adjust settings before the countdown timer hits zero. Hiding these options creates friction and forces players to abort the fight to access menus.",
+      "how": "Add the \"MOVES\" and \"Settings\" buttons to the Pre-Fight screen layout, matching the in-fight HUD position."
+    },
+    {
+      "id": "landscape-control-scaling",
+      "title": "Scale virtual joysticks for landscape aspect ratios",
+      "what": "In the landscape/widescreen view (Screenshot 9), the virtual joysticks at the bottom corners are extremely small and cramped compared to the portrait view.",
+      "why": "Touch targets that are too small lead to missed inputs and frustration, especially on tablets or landscape phones where the screen is wider.",
+      "how": "Implement responsive scaling for the control zone. Increase the joystick radius by 20-30% and move them slightly higher up the screen when the aspect ratio exceeds 1.8 (landscape)."
+    },
+    {
+      "id": "techniques-menu-contrast",
+      "title": "Increase contrast for move point values",
+      "what": "In the Techniques menu (Screenshot 6), the text indicating point values (e.g., \"mid - Half point\", \"high - Full point\") is rendered in a low-contrast grey font against the dark background.",
+      "why": "Players need to quickly distinguish between high-damage (Full point) and low-damage (Half point) moves to build an effective strategy. The current low contrast makes this information hard to parse.",
+      "how": "Change the font color of the point values to a warm gold or bright yellow to match the HUD theme, increasing visibility and contrast against the dark background."
+    },
+    {
+      "id": "post-fight-navigation-dead-end",
+      "title": "Add exit/navigation button to Post-Fight screen",
+      "what": "The Post-Fight screen (Screenshot 8) displays the winner and a \"REMATCH\" button but lacks any button to return to the main menu, access settings, or view the Techniques list.",
+      "why": "If a player loses or wants to quit, they are stuck staring at the \"REMATCH\" countdown. There is no way to navigate away from this screen.",
+      "how": "Add a small \"X\" or \"Menu\" button in the top-right corner of the Post-Fight screen to allow players to exit to the main menu or access settings."
+    }
+  ],
+  "raw": null
+}

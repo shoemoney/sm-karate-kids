@@ -240,6 +240,32 @@ await capture('13-phone-ladder', phone, async (page) => {
   await page.screenshot({ path: `${OUT}/13-phone-ladder.png` });
 });
 
+/* The state every returning player sees, and the state reviewers had been
+   judging as if it were the only one.
+ *
+ * Every capture in this harness runs in a fresh browser context with an empty
+   localStorage, so the first-run coach strip was present in EVERY frame the
+   loop ever showed a model. Three separate rounds reported it as "a permanent
+   instruction wall" that "never clears between moves". It clears on the first
+   bout once both sticks have been used — but no reviewer could have known that
+   from a screenshot, because no screenshot showed the other state.
+ *
+ * This seeds the seen flag, so the review set contains both first-run and
+ * returning-player views of the same screens. */
+await capture('14-phone-returning', phone, async (page) => {
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('smkk:coach-seen-v1', 'true');
+    } catch {
+      /* storage blocked; the strip shows, which is still a valid frame */
+    }
+  });
+  await page.goto(`${BASE}/?mode=dojo`, { waitUntil: 'networkidle' });
+  await waitFight(page);
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: `${OUT}/14-phone-returning.png` });
+});
+
 await browser.close();
 console.log(`shots in ${OUT}`);
 if (errors.length) console.log('console errors:\n' + [...new Set(errors)].join('\n'));
