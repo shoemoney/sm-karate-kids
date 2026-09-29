@@ -15,9 +15,51 @@
     />
     <title>SM Karate Kids: Asmongold vs HasanAbi</title>
     <link rel="icon" href="./brand/shoemoney-emblem.png" />
+    <!-- The publisher mark is the first thing the pre-boot card paints, so it
+         is fetched with the document rather than discovered by the card. -->
+    <link rel="preload" as="image" type="image/webp" href="./brand/shoemoney-logo.webp" />
     <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body>
+    <!-- The pre-boot publisher card.
+         In the document rather than injected, because it has to cover the gap
+         that opens the moment the page is painted and before this module has
+         even been evaluated. main.ts owns taking it down; the watchdog below is
+         the only part of the feature that does not depend on that code. -->
+    <div id="boot" class="boot" data-state="live">
+      <div class="boot-card">
+        <div class="boot-mark">
+          <img
+            class="boot-logo"
+            src="./brand/shoemoney-logo.webp"
+            width="256"
+            height="256"
+            alt="ShoeMoney"
+            decoding="async"
+            fetchpriority="high"
+          />
+        </div>
+        <p class="boot-stage" id="boot-stage" role="status" aria-live="polite">Starting up</p>
+        <div
+          class="boot-bar"
+          id="boot-bar"
+          role="progressbar"
+          aria-label="Loading SM Karate Kids"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+        >
+          <div class="boot-fill" id="boot-fill"></div>
+        </div>
+        <p class="boot-credit">A ShoeMoney AI Labs Game</p>
+
+        <div class="boot-stall" id="boot-stall" hidden>
+          <p class="boot-stall-msg">This is taking longer than it should. The game may have stalled.</p>
+          <button type="button" class="boot-reload" id="boot-reload">Reload</button>
+        </div>
+      </div>
+    </div>
+
     <div id="app">
       <header id="hud">
         <div class="scoreline">
@@ -148,6 +190,31 @@
         </div>
       </footer>
     </div>
+    <script>
+      // The card is removed by the module. If the module never runs — a syntax
+      // error, a blocked request, a device that dies inside the first frame —
+      // nothing else would ever take it down, and a full-screen card with no
+      // way out is the one failure a loading screen is not allowed to be. This
+      // watchdog is the only part of the feature that does not depend on the
+      // code it is covering. It never hides the card; it can only reveal a real
+      // error and a way to retry, which the fast path has already skipped.
+      (function () {
+        var card = document.getElementById('boot');
+        if (!card) return;
+        setTimeout(function () {
+          if (!card.isConnected || card.dataset.state === 'done') return;
+          card.dataset.state = 'stalled';
+          var stall = document.getElementById('boot-stall');
+          if (stall) stall.hidden = false;
+        }, 20000);
+        var reload = document.getElementById('boot-reload');
+        if (reload) {
+          reload.addEventListener('click', function () {
+            location.reload();
+          });
+        }
+      })();
+    </script>
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

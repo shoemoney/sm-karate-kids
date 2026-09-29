@@ -146,6 +146,17 @@ export class Stage {
   /** Airborne dust in the shaft. Empty until the mote texture resolves. */
   private readonly motes: Mote[] = [];
 
+  /**
+   * Resolves when the generated art layer has finished loading, or failed to.
+   * It never rejects: every piece of that layer is optional, and a missing
+   * texture means "keep the procedural room", not "the boot failed".
+   *
+   * boot() waits on this so the dojo is already dressed when the pre-boot card
+   * lifts. Without it the room is assembled untextured and dresses itself a
+   * beat later, in front of the player, with nothing covering the swap.
+   */
+  readonly ready: Promise<void>;
+
   constructor(arena: ArenaSpec, baseUrl: string) {
     const backdrop = new Color(arena.backdropColor);
     this.scene.background = backdrop;
@@ -276,7 +287,7 @@ export class Stage {
     // The generated art layer. Every piece is optional: a missing asset leaves
     // the procedural room exactly as it was, so the game still boots and still
     // looks deliberate with none of them present.
-    void this.dressWithGeneratedArt(baseUrl, floor, seams, fallbackBanners);
+    this.ready = this.dressWithGeneratedArt(baseUrl, floor, seams, fallbackBanners);
   }
 
   /**

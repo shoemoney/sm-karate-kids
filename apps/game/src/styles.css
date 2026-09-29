@@ -261,6 +261,42 @@
   --perf-ink: #8be08b; /* instrumentation is meant to look like instrumentation */
   --perf-plate: rgb(0 0 0 / 0.62);
 
+  /* ---- Pre-boot publisher card --------------------------------------------
+     The ShoeMoney mark is the one deliberately COOL object in a warm room, and
+     that is correct rather than a clash: it is a publisher's mark, not part of
+     the dojo. The room around it stays tungsten, and the mark sits in a pool
+     of the same lamplight everything else is lit by — so the blue reads as
+     "from outside the room" instead of pasted onto it. The white hexagon
+     badge against a near-black ground is the other half of the answer: a cool
+     bright plate on warm charcoal is exactly what a publisher card looks
+     like, and it is the only thing on the screen that is allowed to be one. */
+
+  /* Four stops, not three. A single big jump to transparent left a faint
+     perceptible ring where the falloff ended, which read as a drawn circle
+     rather than as light running out. */
+  --boot-pool: radial-gradient(
+    ellipse 64% 46% at 50% 36%,
+    rgb(232 185 92 / 0.22) 0%,
+    rgb(232 185 92 / 0.1) 34%,
+    rgb(232 185 92 / 0.04) 58%,
+    rgb(232 185 92 / 0.012) 78%,
+    transparent 100%
+  );
+  --boot-vignette: radial-gradient(
+    ellipse 118% 82% at 50% 44%,
+    transparent 52%,
+    var(--shadow-ink) 100%
+  );
+  /* The empty rail has to be visible as a rail, or a bar at 7% reads as a
+     stray gold dash rather than as a meter that is nearly empty. It is a
+     sunken leather well, and the hairline is what draws its edge against a
+     ground that is the same value. */
+  --boot-well: rgb(38 27 19 / 0.92);
+  --boot-well-edge: rgb(255 234 205 / 0.1);
+  --boot-fill: linear-gradient(90deg, var(--gold-deep), var(--gold) 58%, var(--gold-bright));
+  --boot-glint: rgb(255 246 226 / 0.42); /* the light running through the fill */
+  --boot-logo-size: clamp(7.5rem, 42vw, 12rem);
+
   --pad-height: clamp(202px, 27dvh, 232px);
 }
 
@@ -296,6 +332,223 @@ body {
   height: 100dvh;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
     env(safe-area-inset-left);
+}
+
+/* ==========================================================================
+   PRE-BOOT PUBLISHER CARD
+   The screen under the screen. It is in the markup, not injected, because it
+   has to cover the first paint — before this module has been evaluated there is
+   genuinely nothing else on screen, and on a cold phone that is two or three
+   seconds of a black canvas.
+
+   The card is deliberately inert: nothing inside it is focusable while it is
+   up, and nothing here ever moves focus. boot.spec.ts has two tests that type
+   into a field through a whole bout, and a splash that reached for the caret
+   would take the letters with it.
+   ========================================================================== */
+
+.boot {
+  position: fixed;
+  inset: 0;
+  /* Above the sheets (30) and the result card, which is the only thing that
+     would otherwise paint over the floor of the screen. */
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: calc(env(safe-area-inset-top) + var(--space-5)) var(--space-6)
+    calc(env(safe-area-inset-bottom) + var(--space-5));
+  background-color: var(--surface-void);
+  background-image: var(--boot-vignette);
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+
+.boot[data-state='leaving'] {
+  opacity: 0;
+  /* The card is on its way out; nothing underneath it may be clicked through
+     to while the last of it is still painted. */
+  pointer-events: none;
+}
+
+.boot-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  inline-size: min(24rem, 100%);
+  text-align: center;
+  /* The entrance is an ANIMATION, not a transition, and that is not a detail.
+     A transition needs a before and an after, and the card ships in the markup
+     already in its `live` state — so the very first style resolution has
+     nothing to transition from and the content simply starts at full opacity.
+     That would leave the flash guard guarding nothing at all. An animation
+     always runs from its first keyframe, so the content genuinely rises from
+     zero on frame one however early the stylesheet is applied.
+
+     It is also the flash guard: bootScreen.ts tears the card down at whatever
+     opacity this has reached if boot finishes inside the window, so a boot
+     that turns round in 35ms peaks at ~0.6 and is cut, where a full white
+     badge for three frames is the thing that flickers. The exit is a
+     transition on .boot, a different element, so the two never contend. */
+  animation: boot-enter var(--dur-base) var(--ease-out) both;
+}
+
+@keyframes boot-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* The pool of lamplight the mark sits in. This is the whole answer to a blue
+   logo on a warm ground: the mark is not tinted to match the room, it is lit
+   by it. Everything warm on this screen is chrome, the logo is the only cool
+   thing, and that is what makes it read as a publisher's mark rather than as
+   another object standing in the dojo.
+
+   It also does the practical work: the mark's own baked shadow is black, and
+   against a flat void it is invisible and the badge floats. Under a lamp the
+   shadow lands on something, and the mark seats itself. */
+.boot-mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: var(--boot-logo-size);
+  aspect-ratio: 1;
+  margin-block-end: var(--space-3);
+}
+
+.boot-mark::before {
+  content: '';
+  position: absolute;
+  inset: -34%;
+  background: var(--boot-pool);
+  border-radius: var(--radius-circle);
+}
+
+.boot-logo {
+  position: relative;
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  /* Never recoloured, filtered, blended or distorted. It is the one asset in
+     this project that is not ours to restyle; the only thing this rule sets
+     is where it sits. */
+}
+
+/* The live status. Mono, right-aligned, dimmer than anything else on the card
+   — it is an instrument telling you what the loader is doing, not copy. It
+   sits ABOVE the rail and the publisher credit sits below it, so the two lines
+   can never be read as one block of body text. */
+.boot-stage {
+  /* A reserved line, so the card does not reflow under the mark every time
+     the label changes length. */
+  min-block-size: 1em;
+  margin: 0 0 var(--space-2);
+  align-self: stretch;
+  text-align: right;
+  color: var(--text-ghost);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-normal);
+  line-height: var(--leading-tight);
+}
+
+.boot-bar {
+  position: relative;
+  overflow: hidden;
+  align-self: stretch;
+  block-size: 6px;
+  background: var(--boot-well);
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 1px var(--boot-well-edge);
+}
+
+.boot-fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  overflow: hidden;
+  inline-size: 0;
+  background: var(--boot-fill);
+  /* Eased, not continuous: the bar only ever moves because a unit of real
+     work finished, so the shape of the easing reads as "a stage completed"
+     rather than as "something is animating". */
+  transition: inline-size var(--dur-base) var(--ease-out);
+}
+
+/* Light running through the filled part. Clipped by the fill, so it reads as
+   the leading edge of the bar being lit rather than as a loop on a track that
+   may not exist yet — which is why it is kept short enough to still be seen
+   when the bar is at 7%. */
+.boot-fill::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 3.5rem;
+  background: linear-gradient(90deg, transparent, var(--boot-glint), transparent);
+  animation: boot-glint 1900ms linear infinite;
+}
+
+@keyframes boot-glint {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(600%);
+  }
+}
+
+.boot-credit {
+  margin: var(--space-3) 0 0;
+  color: var(--text-muted);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--track-label);
+  line-height: var(--leading-tight);
+  text-transform: uppercase;
+}
+
+.boot-stall {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  margin-block-start: var(--space-4);
+}
+
+.boot-stall[hidden] {
+  display: none;
+}
+
+.boot-stall-msg {
+  max-inline-size: 22rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--leading-snug);
+}
+
+.boot-reload {
+  padding: var(--space-2) var(--space-5);
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold) 62%, var(--gold-deep));
+  box-shadow: var(--shadow-gold-glow);
+  border: 0;
+  border-radius: var(--radius-pill);
+  color: var(--gold-ink);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.boot-reload:focus-visible {
+  outline: 2px solid var(--outline);
+  outline-offset: 3px;
 }
 
 /* ---------- HUD: a lacquered scoreboard under a warm scrim ---------- */
@@ -1239,6 +1492,17 @@ body.high-contrast {
 
   --perf-ink: #a6ffa6;
   --perf-plate: rgb(0 0 0 / 0.95);
+
+  --boot-pool: radial-gradient(
+    ellipse 64% 46% at 50% 36%,
+    rgb(255 212 0 / 0.3) 0%,
+    rgb(255 212 0 / 0.12) 36%,
+    rgb(255 212 0 / 0.03) 64%,
+    transparent 100%
+  );
+  --boot-well: rgb(0 0 0 / 0.94);
+  --boot-well-edge: rgb(255 255 255 / 0.3);
+  --boot-glint: rgb(255 255 255 / 0.6);
 }
 
 /* Even the treatment *on* the render gets pushed apart. */
@@ -1267,7 +1531,9 @@ body.reduced-motion :is(
     .result,
     .result-rematch,
     .result-entry-send,
-    .impact-flash
+    .impact-flash,
+    .boot,
+    .boot-fill
   ),
 body.reduced-motion .stick::before,
 body.reduced-motion .knob::before,
@@ -1276,8 +1542,42 @@ body.reduced-motion .knob::after {
   transition-delay: 0ms;
 }
 
-body.reduced-motion :is(.impact-flash.go, .banner.slam, .result.slam, .points.pop) {
+body.reduced-motion :is(
+    .impact-flash.go,
+    .banner.slam,
+    .result.slam,
+    .points.pop,
+    .boot-fill::after
+  ) {
   animation: none;
+}
+
+/* The card's entrance is an animation precisely so this can switch it off. A
+   transition here could only be collapsed to 1ms, which is still 1ms of
+   fade; `none` is actually none, and the base opacity is already 1 so the
+   content is simply there. */
+body.reduced-motion .boot-card {
+  animation: none;
+}
+
+/* The media query as well as the class above, and the reason is the first
+   paint: `body.reduced-motion` is applied by settings.ts, which runs inside
+   the module — so on a device asking for reduced motion the card would still
+   fade and dissolve on the frames before that class ever lands. The class
+   covers the in-game toggle; this covers the hand-off. */
+@media (prefers-reduced-motion: reduce) {
+  :is(.boot, .boot-fill) {
+    transition-duration: 1ms;
+    transition-delay: 0ms;
+  }
+
+  .boot-card {
+    animation: none;
+  }
+
+  .boot-fill::after {
+    animation: none;
+  }
 }
 
 /* ---------- Layout preferences ---------- */

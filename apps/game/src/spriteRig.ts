@@ -155,6 +155,7 @@ export class SpriteFighterView implements FighterView {
     manifest: SpriteManifest,
     baseUrl: string,
     textureCache: Map<string, Promise<Texture>>,
+    onPage?: () => void,
   ): Promise<SpriteFighterView> {
     const entry = manifest.fighters[spec.id];
     if (entry === undefined) throw new Error(`sprite manifest has no fighter entry for "${spec.id}"`);
@@ -165,7 +166,12 @@ export class SpriteFighterView implements FighterView {
         const url = `${baseUrl}fighters/${page}`;
         const cached = textureCache.get(url);
         if (cached !== undefined) return cached;
-        const pending = loadTexture(url);
+        // Counted as it settles, not as it starts, and only on the fetch that
+        // actually made the request — a cache hit is the same page arriving
+        // twice, and counting it would take the bar past its own end. The
+        // wrapped promise is what goes in the cache, so every later await of
+        // this page sees the same counted result.
+        const pending = onPage === undefined ? loadTexture(url) : loadTexture(url).finally(onPage);
         textureCache.set(url, pending);
         return pending;
       }),
@@ -313,17 +319,43 @@ export class SpriteFighterView implements FighterView {
  * any failure — missing manifest, missing page, unknown fighter id — so the
  * caller can fall back to the 3D rig instead of leaving the game unable to
  * boot.
+ *
+ * `onPage(done, total)` fires as each distinct atlas page settles, not when the
+ * promise as a whole does. The atlas is 2.3 MB across six pages and is the
+ * longest single thing the game waits for; without this the pre-boot card sits
+ * still for all of it and then jumps, which reads as a bar that is not
+ * measuring anything. `total` is 0 when the manifest has nothing to load, in
+ * which case no progress is reported at all rather than a fake 100%.
  */
 export async function tryLoadSpriteViews(
   specs: readonly FighterSpec[],
   baseUrl: string,
+  onPage?: (done: number, total: number) => void,
 ): Promise<readonly SpriteFighterView[] | null> {
   const manifest = await loadManifest(baseUrl);
   if (manifest === null) return null;
 
+  // Counted from the manifest rather than from the requests, so the denominator
+  // is known before the first page lands and can never drift from reality.
+  const wanted = new Set<string>();
+  for (const spec of specs) {
+    for (const page of manifest.fighters[spec.id]?.pages ?? []) {
+      wanted.add(`${baseUrl}fighters/${page}`);
+    }
+  }
+  const total = wanted.size;
+  let done = 0;
+  if (onPage !== undefined && total > 0) onPage(0, total);
+  const note = (): void => {
+    done += 1;
+    onPage?.(Math.min(done, total), total);
+  };
+
   try {
     const textureCache = new Map<string, Promise<Texture>>();
-    return await Promise.all(specs.map((spec) => SpriteFighterView.create(spec, manifest, baseUrl, textureCache)));
+    return await Promise.all(
+      specs.map((spec) => SpriteFighterView.create(spec, manifest, baseUrl, textureCache, note)),
+    );
   } catch (error) {
     console.warn('[smkk] failed to load sprite fighters', error);
     return null;

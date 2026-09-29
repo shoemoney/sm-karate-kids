@@ -6,6 +6,20 @@
     "approved": true,
     "notes": "The ShoeMoney emblem is applied to both fighters' gi chests. See docs/asset-provenance.md and THIRD_PARTY_NOTICES.md for the carve-out from the repo's MIT license."
   },
+  "brand/shoemoney-logo.png": {
+    "source": "Jeremy Schoemaker's own ShoeMoney publisher mark, 1024x1024 source",
+    "license": "Proprietary brand mark, used with owner permission. NOT covered by this repository's MIT grant.",
+    "holder": "Jeremy Schoemaker",
+    "approved": true,
+    "notes": "Source for brand/shoemoney-logo.webp. Shipped uncompressed only as the conversion input; see tools/optimize-art.sh."
+  },
+  "brand/shoemoney-logo.webp": {
+    "source": "tools/optimize-art.sh, cwebp -q 88 -resize 256 -alpha_q 95 from brand/shoemoney-logo.png",
+    "license": "Proprietary brand mark, used with owner permission. NOT covered by this repository's MIT grant.",
+    "holder": "Jeremy Schoemaker",
+    "approved": true,
+    "notes": "The publisher mark on the pre-boot loading card. Resized and re-encoded only — never recoloured, filtered, blended or distorted. 10.2 KB against 375.8 KB of PNG, which matters on the phone load the card exists to cover. See THIRD_PARTY_NOTICES.md for the carve-out from the repo's MIT license."
+  },
   "fighters/shiro-0.webp": {
     "source": "Packed by tools/build-fighter-atlas.py from Jeremy Schoemaker's own karateka artwork, which carries the ShoeMoney emblem",
     "license": "Proprietary artwork of Jeremy Schoemaker. NOT covered by this repository's MIT grant.",
