@@ -1,0 +1,82 @@
+{
+  "model": "inclusionai/ling-3.0-flash-vl",
+  "elapsed_s": 39.0,
+  "usage": {
+    "prompt_tokens": 10867,
+    "completion_tokens": 8388,
+    "total_tokens": 19255,
+    "cost": 0.0007449078,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0007449078,
+      "upstream_inference_prompt_cost": 0.000228207,
+      "upstream_inference_completions_cost": 0.0005167008
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7287,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-progress-bar",
+      "title": "Loading bar is unreadable on first screen",
+      "what": "On the ShoeMoney boot screen (screenshot 1), the progress indicator is a ~4px dark-brown hairline on a near-black background with no visible fill and no percentage text; the whole middle band is empty space around the logo.",
+      "why": "The download wait is the player's first experience; with no readable progress they will assume the game is frozen and quit before it loads.",
+      "how": "Replace the hairline with an 8-10px track plus bright gold fill and add a percentage label under 'Downloading the game', e.g. 'Downloading the game 62%'."
+    },
+    {
+      "id": "end-screen-sticks-live",
+      "title": "Touch sticks stay live behind the REMATCH button",
+      "what": "On the 'HASANABI WINS' end screen (screenshot 8), the STANCE and TECHNIQUE sticks are still fully laid out (only dimmed) flanking the REMATCH pill, which sits in the narrow gap between the fighters' feet and the stick tops.",
+      "why": "A dimmed control still receives taps on a phone; players will mis-tap the sticks instead of the only actionable button, and the sticks visually compete with REMATCH for focus.",
+      "how": "Fade the sticks to under 10% opacity (or hide them) on the end screen and keep them hidden until the player taps REMATCH; nudge the REMATCH pill up into the freed space."
+    },
+    {
+      "id": "prefight-countdown-sticks",
+      "title": "Sticks look active during the FIGHT countdown",
+      "what": "On the qualifier screen (screenshots 2 and 11), the FIGHT 2/3/4 countdown pill sits directly above two fully rendered, glowing virtual sticks identical to the in-fight controls.",
+      "why": "Players will drag or tap the sticks during the countdown expecting a response; when nothing happens they miss the auto-start window and perceive the game as unresponsive.",
+      "how": "Dim the sticks (lower opacity, remove glow) while the countdown runs and add a small 'TAP TO START' hint on the FIGHT pill."
+    },
+    {
+      "id": "gear-button-edge-gap",
+      "title": "Settings gear button is flush to the right edge",
+      "what": "In the in-fight view (screenshots 3-5), the gear button in the top-right corner sits within a few pixels of the screen edge, with almost no bezel margin.",
+      "why": "On a 390px phone, edge-adjacent buttons are hard to release cleanly and can drag off-screen, making settings painful to open mid-bout.",
+      "how": "Inset the MOVES + gear group at least 12px from the right edge, or add padding inside the gear button so the tappable area doesn't touch the bezel."
+    },
+    {
+      "id": "technique-chip-thumb-zone",
+      "title": "Technique name chip sits in the thumbs' resting zone",
+      "what": "The technique pill ('LUNGE PUNCH', 'FRONT KICK', 'SPINNING BACK KICK') is placed in the narrow dead band between the fighters' feet and the sticks' top ring (screenshots 4, 5, 13), directly above where thumbs rest on the sticks.",
+      "why": "That label is the confirmation that a technique registered, but it lives exactly under the player's thumbs, so resting thumbs cover it at the moment they most need to read it.",
+      "how": "Move the chip up into the fighters' chest/head band (like the IPPON text in screenshot 12) or give it a bright gold backdrop/outline so it stays legible over the stick ring."
+    }
+  ],
+  "raw": null
+}

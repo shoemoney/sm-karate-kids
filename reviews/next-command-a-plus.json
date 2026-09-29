@@ -1,0 +1,82 @@
+{
+  "model": "cohere/command-a-plus",
+  "elapsed_s": 17.9,
+  "usage": {
+    "prompt_tokens": 25629,
+    "completion_tokens": 1922,
+    "total_tokens": 27551,
+    "cost": 0.0105717,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0105717,
+      "upstream_inference_prompt_cost": 0.0076887,
+      "upstream_inference_completions_cost": 0.002883
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1354,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "touch-control-overhaul",
+      "title": "Redesign touch controls for mobile comfort",
+      "what": "The dual analog sticks and tiny \"FIGHT\" button (screenshots 2, 3, 5, 6, 7, 8) are too small and awkwardly placed for thumbs. Players must stretch fingers to reach controls, causing inaccurate inputs and covering the action view.",
+      "why": "Mobile players need large, accessible touch targets. The current scheme forces uncomfortable hand positions and obscures the fighting area, directly hurting gameplay fluidity and enjoyment.",
+      "how": "Replace dual analog sticks with large, semi-transparent swipe controls: swipe left/right for movement, swipe up/down for jumps/crouches. Make the \"FIGHT\" button a full-width bottom bar with clear attack icons. Add haptic feedback for successful touches."
+    },
+    {
+      "id": "combat-visual-feedback",
+      "title": "Add impact visual effects to hits",
+      "what": "During combat (screenshots 5, 6), successful attacks show no visual response - no screen shake, particle effects, or damage indicators. Fighters remain in static poses between moves, making combat feel disconnected and lifeless.",
+      "why": "Visual feedback is crucial for confirming player actions and maintaining engagement. Without impact effects, players can't tell if attacks land, breaking the action loop and reducing excitement.",
+      "how": "Implement screen shake on major hits, add spark/particle effects at impact points, display damage numbers above opponents, and create brief slow-motion flashes when critical strikes connect."
+    },
+    {
+      "id": "simplify-move-selection",
+      "title": "Streamline move system for mobile accessibility",
+      "what": "Screenshot 3 shows a dense move list requiring complex button combinations (right stick forward/back + directional inputs). This forces players to memorize intricate controls unsuitable for touch screens.",
+      "why": "Mobile players need intuitive controls. The current system creates a steep learning curve and frustrates new players who can't execute combos. Simplification will increase match accessibility and retention.",
+      "how": "Replace complex input lists with large, single-tap action buttons: \"Light Punch,\" \"Heavy Kick,\" \"Special Move.\" Use swipe directions for additional moves. Add visual prompts showing available moves in the current stance."
+    },
+    {
+      "id": "enhance-hud-clarity",
+      "title": "Improve score and round visibility",
+      "what": "The score display (0-30-0 in screenshot 5) is small and confusing. Players can't quickly gauge match progress or understand scoring logic. The round counter and opponent name are similarly hard to read.",
+      "why": "Clear match state is essential for player orientation. When players can't instantly see who's winning or how close they are to victory, engagement drops and frustration rises.",
+      "how": "Enlarge the score numbers with high-contrast colors (gold for player, red for opponent). Add clear round indicators with progress bars. Display recent hit streaks or combo multipliers prominently."
+    },
+    {
+      "id": "add-match-celebration-flow",
+      "title": "Create engaging post-match experience",
+      "what": "Screenshot 7 shows a bare-bones victory screen with minimal information. There's no celebration animation, achievement unlock notification, or clear next-step guidance, making matches feel unrewarding.",
+      "why": "Celebration moments reinforce positive feedback loops and encourage continued play. Without rewarding end-of-match experiences, players lack motivation to continue competing.",
+      "how": "Add victory/defeat animations with character reactions. Display unlockable rewards or achievement badges. Show a clear \"Rematch\" button with a countdown timer and option to view stats or change opponents."
+    }
+  ],
+  "raw": null
+}

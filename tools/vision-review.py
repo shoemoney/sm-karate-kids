@@ -161,8 +161,31 @@ def main() -> int:
         return 1
 
     elapsed = time.time() - started
-    text = payload["choices"][0]["message"]["content"]
+    text = payload["choices"][0]["message"].get("content")
     usage = payload.get("usage", {})
+
+    # Some providers answer 200 with a null content — a reasoning model that ran
+    # its budget out, or a refusal that never became prose. `.strip()` on None
+    # took the whole harness down and lost the round.
+    if not isinstance(text, str) or not text.strip():
+        print(f"EMPTY {args.model} in {elapsed:.0f}s — provider returned no content", file=sys.stderr)
+        if args.out:
+            with open(args.out, "w") as fh:
+                json.dump(
+                    {
+                        "model": args.model,
+                        "elapsed_s": round(elapsed, 1),
+                        "usage": usage,
+                        "shots": [os.path.basename(s) for s in shots],
+                        "items": None,
+                        "raw": None,
+                        "error": "empty content",
+                        "finish_reason": payload["choices"][0].get("finish_reason"),
+                    },
+                    fh,
+                    indent=2,
+                )
+        return 1
 
     parsed = None
     cleaned = text.strip()

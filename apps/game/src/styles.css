@@ -877,6 +877,20 @@ body.show-perf #backend {
   min-height: 1em;
 }
 
+/* Portrait: the caption is the confirmation that a technique registered, and
+   it was pinned to the very bottom of the stage — directly above the pad, which
+   is where both thumbs are resting. A confirmation the player cannot see while
+   performing the thing it is confirming is not a confirmation. It now sits in
+   the empty band above the fighters' heads, clear of the thumb zone and below
+   the referee call at 18%. Landscape keeps it low, where there are no thumbs
+   in the way. */
+@media (max-width: 699px) {
+  .technique {
+    bottom: auto;
+    top: 25%;
+  }
+}
+
 .technique:not(:empty) {
   display: block;
   width: fit-content;
@@ -1388,7 +1402,10 @@ body.reduced-motion .coach-mark {
   .hud-actions {
     position: absolute;
     inset-block-start: 100%;
-    inset-inline-end: var(--space-3);
+    /* Pulled off the bezel. Collapsing the header row moved these to the right
+       edge, where the gear's own border sat flush against the glass — a target
+       that is partly off-screen on a phone. */
+    inset-inline-end: var(--space-4);
     margin-top: 0;
     z-index: 6;
     gap: var(--space-1);

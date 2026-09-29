@@ -1,0 +1,82 @@
+{
+  "model": "amazon/nova-2-lite-v1",
+  "elapsed_s": 6.9,
+  "usage": {
+    "prompt_tokens": 3710,
+    "completion_tokens": 548,
+    "total_tokens": 4258,
+    "cost": 0.002483,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.002483,
+      "upstream_inference_prompt_cost": 0.001113,
+      "upstream_inference_completions_cost": 0.00137
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-screen-branding",
+      "title": "Loading screen lacks gameplay context",
+      "what": "The loading screen only shows the game's title and a progress bar, with no visual hint of the gameplay mechanics or setting",
+      "why": "Players see only a logo and progress bar before gameplay starts, creating uncertainty about what they're about to play",
+      "how": "Add a small animated preview of the twin-stick controls or a stylized dojo environment to the loading screen"
+    },
+    {
+      "id": "fighter-positioning",
+      "title": "Fighters occupy too little screen space",
+      "what": "The two fighters are centered but sit in the lower third of the screen, leaving excessive empty space above them",
+      "why": "The unused vertical space reduces visual impact and makes the action feel distant from the player",
+      "how": "Shift the fighters upward by ~15% of screen height and scale them slightly larger to fill more of the vertical space"
+    },
+    {
+      "id": "control-hint-visibility",
+      "title": "Control hints are hard to see",
+      "what": "The 'STANCE' and 'TECHNIQUE' labels beneath the control sticks are small, low-contrast gray text against a dark background",
+      "why": "Players may miss which stick controls which aspect during quick gameplay moments",
+      "how": "Increase label size by 1.5x, use a brighter gold/orange color matching the HUD, and add a subtle glow effect"
+    },
+    {
+      "id": "move-selection-clarity",
+      "title": "Move selection lacks visual feedback",
+      "what": "When a move is selected (e.g., 'LUNGE PUNCH'), only the text label changes; the fighter animation doesn't preview the move",
+      "why": "Players can't visually confirm they've selected the intended move before committing",
+      "how": "Add a brief 0.3s preview animation of the selected move executing on the fighter when a technique is chosen"
+    },
+    {
+      "id": "result-screen-button-sizing",
+      "title": "Rematch button is too small on portrait phones",
+      "what": "The 'REMATCH' button in the results screen appears as a thin gold rectangle occupying only ~10% of screen width",
+      "why": "On a 390px-wide portrait screen, the button is too small for comfortable thumb interaction",
+      "how": "Increase the button width to span 70% of the screen and add a 4px rounded corner treatment for better tap targets"
+    }
+  ],
+  "raw": null
+}

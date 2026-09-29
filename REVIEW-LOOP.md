@@ -49,7 +49,7 @@ successive rounds are not five variants of the same opinion.
 | 10 | `mistralai/mistral-medium-3.1` | Mistral | reviewed — 0 of 5 accepted |
 | 11 | `meta-llama/llama-4-maverick` | Meta | pending |
 | 12 | `cohere/command-a-plus` | Cohere | pending |
-| 13 | `amazon/nova-premier-v1` | Amazon | pending |
+| 13 | `amazon/nova-2-lite-v1` | Amazon | pending |
 | 14 | `inclusionai/ling-3.0-flash-vl` | InclusionAI | pending |
 | 15 | `nex-agi/nex-n2.5-pro` | Nexa | pending |
 

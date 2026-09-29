@@ -1,0 +1,82 @@
+{
+  "model": "meta-llama/llama-4-maverick",
+  "elapsed_s": 9.0,
+  "usage": {
+    "prompt_tokens": 19316,
+    "completion_tokens": 488,
+    "total_tokens": 19804,
+    "cost": 0.0042536,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0042536,
+      "upstream_inference_prompt_cost": 0.0038632,
+      "upstream_inference_completions_cost": 0.0003904
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-text",
+      "title": "Improve loading screen text clarity",
+      "what": "The text 'Downloading the game' on the loading screen is too small and not prominent (screenshot 1)",
+      "why": "It may cause confusion or frustration if the player is unsure what is happening during the loading process",
+      "how": "Increase the font size and make the text more prominent, e.g., by using a larger font or a different color"
+    },
+    {
+      "id": "control-labels",
+      "title": "Enhance control label visibility",
+      "what": "The labels 'STANCE' and 'TECHNIQUE' below the control sticks are too small and dim (screenshot 2)",
+      "why": "It may be difficult for players to read the labels, especially in a dimly lit environment or for those with visual impairments",
+      "how": "Increase the font size and brightness of the labels to make them more readable"
+    },
+    {
+      "id": "moves-list",
+      "title": "Improve moves list readability",
+      "what": "The list of moves in the 'MOVES' menu is too dense and has low contrast (screenshot 6)",
+      "why": "It may be challenging for players to quickly scan and understand the available moves",
+      "how": "Improve the spacing between list items and increase the contrast between the text and background"
+    },
+    {
+      "id": "settings-contrast",
+      "title": "Enhance settings menu contrast",
+      "what": "The settings menu has low contrast between the text and background (screenshot 7)",
+      "why": "It may be difficult for players to read the menu options, especially for those with visual impairments",
+      "how": "Increase the contrast between the text and background to make the menu more readable"
+    },
+    {
+      "id": "dojo-visuals",
+      "title": "Optimize dojo visuals for better composition",
+      "what": "The fighters are positioned too low in the frame, with a significant amount of empty space above them (screenshot 9)",
+      "why": "It may make the game feel less engaging or immersive due to the unbalanced composition",
+      "how": "Adjust the camera position or fighter placement to achieve a more balanced composition"
+    }
+  ],
+  "raw": null
+}
