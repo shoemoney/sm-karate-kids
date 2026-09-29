@@ -1,0 +1,84 @@
+{
+  "model": "qwen/qwen3.6-27b",
+  "elapsed_s": 409.5,
+  "usage": {
+    "prompt_tokens": 12282,
+    "completion_tokens": 13227,
+    "total_tokens": 25509,
+    "cost": 0.046011,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.046011,
+      "upstream_inference_prompt_cost": 0.0036846,
+      "upstream_inference_completions_cost": 0.0423264
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 12423,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "hud-instruction-boxes-block-legs",
+      "title": "Instruction boxes obscure fighter footwork",
+      "what": "In screenshots 3, 4, 9, 10, and 11, the semi-transparent 'STANCE' and 'TECHNIQUE' text boxes (listing inputs like 'step', 'jump', 'crouch') are positioned directly above the analog sticks. This places them directly over the fighters' feet and lower legs.",
+      "why": "In a karate game, footwork, stance, and leg positioning are critical mechanics for spacing and defense. Obscuring the feet makes it difficult for the player to judge distance and see if a crouch or jump is visually registering.",
+      "how": "Fade these instruction boxes out after 5 seconds of inactivity, or move them to the top of the screen (below the score bar), or reduce their opacity/size significantly so they don't block the action."
+    },
+    {
+      "id": "landscape-mode-bug",
+      "title": "Game renders in landscape orientation",
+      "what": "Screenshot 12 shows the game running in a landscape aspect ratio. The fighters are tiny in the center, the background is stretched wide, and the analog sticks are spaced far apart at the bottom.",
+      "why": "The design baseline is a portrait phone (390x844). Running in landscape breaks the UI layout, makes the fighters too small to see details, and likely breaks the touch controls.",
+      "how": "Lock the browser/game orientation to portrait mode in the WebGPU/Three.js initialization code."
+    },
+    {
+      "id": "ippon-text-overlap",
+      "title": "Impact text obscures the hit",
+      "what": "In screenshot 9 ('IP PON' screen), the large 'IP PON' text and the move name 'SPINNING BACK KICK' are centered on the screen. This stack of text overlaps the fighters, obscuring the moment of impact.",
+      "why": "The player needs to see the hit connect to feel the impact. Blocking the view of the fighters during a 'hit stop' moment reduces the visual feedback of the successful move.",
+      "how": "Move the 'IP PON' text higher up (near the top HUD) or make the text semi-transparent so the action remains visible behind it."
+    },
+    {
+      "id": "techniques-menu-density",
+      "title": "Techniques menu is too dense to read",
+      "what": "In screenshot 5, the 'TECHNIQUES' menu lists moves in a dense, long list. The icons (small circles with arrows) and the text are small and cramped.",
+      "why": "On a mobile screen, this density makes it hard to quickly scan for a specific move or understand the input combination (e.g., 'Right Stick Forward' + 'Up').",
+      "how": "Increase the font size and icon size. Consider grouping moves by direction (Forward, Back, Up, Down) in a grid or card layout instead of a single long list."
+    },
+    {
+      "id": "score-fraction-display",
+      "title": "Score uses cluttered fraction notation",
+      "what": "In screenshot 7 ('HASANABI WINS'), the score is displayed as '2 1/2'.",
+      "why": "The fraction '1/2' is visually cluttered and takes up more horizontal space than necessary, making the score look messy compared to a clean decimal.",
+      "how": "Use decimal notation '2.5' for a cleaner, more modern UI look."
+    }
+  ],
+  "raw": null
+}

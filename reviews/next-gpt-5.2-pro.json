@@ -1,0 +1,84 @@
+{
+  "model": "openai/gpt-5.2-pro",
+  "elapsed_s": 94.4,
+  "usage": {
+    "prompt_tokens": 15325,
+    "completion_tokens": 2949,
+    "total_tokens": 18274,
+    "cost": 0.817257,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.817257,
+      "upstream_inference_prompt_cost": 0.321825,
+      "upstream_inference_completions_cost": 0.495432
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1924,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-progress-clarity",
+      "title": "Make the loading progress readable and informative",
+      "what": "Pre-boot loading screen: the progress bar at the very bottom is extremely thin (hairline) and low-contrast against the dark background, and the only status text is the static line \u201cDownloading the game\u201d with no percent/size/speed.",
+      "why": "In the first seconds, players can\u2019t tell if the game is progressing or stalled, which increases bounce (especially on mobile web where loads can be slow).",
+      "how": "Increase the bar height to ~8\u201312px, raise contrast (brighter fill + darker track), and add a numeric indicator directly above it (e.g., \u201c42% \u2022 18/42 MB\u201d). Add a subtle indeterminate shimmer when progress can\u2019t be measured."
+    },
+    {
+      "id": "controls-contrast-and-feedback",
+      "title": "Boost twin-stick visibility and active-direction feedback",
+      "what": "Gameplay screens (bottom half): both circular sticks blend into the vignette/black HUD area; the rim chevrons and inner dots are small and low-contrast, making it hard to read where \u201cup/down/left/right\u201d are and whether input is registering.",
+      "why": "Touch-first twin-stick games live or die on immediate control comprehension; low-visibility controls cause misinputs and early frustration.",
+      "how": "Raise stick plate opacity and rim brightness (thicker stroke), enlarge directional chevrons, and add an obvious active wedge highlight + thumb position marker while dragging. Consider enabling \u201cLarge controls\u201d by default (or auto-enable on small screens) and add a 1-time overlay hint showing left=stance/right=technique."
+    },
+    {
+      "id": "sprite-edge-grounding",
+      "title": "Fix cutout halos and ground fighters with contact shadows",
+      "what": "Fight screens: the photoreal fighters show visible cutout/matte artifacts\u2014especially around hair and the white gi edges (a light fringe/halo against the warm dojo background). Feet also read slightly \u201cfloated\u201d because there\u2019s no strong contact shadow where toes meet the tatami.",
+      "why": "These artifacts break the premium/cinematic look and reduce depth; the fighters feel pasted-on rather than inhabiting the dojo, hurting perceived quality.",
+      "how": "Run a quick despill + edge refinement pass on the sprite alpha (1\u20132px feather, remove light fringe), then apply the same post-grade LUT/tonemap to sprites as the scene. Add soft blob contact shadows under each foot (and optionally a faint ambient occlusion ellipse under the body) that scales/intensifies with stance width."
+    },
+    {
+      "id": "prefight-layout-hierarchy",
+      "title": "Rebalance the pre-fight screen so fighters and CTA own the frame",
+      "what": "\u201cQUALIFIER vs HasanAbi\u201d pre-fight screen: the upper half is dominated by large headline/description blocks, while the fighters are pushed low and heavily dimmed; there\u2019s also a lot of empty dark space above them. The \u201cSTARTING IN 2/3/4\u201d line is small and easy to miss under the big FIGHT button.",
+      "why": "The matchup moment should sell the fantasy instantly; burying the fighters and downplaying the countdown makes the screen feel like a menu, not a bout intro, and players may not understand whether they need to tap FIGHT or wait.",
+      "how": "Move the fighters up ~10\u201315% of screen height and reduce headline size slightly; replace the full-scene dim with a tighter text scrim behind the copy. Promote the countdown by placing it inside/attached to the FIGHT button (e.g., \u201cFIGHT \u2022 2s\u201d) or making it larger directly above the button."
+    },
+    {
+      "id": "results-hud-state",
+      "title": "Cleanly switch HUD states on the win/results screen",
+      "what": "Results screen (\u201cHASANABI WINS\u201d): the top HUD still shows an active round timer (e.g., \u201c27\u201d) even though the match is over, and the bottom text says \u201cSTARTING IN 8\u201d without clearly stating what is starting (auto-rematch? next bout?).",
+      "why": "Mixed states create confusion at the exact moment players decide to replay or quit; unclear countdowns feel like the game is doing something without the player\u2019s consent.",
+      "how": "On results state, hide/replace the timer with a \u201cRESULT\u201d badge (or freeze at 0) and suppress in-match HUD behaviors. Rename the countdown to an explicit action (\u201cAuto rematch in 8\u201d / \u201cNext bout in 8\u201d) and provide a clear secondary option if applicable (e.g., smaller \u201cExit\u201d/\u201cMenu\u201d)."
+    }
+  ],
+  "raw": null
+}

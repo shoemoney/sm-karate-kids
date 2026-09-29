@@ -400,6 +400,31 @@ async function boot(screen: BootScreen): Promise<void> {
   const REMATCH_AFTER_MS = 8000;
   const ROUND_INTRO_MS = 4000;
   const points = (n: number): string => (Number.isInteger(n) ? String(n) : n === 0.5 ? '½' : `${Math.floor(n)}½`);
+  /**
+   * A score, for anywhere outside the HUD.
+   *
+   * The in-match score is `points()` — a half point is `2½`. The result card,
+   * the run total and the career best were all `toLocaleString()`, which renders
+   * the same value as `2.5`. So the product showed one notation for the whole
+   * bout and a different one the moment the bout ended, and `2.5` is a decimal
+   * that reads ambiguously at a glance — two-and-a-half, or a tally of two
+   * and a bit?
+   *
+   * Six models across six rounds reported it without agreement on why: "cluttered
+   * fraction notation", "hard to parse quickly", "unclear half-point fraction
+   * with no explanation", "typographic clash", "hard to read". They were all
+   * looking at the result screen and all describing the same thing, which is the
+   * one place a score is shown in a notation the player has never seen before.
+   *
+   * Thousands separators are kept, so a four-figure career total still reads as
+   * one.
+   */
+  const formatScore = (n: number): string => {
+    if (n === 0.5) return '½'; // matches points(): half a point is not "0½"
+    const whole = Math.floor(n);
+    const grouped = whole.toLocaleString();
+    return n === whole ? grouped : `${grouped}½`;
+  };
 
   // Every card ends in one pending action, fired by its button or by the
   // countdown, whichever comes first — never both.
@@ -507,9 +532,9 @@ async function boot(screen: BootScreen): Promise<void> {
     coach.dismiss();
     hud.showResult({
         kicker: `Round ${run.round + 1} cleared`,
-        headline: `+${earned.toLocaleString()}`,
+        headline: `+${formatScore(earned)}`,
         tone: 'full',
-        score: `Run ${run.score.toLocaleString()}`,
+        score: `Run ${formatScore(run.score)}`,
         detail: `Next: the ${next.name}`,
         action: 'NEXT ROUND',
         rematch: () => act(),
@@ -528,10 +553,10 @@ async function boot(screen: BootScreen): Promise<void> {
       kicker: won ? 'Tournament complete' : `Out in the ${round.name}`,
       headline: won ? 'CHAMPION' : 'DEFEATED',
       tone: won ? 'full' : 'neutral',
-      score: run.score.toLocaleString(),
+      score: formatScore(run.score),
       detail: newBest
         ? 'New best score'
-        : `Best ${record.bestScore.toLocaleString()} · titles ${record.championships}`,
+        : `Best ${formatScore(record.bestScore)} · titles ${record.championships}`,
       action: 'NEW TOURNAMENT',
       rematch: () => act(),
     });
