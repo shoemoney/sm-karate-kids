@@ -50,7 +50,9 @@
   --text: #f6efe6; /* warm off-white, the paper */
   --text-muted: #b5a693; /* secondary copy */
   --text-faint: #8e8071; /* tracked micro-labels */
-  --text-ghost: #6f6459; /* machine readouts, resting detents */
+  --text-ghost: #9c9084; /* machine readouts, resting detents. Lifted from #6f6459:
+    the backend label is the only status text in the HUD and at the old value
+    it measured 3.06:1 on the scoreline panel, under the 4.5:1 AA floor. */
 
   /* ---- Accents ------------------------------------------------------------ */
 
@@ -64,7 +66,9 @@
   --cool-bright: #d6ecf2;
   --cool-glow: rgb(158 195 205 / 0.5);
 
-  --aka: #d9483c; /* the red gi */
+  --aka: #e2594c; /* the red gi. Lifted from #d9483c: the opposing
+    score measured 4.15:1 against the scoreline, less than half the 15.46:1
+    of the player score, and it is the number you read to know you are losing. */
   --aka-bright: #ff8f84;
   --aka-dim: #c07068;
 
@@ -79,7 +83,11 @@
   --fighter-1: var(--aka);
   --fighter-1-dim: var(--aka-dim);
 
-  --outline: var(--cool); /* focus ring */
+  /* The focus ring was --cool, which is the one deliberately cold token in a
+     warm palette — a pale blue ring around the gold button, drawn on load
+     before any input, reading like a default nobody restyled. Warm gold keeps
+     focus visible without fighting the room. */
+  --outline: var(--gold); /* focus ring */
   --check: var(--gold); /* checkbox / accent-color */
 
   /* ---- Edges -------------------------------------------------------------- */
@@ -98,8 +106,12 @@
   --scrim-hud-mid: rgb(14 9 5 / 0.58);
   --scrim-none: rgb(14 9 5 / 0);
   --scrim-banner: rgb(10 6 3 / 0.68);
-  --scrim-soft: rgb(12 8 4 / 0.8);
-  --scrim-hard: rgb(9 6 3 / 0.96);
+  /* Lifted from 0.8/0.96. At those values the round card blacked out the
+     dojo entirely — 90% of the title screen measured below 1% relative
+     luminance, and the room behind it was invisible. The card still reads as
+     the focus, but the art is visible behind it now. */
+  --scrim-soft: rgb(14 9 5 / 0.55);
+  --scrim-hard: rgb(10 7 4 / 0.86);
   --plate: rgb(14 10 6 / 0.78); /* the technique caption's own ground */
   --plate-text: #f0e6d8;
   --plaque-top: rgb(38 27 19 / 0.86); /* desktop floating control plaque */
@@ -872,6 +884,24 @@ body {
   .stick-zone.engaged .stick {
     opacity: 0.85;
   }
+
+  /* On a wide screen the sticks float over the mat, and two solid plaques sat
+     directly on both fighters' shins — the single biggest thing making the
+     desktop frame read as unfinished. A keyboard is present at this size, so
+     the plaques lose their plate entirely and only light up when a pointer
+     actually engages one. */
+  .stick-zone {
+    background: none;
+    border-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .stick-zone.engaged {
+    background: linear-gradient(180deg, var(--plaque-top), var(--plaque-bottom));
+    border-color: var(--edge-strong);
+    box-shadow: var(--shadow-panel);
+  }
 }
 
 /* ---------- HUD actions ---------- */
@@ -1242,7 +1272,11 @@ body.reduced-motion :is(.impact-flash.go, .banner.slam, .result.slam, .points.po
 
 body.large-controls {
   --pad-height: clamp(248px, 40dvh, 320px);
-  --stick-size: min(45vw, 196px, calc(var(--pad-height) - 3.625rem));
+  /* The width cap was 45vw, which resolves to 176px on a 390px phone and is
+     therefore never the binding term — so large-controls grew the pad and not
+     the target, which is exactly backwards for an accessibility setting. The
+     binding term is now the pad height. */
+  --stick-size: min(52vw, 210px, calc(var(--pad-height) - 3.625rem));
   --detent: 0.95rem;
   --detent-arm: 0.44rem;
   --pip: 0.4rem;

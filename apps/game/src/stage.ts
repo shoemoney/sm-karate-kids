@@ -33,6 +33,11 @@ const FRAME_HALF_HEIGHT = 1.3;
 const MIN_HALF_WIDTH = 1.25;
 /** Breathing room outside the pair, in metres. */
 const EDGE_MARGIN = 0.6;
+/**
+ * Half a fighter's body width reserved outside the pair, so an extended
+ * technique cannot push a limb off the edge of the frame.
+ */
+const FIGHTER_HALF_WIDTH = 0.42;
 
 /**
  * Where the dojo furniture lives, in metres. The camera only ever dollies and
@@ -86,13 +91,24 @@ function loadTexture(url: string, opts: { srgb?: boolean; repeat?: number } = {}
   });
 }
 
-/** Resolves whether a generated asset exists, without throwing on a 404. */
+/**
+ * Loads a generated asset, returning null instead of throwing when it is
+ * genuinely absent.
+ *
+ * There is deliberately no HEAD probe here. A HEAD preflight costs a second
+ * request per asset and — worse — many CDNs and object stores answer HEAD with
+ * 405, at which point this would silently drop the entire art layer and fall
+ * back to the procedural room with nothing in the console. TextureLoader
+ * already distinguishes "not found" from "loaded", so a single GET is both
+ * cheaper and more honest; the warn below is what makes a miss diagnosable.
+ */
 async function tryLoad(url: string, opts?: { repeat?: number }): Promise<Texture | null> {
   try {
-    const response = await fetch(url, { method: 'HEAD' });
-    if (!response.ok) return null;
     return await loadTexture(url, opts ?? {});
   } catch {
+    console.warn(
+      `[smkk] generated art "${url}" failed to load; the dojo keeps its procedural fallback for this piece`,
+    );
     return null;
   }
 }
@@ -169,7 +185,8 @@ export class Stage {
       this.scene.add(post);
     }
 
-    this.scene.add(buildBackdrop(arena));
+    const { group, fallbackBanners } = buildBackdrop(arena);
+    this.scene.add(group);
 
     // Warm key, cool rim, low ambient: the fighters are lit, the room is not.
     const key = new DirectionalLight('#ffe0b8', 2.8);
@@ -246,7 +263,7 @@ export class Stage {
     // The generated art layer. Every piece is optional: a missing asset leaves
     // the procedural room exactly as it was, so the game still boots and still
     // looks deliberate with none of them present.
-    void this.dressWithGeneratedArt(baseUrl, floor, seams);
+    void this.dressWithGeneratedArt(baseUrl, floor, seams, fallbackBanners);
   }
 
   /**
@@ -258,6 +275,7 @@ export class Stage {
     baseUrl: string,
     floor: Mesh,
     seams: Group,
+    fallbackBanners: Group,
   ): Promise<void> {
     const [backdrop, mat, crowd, shaft, banner] = await Promise.all([
       tryLoad(`${baseUrl}generated/dojo-backdrop.webp`),
@@ -298,21 +316,21 @@ export class Stage {
 
     if (crowd !== null) {
       // Seated students behind the fighting area: depth cue and scale
-      // reference. Sunk low against the mat and pushed well back, so it reads
-      // as a distant row of spectators rather than as shapes floating at the
-      // fighters' shoulder height.
+      // reference. The plane keeps the texture's own 3:1 aspect — stretching
+      // it wider flattens every figure into a bowling pin, which reads as
+      // blobs on the mat rather than as a distant row of people.
       const row = new Mesh(
-        new PlaneGeometry(13, 1.5),
+        new PlaneGeometry(9, 3),
         new MeshBasicMaterial({
           map: crowd,
           transparent: true,
           depthWrite: false,
-          opacity: 0.62,
+          opacity: 0.55,
           toneMapped: true,
         }),
       );
-      row.material.color.set('#3a2f24');
-      row.position.set(0, 0.62, CROWD_Z);
+      row.material.color.set('#2e241a');
+      row.position.set(0, 0.85, CROWD_Z);
       this.scene.add(row);
     }
 
@@ -344,11 +362,19 @@ export class Stage {
         side: DoubleSide,
         toneMapped: true,
       });
+      // Tint the cloth to the same oxblood the procedural banner used, so the
+      // two can never disagree if both are ever on screen.
+      bannerMaterial.color.set('#7a3b36');
       for (const side of [-1, 1]) {
         const cloth = new Mesh(new PlaneGeometry(0.95, 2.5), bannerMaterial);
-        cloth.position.set(side * 5.4, 3.9, -13.3);
+        cloth.position.set(side * 5.6, 3.9, -13.3);
         this.scene.add(cloth);
       }
+      // The procedural banner sat at the same spot in a different colour and
+      // was never removed, so the two drew on top of each other as a flat slab
+      // with a smaller red panel inset off-centre. Step it aside like the
+      // tatami seams do when real art lands.
+      fallbackBanners.visible = false;
     }
   }
 
@@ -369,7 +395,14 @@ export class Stage {
     const aspect = this.width / Math.max(this.height, 1);
     const halfFov = (FOV * Math.PI) / 360;
     const tan = Math.tan(halfFov);
-    const halfWidth = Math.max(MIN_HALF_WIDTH, Math.abs(gap) / 2 + EDGE_MARGIN);
+    // The gap is measured centre to centre, but a fighter is not a point: a
+    // wide lunge stance throws a foot well past its own centre, and framing on
+    // the gap alone sliced that foot off at the frame edge on the strike pose.
+    // Budget for half a body on each side of the pair.
+    const halfWidth = Math.max(
+      MIN_HALF_WIDTH,
+      Math.abs(gap) / 2 + EDGE_MARGIN + FIGHTER_HALF_WIDTH,
+    );
     const target = Math.max(FRAME_HALF_HEIGHT / tan, halfWidth / (aspect * tan)) * 1.04;
 
     const ease = immediate ? 1 : 0.07;
@@ -435,7 +468,7 @@ export class Stage {
  * shapes, nothing evoking a specific existing game's dojo. This is the
  * fallback room; the generated backdrop covers it when it loads.
  */
-function buildBackdrop(arena: ArenaSpec): Group {
+function buildBackdrop(arena: ArenaSpec): { group: Group; fallbackBanners: Group } {
   const group = new Group();
 
   const beamMaterial = new MeshStandardMaterial({ color: '#4a3826', roughness: 0.85 });
@@ -462,13 +495,15 @@ function buildBackdrop(arena: ArenaSpec): Group {
   }
 
   const bannerMaterial = new MeshStandardMaterial({ color: '#5c1f1c', roughness: 0.9 });
+  const fallbackBanners = new Group();
   for (const side of [-1, 1]) {
     const banner = new Mesh(new PlaneGeometry(1.05, 2.6), bannerMaterial);
     banner.position.set(side * 5.6, 3.9, -13.3);
-    group.add(banner);
+    fallbackBanners.add(banner);
   }
+  group.add(fallbackBanners);
 
-  return group;
+  return { group, fallbackBanners };
 }
 
 /** A soft radial falloff, bright in the middle and gone by the edge. */
