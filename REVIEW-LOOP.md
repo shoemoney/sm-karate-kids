@@ -1618,3 +1618,53 @@ raised, which is a different and more useful signal than a fix.
   proprietary and may not be recoloured.
 - `rebalance-landscape-controls` (gpt-5.6-sol-pro) — landscape, eighth model.
 - `raise-fighters-in-frame` (mimo-v2.6-pro) — framing, twenty-seventh iteration.
+
+### Round 49 — gpt-5.6-luna-pro, glm-4.5v — `750b83d`
+
+- `sprite-environment-disconnect` (glm-4.5v) and its six predecessors —
+  **ACCEPTED, at seven reports across five rounds.** Logged in round 30 as
+  legitimate and not actioned, which was right at one report and wrong by five.
+  The most-reported actionable item in the loop, sitting behind a framing family
+  declined twenty-seven times.
+
+  The fix is the *opposite* of the standing "make it brighter" rejection.
+  Nobody is asking for the room to be neutralised; every one of them is asking
+  for the fighters to belong to the room they are in. A warm multiply on the
+  sprite material, no channel above unity, applied to the material rather than
+  painted into the art.
+
+  **Logged in round 30 as legitimate and not actioned was the right call at one
+  report.** It is the fourth instance of that in this log, alongside the
+  dismissal of the settings toggles in round 15, the coach strip in round 18 and
+  the framing family throughout. *A repeated request is not yet a pattern; a
+  request repeated five times in five rounds by models with no way to see each
+  other is.*
+
+- **A gate flake, investigated rather than dismissed.** This tripped
+  `pnpm test:e2e` twice with "Target page, context or browser has been closed"
+  on the full-length bout test. Bisected: the grade was the correlate, but a
+  neutral (1,1,1) grade passed and a warm one failed, and a colour multiply
+  cannot cost twenty percent of a software-rendered frame. The same test passes
+  on a clean tree at 31.5s and on this one at 38s, varying only with how busy the
+  machine was — it plays a full 1800-tick bout and sits near a cliff. Settled
+  machine: 111 unit, 34 e2e passed, 4 skipped. **No test was touched**, and
+  neither was the fix, which is verified by capture.
+
+- `add-result-exit: "give the result screen a clear way out"` (gpt-5.6-luna-pro)
+  — declined, with reasoning. The card is `action: 'NEW TOURNAMENT'` →
+  `newRun()`; there is one mode of play, so the loop has no branch to exit from.
+  A quit screen on a browser arcade game is a product decision, not a defect, and
+  it would cost the player the one-tap path back into a fight. Worth revisiting
+  if the game ever grows a second mode.
+- `fix-wide-layout: "use the available browser width instead of leaving a dead
+  black field"` (gpt-5.6-luna-pro) — landscape, ninth model. The backdrop seam
+  is closed; the stage/pad split is the architecture argument.
+- `score-typography-polish: "end-game score uses awkward fractions"*
+  (glm-4.5v) — **stale**, fixed in round 36. `formatScore()` renders `2½`
+  everywhere outside the HUD. Fourth distinct stale-finding in the log; the
+  lesson is the same each time: **a reviewer reporting a finding fixed in an
+  earlier round is not a contradiction, it is a lag.**
+- `subtle-hit-feedback: "scoring events lack visual punch"` (glm-4.5v) — the
+  flash was halved in round 26 and the sparks given tapers in round 46.
+- `teach-first-attack` (gpt-5.6-luna-pro),
+  `move-hint-vertical-bloat` (glm-4.5v) — the coach, sixth appearance.
