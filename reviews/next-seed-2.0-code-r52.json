@@ -1,0 +1,84 @@
+{
+  "model": "bytedance-seed/seed-2.0-code",
+  "elapsed_s": 95.6,
+  "usage": {
+    "prompt_tokens": 7376,
+    "completion_tokens": 6070,
+    "total_tokens": 13446,
+    "cost": 0.021898,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.021898,
+      "upstream_inference_prompt_cost": 0.003688,
+      "upstream_inference_completions_cost": 0.01821
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 5132,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-progress-indicator-missing",
+      "title": "Pre-boot loading screen has no visible download progress",
+      "what": "The ShoeMoney pre-boot loading screen (first screenshot) displays \"Downloading the game\" text with an empty, unfilled progress bar; there is no percentage, moving fill, or indicator of how much of the game has downloaded.",
+      "why": "Mobile users frequently abandon apps with unquantified wait times; this creates immediate churn risk before the game ever loads.",
+      "how": "Add a warm gold fill to the progress bar that matches the game's HUD palette, and/or center a percentage text (e.g., \"62%\") over the bar that updates as assets download."
+    },
+    {
+      "id": "fighter-framing-thumb-occlusion",
+      "title": "Fighters are positioned too low in portrait, causing thumb occlusion",
+      "what": "In all portrait fight screens (e.g., screenshots 3, 10, 12), fighters are shifted downward: there is ~3x more empty vertical space between the top HUD and the fighters' heads than between the fighters' feet and the top of the touch control area.",
+      "why": "When users interact with the bottom-mounted twin sticks, their thumbs will occlude the fighters' lower bodies (legs, feet), which are critical for reading stance (crouch, step, jump) and incoming attack tells.",
+      "how": "Adjust the vertical camera framing for portrait mode to center the fighters vertically: reduce the empty space above the fighters, and increase the buffer space between the fighters' feet and the touch controls, so thumbs do not cover any part of the fighters' bodies."
+    },
+    {
+      "id": "control-terminology-inconsistent-hints-incomplete",
+      "title": "Control hints are incomplete and terminology is misaligned",
+      "what": "1) The persistent in-fight control hint box (screenshots 3, 10) only describes basic stick directions, and does not mention that attacks require combining stance (left) and technique (right) stick inputs. 2) The moves list (screenshot 6) refers to \"LEFT STICK\" / \"RIGHT STICK\" while in-game controls are labeled \"STANCE\" / \"TECHNIQUE\", creating conflicting terminology.",
+      "why": "New players cannot learn core move mechanics from in-fight hints, and conflicting terminology between the moves list and in-game labels causes confusion when learning attack combinations.",
+      "how": "1) Update the in-fight hint to add a line: \"Combine STANCE + TECHNIQUE inputs for attacks\" (or hide the persistent hint after a player's first fight). 2) Align terminology: change moves list text to \"STANCE STICK\" / \"TECHNIQUE STICK\", and add a 1-line legend below the moves list header: \"Left = STANCE stick | Right = TECHNIQUE stick\"."
+    },
+    {
+      "id": "win-screen-rematch-skippability-unclear",
+      "title": "Win screen rematch button does not indicate it can skip the countdown",
+      "what": "The post-fight win screen (screenshot 8) displays a prominent \"REMATCH\" button with \"STARTING IN 8\" text below it, but no visual indicator that tapping the \"REMATCH\" button will skip the auto-start countdown.",
+      "why": "Players will unnecessarily wait the full countdown duration, slowing down the match turnaround loop and reducing session engagement, especially for players who want to rematch quickly.",
+      "how": "Add a small, light text line below the countdown: \"Tap REMATCH to skip\", or add a subtle pulse animation to the \"REMATCH\" button to signal it is interactive before the countdown expires."
+    },
+    {
+      "id": "moves-list-no-scroll-indicator",
+      "title": "Moves list has no scroll indicator, hiding lower content",
+      "what": "The techniques/moves list screen (screenshot 6) displays a long list of attacks that cuts off mid-entry at the bottom (the final visible move \"Roundhouse Kick\" is partially obscured, with the entire \"RIGHT STICK DOWN\" move section hidden below), with no scroll bar, fade gradient, or text hint to indicate the list is scrollable.",
+      "why": "Players will assume the visible content is the full list of moves, leaving them unaware of all \"RIGHT STICK DOWN\" attacks, limiting their available moves and gameplay options.",
+      "how": "Add a subtle vertical scroll bar along the right edge of the moves list, or a 10-15% opacity warm gold fade gradient at the bottom of the list to signal more content, or a small text line at the bottom: \"Scroll for more moves\"."
+    }
+  ],
+  "raw": null
+}

@@ -1686,6 +1686,31 @@ input:focus-visible,
   color: var(--gold);
 }
 
+/* A scroll cue on the bottom edge of a scrolling sheet.
+   Unconditional, and that is the point: an element that only appears when the
+   scroll position is known needs JS, and the thing being signalled is "there is
+   more below", which is true from the first frame. A static fade costs nothing
+   and is never wrong — it reads as a soft edge at the bottom of a list, which
+   is exactly what it is.
+
+   Round 24 had an accidental affordance: the next section header happened to
+   land at the fold. Round 51 added the key and the rules above the list, which
+   pushed that header below the fold, and the list now ends on a clean row
+   boundary that reads as the end of the reference. seed-2.0-code caught it as
+   "moves list has no scroll indicator, hiding lower content", and it was right.
+
+   Sixteen of eighteen moves are below it. */
+#tech-ref::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 3rem;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgb(16 11 8 / 0) 0%, var(--surface-void) 92%);
+  z-index: 2;
+}
+
 .sheet-body {
   flex: 1 1 auto;
   overflow-y: auto;
