@@ -476,3 +476,31 @@ Rejected this round, with the measurement:
   state, now on its seventh appearance in the log.
 - `technique-label-overlap` (mimo) — the technique chip moved to 25% of the
   stage in round 12; the TECHNIQUE label is on the pad. They are ~380px apart.
+
+### Round 17 — gemma-4-26b, qwen3.8-27b, gpt-5.6-luna — `011c763`
+
+- `clipped-fight-cta` (gpt-5.6-luna) — **rejected on measurement, and the
+  measurement found something better.** Claimed the pre-fight CTA clips on
+  portrait. Measured at 320x568, 360x640 and 390x844: the button sits at
+  298-350, 370-422 and 548-600, fully inside the viewport in every case.
+  Verifying it meant shooting a viewport nobody shoots, and at 320px the
+  scoreline was rendering **"ASMONG…" and "HASANA…"** — two truncated names
+  landing on the same stub, so the player cannot tell the fighters apart on the
+  one element that identifies them. Fixed by tightening tracking and dropping a
+  step below 360px; both names now measure unclipped at all three widths.
+
+  **A review set is a sampling of the product, and this loop only ever sampled
+  one viewport.** Seventeen rounds of frontier models asked the same question
+  about the same 390px screen, and the defect that survived all of them was on
+  a device that is still a phone. Rejecting a claim is what surfaced it.
+- `combat-hint-panel-clutter` (qwen3.8-27b) — called the coach strip a
+  "permanent instruction wall". It is first-run only and retires once both
+  sticks have been used. The overlap point is fair: the strip's lower edge sits
+  on the upper arc of both rings. Tight rather than broken.
+- `combat-callout-collision` (gpt-5.6-luna) — the technique chip at 25% of the
+  stage and the referee call at 18% are 38px apart. Fair, and the cheapest fix
+  is spacing rather than a redesign.
+- `landscape-empty-control-layout` (gpt-5.6-luna) — the desktop corner
+  plaques. A taste question, not a defect.
+- `score-readability-low-contrast`, `ui-layering-occlusion` — already handled
+  in rounds 5/10 and 1 respectively.
