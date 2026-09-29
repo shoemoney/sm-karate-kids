@@ -1,0 +1,84 @@
+{
+  "model": "z-ai/glm-5.3-flash",
+  "elapsed_s": 187.6,
+  "usage": {
+    "prompt_tokens": 16986,
+    "completion_tokens": 9022,
+    "total_tokens": 26008,
+    "cost": 0.006000065,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.006000065,
+      "upstream_inference_prompt_cost": 0.002165715,
+      "upstream_inference_completions_cost": 0.00383435
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7709,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "portrait-fighter-scale",
+      "title": "Zoom the fight camera in \u2014 the fighters use barely a quarter of the portrait frame",
+      "what": "In every live bout capture (e.g. the FRONT KICK frame), the two fighters together stand only ~340px of the 1284px-tall screen (~26%), with their heads at mid-frame; ~380px of empty shoji wall and dark ceiling sits above them, and the bottom third is the legend panel plus sticks. Scaled to the 390x844 baseline, the fighters are roughly 220px tall.",
+      "why": "Point karate is a reading game \u2014 stance depth, limb extension and range decide scoring. At 26% height the faces and feet soften into the backdrop, and the pixels go to set-dressing the player never scores against. This is the first thing anyone notices in the first five seconds of gameplay.",
+      "how": "Tighten the portrait camera (shorter distance or narrower FOV) so fighters fill ~45-50% of frame height with heads just above the upper-third line, and lower the camera target so the shoji band sits behind their torsos rather than ~380px above their heads; apply the same tighter framing to the pre-fight and result overlays so the framing never jumps."
+    },
+    {
+      "id": "cta-covers-fighters",
+      "title": "FIGHT and REMATCH buttons render on top of the fighters' legs",
+      "what": "On the QUALIFIER vs HasanAbi screen the ~290x100px gold FIGHT pill is centered around y=838, burying both fighters' shins and feet (feet reach ~y=860). The results screen repeats the problem: REMATCH sits directly over the white fighter's lead foot and the red fighter's trailing leg.",
+      "why": "The fighters are the hero art and the hook of every menu; cropping them at the shin behind a blooming CTA reads as a layout template, and the button's glow competes with the fighters inside the same focal zone.",
+      "how": "In overlay states either raise the fighters ~120px so their full silhouettes clear the button, or move the CTA down into the empty band just above the stick dock (y\u2248960+) where it intersects no sprite. Also dim only the backdrop in these states and keep the fighters at full exposure \u2014 they are currently washed down by the same overlay dim as the walls."
+    },
+    {
+      "id": "input-legend-always-on",
+      "title": "The stance/technique cheat-sheet panel parks mid-screen for the entire bout",
+      "what": "In every mid-fight capture (LUNGE PUNCH, IPPON, FRONT KICK frames), a gold-caps two-column legend ('STANCE \u25c0 step \u25b2 jump... / TECHNIQUE \u25c0 back \u25b6 forward...') sits in a translucent tan strip spanning nearly full width at ~y=880-955, directly above the sticks, present in every single frame of play.",
+      "why": "It is the brightest sustained text block on screen and sits exactly between the fight and the player's thumbs, pulling the eye downward mid-exchange; it also permanently consumes ~75px of vertical space the undersized fighters need. After one bout it is pure noise for everyone.",
+      "how": "Show the legend only for the first ~10 seconds of the first bout, then fade it to near-zero opacity or collapse it into a small '?' chip beside the MOVES button; give the reclaimed band back to the camera zoom rather than shrinking the sticks, and keep the permanent move reference in the MOVES modal where it already exists."
+    },
+    {
+      "id": "moves-notation-cryptic",
+      "title": "MOVES list rows show two unlabeled icons plus a bare '+' with no key",
+      "what": "In the TECHNIQUES modal, every row renders two ~26px outlined circles joined by a bare '+' (Lunge Punch reads [dot][\u25b6] +) with 'mid \u00b7 Half point' in ~11px dim gray beneath. Section headers only name 'RIGHT STICK FORWARD/BACK/UP/DOWN', yet each row clearly pairs a stance-stick icon with a technique-stick icon \u2014 the two-icon grammar is never explained anywhere in the screen.",
+      "why": "This modal is the sole teaching surface for a 20-technique system; if players cannot parse the notation, the move list reads as arbitrary strings, and the point-value text is below comfortable size and contrast on the near-black panel for a phone held at arm's length.",
+      "how": "Add a one-line key under the title ('stance-stick direction + technique-stick flick = technique'), color-code the two icon sets to match the stick knob dots already in-game (blue for stance, gold for technique), scale row icons to ~36px, and lift the range/points text to 13px at ~70% white."
+    },
+    {
+      "id": "loader-bar-reads-stuck",
+      "title": "Boot screen's progress bar sits at 100% while still saying 'Downloading the game'",
+      "what": "On the ShoeMoney boot screen, the tan progress bar at ~y=818 spans the full track with no visible unfilled portion, yet the label still reads 'Downloading the game' and the screen holds there; roughly 60% of the frame is empty black above and below the logo block.",
+      "why": "A visually full bar with a 'downloading' label is the universal frozen-loader tell \u2014 on mobile Safari players assume the tab hung and close during exactly the wait window the game needs; the blank expanse also wastes the one screen every player is guaranteed to see.",
+      "how": "Cap the displayed fill at ~90% until the WebGPU scene has rendered its first frame, then snap to 100% and swap the label to a done-state ('Stepping onto the tatami...') with auto-advance; add a small percent readout so any stall is legible, and place a faint dojo vignette or fighter silhouettes behind the logo to put the dead space to work as a teaser."
+    }
+  ],
+  "raw": null
+}

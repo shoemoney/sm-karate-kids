@@ -55,6 +55,30 @@ async function boot(name) {
     uploadThroughput: (600 * 1024) / 8,
   });
   await page.goto(`${BASE}/`, { waitUntil: 'commit' });
+  // Wait for the stylesheet before anything else.
+  //
+  // At `commit` + 600ms the page has no CSS at all — document.styleSheets
+  // enumerates zero style rules — so the card renders unstyled. An unstyled
+  // `.boot-fill` is a plain block-level div: full width, no gradient, opacity
+  // 1. That is a bar at 100%, under a line that says "Downloading the game",
+  // which is exactly what glm-5.3-flash reported this round and exactly what
+  // twelve providers have been describing as a broken loading screen for the
+  // life of the loop.
+  await page.waitForFunction(
+    () => {
+      let n = 0;
+      for (const sh of document.styleSheets) {
+        try {
+          n += sh.cssRules.length;
+        } catch {
+          /* cross-origin sheet; the boot card has none */
+        }
+      }
+      return n > 0;
+    },
+    null,
+    { timeout: 15000 },
+  );
   // Wait for the card to finish fading in before the shot.
   //
   // This capture was taken 600ms after commit, which is inside `boot-enter`.

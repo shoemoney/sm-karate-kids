@@ -1,0 +1,84 @@
+{
+  "model": "openai/gpt-5.4-mini",
+  "elapsed_s": 11.3,
+  "usage": {
+    "prompt_tokens": 15325,
+    "completion_tokens": 981,
+    "total_tokens": 16306,
+    "cost": 0.01590825,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.01590825,
+      "upstream_inference_prompt_cost": 0.01149375,
+      "upstream_inference_completions_cost": 0.0044145
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "match-ui-occupies-combat",
+      "title": "Shrink the pre-fight overlay so the fighters are readable sooner",
+      "what": "On the qualifier/start screens, the big \"QUALIFIER vs HasanAbi\" title, strategy blurb, large FIGHT button, countdown, and two oversized joystick diagrams fill most of the vertical center and lower half. The actual fighters are pushed into a small band above the controls, with the combat scene visually secondary to the UI.",
+      "why": "In the first seconds, players should read the matchup and then immediately understand the arena and opponents. This layout makes the game feel like a menu screen instead of a fight intro and delays visual payoff on a phone screen.",
+      "how": "Collapse the explanatory copy into a single compact line, reduce the FIGHT button height by ~30\u201340%, and move the joystick diagrams below the fold or into a small tutorial chip that expands on tap. Keep only the score bar and one short matchup label visible above the fighters."
+    },
+    {
+      "id": "battlefield-cropped-by-control-dock",
+      "title": "Recover more of the arena by reducing the bottom control dock height",
+      "what": "In active combat, the lower third is consumed by two large circular sticks plus the centered instruction card, leaving only a relatively shallow gameplay window above them. The fighters sit high in the frame while the playable arena floor is visually compressed.",
+      "why": "This hurts spatial awareness on a touch-first game: distance, foot placement, and kick height become harder to judge when the combat zone is squeezed vertically. It also makes the game look less premium because the battlefield feels like it is fighting the HUD for space.",
+      "how": "Reduce the control dock diameter and move the labels inside or directly under each stick. Make the instruction card collapsible after the first round or show it only in the tutorial. On 390x844, reclaim at least 80\u2013120 px of vertical combat space."
+    },
+    {
+      "id": "repeated-sticks-confuse-controls",
+      "title": "Remove the duplicate stick labels below the joysticks",
+      "what": "In the combat view, each stick already has a label in the instruction card above it, yet the same words \"STANCE\" and \"TECHNIQUE\" are repeated again under the sticks themselves. That creates two competing label rows for the same controls.",
+      "why": "The repetition adds visual clutter right where the player needs to interact, making the control mapping feel overdesigned and less legible on a small phone screen. It also wastes valuable vertical space that could go to the fight.",
+      "how": "Keep one label system only. Best fix today: remove the lower labels entirely and leave the instruction card or the inner stick captions. If you want persistent identification, use small corner badges inside the outer ring instead of a second text row."
+    },
+    {
+      "id": "settings-sheet-uses-too-much-empty-space",
+      "title": "Tighten the settings panel so the footer isn\u2019t stranded",
+      "what": "The settings screen has a very tall empty area between the toggle list and the footer text at the bottom, with the \"Career \u2014 played 0 \u00b7 won 0 \u00b7 best time \u2014\" line sitting isolated near the lower edge. The list ends far above the screen bottom.",
+      "why": "On mobile, large dead zones make the panel feel unfinished and force extra scrolling or awkward eye travel. Important secondary info like the career stats looks disconnected and easy to miss.",
+      "how": "Pull the footer up directly beneath the last toggle and reduce vertical row padding by 15\u201325%. If the panel is meant to scroll, let the list fill the available height and pin the footer just below the options instead of leaving a large empty block."
+    },
+    {
+      "id": "round-start-state-hides-the-fight",
+      "title": "Make the round-start transition clearer and less obstructive",
+      "what": "On the round-start screens, the game darkens the arena and overlays a large centered title plus a big button and countdown, while the fighters stand frozen behind it. The player\u2019s eye is pulled more to the UI stack than to the moment the bout begins.",
+      "why": "This undercuts the sense of motion and anticipation; the start of a karate round should feel immediate and kinetic. The heavy overlay delays the first readable action and makes the scene feel static.",
+      "how": "Replace the large centered stack with a compact top-center banner and a single small countdown chip. Fade the button out faster after tap/auto-start and let the fighters and arena remain dominant during the transition."
+    }
+  ],
+  "raw": null
+}

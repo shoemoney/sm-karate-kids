@@ -1,0 +1,84 @@
+{
+  "model": "qwen/qwen3.7-plus",
+  "elapsed_s": 89.8,
+  "usage": {
+    "prompt_tokens": 12282,
+    "completion_tokens": 5198,
+    "total_tokens": 17480,
+    "cost": 0.01058368,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.01058368,
+      "upstream_inference_prompt_cost": 0.00393024,
+      "upstream_inference_completions_cost": 0.00665344
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 4316,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "oversized-default-controls",
+      "title": "Reduce default virtual stick size to reclaim screen space",
+      "what": "In the primary portrait gameplay view (e.g., the 'Qualifier' screen), the two virtual joysticks at the bottom are enormous, occupying roughly the bottom 35-40% of the vertical screen space. The 'Large controls' toggle in settings appears to be OFF by default, yet the controls are massive.",
+      "why": "This pushes the fighters into the middle-upper third, making them appear smaller and reducing the visibility of the action. On a phone, UI elements of this size feel oppressive and waste valuable canvas that should be dedicated to the fight.",
+      "how": "Scale down the default radius of the joystick components by 40-50%. They should be thumb-sized, not palm-sized. Keep the 'Large controls' toggle for accessibility, but make the default layout much more compact to let the fighters breathe."
+    },
+    {
+      "id": "invisible-loading-progress",
+      "title": "Increase visibility of the loading progress bar",
+      "what": "On the boot/loading screen, the progress bar is a very thin, dark brown line against a black background. It is barely distinguishable from the surrounding darkness.",
+      "why": "Players on slower mobile connections might think the game has frozen or failed to load, leading to early churn before the game even starts.",
+      "how": "Change the progress bar fill color to the brand gold/yellow (matching the 'FIGHT' button) and increase its height (thickness) by 2x or 3x. Add a subtle glow to match the 'tungsten' aesthetic."
+    },
+    {
+      "id": "redundant-control-legend",
+      "title": "Remove or auto-hide the persistent control legend",
+      "what": "A semi-transparent box labeled 'STANCE' and 'TECHNIQUE' with arrow mappings sits directly above the joysticks in the gameplay view, floating between the fighters' feet and the controls.",
+      "why": "It creates visual clutter in the lower-middle of the screen, obscuring the floor and breaking the immersion of the dojo. The information is redundant once the player learns the twin-stick mechanics.",
+      "how": "Make this legend fade out automatically after the first round or after 5 seconds of gameplay. Rely on the existing 'MOVES' button for reference if the player forgets."
+    },
+    {
+      "id": "distant-fighter-framing",
+      "title": "Tighten camera framing to emphasize the fighters",
+      "what": "In the portrait view, there is a significant amount of empty dojo wall/ceiling space above the fighters' heads. The fighters occupy the center but feel a bit small relative to the canvas, especially given the 'photoreal sprite' selling point.",
+      "why": "Pushing the camera too far back diminishes the impact of the character art and makes the combat feel less intimate and impactful.",
+      "how": "Move the camera forward on the Z-axis or lower the camera height slightly to crop out the top 15-20% of the dojo background, making the fighters fill the vertical center more aggressively."
+    },
+    {
+      "id": "low-contrast-round-pill",
+      "title": "Improve legibility of the Round/Mode indicator",
+      "what": "The pill shape at the top left saying 'ROUND 1/5 \u00b7 QUALIFIER' uses dark grey text on a dark background. It is the hardest text to read on the entire HUD.",
+      "why": "It provides critical context (how far along the player is in the career mode) but is visually recessive. Players might miss which round they are on.",
+      "how": "Change the text color to the warm gold/white used in the main HUD titles (like 'QUALIFIER' in the center), or lighten the background of the pill to provide better contrast against the dark dojo."
+    }
+  ],
+  "raw": null
+}
