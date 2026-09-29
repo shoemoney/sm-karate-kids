@@ -43,22 +43,25 @@ describe('the fighter atlas covers the game', () => {
   });
 
   test('every move folder in the source art is in the atlas', (ctx) => {
-    // assets/ is gitignored incoming art (35 MB), so it is absent in CI. Skip
-    // visibly rather than returning quietly — a test that passes without
-    // checking anything is how a dropped technique goes unnoticed.
-    if (!existsSync(ART_DIR)) {
-      ctx.skip();
-      return;
-    }
     // A folder is a move when it carries its own animation.json. `guard/` holds
     // the two guard portraits and `generated/` the stage plates — neither is a
     // technique, and neither has frames to play.
-    const folders = readdirSync(ART_DIR, { withFileTypes: true })
-      .filter((entry) => entry.isDirectory())
-      .map((entry) => entry.name)
-      .filter((name) => existsSync(join(ART_DIR, name, 'animation.json')))
-      .sort();
-    expect(folders.length, 'expected the art drop to contain move folders').toBeGreaterThan(0);
+    const folders = existsSync(ART_DIR)
+      ? readdirSync(ART_DIR, { withFileTypes: true })
+          .filter((entry) => entry.isDirectory())
+          .map((entry) => entry.name)
+          .filter((name) => existsSync(join(ART_DIR, name, 'animation.json')))
+          .sort()
+      : [];
+
+    // The move art is gitignored, but assets/generated/ is tracked, so `assets/`
+    // can exist on a fresh checkout holding nothing but the stage plates. No
+    // move folders means there is no art drop to audit — skip visibly rather
+    // than pass on nothing, and never fail CI for art it was not given.
+    if (folders.length === 0) {
+      ctx.skip();
+      return;
+    }
 
     const missing = folders.filter((name) => !hasPoseFor(poses, name));
     expect(missing, `art folders with no pose in the atlas: ${missing.join(', ')}`).toEqual([]);
