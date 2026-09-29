@@ -1301,14 +1301,25 @@ body:has(.result.show) .stick-zone {
   font-style: normal;
 }
 
-/* While the mark is up the knob hides, so the caption is not read through a
-   lit glass sphere. It comes straight back the moment the mark is dismissed. */
-body.coach-active .knob,
+/* While the mark is up, the stick RECEDES but does not disappear. An earlier
+   pass hid the knob and the chevrons outright, and the result was two empty
+   rings with text floating in them — on a first run, the one moment the player
+   most needs to know these are sticks, they stopped looking like sticks. The
+   knob shrinks and dims; the chevrons stay, because they are what tells the
+   player the ring has four directions. Everything comes straight back when the
+   mark is dismissed. */
+body.coach-active .knob {
+  opacity: 0.28;
+  transform: scale(0.72);
+}
+
 body.coach-active .knob::before,
-body.coach-active .knob::after,
-body.coach-active .glyph,
-body.coach-active .stick::before {
-  opacity: 0;
+body.coach-active .knob::after {
+  opacity: 0.25;
+}
+
+body.coach-active .glyph {
+  opacity: 0.45;
 }
 
 @keyframes coach-in {

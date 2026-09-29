@@ -1,0 +1,78 @@
+{
+  "model": "qwen/qwen3.8-omni-flash",
+  "elapsed_s": 91.1,
+  "usage": {
+    "prompt_tokens": 8714,
+    "completion_tokens": 5901,
+    "total_tokens": 14615,
+    "cost": 0.00408057,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00408057,
+      "upstream_inference_prompt_cost": 0.0013071,
+      "upstream_inference_completions_cost": 0.00277347
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 4483,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png"
+  ],
+  "items": [
+    {
+      "id": "portrait-fight-framing-dead-top",
+      "title": "In-bout portrait wastes the top fifth of the frame on empty black, shrinking the fighters",
+      "what": "On the live bout screen (screenshot 3), the scoreboard ends at ~y75 but the dojo window lattice doesn't begin until ~y315. That entire ~240px band is near-black with only faint bokeh dust. The fighters' heads start at ~y470 and their feet land at ~y780, so the actual action is compressed into a thin middle strip between a dead top zone and the control panel that starts at ~y940.",
+      "why": "The fight is the product, and on the design-baseline phone the combatants read as small background elements. Players spend every second of a bout craning between an empty top band and the sticks, and the cinematic dojo backdrop (windows, banners, volumetric light) is barely given room to register.",
+      "how": "Raise the camera pitch slightly and/or pull the rig in ~15-20% so the window lattice and hanging light fill the upper third instead of black void, and lift the horizon line so the fighters occupy roughly the vertical middle of the 3D viewport. Keep the warm low-key grade; this is framing, not brightness."
+    },
+    {
+      "id": "portrait-sticks-have-no-knob-or-chevrons",
+      "title": "Portrait control circles render as legend cards with no visible stick nub or direction chevrons",
+      "what": "In every portrait bout shot (screenshots 3-5), the two large bottom circles contain only static text ('MOVE & JUMP / step jump crouch', 'STRIKE / reverse forward high low') inside a thin ring. There is no inner knob and no directional chevrons. The landscape capture (screenshot 9) proves the intended affordance exists: small circles with a raised center nub and four chevron arrows \u2014 but that treatment is absent in portrait, the baseline layout.",
+      "why": "These circles eat ~27% of the screen and are the entire input surface for a flick-based fighter. Without a knob or chevrons they read as informational placards, not draggable sticks, so a first-time player has no visual cue that the circle is the thing they grab and swipe during a 30-second round.",
+      "how": "Port the landscape stick treatment to portrait: draw the center nub plus four faint chevrons inside each ring, and move the move legend out of the circle body \u2014 show it as a dismissible first-bout hint or keep it only in the MOVES sheet. The ring should look grabbable at a glance."
+    },
+    {
+      "id": "crowd-silhouettes-flat-gray-collide-with-fighters",
+      "title": "Crowd row renders as flat light-gray cutouts that clash with the warm scene and overlap the fighters' legs",
+      "what": "On the bout screen (screenshots 3, 4, 9), a row of seated-spectator silhouettes sits at the mat's back edge (~y600-640 in portrait). They are a cool, flat mid-gray (#8a8a8a-ish) with no shading, and they intersect the fighters' thighs and shins \u2014 e.g. the left fighter's rear leg visually merges into a gray blob. They are the brightest, least-textured elements in an otherwise photoreal, tungsten-graded frame.",
+      "why": "They sit exactly in the focal band where the eye tracks the fighters, so the placeholder look breaks the cinematic illusion the rest of the art direction sells, and the value collision muddies the read of the fighters' lower-body stance during exchanges.",
+      "how": "Drop the crowd row to near-black silhouette (luma well below the tatami), add a faint warm rim from the overhead light, apply a slight depth-of-field blur, and lower or push them back so they never overlap the fighters' leg lines. They should read as shadow, not shape."
+    },
+    {
+      "id": "loading-bar-shows-zero-progress",
+      "title": "Boot progress bar has no visible fill, no percentage, and almost no contrast against the background",
+      "what": "On the ShoeMoney loading screen (screenshot 1), the bar under 'Downloading the game' is a ~4px rounded track with only a faint diagonal sheen \u2014 there is no determinate fill segment, no percentage text, and no visible indeterminate pulse. The track itself is a dark brown barely distinguishable from the near-black page.",
+      "why": "This is the first screen every player sees, and a static empty bar with no numeric readout is indistinguishable from a hang. During asset download the player has no signal that the game is alive, which drives early abandonment and false 'it's frozen' reports.",
+      "how": "Make the bar determinate: thicken to ~8px, raise track contrast, fill with the brand blue from the logo, and print a live percentage beside or inside it. Add a subtle shimmer on the fill so motion is visible even in a still frame, and swap the caption to 'Downloading\u2026 47%' style copy."
+    },
+    {
+      "id": "boot-logo-black-extrusion-misregistered",
+      "title": "The shield logo's black backing layer is offset, reading as a misprinted duplicate instead of a bevel",
+      "what": "On the loading screen (screenshot 1), a solid black copy of the shield sits behind the silver/blue mark but is displaced to the upper-left and also pokes out below the bottom tip, while the blue '$' is highlighted from the top-left. The result is an asymmetric black halo \u2014 thick on the left shoulder and bottom point, thin/absent on the right \u2014 that looks like two misaligned layers rather than intentional depth.",
+      "why": "It is the literal first image of the product and it carries the publisher brand. A misregistered shadow on the logo reads as a rendering bug or a sloppy export, undercutting the polished cinematic tone the rest of the boot screen and HUD establish.",
+      "how": "Rebuild the extrusion as a consistent offset: pick one light direction (match the '$' highlight, top-left), then place the black silhouette uniformly down-and-right of the shield by a fixed few pixels, or replace it with a soft drop shadow. The black layer must not peek asymmetrically around the silver border."
+    }
+  ],
+  "raw": null
+}
