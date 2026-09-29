@@ -537,14 +537,18 @@ export class Stage {
     const aspect = this.width / Math.max(this.height, 1);
     const halfFov = (FOV * Math.PI) / 360;
     const tan = Math.tan(halfFov);
+    // A tall viewport is width-starved: fitting both fighters side by side
+    // forces the camera far enough back that they end up small, and the frame
+    // below their feet becomes a quarter of the screen in empty mat. So the
+    // breathing room is spent generously on a desktop frame and sparingly on a
+    // phone one, where the pixels are the scarce resource.
+    const tight = aspect < 0.85;
+    const margin = tight ? EDGE_MARGIN * 0.7 : EDGE_MARGIN;
+    const body = tight ? FIGHTER_HALF_WIDTH * 0.8 : FIGHTER_HALF_WIDTH;
     // The gap is measured centre to centre, but a fighter is not a point: a
     // wide lunge stance throws a foot well past its own centre, and framing on
     // the gap alone sliced that foot off at the frame edge on the strike pose.
-    // Budget for half a body on each side of the pair.
-    const halfWidth = Math.max(
-      MIN_HALF_WIDTH,
-      Math.abs(gap) / 2 + EDGE_MARGIN + FIGHTER_HALF_WIDTH,
-    );
+    const halfWidth = Math.max(MIN_HALF_WIDTH, Math.abs(gap) / 2 + margin + body);
     const target = Math.max(FRAME_HALF_HEIGHT / tan, halfWidth / (aspect * tan)) * 1.04;
 
     const ease = immediate ? 1 : 0.07;
@@ -553,10 +557,15 @@ export class Stage {
     const targetX = midpointX * 0.7;
     const x = immediate ? targetX : this.camera.position.x + (targetX - this.camera.position.x) * 0.12;
 
-    // A level camera at chest height. Tilting down on a tall viewport buys a
-    // third of a screen of empty foreground mat and nothing else.
-    this.camera.position.set(x, 1.18, this.distance);
-    this.camera.lookAt(x, 1.18, 0);
+    // Level camera, lifted only slightly on a phone. There the distance is
+    // width-driven, so the vertical window is taller than the fighters need
+    // and the empty mat under their feet is real — but lifting the camera
+    // slides the window up and crops their feet off the bottom, which is a
+    // worse trade. A small lift removes most of the dead band and none of the
+    // floor under a stance.
+    const eyeY = tight ? 1.5 : 1.18;
+    this.camera.position.set(x, eyeY, this.distance);
+    this.camera.lookAt(x, eyeY, 0);
 
     const follow = immediate ? 1 : 0.08;
     this.leftPool.position.x += (midpointX - gap / 2 - this.leftPool.position.x) * follow;

@@ -1,0 +1,78 @@
+{
+  "model": "google/gemini-3.8-flash",
+  "elapsed_s": 27.9,
+  "usage": {
+    "prompt_tokens": 12314,
+    "completion_tokens": 2836,
+    "total_tokens": 15150,
+    "cost": 0.0198705,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0198705,
+      "upstream_inference_prompt_cost": 0.0092355,
+      "upstream_inference_completions_cost": 0.010635
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1939,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png"
+  ],
+  "items": [
+    {
+      "id": "landscape-controls-fighter-overlap",
+      "title": "Reposition virtual sticks in landscape to prevent fighter occlusion",
+      "what": "In widescreen/landscape view (Screenshot 9), the twin-stick control rings sit directly over the fighters' legs and feet, with the right stick completely occluding HasanAbi's lower right leg and mat contact point.",
+      "why": "Point karate relies on reading distance, stance, and foot planting; placing dark circular controls directly over the character sprites destroys visual clarity and looks like an unadapted viewport bug.",
+      "how": "Clamp the joysticks to the bottom-left and bottom-right viewport corners with lateral padding, or pull the Three.js camera back along the Z-axis in landscape media queries so the fighting plane remains clear of UI overlays."
+    },
+    {
+      "id": "portrait-camera-tatami-dead-space",
+      "title": "Lower camera pitch to eliminate empty tatami expanse in portrait view",
+      "what": "In portrait mode (Screenshots 3, 4, 5, 10), there is an empty band of tatami mat spanning roughly 25-30% of the screen height between the fighters' feet and the top boundary of the joystick dock.",
+      "why": "The fighters appear pushed high and small in the frame, making touch interactions feel physically disconnected from the action while wasting prime screen real estate on featureless floor texture.",
+      "how": "Lower the 3D camera height and decrease vertical pitch by 5-8 degrees to drop the horizon line, bringing the fighters closer to the lower-middle focal area and filling the upper frame with more dojo background architecture."
+    },
+    {
+      "id": "controls-persisting-behind-modals",
+      "title": "Dim or dismiss touch sticks during modal overlay states",
+      "what": "On the Techniques screen (Screenshot 6), Settings screen (Screenshot 7), and bout card overlays (Screenshots 2 and 8), the full high-contrast twin-stick HUD remains brightly rendered at the bottom.",
+      "why": "It creates severe visual clutter behind text-heavy screens and falsely implies the sticks are active touch targets while modals and countdowns are open.",
+      "how": "Add an active modal state that fades the `#stick-container` opacity to 0.15 or translates it off-screen downward using a 200ms ease transition whenever a dialog or announcement banner is active."
+    },
+    {
+      "id": "typography-inconsistency-overlays",
+      "title": "Unify overlay typography with the cinematic brass display font",
+      "what": "On the Qualifier and Match End screens (Screenshots 2, 8, and 11), the title uses a stylized geometric brass display font ('QUALIFIER'), immediately paired with standard neutral sans-serif ('vs HasanAbi') and generic caps body copy.",
+      "why": "The abrupt jump to default sans-serif breaks the 80s martial arts tournament atmosphere and makes the opponent introduction text look like unstyled developer placeholder text.",
+      "how": "Style the opponent name with the tournament display face or an elevated tracked condensed serif, adding subtle gold metallic gradient and drop-shadow styling consistent with the headline."
+    },
+    {
+      "id": "loading-screen-asymmetry-contrast",
+      "title": "Center loading status text and increase progress bar visibility",
+      "what": "On the initial boot screen (Screenshot 1), 'Starting up' is right-aligned above an extremely faint, hairline loading bar, while the ShoeMoney logo and footer text are centered.",
+      "why": "The asymmetrical, right-aligned status label unbalances the portrait layout, and the low-contrast progress bar gives inadequate visual feedback during WebGPU shader compilation.",
+      "how": "Center the 'Starting up' label directly above the bar, increase the progress track thickness from ~2px to 4px, and give the active progress fill a glowing amber tint (#E5A93C) matching the in-game HUD palette."
+    }
+  ],
+  "raw": null
+}

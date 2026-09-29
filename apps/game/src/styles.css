@@ -442,24 +442,29 @@ body {
      is where it sits. */
 }
 
-/* The live status. Mono, right-aligned, dimmer than anything else on the card
-   — it is an instrument telling you what the loader is doing, not copy. It
-   sits ABOVE the rail and the publisher credit sits below it, so the two lines
-   can never be read as one block of body text. */
+/* The live status. Mono, dimmer than anything else on the card — it is an
+   instrument telling you what the loader is doing, not copy. Centred, because
+   the mark above it and the publisher credit below it are both centred, and a
+   lone right-aligned line between two centred things reads as a mistake.
+   It sits ABOVE the rail and the credit sits below, so the two lines can never
+   be read as one block of body text. */
 .boot-stage {
   /* A reserved line, so the card does not reflow under the mark every time
      the label changes length. */
   min-block-size: 1em;
   margin: 0 0 var(--space-2);
   align-self: stretch;
-  text-align: right;
-  color: var(--text-ghost);
+  text-align: center;
+  color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
   letter-spacing: var(--track-normal);
   line-height: var(--leading-tight);
 }
 
+/* 6px, not the 2px hairline it started as: on a phone the bar is the only
+   thing reporting real progress, and at 2px against a dark well it read as a
+   rule rather than as a gauge. */
 .boot-bar {
   position: relative;
   overflow: hidden;
@@ -1117,9 +1122,11 @@ body {
   }
 
   /* Floated over the mat, each control is a brass-cornered plaque rather than
-     a stray circle: the hit area shrinks to the plaque, not a screen half. */
+     a stray circle: the hit area shrinks to the plaque, not a screen half.
+     `justify-self` is start/end, not center — centered in a 1fr column still
+     put the right stick across HasanAbi's shin on a 1280px screen. */
   .stick-zone {
-    justify-self: center;
+    justify-self: start;
     align-self: end;
     width: auto;
     padding: var(--space-3) var(--space-5) var(--space-2);
@@ -1127,6 +1134,10 @@ body {
     border: 1px solid var(--edge-faint);
     box-shadow: var(--shadow-panel);
     pointer-events: auto;
+  }
+
+  .stick-zone:last-child {
+    justify-self: end;
   }
 
   .stick-zone.engaged {
@@ -1165,6 +1176,33 @@ body {
     border-color: var(--edge-strong);
     box-shadow: var(--shadow-panel);
   }
+}
+
+/* The sticks stay lit behind the settings sheet, the technique reference and
+   the bout card. Nothing behind a dialog is a live touch target, and a full
+   contrast control pad under a wall of text reads as clutter. `:has()` keeps
+   this in CSS — no JS has to know that sheets and controls are related. */
+body:has(.sheet:not([hidden])) #pad,
+body:has(.result.show) #pad {
+  opacity: 0.18;
+  filter: saturate(0.6);
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    filter var(--dur-base) var(--ease-out);
+  pointer-events: none;
+}
+
+#pad {
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    filter var(--dur-base) var(--ease-out);
+}
+
+body:has(.sheet:not([hidden])) .stick-zone,
+body:has(.result.show) .stick-zone {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 /* ---------- HUD actions ---------- */
@@ -1754,11 +1792,26 @@ body.left-handed #zone-right {
   color: var(--text);
 }
 
+/* The "vs <opponent>" line. It sat in the body sans next to a display-weight
+   headline and read as unstyled placeholder text on the round card. It gets
+   the same gold treatment as the headline, one step down, so the card reads as
+   one typographic object rather than a headline with a caption bolted on. */
 .result-score {
   font-size: clamp(var(--text-lg), 8vw, 2.6rem);
   font-weight: var(--weight-heavy);
   font-variant-numeric: tabular-nums;
+  color: transparent;
+  background: linear-gradient(180deg, var(--text) 20%, var(--gold) 115%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  letter-spacing: var(--track-tight);
+  text-shadow: 0 0.08em 0 rgb(0 0 0 / 0.4);
+}
+
+/* High contrast cannot rely on a gradient for legibility. */
+body.high-contrast .result-score {
   color: var(--text);
+  -webkit-text-fill-color: var(--text);
 }
 
 .result-detail {
