@@ -1,0 +1,82 @@
+{
+  "model": "openai/gpt-6-luna",
+  "elapsed_s": 57.0,
+  "usage": {
+    "prompt_tokens": 13499,
+    "completion_tokens": 4634,
+    "total_tokens": 18133,
+    "cost": 0.0040043,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 13496,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0040043,
+      "upstream_inference_prompt_cost": 0.0016873,
+      "upstream_inference_completions_cost": 0.002317
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 3799,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "show-loading-progress",
+      "title": "Make download progress visibly progress",
+      "what": "On the ShoeMoney loading screen, the thin bar below \u201cDownloading the game\u201d is almost entirely the same dark tone as its track, so there is no discernible filled portion; the small centered content is surrounded by large areas of near-black.",
+      "why": "The first screen gives players little visual evidence that loading is advancing, which can make a deliberate wait look like a stalled game.",
+      "how": "Use a clearly contrasting warm-gold fill against the existing dark track, and show a percentage or named loading phase above it. Keep the background dark; improve the progress indicator rather than brightening the whole screen."
+    },
+    {
+      "id": "clear-the-stick-surfaces",
+      "title": "Move control instructions off the joysticks",
+      "what": "In the portrait gameplay screenshots, the stance directions (\u201cstep,\u201d \u201cjump,\u201d \u201ccrouch\u201d) and technique directions (\u201creverse,\u201d \u201cforward,\u201d \u201chigh,\u201d \u201clow\u201d) are printed across the middle of their respective stick circles, where the thumb control itself sits.",
+      "why": "On a phone, players need to see and feel the control surface clearly; text beneath their thumbs is both obscured during play and makes the sticks harder to read at a glance.",
+      "how": "Keep the directional arrows on the stick rings, but move the word legend into a separate compact strip above the controls or into the Moves help panel. Leave the stick centers and travel areas visually clear."
+    },
+    {
+      "id": "label-the-auto-start",
+      "title": "Explain the number inside the fight button",
+      "what": "The pre-fight screen shows a bright \u201cFIGHT\u201d button with a small circled \u201c2\u201d; later intro and result screens show the same treatment with \u201c4\u201d and \u201c8\u201d beside \u201cFIGHT\u201d or \u201cREMATCH.\u201d Nothing on the button says what those numbers mean.",
+      "why": "Players can read the number as a round or button count instead of a countdown, leaving them unsure whether they should tap or wait for the match to start.",
+      "how": "Label it explicitly, for example \u201cFIGHT NOW\u201d with a separate \u201cAuto-start in 2s\u201d countdown. Use the same clear treatment for the rematch screen and keep the tap target large."
+    },
+    {
+      "id": "reframe-portrait-combat",
+      "title": "Give the fighters more of the portrait frame",
+      "what": "In the portrait live-match shots, the fighters occupy a relatively short band in the lower-middle of the screen, with a large area of dark ceiling and upper dojo between the top HUD/buttons and their heads.",
+      "why": "The fighters and their moves are the main point of a point-karate bout; at phone size, leaving that much vertical space above them makes combat less prominent and actions harder to read.",
+      "how": "Use a portrait-specific camera framing: tighten the vertical view and bring the fighters closer together so they appear larger while keeping both heads and feet inside the arena. Preserve the wider framing for landscape."
+    },
+    {
+      "id": "separate-hit-callouts",
+      "title": "Give scoring feedback its own clear lane",
+      "what": "In the portrait spinning-back-kick scoring frame, the large \u201cIPPON / HASANABI\u201d result text is stacked directly against the \u201cSPINNING BACK KICK\u201d move banner; their text and dark backplates crowd together near the upper center.",
+      "why": "The player has to parse both which move happened and who scored at the exact moment the result matters, but the overlapping hierarchy makes the feedback read as one cramped label.",
+      "how": "On a scored hit, hide or move the move-name toast and reserve a separate, consistent area for the score result. Add clear vertical spacing between the result, scorer name, and any move label."
+    }
+  ],
+  "raw": null
+}

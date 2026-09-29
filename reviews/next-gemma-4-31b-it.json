@@ -1,0 +1,46 @@
+{
+  "model": "google/gemma-4-31b-it",
+  "elapsed_s": 66.4,
+  "usage": {
+    "prompt_tokens": 4188,
+    "completion_tokens": 687,
+    "total_tokens": 4875,
+    "cost": 0.0006105,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0006105,
+      "upstream_inference_prompt_cost": 0.00037692,
+      "upstream_inference_completions_cost": 0.00023358
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": null,
+  "raw": "[\n  {\n    \"id\": \"control-occlusion\",\n    \"title\": \"Input labels overlap active control zones\",\n    \"what\": \"In the gameplay screen, the 'STANCE' and 'TECHNIQUE' text labels and move-lists (e.g., 'step', 'jump') are rendered directly over the joystick touch areas.\",\n    \"why\": \"Visual clutter in the primary interaction zone creates cognitive load and obscures the physical boundaries of the twin-stick controls during high-intensity combat.\",\n    \"how\": \"Move the move-list labels (step, jump, etc.) above the joystick circles or integrate them into the outer ring of the joystick UI.\"\n  },\n  {\n    \"id\": \"fighter-centering\",\n    \"title\": \"Vertical composition wastes screen real estate\",\n    \"what\": \"In the 'QUALIFIER' and gameplay screens, the fighters are positioned in the center/lower-middle, leaving a massive void of empty dojo floor between the fighters and the bottom HUD.\",\n    \"why\": \"On a portrait phone, this pushes the action too far from the player's thumbs and makes the characters appear small, reducing the impact of the photoreal sprites.\",\n    \"how\": \"Shift the camera angle down or move the fighter sprites lower in the frame to reduce the gap between the feet and the control panel.\"\n  },\n  {\n    \"id\": \"hit-feedback-visibility\",\n    \"title\": \"Low-contrast hit sparks\",\n    \"what\": \"In the 'IPPON' screenshot, the yellow hit-sparks on the fighter's head are thin and blend into the warm, volumetric lighting of the background.\",\n    \"why\": \"The 'Ippon' is the most critical moment of the game; if the visual feedback is too subtle, the player may miss the exact point of impact.\",\n    \"how\": \"Add a high-contrast white core to the sparks and a brief, full-screen radial blur or chromatic aberration hit-stop effect.\"\n  },\n  {\n    \"id\": \"hud-hierarchy\",\n    \"title\": \"Scoreboard lacks visual prominence\",\n    \"what\": \"The top HUD (Asmongold 0 - 30 - Hasanabi) uses thin, small typography that blends into the dark background.\",\n    \"why\": \"Players need to glance at their score and time instantly; the current thin font requires too much focus to read during a fight.\",\n    \"how\": \"Increase the font weight of the scores and add a subtle dark semi-transparent backing plate to the top HUD to separate it from the background light.\",\n  },\n  {\n    \"id\": \"menu-contrast\",\n    \"title\": \"Settings checkboxes lack active state clarity\",\n    \"what\": \"In the 'SETTINGS' screen, the checkboxes for 'Reduced motion', 'High contrast', etc., are dark grey on a dark brown background.\",\n    \"why\": \"It is visually difficult to tell at a glance which settings are currently enabled versus disabled.\",\n    \"how\": \"Change the 'checked' state to a bright gold fill (matching the 'FIGHT' button) to provide a clear binary visual indicator.\"\n  }\n]"
+}

@@ -51,7 +51,7 @@ export function createControlCoach(): ControlCoach {
   const touched = new Set<'left' | 'right'>();
 
   const clear = (): void => {
-    for (const node of document.querySelectorAll('.coach-mark')) node.remove();
+    for (const node of document.querySelectorAll('.coach-strip')) node.remove();
     document.body.classList.remove('coach-active');
     shown = false;
   };
@@ -74,28 +74,36 @@ export function createControlCoach(): ControlCoach {
       for (const lesson of LESSONS) {
         const zone = document.getElementById(lesson.zone);
         if (zone === null) continue;
-        const mark = document.createElement('div');
-        mark.className = 'coach-mark';
-        // Decorative, and the stick's own aria-label already names it.
-        mark.setAttribute('aria-hidden', 'true');
-        const title = document.createElement('strong');
-        title.textContent = lesson.title;
-        // One element per direction. A single run of text let the browser break
-        // between a glyph and its word — "▲" on one line, "high" on the next —
-        // which is worse than overflow: the reader has to reassemble it. Each
-        // pair is now its own grid cell and can never be split.
-        const body = document.createElement('span');
-        body.className = 'coach-legend';
-        for (const pair of lesson.pairs) {
-          const cell = document.createElement('i');
-          cell.textContent = pair;
-          body.appendChild(cell);
-        }
-        mark.append(title, body);
-        zone.appendChild(mark);
         placed += 1;
       }
       if (placed === 0) return;
+
+      // One strip, not two. The lesson is about the pair — "this is the move
+      // stick, that is the technique stick" is a relationship, and splitting it
+      // across two rings made the player read it twice. It also keeps the rings
+      // clear: a control being pressed should be showing the control.
+      const strip = document.createElement('div');
+      strip.className = 'coach-strip';
+      strip.setAttribute('aria-hidden', 'true');
+      for (const lesson of LESSONS) {
+        const half = document.createElement('div');
+        half.className = 'coach-half';
+        const title = document.createElement('strong');
+        title.textContent = lesson.title;
+        const legend = document.createElement('span');
+        legend.className = 'coach-legend';
+        for (const pair of lesson.pairs) {
+          const cell = document.createElement('i');
+          cell.textContent = pair;
+          legend.appendChild(cell);
+        }
+        half.append(title, legend);
+        strip.appendChild(half);
+      }
+      const pad = document.getElementById('pad');
+      if (pad === null) return;
+      pad.appendChild(strip);
+
       shown = true;
       document.body.classList.add('coach-active');
     },

@@ -89,6 +89,7 @@
      focus visible without fighting the room. */
   --outline: var(--gold); /* focus ring */
   --check: var(--gold); /* checkbox / accent-color */
+  --toggle-off: rgb(38 30 22 / 0.9); /* the OFF plate, against a near-black sheet */
 
   /* ---- Edges -------------------------------------------------------------- */
 
@@ -1285,6 +1286,11 @@ body:has(.result[data-phase='result'].show) #pad {
 }
 
 #pad {
+  /* Positioned, because the first-run coach strip is absolutely placed at the
+     top of the pad. Without this the strip resolved against the root and
+     rendered at y=8, behind the scoreboard — present in the DOM, correct in
+     every computed style, and invisible in the screenshot. */
+  position: relative;
   transition:
     opacity var(--dur-base) var(--ease-out),
     filter var(--dur-base) var(--ease-out);
@@ -1299,44 +1305,57 @@ body:has(.result[data-phase='result'].show) .stick-zone {
 
 /* ---------- First-run control coach ---------- */
 
-/* A caption inside each stick ring, and only on the first bout. It is biased to
-   the UPPER half of the ring: the ring is the hit area, the thumb rests low
-   and central on it, and a legend set dead centre is a legend the player cannot
-   read while using the control it describes. The STANCE and TECHNIQUE labels
-   under the ring are untouched — the mark titles now use the same two words. */
-.coach-mark {
+/* The first-run lesson, as one strip laid across the top of the pad.
+   Off the sticks entirely: a control being pressed should be showing the
+   control, and the ring's own chevrons already say what a stick is. Three
+   rounds said so, and they were right. */
+.coach-strip {
   position: absolute;
-  inset: 0 0 22% 0;
+  inset-block-start: var(--space-2);
+  inset-inline: var(--space-3);
+  z-index: 3;
   display: grid;
-  align-content: start;
-  justify-items: center;
-  gap: 3px;
-  padding-block-start: 18%;
-  text-align: center;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--coach-plate);
+  backdrop-filter: blur(12px) saturate(0.9);
+  -webkit-backdrop-filter: blur(12px) saturate(0.9);
+  border: 1px solid var(--edge-faint);
+  box-shadow: var(--shadow-panel);
   pointer-events: none;
   animation: coach-in var(--dur-slow) var(--ease-out) both;
 }
 
-.coach-mark strong {
-  font-size: var(--text-xs);
+body.no-backdrop-filter .coach-strip {
+  background: rgb(12 8 4 / 0.94);
+}
+
+.coach-half {
+  display: grid;
+  gap: 1px;
+  justify-items: center;
+  text-align: center;
+}
+
+.coach-half strong {
+  font-size: var(--text-2xs);
   font-weight: var(--weight-bold);
-  letter-spacing: var(--track-wide);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
-  color: var(--text);
+  color: var(--gold-bright);
 }
 
 .coach-legend {
   display: grid;
   grid-template-columns: repeat(2, auto);
-  gap: 1px var(--space-2);
+  gap: 0 var(--space-2);
   justify-content: center;
   font-family: var(--font-mono);
-  font-size: 0.66rem;
+  font-size: 0.6rem;
   font-style: normal;
-  line-height: 1.4;
-  /* Was --text-muted. The coach mark is the one piece of text on the pad that
-     a player with no prior knowledge cannot decode from context, so it does not
-     get ghosted like a resting detent does. */
+  line-height: 1.45;
   color: var(--text);
 }
 
@@ -1345,31 +1364,20 @@ body:has(.result[data-phase='result'].show) .stick-zone {
   font-style: normal;
 }
 
-/* While the mark is up, the stick RECEDES but does not disappear. An earlier
-   pass hid the knob and the chevrons outright, and the result was two empty
-   rings with text floating in them — on a first run, the one moment the player
-   most needs to know these are sticks, they stopped looking like sticks. The
-   knob shrinks and dims; the chevrons stay, because they are what tells the
-   player the ring has four directions. Everything comes straight back when the
-   mark is dismissed. */
-body.coach-active .knob {
-  opacity: 0.28;
-  transform: scale(0.72);
-}
-
+/* Nothing about the sticks changes while the strip is up — the rings stay lit
+   and their chevrons stay where they are, because they are the affordance. */
+body.coach-active .knob,
 body.coach-active .knob::before,
-body.coach-active .knob::after {
-  opacity: 0.25;
-}
-
-body.coach-active .glyph {
-  opacity: 0.45;
+body.coach-active .knob::after,
+body.coach-active .glyph,
+body.coach-active .stick::before {
+  opacity: 1;
 }
 
 @keyframes coach-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(-6px);
   }
   to {
     opacity: 1;
@@ -1377,7 +1385,7 @@ body.coach-active .glyph {
   }
 }
 
-body.reduced-motion .coach-mark {
+body.reduced-motion .coach-strip {
   animation: none;
 }
 
@@ -1575,6 +1583,33 @@ input:focus-visible,
   height: 22px;
   flex: 0 0 auto;
   accent-color: var(--check);
+  /* A gold plate under the native control. `accent-color` alone tints the
+     tick, but leaves the box the same value whether it is on or off, so the
+     state had to be read from a 3px mark. Five rounds in, this was the most
+     repeated finding in the loop and it was being dismissed every round as
+     "the capture has all six toggles off" — which was true, and was also a way
+     of never having to look. The on state now changes the whole plate, not
+     just the tick, so it is readable at a glance and from across the screen. */
+  background: var(--toggle-off);
+  border: 1px solid var(--edge-strong);
+  border-radius: 5px;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.setting-row input[type="checkbox"]:checked {
+  background: var(--gold);
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 0.7rem -0.1rem var(--gold-glow);
+}
+
+body.high-contrast .setting-row input[type="checkbox"] {
+  background: var(--surface-sunken);
+}
+
+body.high-contrast .setting-row input[type="checkbox"]:checked {
+  background: var(--check);
 }
 
 .setting-row input[type="checkbox"]::after {
