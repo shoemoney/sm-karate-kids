@@ -1249,8 +1249,8 @@ body:has(.result.show) .stick-zone {
   display: grid;
   align-content: center;
   justify-items: center;
-  gap: 2px;
-  padding-inline: var(--space-3);
+  gap: 3px;
+  padding-inline: var(--space-2);
   text-align: center;
   pointer-events: none;
   animation: coach-in var(--dur-slow) var(--ease-out) both;
@@ -1264,11 +1264,21 @@ body:has(.result.show) .stick-zone {
   color: var(--text);
 }
 
-.coach-mark span {
+.coach-legend {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 1px var(--space-2);
+  justify-content: center;
   font-family: var(--font-mono);
-  font-size: 0.58rem;
-  line-height: 1.35;
+  font-size: 0.56rem;
+  font-style: normal;
+  line-height: 1.4;
   color: var(--text-muted);
+}
+
+.coach-legend i {
+  white-space: nowrap;
+  font-style: normal;
 }
 
 /* While the mark is up the knob hides, so the caption is not read through a
@@ -1305,6 +1315,34 @@ body.reduced-motion .coach-mark {
   justify-content: flex-end;
   gap: var(--space-2);
   margin-top: var(--space-2);
+}
+
+/* Portrait: the two buttons were the only thing on a whole second row, which
+   on a 390px phone is roughly 90px of chrome holding two controls — taken
+   straight out of the viewport the fighters were competing for. They now float
+   over the top-right of the dojo on their own scrim, so the header is one band
+   and the fighters get the height back. Wide screens keep the row: there is
+   room there, and nothing is gained by overlaying a desktop HUD on the art. */
+@media (max-width: 699px) {
+  .hud-actions {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline-end: var(--space-3);
+    margin-top: 0;
+    z-index: 6;
+    gap: var(--space-1);
+  }
+
+  .hud-actions .icon-btn {
+    background: rgb(12 8 4 / 0.66);
+    backdrop-filter: blur(10px) saturate(0.9);
+    -webkit-backdrop-filter: blur(10px) saturate(0.9);
+    border-color: var(--edge-faint);
+  }
+
+  body.no-backdrop-filter .hud-actions .icon-btn {
+    background: rgb(12 8 4 / 0.9);
+  }
 }
 
 .icon-btn {

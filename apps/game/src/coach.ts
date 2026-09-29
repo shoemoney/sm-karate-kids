@@ -25,10 +25,10 @@ export interface ControlCoach {
 const LESSONS: ReadonlyArray<{
   zone: string;
   title: string;
-  body: string;
+  pairs: readonly string[];
 }> = [
-  { zone: 'zone-left', title: 'Move & jump', body: '◀ ▶ step · ▲ jump · ▼ crouch' },
-  { zone: 'zone-right', title: 'Strike', body: '◀ reverse · ▲ high · ▼ low · ▶ forward' },
+  { zone: 'zone-left', title: 'Move & jump', pairs: ['◀ step', '▲ jump', '▶ step', '▼ crouch'] },
+  { zone: 'zone-right', title: 'Strike', pairs: ['◀ reverse', '▶ forward', '▲ high', '▼ low'] },
 ];
 
 export function createControlCoach(): ControlCoach {
@@ -65,8 +65,17 @@ export function createControlCoach(): ControlCoach {
         mark.setAttribute('aria-hidden', 'true');
         const title = document.createElement('strong');
         title.textContent = lesson.title;
+        // One element per direction. A single run of text let the browser break
+        // between a glyph and its word — "▲" on one line, "high" on the next —
+        // which is worse than overflow: the reader has to reassemble it. Each
+        // pair is now its own grid cell and can never be split.
         const body = document.createElement('span');
-        body.textContent = lesson.body;
+        body.className = 'coach-legend';
+        for (const pair of lesson.pairs) {
+          const cell = document.createElement('i');
+          cell.textContent = pair;
+          body.appendChild(cell);
+        }
         mark.append(title, body);
         zone.appendChild(mark);
         placed += 1;
