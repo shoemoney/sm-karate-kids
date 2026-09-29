@@ -1588,3 +1588,33 @@ raised, which is a different and more useful signal than a fix.
   round refuted the same family on the *back* kick, correctly, and let a correct
   refutation of one move dismiss a finding about fourteen. This time the move
   named in the report was the move that was opened.
+
+### Round 48 — gpt-5.6-sol-pro, mimo-v2.6-pro — `5b7c1d9`
+
+- `fix-settings-overlay-edge: "stop the Settings panel from visibly slicing
+  through the fight"` (gpt-5.6-sol-pro) — **accepted, and it is round 44's own
+  fix described four rounds later.** Making the sheet content-height removed the
+  void and put a hard edge across both fighters at chest height instead. The
+  panel now carries a scrim, so the edge reads as a boundary and the fight reads
+  as being behind it.
+
+  **Removing a void and creating a slice are the same mistake: changing a
+  container's shape without giving it a boundary.** That is the fifth time in
+  this loop a fix has been right about a principle and incomplete about the
+  edge, and the pattern is stable enough to state as a rule: *when a container's
+  shape changes, ask what its boundary now means, in the same commit.*
+- `sync-move-label-with-pose: "move callout fires while the fighter is still
+  standing in idle"` (mimo-v2.6-pro) — **the round-19 finding, reported again by
+  a model that cannot have seen the fix.** The chip has a 700ms expiry; a live
+  probe shows it appearing at 100ms and clearing at 794ms. Round 20 moved the
+  call's move name into the stamp. This is now the third distinct stale-finding
+  in the log, and the lesson is the same each time: **a reviewer reporting a
+  finding fixed in an earlier round is not a contradiction, it is a lag.** The
+  queue is long and the model has no way to know which rounds it is reading.
+- `ground-fighter-sprites` / `ground-and-layer-fighter-sprites` (gpt-5.6-sol-pro,
+  mimo-v2.6-pro) — contact shadows, checked at 3x in round 42 and present.
+- `loading-progress-and-palette` (mimo-v2.6-pro) — the twenty-first appearance.
+  The "wrong temperature" half of it is about the ShoeMoney mark, which is
+  proprietary and may not be recoloured.
+- `rebalance-landscape-controls` (gpt-5.6-sol-pro) — landscape, eighth model.
+- `raise-fighters-in-frame` (mimo-v2.6-pro) — framing, twenty-seventh iteration.
