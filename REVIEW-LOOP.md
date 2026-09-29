@@ -37,8 +37,8 @@ successive rounds are not five variants of the same opinion.
 
 | # | Model | Family | Status |
 |---|-------|--------|--------|
-| 1 | `google/gemini-3.8-flash` | Google | reviewed |
-| 2 | `z-ai/glm-5.3-flash` | Zhipu | pending |
+| 1 | `google/gemini-3.8-flash` | Google | landed `087be7a` |
+| 2 | `z-ai/glm-5.3-flash` | Zhipu | landed `bc53eda` |
 | 3 | `anthropic/claude-opus-5.5` | Anthropic | pending |
 | 4 | `openai/gpt-5.2` | OpenAI | pending |
 | 5 | `x-ai/grok-4-vision` | xAI | pending |
@@ -56,3 +56,44 @@ successive rounds are not five variants of the same opinion.
 ## Log
 
 Rounds, newest last. Full model output is kept in `reviews/`.
+
+### Round 1 — google/gemini-3.8-flash — `087be7a`
+
+Five items, all real, all verified before implementing:
+
+- `landscape-controls-fighter-overlap` — `justify-self: center` in a 1fr column
+  still crossed HasanAbi's shin at 1280px. Fixed to hard corners.
+- `portrait-camera-tatami-dead-space` — a tall viewport is width-starved, so
+  framing both fighters pushed the camera back until a quarter of the screen was
+  empty mat. **First attempt overshot** (eye 2.05 cropped the fighters at the
+  knees); 1.5 plus tighter portrait margins is the measured compromise.
+- `controls-persisting-behind-modals` — sticks at full contrast behind sheets
+  and the result card. Now 0.18 via `:has()`.
+- `typography-inconsistency-overlays` — result score got the gold treatment.
+- `loading-screen-asymmetry-contrast` — status centred, bar no longer a hairline.
+
+### Round 2 — z-ai/glm-5.3-flash — `bc53eda`
+
+- `blackout-hides-dojo-on-boot-and-result` — **two corrections.** Easing the
+  result veil alone made the detail line unreadable against a white gi; the fix
+  is a blurred plate under the text column only, dojo readable elsewhere.
+- `boot-progress-bar-invisible` — the 0% is *correct* (first unit is a bundle
+  fetch) but reads as broken. Number now ships in the markup, not just the
+  first update, so first paint carries a reading.
+- `crowd-silhouettes-read-as-cutouts` — `MeshBasicMaterial` takes no light, so
+  the row had to be repainted warm rather than lit.
+- `webgpu-tag-in-scoreboard` — moved to a dimmed corner tab. First put it
+  bottom-right, which collided with the settings gear; bottom-left.
+- `portrait-fight-framing-too-loose` — vignette 0.38 → 0.28.
+
+### Patterns worth keeping
+
+- **Vision models overstate in the "too dark / too small" direction.** Twice now
+  the honest read was "the art direction is intentional, the fix is smaller than
+  you think". Round 1's first camera attempt proved it: applying the full
+  suggestion cropped the fighters at the knees.
+- **Two of ten items needed a second correction after the first fix.** Capture
+  after every round, not just at the end — the overshoot is invisible in code.
+- **A real finding is not always a code finding.** The boot bar and the WEBGPU
+  slot were both correct behaviour in a bad position.
+
