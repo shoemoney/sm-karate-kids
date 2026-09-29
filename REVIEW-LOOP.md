@@ -1159,11 +1159,18 @@ is what a corrected sample does.
   `data-measuring="true"` is set when the shot is taken, so the CSS ought to be
   drawing something else.
 
-  Not resolved. Every DOM-level measurement of this card came back inconsistent
-  with the stylesheet, and the probe that reported "zero style rules" is itself
-  a pre-CSS reading — the same class of mistake as round 32's contrast numbers.
-  Not guessed at, and not fixed blind. The harness now guarantees a styled page
-  before capture, which is the first thing needed to measure it properly.
+  **RESOLVED — and it was never a defect.** With the stylesheet loaded and the
+  page measured properly: `data-measuring="true"`, `fill` at `inline-size: 0px`
+  and `opacity: 0`, the track at `rgba(56,41,28,0.95)`, and the line reading
+  "Downloading the game". The bar is empty, correctly, exactly as designed.
+
+  What the loop has been looking at for 35 rounds is the harness's *unstyled*
+  screenshot, where `.boot-fill` is a plain block-level div — full width, no
+  gradient, opacity 1. A 100% bar. Under a line that says it is downloading.
+
+  Round 35's fix is what made this measurable, and the open question it left
+  closed itself on the first properly-instrumented attempt. Nothing in the
+  product needed changing.
 
 - **The boot capture never waited for the stylesheet.** 600ms after `commit`
   under throttle, `document.styleSheets` enumerates **zero** style rules. So
