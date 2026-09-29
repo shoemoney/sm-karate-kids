@@ -1978,3 +1978,28 @@ work and it is not something this review loop found.
   Three further crops at guessed coordinates failed to find the knobs at all.
   Guessed coordinates are not an instrument either. The computed read settled it
   in one call, and it is what should have been used first.
+
+### Round 59 — closing the last open correctness claim
+
+- `backwards-settings-toggle-state: "two settings toggles incorrectly show active
+  state when they are disabled"` (seed-2.0-lite) — **REFUSED, by state-versus-
+  effect rather than by looking.**
+
+  The frame cannot settle it: in `15-phone-settings-mixed` the two gold switches
+  are genuinely on, so a reviewer reading it sees two active toggles and calls
+  them wrong. What settles it is toggling each one and asking whether the game
+  changed:
+
+      Left-handed layout   -> body gains `left-handed`
+      Mute sound           -> checked, audio state internal (no body class)
+      Show performance HUD -> body gains `show-perf`, #perf-hud un-hides
+
+  All three wired. The switches are not backwards; the model read a true frame
+  and drew a false conclusion from it.
+
+  **This was the only state-correctness claim left in fifty-nine rounds, and it
+  is now the fifth finding a model reported that turned out to be a correct
+  reading of an incomplete picture.** The pattern is stable enough to be worth
+  stating plainly: a model given one frame of a system that has more than one
+  state will confidently infer the rule from the instance. That is not a defect
+  in the reviewer. It is what happens when the instrument shows one state.
