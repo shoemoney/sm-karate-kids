@@ -1,25 +1,25 @@
 {
   "model": "openai/gpt-5.6-terra",
-  "elapsed_s": 29.9,
+  "elapsed_s": 25.6,
   "usage": {
-    "prompt_tokens": 14412,
-    "completion_tokens": 1651,
-    "total_tokens": 16063,
-    "cost": 0.0558405,
+    "prompt_tokens": 15325,
+    "completion_tokens": 1544,
+    "total_tokens": 16869,
+    "cost": 0.056839,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
-      "cache_write_tokens": 14409,
+      "cache_write_tokens": 15322,
       "audio_tokens": 0,
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.0558405,
-      "upstream_inference_prompt_cost": 0.0360285,
-      "upstream_inference_completions_cost": 0.019812
+      "upstream_inference_cost": 0.056839,
+      "upstream_inference_prompt_cost": 0.038311,
+      "upstream_inference_completions_cost": 0.018528
     },
     "completion_tokens_details": {
-      "reasoning_tokens": 463,
+      "reasoning_tokens": 516,
       "image_tokens": 0,
       "audio_tokens": 0
     }
@@ -39,44 +39,45 @@
     "11-phone-impact.png",
     "12-phone-jump.png",
     "13-phone-ladder.png",
-    "14-phone-returning.png"
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
   ],
   "dropped_for_cap": [],
   "items": [
     {
-      "id": "clarify-dual-stick-input",
-      "title": "Make the two fight controls understandable before the first exchange",
-      "what": "On the active portrait fight screen, the bottom half contains two large circular pads with only tiny arrow glyphs and the labels \"STANCE\" and \"TECHNIQUE.\" The mapping is only explained by the small two-column strip above them (for example, \"\u25c0 step \u25b2 jump\" and \"\u25c0 reverse \u25b6 forward\"), while the round-intro screen shows the same unexplained controls behind the FIGHT button.",
-      "why": "A first-time touch player has to infer that each pad accepts eight directions, that the left pad changes movement, and that the right pad selects attacks. In a 30-second bout, that learning cost is likely to cause immediate misses and make the game feel unresponsive rather than tactical.",
-      "how": "During the first qualifier, add a short, dismissible input tutorial: pulse the left pad with \"Drag: step / jump / crouch,\" then pulse the right pad with \"Drag a direction to attack.\" Show the selected direction and resulting move name directly beside the active thumb position for the first few inputs, then reduce the permanent legend to a cleaner compact version."
+      "id": "loading-progress-invisible",
+      "title": "Make the loading state show unmistakable progress",
+      "what": "On the ShoeMoney pre-boot screen, the long bar beneath \u201cDownloading the game\u201d appears as a nearly empty dark brown hairline, with no clearly visible filled portion or percentage. The player can read that the game is downloading but cannot tell whether it is advancing or stalled.",
+      "why": "This is the first screen a player sees, and an ambiguous loader makes a browser game feel frozen or unreliable before they have played.",
+      "how": "Render a high-contrast gold fill inside the existing track from 0\u2013100%, animate it only from real asset progress, and add a compact numeric state such as \u201cDownloading 62%\u201d or \u201cPreparing dojo\u2026\u201d above the bar. Keep the warm palette, but ensure the fill differs clearly from the unfilled track at phone brightness."
     },
     {
-      "id": "fix-bottom-control-cropping",
-      "title": "Keep the control labels and touch targets clear of the bottom edge",
-      "what": "In multiple portrait gameplay screenshots, the lower part of the right control is pressed into the viewport edge: the \"TECHNIQUE\" label is visibly cut off or obscured at the very bottom. In the lunge-punch frame, the label is mostly hidden behind the selected-stick treatment and screen edge.",
-      "why": "The right stick is the attack control, so any clipping at the bottom makes the most important input feel unsafe to touch and makes its role harder to read. It also looks like the HUD has failed to fit the phone screen.",
-      "how": "Reserve a fixed bottom safe-area for both pads and their labels. Scale the dials down slightly or move the whole controls block upward so every ring, directional indicator, and label has at least 16 px of bottom clearance on the 390x844 baseline; test with browser UI/safe-area insets enabled."
+      "id": "landscape-control-dead-zone",
+      "title": "Fix the landscape layout\u2019s enormous unused control area",
+      "what": "In the 1280\u00d7800 landscape gameplay screenshot, the dojo ends around y=570, leaving a large nearly black lower band. The stance and technique controls sit as small circles in the extreme lower corners, separated by roughly a thousand pixels of empty space.",
+      "why": "A player who rotates their phone gets tiny, edge-hugging touch targets and loses a large amount of usable screen area. It looks like the game failed to reflow rather than intentionally adapting to landscape.",
+      "how": "Add a dedicated landscape layout: extend the arena farther down, scale each stick to at least the current portrait touch diameter, and anchor the sticks inset from the lower-left and lower-right safe areas. Use the freed center-bottom space for the control legend or contextual move feedback rather than an empty black field."
     },
     {
-      "id": "tame-hit-flash-clipping",
-      "title": "Reduce the hit flash that destroys fighter readability",
-      "what": "In the impact screenshot with the \"IPPON\" callout, the white-gi fighter becomes a near-solid white shape from the waist through the head, while a huge pale bloom spreads across the left-middle of the tatami. The opponent's kick and the defender's actual body pose become difficult to parse at the moment the game needs to communicate the result.",
-      "why": "A decisive hit should be the clearest frame in the bout. Here the exposure/bloom treatment reads more like a rendering blowout than a precise combat confirmation, weakening both readability and the premium photoreal-sprite presentation.",
-      "how": "Keep a localized impact burst, but clamp bloom before compositing and protect the fighter sprite luminance with a mask or lower bloom threshold on character layers. Use a short radial spark/shock-ring centered on the contact point instead of flooding the defender's full torso and the floor with white."
+      "id": "control-legend-obscures-arena",
+      "title": "Stop the persistent control legend from covering the fight space",
+      "what": "During portrait gameplay, the wide \u201cSTANCE / TECHNIQUE\u201d instruction card occupies the band immediately above both sticks, from roughly y=866 to y=953. It overlays the tatami directly below the fighters and remains present in multiple active-fight screenshots.",
+      "why": "The card competes with the fighters and move-result feedback for the player\u2019s lower-screen attention, while repeating information already expressed by the directional arrows on the two controls. In a fast touch game, that is visual obstruction where a player is looking for spacing and foot position.",
+      "how": "Show this card only for the first few seconds of the first bout, then collapse it into a small tappable \u201c?\u201d beside MOVES. On later bouts, reveal a single short contextual hint only after an unused input or pause, and let the arena run cleanly from the fighters down to the controls."
     },
     {
-      "id": "repair-sprite-pose-edges",
-      "title": "Clean up the fighter sprite cutouts and awkward kick silhouette",
-      "what": "The fighters read as sharply cut photographic sprites against the rendered dojo: their outlines, especially hair, sleeves, and feet, have a pasted-on edge rather than matching the scene's soft volumetric lighting. The \"FRONT KICK\" screenshot is most distracting: the raised white trouser leg ends in a broad, flat-looking white shape with a tiny disconnected-looking foot edge on its left.",
-      "why": "The dojo has convincing warm depth and floor perspective, so rough sprite edges stand out immediately. The front-kick silhouette can make a core move look broken or visually unfinished instead of powerful.",
-      "how": "Re-export the offending pose with a corrected alpha matte and intact foot silhouette, then apply consistent contact shadows beneath each planted foot. Add a restrained warm rim/ambient grade and depth-aware softening to sprite edges so they inherit the dojo lighting without flattening the deliberately cinematic scene."
+      "id": "technique-list-input-legibility",
+      "title": "Make the move-list input recipes readable at phone size",
+      "what": "On the TECHNIQUES screen, every move recipe is represented by two small outlined circular direction icons, a tiny plus sign, then the move name. The controls are packed tightly into rows, while the pale-blue directional glyphs and gray \u201cmid \u00b7 Half point\u201d metadata are comparatively low-contrast against the brown panel.",
+      "why": "The move list is where a new player learns the central combat system. If they cannot quickly decode which stick directions to combine, they will return to play without understanding how to intentionally perform techniques.",
+      "how": "Enlarge the input diagrams and color-code the first input as stance blue and the second as technique gold, matching the live controls. Increase the metadata contrast, add a one-line header such as \u201cHold stance direction + flick technique direction,\u201d and make each row tappable to play a short silent in-panel input animation rather than relying solely on static icons."
     },
     {
-      "id": "make-score-and-countdowns-legible",
-      "title": "Disambiguate the score fractions and small numbered button badges",
-      "what": "The result screen shows \"HASANABI WINS\" and a score of \"0 \u2014 2\u00bd,\" while the header also displays Hasanabi's score as \"2\u00bd.\" Separately, the large round-intro button reads \"FIGHT\" with a small dark circle containing \"2\" in one screenshot and \"4\" in another; the circle has no visible label explaining whether it is a countdown, round number, or input prompt.",
-      "why": "Point-karate scoring already needs quick comprehension. Fractional scores without a visible scoring key, plus unexplained numerals attached to the primary action, leave players uncertain about who is ahead and whether they must wait or tap to begin.",
-      "how": "Label the scoring unit where it first appears, such as a brief \"Half points enabled\" tooltip or an always-readable result breakdown (for example, \"2 points + 1 half point\"). Replace the unlabeled FIGHT badge with explicit copy such as \"FIGHT \u2014 starts in 2\" and animate it as a countdown; remove the badge entirely when the button is immediately actionable."
+      "id": "settings-screen-empty-misgrouped-record",
+      "title": "Remove the orphaned record message from Settings",
+      "what": "The SETTINGS screen has six options in the upper third, then almost the entire lower screen is empty. At the very bottom, below a divider, it says \u201cNo bouts yet \u2014 your record starts with your first fight.\u201d This reads as an unrelated record panel stranded inside Settings.",
+      "why": "The empty space and unrelated footer make the settings screen feel unfinished, and the player has no clear destination for viewing their actual match record once bouts exist.",
+      "how": "Move the record status to a dedicated Profile/Record entry reachable from the main fight flow, or replace the footer with settings-specific content such as version/build and reset controls. If no additional settings are planned, shorten the panel to its content height so the close action and options form a deliberate, complete sheet."
     }
   ],
   "raw": null
