@@ -370,6 +370,41 @@ export class Hud {
   /** Builds the technique reference list straight from content — no second copy of the move list. */
   renderTechniques(container: HTMLElement, moves: ReadonlyMap<string, MoveSpec>): void {
     container.replaceChildren();
+
+    // A key, once, for the two glyphs every row is built from.
+    //
+    // Each row reads "[stance] + [technique]". The group heading above already
+    // names the technique direction, so the second glyph is explained by where
+    // you are — but the first one is the stance, and nothing on the sheet ever
+    // said so. A player looking up a move sees two circles and a plus and has
+    // to guess which is which.
+    //
+    // gpt-5.6-terra put it as "make the move-list input recipes readable at
+    // phone size" and grok-4.5 as "two unlabeled icons plus a bare '+' with no
+    // key". The size was never the problem and neither was the glyphs; there
+    // was no key.
+    const key = document.createElement('p');
+    key.className = 'tech-key';
+    const item = (pip: string, word: string): HTMLElement => {
+      const span = document.createElement('span');
+      span.className = 'tech-key-item';
+      const dot = document.createElement('span');
+      dot.className = 'tech-pip';
+      dot.setAttribute('aria-hidden', 'true');
+      dot.textContent = pip;
+      const label = document.createElement('span');
+      label.className = 'tech-key-word';
+      label.textContent = word;
+      span.append(dot, label);
+      return span;
+    };
+    const join = document.createElement('span');
+    join.className = 'tech-plus';
+    join.setAttribute('aria-hidden', 'true');
+    join.textContent = '+';
+    key.append(item('·', 'stance'), join, item('·', 'technique'));
+    container.append(key);
+
     for (const family of FAMILIES) {
       const group = document.createElement('section');
       group.className = 'tech-group';

@@ -1881,6 +1881,30 @@ body.high-contrast .setting-row input[type="checkbox"]:checked::before {
   color: var(--gold);
 }
 
+/* The key, once, for the two pips every row is made of. */
+.tech-key {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-2);
+  border-block-end: 1px solid var(--edge-faint);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.tech-key-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.tech-key-word {
+  color: var(--text-muted);
+}
+
 .tech-list {
   list-style: none;
   margin: 0;
