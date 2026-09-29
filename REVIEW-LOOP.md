@@ -1668,3 +1668,54 @@ raised, which is a different and more useful signal than a fix.
   flash was halved in round 26 and the sparks given tapers in round 46.
 - `teach-first-attack` (gpt-5.6-luna-pro),
   `move-hint-vertical-bloat` (glm-4.5v) — the coach, sixth appearance.
+
+### Round 51 — qwen3.5-397b-a17b — `9453de1`
+
+- `incomplete-match-info: "missing match format details"` (qwen3.5-397b) —
+  **ACCEPTED, and the only finding in that batch that was neither stale nor
+  already fixed.**
+
+  The first-run coach teaches the two sticks. The moves sheet teaches every
+  technique and what it scores. **Nothing in the game says what the rules
+  are** — that one clean contact ends the exchange, that IPPON is a full point,
+  that first to two takes the round.
+
+  That matters more than it sounds. This is point karate and most players have
+  never watched it, so the one thing the sport is famous for — a single clean
+  hit ends the exchange, no health bars — is invisible until they win one and
+  do not know why.
+
+  It lives on the moves sheet, not the round card. The card is four seconds
+  long and already carries the round name, the opponent, their tell and a
+  button. The sheet is the screen a player opens when they do not understand
+  something, and until now nothing on it told them what they were looking at.
+
+  **The loop has spent fifty rounds on how the controls look and never once on
+  what the game is. That is what a model that reads the screen literally is for
+  and it took a literal reading to surface.**
+
+- Stale this round: `persistent-instruction-clutter` (coach, seventh appearance,
+  first-run only), `redundant-prefight-interaction` (refuted round 40),
+  `text-heavy-moves-list` (keyed in round 45). Three of four, which is now the
+  normal yield and is worth reading as signal: the loop is close to exhausted on
+  what a screenshot of the first fifteen seconds can show.
+- `mistralai/mistral-medium-3-5` — 429 again; `openai/gpt-5.1-mini` — not a
+  valid slug.
+
+### ⚠ Known unstable gate — `boot.spec.ts` › "a result card never pulls focus away from someone typing"
+
+Recorded because it is a red gate that is **not** caused by any recent change,
+and the next person to hit it should not spend a round bisecting their own work.
+
+It plays a full 1800-tick bout on a software renderer and intermittently dies
+part-way with `Target page, context or browser has been closed`. Evidence:
+
+- Fails on **clean `main`**, stashed, on one project; passes on the other.
+- Passes at 31.5s on a settled machine; fails at 21–50s on a busy one.
+- Alternates which project fails between runs.
+
+Not touched. The test's own comment already says it exists to outlast a whole
+bout and sets a 180s timeout for exactly this reason, so the assertion is not
+the problem — the renderer is. It wants a real fix (probably a memory ceiling
+or a shorter bout for that one test), and that is a separate piece of work from
+anything the review loop has found.
