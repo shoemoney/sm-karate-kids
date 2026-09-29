@@ -44,7 +44,7 @@ successive rounds are not five variants of the same opinion.
 | 5 | `x-ai/grok-4.20` | xAI | landed `b0197d6` |
 | 6 | `moonshotai/kimi-k3` | Moonshot | landed `f1fd3cf` |
 | 7 | `qwen/qwen3.8-omni-flash` | Alibaba | landed `dd37810` |
-| 8 | `bytedance-seed/seed-2.0-code` | ByteDance | pending |
+| 8 | `bytedance-seed/seed-2.0-code` | ByteDance | landed `d5336dd` |
 | 9 | `deepseek/deepseek-v4.1-flash` | DeepSeek | pending |
 | 10 | `mistralai/mistral-medium-3.1` | Mistral | pending |
 | 11 | `meta-llama/llama-4-maverick` | Meta | pending |
@@ -269,3 +269,29 @@ Nothing in the loop was looking at a *given* screen across time. The re-capture
 each round is what surfaced it — not because a reviewer got better, but because
 the previous round's fix put the marks in front of the sticks for the first
 time and someone finally looked at that combination.
+
+### Round 8 — bytedance-seed/seed-2.0-code — `d5336dd`
+
+- `pre-fight-controls-unlabeled-hidden` — **a round-1 regression, found eight
+  rounds later.** The rule that stands the sticks down behind a dialog was also
+  matching the pre-fight round card, so during the countdown that *ends* in the
+  fight the pad sat at 18% and the STANCE and TECHNIQUE labels were barely
+  legible. The round card is not a dialog you dismiss to return to gameplay; it
+  is the thing that hands you the controls. Dimming it is the exact opposite of
+  the rule's intent. Now scoped to real sheets and the post-fight result, using
+  the `data-phase` attribute round 4 added.
+- `countdown-button-number-ambiguous` — "FIGHT · 3" put a bare numeral on a
+  gold pill next to a scoreboard, where a bare numeral reads as a point total.
+  The digit now sits in its own dark chip, with an aria-label for voice.
+- `settings-toggle-state-unclear` — **rejected: the evidence cannot show it.**
+  The capture has all six toggles OFF. Asserting an active/inactive problem
+  from six unchecked boxes is not evidence of anything.
+- `loading-progress-bar-empty` — fourth round to photograph the MEASURING
+  state as an empty bar.
+
+**Two regressions, both mine, both from "a rule that was right in one place".**
+Round 1's dim-behind-modals rule and round 3's hide-the-knob-while-coaching
+rule were each correct where they were written and wrong one context away. The
+loop only found them because each round re-captured the whole product, and a
+model looking at a composition that a *previous* round had just created is
+looking at something no reviewer had seen before.
