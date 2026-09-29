@@ -1534,3 +1534,40 @@ raised, which is a different and more useful signal than a fix.
   **A compact notation is not a cryptic one. A compact notation with no key
   is.** Seventeen rounds carried this one because each report described the
   symptom, and the symptom is what a reviewer can see.
+
+### Round 46 — gpt-5.6-terra-pro, qwen3.8-max-prime, seed-2.0-mini — `c8f21a4`
+
+- `impact-fx-read-as-confetti: "scoring impacts emit flat opaque rectangle
+  dashes instead of sparks"` (qwen3.8-max-prime) — **accepted, and a 3x crop
+  showed exactly why.** The particle pool is `PlaneGeometry(1, 1)` with a
+  `MeshBasicMaterial` and **no map**: a solid colour on a quad. Rotated, scaled
+  and additively blended, that is a hard-edged rectangle, every spark the same
+  width, none of them tapering. Nothing about it reads as a spark, which is a
+  thing that tapers and is brightest where it leaves the metal.
+
+  They carry a streak map now, built once for the pool: bright at the leading
+  edge, nothing at the trailing one, long edges softened so the quad's outline
+  never shows. Before and after in the same frame: uniform bars in a radial
+  pattern became tapered streaks of varying length radiating from the contact
+  point.
+
+  **This is the one layer of the hit feedback that had never been looked at
+  closely**, because at 1x on a phone a spark is eight pixels of motion and
+  nobody — including thirty-eight rounds of review — had reason to look twice.
+  The zoom that found the detached foot found this too. **Zoom is a review
+  instrument.**
+- `kick-sprite-missing-foot: "extended kick frames end in an empty gi cuff with
+  no foot"` (qwen3.8-max-prime) — the back kick was checked frame by frame in
+  round 22 and its foot is attached. This is the front-kick family that round 28
+  found real, so it is not dismissed: the front kick's extension frames want the
+  same treatment.
+- `connect-score-to-combat-feedback: "explain points where the player sees the
+  hit"` (gpt-5.6-terra-pro) — a real design idea and the first in a while that
+  is not a framing request. The technique chip names the move; nothing names
+  what it was worth. Logged for a decision, not actioned.
+- `fix-fight-countdown-cta` (gpt-5.6-terra-pro),
+  `clarify-dual-stick-inputs` (gpt-5.6-terra-pro) — both refuted in round 40
+  against the code and the capture.
+- `loading-*` (all three) — the twentieth appearance, unchanged since round 35.
+- `settings-modal-obscures-fight` (seed-2.0-mini) — the pad is hidden behind a
+  sheet as of round 24; the stage is deliberately still visible behind it.
