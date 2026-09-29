@@ -1902,3 +1902,55 @@ work and it is not something this review loop found.
   at `90152ff`.
 - `control-hint-obstruction` (qwen3.6-flash), `clarify-control-language`
   (gpt-5.6-luna) — the coach, eighth appearance, first-run only.
+
+### Round 57 — seed-2.0-lite, gpt-5.6-terra, claude-opus-5
+
+- `twin-sticks-indistinguishable: "the two dials are visual twins; the only
+  difference is a 6px dot, and the active-drag ring draws outside the pad"`
+  (claude-opus-5) — **ACCEPTED IN PRINCIPLE, NOT LANDED, and the attempt is
+  reverted.**
+
+  Accurate. Two identical bronze pucks either side of the screen, told apart by
+  a pip at 0.4 opacity, in a game where picking the wrong stick costs a point.
+
+  The fix was to stop using two different *colours* — the hardest distinction to
+  make at a glance — and use two different *marks*: the stance stick's filled,
+  the technique stick's hollow. Shape survives colour blindness, survives a dim
+  tungsten room, and survives being looked at for half a second mid-bout,
+  which is how a thumb actually finds it. It also says something true: the
+  stance stick is the root you stand on, the technique stick is the expression
+  on top of it.
+
+  **It did not work and has been reverted.** Both pips still render filled and
+  the same size after the change, across a re-captured frame. Rather than ship
+  a style change I could not see working, it is reverted and logged as open.
+
+  Two candidate causes worth a look next round and neither was chased here: a
+  later `--pip` redefinition at line 2299 that changes the value both rules
+  read, and a `body.coach-active .knob::after` at line 1569 that outranks a
+  plain class rule. The returning-player capture has no `coach-active`, so that
+  one is unlikely, which leaves the redefinition — but confirming it needs a
+  computed-style read, not another screenshot.
+
+  **This is the second time in this loop that a change has been thrown away
+  because a capture showed it was not doing what the DOM said** — round 20's
+  rings stepping down off the pad, and this. Both times the code was right and
+  the picture was not, and both times the picture won.
+- `backwards-settings-toggle-state: "two settings toggles incorrectly show
+  active state when they are disabled"` (seed-2.0-lite) — **open, and it is a
+  state-correctness claim rather than a look**, which is the only kind in this
+  round that is worth chasing. In `15-phone-settings-mixed` two switches are
+  genuinely on, so the frame does not show a bug; what it needs is a
+  state-versus-effect check — toggle Mute sound and confirm audio actually
+  mutes, toggle the performance HUD and confirm it actually appears. Not done
+  here.
+- `sprites-not-graded-into-dojo` (claude-opus-5) — the warm grade landed in
+  round 49 and is visible in the captures; this is the second report of it and
+  the first to arrive after the fix.
+- `no-impact-moment-on-ippon` (claude-opus-5) — the impact stack, rebuilt in
+  rounds 23, 26 and 46.
+- `non-interactive-pre-fight-button` (seed-2.0-lite) — the whole button is the
+  skip, stated in the caption added in round 34.
+- `make-loading-progress-legible` / `loading-bar-shows-no-progress`
+  (gpt-5.6-terra, claude-opus-5) — the twenty-fourth and twenty-fifth
+  appearances, unchanged since round 35.

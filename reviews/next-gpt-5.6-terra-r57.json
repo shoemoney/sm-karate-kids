@@ -1,0 +1,85 @@
+{
+  "model": "openai/gpt-5.6-terra",
+  "elapsed_s": 28.2,
+  "usage": {
+    "prompt_tokens": 16238,
+    "completion_tokens": 1589,
+    "total_tokens": 17827,
+    "cost": 0.0596615,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 16235,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0596615,
+      "upstream_inference_prompt_cost": 0.0405935,
+      "upstream_inference_completions_cost": 0.019068
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 516,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "clarify-fight-start",
+      "title": "Remove the conflicting Fight button and automatic countdown",
+      "what": "On the portrait qualifier screen, the large center button says \u201cFIGHT,\u201d but directly beneath it the UI says \u201cSTARTING IN 2\u201d (and another capture says \u201cSTARTING IN 4\u201d). The screen gives two contradictory signals: tap to begin versus the bout will begin without input.",
+      "why": "This is a first-session decision point. A new player can waste the opening seconds waiting for the button, or tap it without understanding whether it did anything, before they have learned the twin-stick controls.",
+      "how": "Choose one start behavior. If the bout is automatic, replace the button with a non-interactive countdown treatment such as \u201cGET READY \u2014 2.\u201d If tapping starts play, remove the auto-start line and show a clear \u201cTap FIGHT to begin\u201d state until pressed."
+    },
+    {
+      "id": "fix-landscape-layout",
+      "title": "Do not expose the broken landscape play layout",
+      "what": "The landscape gameplay screenshot has the dojo compressed into the upper half of the 1280\u00d7800 frame, while a very large black empty region occupies the lower half. The two sticks sit isolated in opposite bottom corners with no supporting HUD, leaving most of the touch area visually abandoned.",
+      "why": "Although portrait is the intended phone baseline, mobile browsers can enter landscape through rotation. This presentation looks like an unfinished responsive state and makes the fighter/action area much smaller than it should be.",
+      "how": "Lock the experience to portrait and show a branded rotate-device interstitial when landscape is detected. If landscape must remain playable, rebuild its layout: expand the arena vertically into the available space, keep controls anchored closer to the arena edge, and eliminate the empty black lower field."
+    },
+    {
+      "id": "make-loading-progress-legible",
+      "title": "Give the loading screen visible progress and a stronger focal point",
+      "what": "On the ShoeMoney pre-boot screen, the progress bar around the lower-middle is an almost uniformly dark brown line with no discernible filled portion. The logo and copy are confined to a small central band while most of the 390\u00d7844 screen is near-black empty space.",
+      "why": "This is the player's first impression and the text explicitly says \u201cDownloading the game,\u201d yet the screen does not visibly reassure them that work is progressing. On a dim phone display it can read as stalled.",
+      "how": "Render a high-contrast warm-gold fill inside the existing track, update it continuously from real loading progress, and include a numeric percentage or changing asset status. Keep the low-key cinematic background, but enlarge the central logo/content group or add a restrained dojo-detail silhouette so the screen does not feel empty."
+    },
+    {
+      "id": "improve-score-readability",
+      "title": "Make half-point scoring readable at a glance",
+      "what": "In the loss/result screenshot, Hasanabi\u2019s \u201c2\u00bd\u201d is split awkwardly in the top scoreboard: the large \u201c2\u201d sits high while the \u201c1/2\u201d fraction is much smaller and dropped below it. The result line \u201c0 \u2014 2\u00bd\u201d is clearer, but still uses a tiny superscript-style fraction relative to the other numerals.",
+      "why": "Point totals are the primary competitive feedback. A player should be able to read the score in under a second during a 30-second bout; the stacked fraction can look like an extra, detached HUD value rather than part of the score.",
+      "how": "Use a single score token with consistent baseline alignment: render \u201c2\u00bd\u201d as one large glyph/string, or use \u201c2.5\u201d in the compact top HUD. Match its cap height and visual weight to the integer score, and reserve fractional styling only for the post-bout detail view if desired."
+    },
+    {
+      "id": "simplify-move-reference",
+      "title": "Make the moves reference scannable on a phone",
+      "what": "The TECHNIQUES panel presents each move as several tiny circular direction icons, a plus sign, a move name, and a small \u201cmid/high/low \u00b7 half/full point\u201d label on one row. In the portrait capture, rows such as \u201cStepping Lunge Punch\u201d and \u201cCrouching Reverse Punch\u201d are dense, and the next section is visibly clipped at the bottom with no obvious scroll affordance.",
+      "why": "The move list is meant to teach the core control language, but the fine iconography and tightly packed metadata are hard to parse quickly on a 390px-wide phone. Players may close it without retaining which inputs produce which attacks.",
+      "how": "Increase the directional-input icons and row height, use stronger contrast for the input sequence, and move height/score metadata to a second lighter line or a compact right-aligned badge. Add a visible \u201cSwipe up for more\u201d cue or persistent scroll indicator at the lower edge, and open the panel at the relevant current direction when launched from the Moves button."
+    }
+  ],
+  "raw": null
+}

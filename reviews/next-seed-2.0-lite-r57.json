@@ -1,0 +1,85 @@
+{
+  "model": "bytedance-seed/seed-2.0-lite",
+  "elapsed_s": 56.3,
+  "usage": {
+    "prompt_tokens": 22123,
+    "completion_tokens": 2811,
+    "total_tokens": 24934,
+    "cost": 0.01115275,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.01115275,
+      "upstream_inference_prompt_cost": 0.00553075,
+      "upstream_inference_completions_cost": 0.005622
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 2101,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "static-loading-progress-bar",
+      "title": "Initial loading screen shows no visible download progress",
+      "what": "On the boot loading screen, the thin horizontal progress bar below the 'Downloading the game' text is completely empty and static, with no fill animation, percentage label, or loading state indicator.",
+      "why": "Users have no way to tell if the game is stuck, how long loading will take, and will abandon the page early out of uncertainty.",
+      "how": "Animate the progress bar to fill proportionally as assets load, add a small percentage label adjacent to the bar, and add a subtle breathing animation if loading stalls longer than 1 second."
+    },
+    {
+      "id": "control-panel-occludes-fighters",
+      "title": "Persistent move hint panel and joysticks block fighter visibility",
+      "what": "On the active fight screen, the move hint text panel above the dual joysticks cuts off the bottom edge of the fighters' feet, and the large joysticks occupy ~32% of the vertical phone screen, leaving minimal space for the fight arena.",
+      "why": "Foot position and stance are critical visual cues for judging attack range, players cannot see full fighter animations during active play.",
+      "how": "Collapse the persistent move hint panel to only appear for 1 second immediately after a move executes, shrink the joysticks by 15% vertically, and shift the entire control group down 10px to free up arena space."
+    },
+    {
+      "id": "backwards-settings-toggle-state",
+      "title": "Two settings toggles incorrectly show active state when they are disabled",
+      "what": "On the settings screen, 'Mute sound' and 'Show performance HUD' toggles have the yellow filled 'enabled' visual state, but the game plays audio and displays no performance HUD during active play, confirming the toggles are reversed.",
+      "why": "Users will tap the toggles expecting to enable the feature, and instead accidentally disable it, leading to unexpected missing audio or UI clutter.",
+      "how": "Correct the toggle default state so only actively enabled features show the yellow filled slider, all disabled options use the empty white slider matching the other settings entries."
+    },
+    {
+      "id": "inconsistent-half-point-score-ui",
+      "title": "Half point scoring uses inconsistent formatting that confuses new players",
+      "what": "The post-fight results screen uses a stacked superscript fraction (2\u00bd) to show partial points, while the top match HUD only displays integer scores with no indicator that a half point has been earned.",
+      "why": "Players cannot quickly tell how close they are to winning/losing a round during play, the fraction formatting is non-standard for mobile UI.",
+      "how": "Standardize all score displays to use decimal notation (e.g. 2.5) everywhere, add a small dot next to the integer score on the top HUD to indicate a half point has been earned during the round."
+    },
+    {
+      "id": "non-interactive-pre-fight-button",
+      "title": "Pre-fight 'FIGHT' button is decorative and cannot skip countdown",
+      "what": "On the pre-fight qualifier screen, the large prominent golden 'FIGHT' button has no tap interaction, and the countdown only shows a static integer with no ticking animation.",
+      "why": "Players instinctively tap the large button to skip the wait, receive no feedback, and assume the game is frozen or unresponsive.",
+      "how": "Add tap functionality to the 'FIGHT' button to skip the remaining pre-fight countdown, and add a subtle pulse animation to the countdown number as it ticks down each second."
+    }
+  ],
+  "raw": null
+}
