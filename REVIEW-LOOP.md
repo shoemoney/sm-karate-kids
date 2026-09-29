@@ -1149,3 +1149,48 @@ is what a corrected sample does.
   `combat-floating-move-text-placement` — framing, in its twenty-first
   iteration, and the one family of request that has never once produced a
   change. Standing: warm and low.
+
+### Round 35 — gpt-5.4-mini, qwen3.7-plus, glm-5.3-flash — `c7c3acf`
+
+- `loader-bar-reads-stuck: "boot screen's progress bar sits at 100% while still
+  saying 'Downloading the game'"` (glm-5.3-flash) — **OPEN, and the most
+  specific finding the loop has produced.** The capture confirms it exactly. The
+  intended design is an empty track plus a 38% travelling sheen, and
+  `data-measuring="true"` is set when the shot is taken, so the CSS ought to be
+  drawing something else.
+
+  Not resolved. Every DOM-level measurement of this card came back inconsistent
+  with the stylesheet, and the probe that reported "zero style rules" is itself
+  a pre-CSS reading — the same class of mistake as round 32's contrast numbers.
+  Not guessed at, and not fixed blind. The harness now guarantees a styled page
+  before capture, which is the first thing needed to measure it properly.
+
+- **The boot capture never waited for the stylesheet.** 600ms after `commit`
+  under throttle, `document.styleSheets` enumerates **zero** style rules. So
+  every boot screenshot in the loop's history has been a page with no CSS on it
+  unless the load happened to beat the timer. Fixed, on top of round 32's
+  animation wait. Two waits, one underlying lesson.
+
+  **Chasing the contrast of one card has now cost two rounds and produced one
+  real fix, one measurement artefact and one open question.** That ratio is the
+  finding as much as anything else this round.
+- `settings-sheet-uses-too-much-empty-space` (gpt-5.4-mini) — **already fixed,
+  in the same round it was reported.** The career line is now a pinned footer.
+  A model reporting a regression of mine that I had already found and fixed two
+  rounds earlier.
+- `repeated-sticks-confuse-controls: "remove the duplicate stick labels below
+  the joysticks"` (gpt-5.4-mini), `redundant-control-legend` (qwen3.7-plus),
+  `input-legend-always-on` (glm-5.3-flash) — the fourth appearance, and the
+  conflation is now explicit: these models are reading the always-visible
+  STANCE/TECHNIQUE labels and the first-run-only coach as one thing. They are
+  not. The labels name the two sticks; the coach teaches the grammar and
+  retires once both have been used. `14-phone-returning` exists to show the
+  difference and is in the set.
+- `low-contrast-round-pill` (qwen3.7-plus) — worth measuring next round.
+- `moves-notation-cryptic: "two unlabeled icons plus a bare '+' with no key"**
+  (glm-5.3-flash) — the moves rows do carry a per-group header naming the stick
+  direction. The icons themselves are still an unexplained glyph pair.
+- `oversized-default-controls`, `distant-fighter-framing`,
+  `portrait-fighter-scale`, `match-ui-occupies-combat`,
+  `battlefield-cropped-by-control-dock` — framing, twenty-second iteration.
+  Standing: warm and low, pad at 27.0% of an 844px screen.
