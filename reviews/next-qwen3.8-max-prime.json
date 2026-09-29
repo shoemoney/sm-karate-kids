@@ -1,0 +1,84 @@
+{
+  "model": "qwen/qwen3.8-max-prime",
+  "elapsed_s": 120.0,
+  "usage": {
+    "prompt_tokens": 12295,
+    "completion_tokens": 7847,
+    "total_tokens": 20142,
+    "cost": 0.143344,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.143344,
+      "upstream_inference_prompt_cost": 0.04918,
+      "upstream_inference_completions_cost": 0.094164
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 6469,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "portrait-fighters-too-small",
+      "title": "Fighters fill only ~25% of the portrait frame while the top 40% is empty shoji wall",
+      "what": "In every in-bout capture (the neutral stance frames, the LUNGE PUNCH and FRONT KICK callout frames), the two sprites span roughly y=620-1040 of the 1680px-tall capture, i.e. about a quarter of the screen, while y=100-600 is uninterrupted empty wall/windows and y=1050-1130 is empty mat before the legend panel. The callout pills (LUNGE PUNCH, FRONT KICK) float in that dead void instead of near the action.",
+      "why": "On the 390x844 design baseline the fighters are only ~200pt tall. Reading foot placement, weight shift and kick height IS the game, and players are doing it at thumbnail scale while their thumbs cover the bottom third. The most expensive pixels on the phone (upper middle) carry nothing during play.",
+      "how": "Tighten the bout camera: target the midpoint between fighters at chest height and reduce camera distance / raise focal length until the pair fills ~50-60% of the space between HUD bottom and legend top (feet just above the legend, heads ~15% headroom reserved for callouts). Clamp the target horizontally each frame so the framing holds while they step."
+    },
+    {
+      "id": "kick-sprite-missing-foot",
+      "title": "Extended kick frames end in an empty gi cuff with no foot",
+      "what": "In the FRONT KICK capture, the white gi fighter's raised kicking leg terminates in a blunt white sleeve cuff at roughly x=345,y=770 with no bare foot beyond it, while every standing pose clearly shows skin-toned bare feet. The leg reads as amputated exactly at the extension peak.",
+      "why": "Reach and timing are judged from the silhouette of the kicking limb; a missing foot removes the contact-point cue from the player's own technique and looks like broken art in the moment most likely to be clipped and shared.",
+      "how": "Patch the kick frames in the sprite atlas: composite a bare foot (same skin tone and scale as the stance feet) past the cuff on every extended-leg frame, then audit all 15 technique frames for clipped limbs by rendering each frame's silhouette and flagging limbs that end without a hand/foot blob."
+    },
+    {
+      "id": "loading-bar-shows-no-progress",
+      "title": "Pre-boot progress bar is a uniform brown line with no fill, percent, or stage text",
+      "what": "On the ShoeMoney pre-boot screen the bar at y~1075 is a single flat tan-brown rounded line edge to edge; there is no distinguishable fill head, no percentage, and the label above it reads only the static 'Downloading the game' with no stage change visible.",
+      "why": "This is the first screen of the product, and WebGPU shader compile + asset warm-up on a phone can take many seconds. With zero motion or stage feedback a player on a cold cache cannot tell loading from a hang and backgrounded-kills the tab before the dojo ever appears.",
+      "how": "Drive the fill width from real progress (asset bytes, then compile/warm-up steps), contrast fill vs track (e.g. tungsten gold fill on near-black track), and swap the label per stage ('Downloading', 'Compiling shaders', 'Warming dojo') with a percent readout; add a slow shimmer on the track while a stage is unmeasurable."
+    },
+    {
+      "id": "intro-fight-button-covers-fighters",
+      "title": "The FIGHT button sits on top of both fighters' shins and feet during the intro",
+      "what": "On the qualifier intro overlays (STARTING IN 4 / 3 / 2), the gold FIGHT pill occupies y~1030-1160, directly over the lower legs: the white fighter's feet and ankles are completely hidden behind it and the red fighter's front foot is clipped by its right edge. Directly below, 'STARTING IN n' promises an auto-start that competes with the tap-to-fight affordance.",
+      "why": "The intro is the player's first clean look at the matchup and at stance tells (foot spacing, weight bias) the scout text just taught them to watch; occluding the feet wastes it, and the button-vs-countdown ambiguity leaves players unsure whether tapping does anything.",
+      "how": "Move the button into the empty band between the fighters' feet (~y=1050) and the stick row (~y=1260) at reduced height (~64pt), or shift the intro camera target up so feet clear the button; render the countdown as a depleting ring around the button edge and make tap = start immediately, removing the separate 'STARTING IN' line."
+    },
+    {
+      "id": "impact-fx-read-as-confetti",
+      "title": "Scoring impacts emit flat opaque rectangle dashes instead of sparks",
+      "what": "In the IPPON capture (spinning back kick connect), the hit effect at the white fighter's head is ~a dozen hard-edged, flat yellow and cream rotated rectangles radiating outward (x~280-380, y~570-800). They have no taper, no glow, and do not interact with the bloom chain, sitting on top of the photoreal sprites like paper confetti.",
+      "why": "The scoring hit is the climax of every loop and the strongest feedback moment in the bout; placeholder-looking sparks undersell the impact, make the photoreal art direction look unfinished, and degrade every replay clip taken from the win moment.",
+      "how": "Replace the rectangle quads with additive tapered streak sprites (bright core, alpha falloff along length) scaled by point value, plus a 60-80ms hitstop, a one-frame radial flash at the contact point, and a temporary bloom-threshold dip so the spark core blooms through the existing TSL chain."
+    }
+  ],
+  "raw": null
+}

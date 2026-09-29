@@ -1,0 +1,84 @@
+{
+  "model": "bytedance-seed/seed-2.0-mini",
+  "elapsed_s": 22.5,
+  "usage": {
+    "prompt_tokens": 20849,
+    "completion_tokens": 2683,
+    "total_tokens": 23532,
+    "cost": 0.0031581,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0031581,
+      "upstream_inference_prompt_cost": 0.0020849,
+      "upstream_inference_completions_cost": 0.0010732
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 2118,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-bar-invisible",
+      "title": "Thin loading progress bar is unreadable",
+      "what": "The pre-boot loading screen has an extremely thin horizontal brown progress line, barely distinguishable against the dark background, so players can\u2019t track download progress easily.",
+      "why": "Players feel uncertain about wait time, leading to frustration especially on slower mobile connections.",
+      "how": "Increase progress bar height to 8px, use a warm gold fill for the progress segment, and add a subtle dark outline to boost contrast against the background."
+    },
+    {
+      "id": "joystick-size-cramped",
+      "title": "Over-sized joysticks reduce fight area",
+      "what": "In portrait fight screens, the two stance/technique joysticks take ~30% of vertical screen height, leaving only ~40% for the combat zone (fighters + dojo backdrop), making fights feel cramped.",
+      "why": "The cinematic dojo atmosphere is diminished, and reduced space makes tracking fighter movements harder during combat.",
+      "how": "Reduce joystick diameter by 25% and reposition them closer to the screen\u2019s bottom edge to free up vertical space for the fight area."
+    },
+    {
+      "id": "score-half-point-ambiguous",
+      "title": "Half-point score is hard to parse",
+      "what": "In post-fight and fight screens, the score uses a small, low-contrast '\u00bd' character for partial points, making it difficult to quickly read exact score values.",
+      "why": "Players need to track scores at a glance during fights; unclear scores cause confusion about match state.",
+      "how": "Use a larger, bolder font for score values, replace the half-point symbol with '0.5' for clarity, or add a high-contrast outline to the half-point character."
+    },
+    {
+      "id": "move-labels-unreadable",
+      "title": "Fight move labels are illegible mid-action",
+      "what": "The move descriptions above joysticks (e.g., '\u25c0 step \u25b2 jump') are small, low-contrast text, so players can\u2019t quickly reference controls during active combat.",
+      "why": "Fast reaction times are critical; unclear controls lead to avoidable mistakes and frustration.",
+      "how": "Increase move label font size by 50%, use a bold weight, and add padding to the label bar to improve readability."
+    },
+    {
+      "id": "settings-modal-obscures-fight",
+      "title": "Settings modal blocks combat view",
+      "what": "The settings screen is a full-width modal that covers the lower half of fighters when opened, obscuring the combat area while adjusting settings.",
+      "why": "Players can\u2019t monitor the fight while tweaking settings mid-round, disrupting gameplay flow.",
+      "how": "Resize the settings modal to 80% screen width, center it horizontally, and position it in the middle of the screen so it doesn\u2019t fully cover the fighters."
+    }
+  ],
+  "raw": null
+}

@@ -1,6 +1,7 @@
 import {
   AdditiveBlending,
   NormalBlending,
+  CanvasTexture,
   Color,
   Mesh,
   MeshBasicMaterial,
@@ -66,6 +67,43 @@ export interface Flashable {
   recoil?(amount: number, facing: 1 | -1): void;
 }
 
+/**
+ * A spark, drawn once and shared by every particle in the pool.
+ *
+ * Bright and hard at the leading edge, tapering to nothing at the trailing
+ * one, with the long edges softened so the quad it is painted on does not show.
+ * Additive blending does the rest.
+ */
+function sparkStreak(): CanvasTexture {
+  const w = 128;
+  const h = 32;
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const g = canvas.getContext('2d');
+  if (g !== null) {
+    const along = g.createLinearGradient(0, 0, w, 0);
+    along.addColorStop(0, 'rgba(255,255,255,0)');
+    along.addColorStop(0.55, 'rgba(255,255,255,0.35)');
+    along.addColorStop(0.9, 'rgba(255,255,255,1)');
+    along.addColorStop(1, 'rgba(255,255,255,0.9)');
+    g.fillStyle = along;
+    g.fillRect(0, 0, w, h);
+    // Soften the long edges so the quad's own outline never shows.
+    const across = g.createLinearGradient(0, 0, 0, h);
+    across.addColorStop(0, 'rgba(0,0,0,1)');
+    across.addColorStop(0.5, 'rgba(0,0,0,0)');
+    across.addColorStop(1, 'rgba(0,0,0,1)');
+    g.globalCompositeOperation = 'destination-out';
+    g.fillStyle = across;
+    g.fillRect(0, 0, w, h);
+    g.globalCompositeOperation = 'source-over';
+  }
+  const tex = new CanvasTexture(canvas);
+  tex.needsUpdate = true;
+  return tex;
+}
+
 export class Juice {
   private readonly particles: Particle[] = [];
   private readonly dustPool: Particle[] = [];
@@ -94,6 +132,7 @@ export class Juice {
   ) {
     this.artBaseUrl = baseUrl;
     const geometry = new PlaneGeometry(1, 1);
+    const streak = sparkStreak();
     // Two pools with fixed blending. One shared pool meant switching a
     // material's blending on every spark, which forces a shader rebuild on
     // the exact frame the hit lands.
@@ -101,6 +140,14 @@ export class Juice {
       const dust = i >= POOL_SIZE - DUST_POOL;
       const material = new MeshBasicMaterial({
         color: dust ? DUST : SPARK,
+        // Sparks carry a tapered streak map. Without one they are plane
+        // quads with a solid colour, which at 3x is exactly what they looked
+        // like: hard-edged rectangles of uniform width, all the same length,
+        // with no taper and no glow. qwen3.8-max-prime read them as "flat
+        // opaque rectangle dashes" and "confetti", and they were right — a
+        // spark is a thing that tapers and is brighter where it leaves the
+        // metal, and a rectangle is neither.
+        map: dust ? null : streak,
         transparent: true,
         opacity: 0,
         depthWrite: false,
