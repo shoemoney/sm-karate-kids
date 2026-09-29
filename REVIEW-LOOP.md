@@ -948,3 +948,36 @@ And the process failure that let it live nine rounds: in round 22 I bursted the
 *back* kick, found it clean, and refuted a finding that was about a *different
 move*. A correct refutation scoped to the wrong thing is worse than no
 refutation, because it looks like diligence.
+
+### Round 30 — grok-4.3, gpt-5.3-codex, qwen3.5-plus-02-15 — `3149f0a`
+
+- `settings-toggle-contrast: "poor off-state visibility"` (grok-4.3) — lifted
+  the off track again, #2a2019 → #352a20. Round 21 moved it off pure black and
+  round 25 put the state system into the review set, but the value was still a
+  guess rather than a measured one.
+- `low-contrast-stick-affordance: "default virtual sticks are too dim to read
+  at a glance"` (gpt-5.3-codex), following deepseek-v4-flash r27,
+  qwen3.8-flash r21 and glm-5.3-flashx r20 — **four reports over four rounds.**
+  `--detent-idle` 0.36 → 0.52 helped and did not close it; 0.68 now. Verified
+  at 1:1 on a re-captured stick.
+- `technique-popup-size` (grok-4.3) and `micro-text-under-pressure`
+  (gpt-5.3-codex) — the move callout, one step under body size and a full step
+  down in colour. Now body size on `--text-muted`.
+- `stick-input-feedback-mismatch: "stick visualizer shows raw touch position,
+  not snapped input"` (qwen3.5-plus-02-15) — worth a look, not yet checked.
+- `loading-progress-bar`, `loading-progress-visibility` — the MEASURING state,
+  in its thirteenth appearance across ten providers.
+- `controls-visible-during-countdown` (grok-4.3) — the pre-fight card is
+  deliberately excluded from modal dimming; documented in the stylesheet.
+- `fighters-look-pasted-over-the-mat` (gpt-5.3-codex),
+  `sprites-not-graded-into-scene` (claude-opus-5.5) — two models, independently,
+  saying the fighters are not graded into the warm tungsten scene. Real art
+  direction note, and the opposite of the standing "make it brighter" rejection:
+  this asks for the sprites to match the room, not the room to match them.
+- `mistralai/mistral-small-2603` — 429, upstream shared pool rate-limited. Not a
+  model defect; retry later.
+
+**Process note.** The callout edit was a `str.replace(pattern, 1)` over a
+file-wide pattern. It reported success, changed a different rule 400 lines
+earlier, and left `.technique` untouched. All three edits are now whole-rule
+matches with an `assert count == 1`, so a miss is loud.
