@@ -752,6 +752,25 @@ body.show-perf #backend {
   flex: 0 0 auto;
 }
 
+.score-frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: baseline;
+  line-height: 0.78;
+  margin-inline-start: 0.04em;
+  translate: 0 -0.12em;
+  font-size: 0.52em;
+  font-weight: var(--weight-bold);
+}
+
+.score-frac-bar {
+  inline-size: 0.62em;
+  block-size: 0.09em;
+  background: currentColor;
+  border-radius: 1px;
+}
+
 .side[data-side="0"] .points {
   color: var(--fighter-0);
 }

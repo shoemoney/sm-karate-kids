@@ -1,0 +1,84 @@
+{
+  "model": "openai/gpt-5.2",
+  "elapsed_s": 25.8,
+  "usage": {
+    "prompt_tokens": 15325,
+    "completion_tokens": 1667,
+    "total_tokens": 16992,
+    "cost": 0.05015675,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.05015675,
+      "upstream_inference_prompt_cost": 0.02681875,
+      "upstream_inference_completions_cost": 0.023338
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 632,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-bar-clarity",
+      "title": "Make the pre-boot download progress legible and informative",
+      "what": "Pre-boot loading screen (ShoeMoney logo): the progress bar is a 1\u20132px-tall line near the very bottom edge with very low contrast against the dark background, and there\u2019s no numeric progress (no %/MB), so it reads like a decorative divider rather than progress.",
+      "why": "In the first 5 seconds, players judge whether the game is working; an unreadable progress indicator increases bounce and \u201cstuck loading\u201d reports.",
+      "how": "Increase bar height to ~6\u20138px, raise contrast (lighter fill + darker track), and add a compact label above it (e.g., \u201cDownloading\u2026 42%\u201d or \u201c12/28 MB\u201d) centered; also move the bar up by ~24\u201332px to avoid bottom-edge/gesture-area ambiguity."
+    },
+    {
+      "id": "pregame-ui-staging",
+      "title": "Hide/disable the twin-stick controls during the QUALIFIER intro/countdown",
+      "what": "QUALIFIER intro screen (with big \u201cFIGHT\u201d button): both large virtual sticks are already visible and look active under the CTA, while the UI also says \u201cSTARTING IN 2/3/4\u201d; this creates three competing focal points (title card, Fight button, sticks) in the lower half.",
+      "why": "It\u2019s unclear what the player should do (tap FIGHT vs. start moving sticks), which is costly on first-match comprehension for a touch-first game.",
+      "how": "Stage the UI: during intro/countdown, either (a) hide the sticks entirely and show a single CTA (Tap to start / Fight), or (b) show the sticks at reduced opacity with a \u201cLocked\u201d state and no thumb indicators; fade them in and enable input only when the round actually begins."
+    },
+    {
+      "id": "half-point-formatting",
+      "title": "Fix half-point score rendering so it can\u2019t read as \u201c21/2\u201d",
+      "what": "Results screen (\u201cHASANABI WINS\u201d): the top-right score shows a half point as a stacked \u201c2 1/2\u201d style string (visually reads like \u201c21/2\u201d) rather than an unambiguous \u201c2.5\u201d or true \u201c2\u00bd\u201d glyph.",
+      "why": "Point-karate scoring is already nonstandard for many players; ambiguous typography makes the win condition feel confusing/untrustworthy.",
+      "how": "Standardize on one format everywhere: either render halves as decimal (2.5) or use a single-character fraction glyph (\u00bd) from a font that supports it; if using a glyph, include it in the UI font subset and render as one token (no slash layout)."
+    },
+    {
+      "id": "sprite-grounding-shadows",
+      "title": "Add contact shadows to anchor the photoreal fighters to the tatami",
+      "what": "In-fight screens (dojo background): both fighters\u2019 feet look like they\u2019re sitting on top of the mat texture with little/no localized darkening under soles; the lack of a tight contact shadow makes them read as cutouts floating over the floor.",
+      "why": "This breaks the \u2018premium\u2019 look immediately (mixed 3D + photoreal sprites) and reduces depth/impact when strikes land because characters don\u2019t feel physically placed in the scene.",
+      "how": "Add a shadow-catcher pass under each fighter: a soft blob/contact shadow (elliptical, blurred) that scales/offsets with stance and foot positions; if you have per-fighter depth, use a simple projected shadow quad; otherwise, attach 1\u20132 blobs to each ankle/foot bone and blend multiply at ~20\u201335% opacity."
+    },
+    {
+      "id": "combat-hint-readability",
+      "title": "Increase readability of the stance/technique hint strip and directional cues",
+      "what": "In-fight HUD (above the sticks): the \u201cSTANCE / TECHNIQUE\u201d hint strip uses very small text and thin arrow glyphs; on the 390px-wide portrait shots it\u2019s hard to parse at a glance, and the tiny left/right/up/down markers compete with the similarly subtle chevrons around the sticks.",
+      "why": "Players can\u2019t quickly learn the control language, leading to random swipes/inputs and early churn\u2014especially critical in the first round.",
+      "how": "Bump hint-strip font size and weight (e.g., +2\u20133px and semibold), increase contrast (lighter text or darker pill), and replace tiny triangle glyphs with the same iconography used on the sticks (matching arrow/chevron shapes); optionally show only the last input + next expected input instead of the full list to reduce density."
+    }
+  ],
+  "raw": null
+}

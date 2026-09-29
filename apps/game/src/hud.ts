@@ -14,11 +14,25 @@ const FAMILY_GLYPH: Record<AttackFamily, string> = {
   down: '▼',
 };
 
+/**
+ * The technique stick's four directions.
+ *
+ * These said "Right stick forward/back/up/down" until round 53, which is
+ * console vocabulary on a game that ships two thumb sticks on a touch pad and
+ * no gamepad input at all — and it contradicted the key at the top of this very
+ * sheet, which has said "STANCE + TECHNIQUE" since round 45. One screen using
+ * two names for the same control, one of them for hardware the player does not
+ * have.
+ *
+ * mimo-v2.6-pro put it as "uses console 'stick' language" and it is exactly
+ * right. Round 28 fixed half of this problem by aligning the coach legend to
+ * the sheet; the other half is this.
+ */
 const FAMILY_LABEL: Record<AttackFamily, string> = {
-  forward: 'Right stick forward',
-  back: 'Right stick back',
-  up: 'Right stick up',
-  down: 'Right stick down',
+  forward: 'Technique forward',
+  back: 'Technique back',
+  up: 'Technique up',
+  down: 'Technique down',
 };
 
 const QUALIFIER_GLYPH: Record<Qualifier, string> = {
@@ -41,6 +55,44 @@ const POINT_LABEL = new Map<number, string>([
   [2.5, '2½'],
   [3, '3'],
 ]);
+
+/**
+ * A score, as a stacked fraction where there is a half in it.
+ *
+ * The U+00BD glyph is not usable here. In this font stack — and in most system
+ * sans faces on every platform this ships to — it renders as a *slashed*
+ * fraction, so `2½` reads as "21/2" at a glance. gpt-5.2 said exactly that:
+ * "fix half-point score rendering so it can't read as 21/2", and it is right.
+ *
+ * It also made round 36's fix worse rather than better. That change replaced a
+ * decimal `2.5` — ambiguous, but at least one character per digit — with a
+ * glyph that is visually three characters wide and reads as three. A notation
+ * chosen to be unambiguous turned out to be less so.
+ *
+ * Two stacked numerals are unambiguous on every platform, are not a glyph
+ * anyone can misread, and are smaller than the slashed form, which also buys
+ * back the width that made `10½` clip in round 43.
+ */
+function renderScore(el: HTMLElement, score: number): void {
+  const whole = Math.floor(score);
+  if (score === whole) {
+    el.textContent = POINT_LABEL.get(score) ?? String(whole);
+    return;
+  }
+  const frac = document.createElement('span');
+  frac.className = 'score-frac';
+  const top = document.createElement('span');
+  top.className = 'score-frac-num';
+  top.textContent = '1';
+  const bar = document.createElement('span');
+  bar.className = 'score-frac-bar';
+  const bottom = document.createElement('span');
+  bottom.className = 'score-frac-num';
+  bottom.textContent = '2';
+  frac.append(top, bar, bottom);
+  el.replaceChildren(document.createTextNode(whole === 0 ? '' : String(whole)), frac);
+  el.setAttribute('aria-label', `${whole} and a half`);
+}
 
 export class Hud {
   private readonly points = [el('points-0'), el('points-1')];
@@ -90,7 +142,7 @@ export class Hud {
     for (const index of [0, 1] as const) {
       const score = state.fighters[index].score;
       const el = this.points[index]!;
-      el.textContent = POINT_LABEL.get(score) ?? String(score);
+      renderScore(el, score);
       if (score > this.lastScores[index]) Hud.replay(el, 'pop');
       this.lastScores[index] = score;
     }

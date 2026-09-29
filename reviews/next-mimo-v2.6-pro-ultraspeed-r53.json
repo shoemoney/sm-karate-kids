@@ -1,0 +1,84 @@
+{
+  "model": "xiaomi/mimo-v2.6-pro-ultraspeed",
+  "elapsed_s": 29.9,
+  "usage": {
+    "prompt_tokens": 12269,
+    "completion_tokens": 5789,
+    "total_tokens": 18058,
+    "cost": 0.10373445,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.10373445,
+      "upstream_inference_prompt_cost": 0.05337015,
+      "upstream_inference_completions_cost": 0.0503643
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 4226,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-bar-no-feedback",
+      "title": "Loading screen gives zero progress feedback, so it reads as a frozen page",
+      "what": "Pre-boot ShoeMoney screen (first screenshot): the progress bar at y\u2248815 is a ~500px-wide empty rounded outline with only a faint gold hairline \u2014 no fill, no percentage, no shimmer, and the only status is the static line 'Downloading the game' at y\u2248775. Everything from y=0\u2013430 and y=880\u20131280 is empty brown-black.",
+      "why": "This is the first 5 seconds of the product. With a permanently empty bar and no moving numbers, mobile users assume the game is stuck, close or reload the tab, and often never come back \u2014 a fresh reload also re-pays the whole asset download cost.",
+      "how": "Bind the bar to real loaded bytes/asset count so the gold fill advances continuously, put a live percentage right-aligned inside the bar ('37%'), and rotate micro-status text in the 'Downloading the game' slot ('compiling shaders\u2026', 'building dojo\u2026', 'packing fighters\u2026'). If actual progress is chunky, add a moving sweep only while bytes arrive and switch to 'Still working \u2014 slow connection?' after 3s of no progress."
+    },
+    {
+      "id": "fighter-sprite-matte-halo",
+      "title": "Fighters read as pasted photo cut-outs with matte halos and camera-flat lighting",
+      "what": "In every bout screen (screenshots 3, 4, 13, 15) the sprites show hard cut-out edges: a bright, slightly cool matte rim along the white gi's shoulder and outer arm, a fuzzy light halo where the hair overlaps the shoji windows at y\u2248470\u2013520, and both fighters lit flat front-on while the dojo's key light is warm and from behind/above. Feet sit on the mat with a body-wide shadow instead of a contact blend.",
+      "why": "Photoreal fighters are the stated differentiator; on a 390px screen at arm's length the halos and mismatched light direction make them look like cardboard standees, undercutting the cinematic 'tungsten and tatami' promise in the first frame of gameplay.",
+      "how": "Erode/feather sprite alpha by 1px to kill the light fringe, and grade each atlas toward the scene palette (multiply a warm tungsten gradient coming from the upper-back light source, plus a 1\u20132px gold rim on the top/back-facing silhouette edges to match the banner glow). Replace the full-body shadow with a soft contact ellipse under each foot plus one low, offset cast shadow matching the shoji light direction."
+    },
+    {
+      "id": "portrait-fight-strip-composition",
+      "title": "In portrait the fight is squeezed into a 350px strip while a third of the screen is empty wall",
+      "what": "Portrait bout (screenshots 3, 4, 13): fighters occupy only y\u2248440\u2013790 of the 844px frame, heads at ~55% screen height. Above them, y\u2248130\u2013430 is a nearly empty blurred wall band whose only content is the MOVES + gear buttons in the top-right; below, the mat runs to y\u2248870 before the legend card and sticks begin. The bottom 400px is UI, the top 300px is nothing.",
+      "why": "The core skill of point karate is reading reach and distance; when the fighters are a small strip with dead space above, players cannot judge when a Lunge Punch will land, and the empty top third looks like an asset that failed to load rather than a designed dojo.",
+      "how": "Raise and push in the camera: put the fighters' eye line at ~40% frame height and scale the sprites ~1.25x so feet sit just above the legend card at y\u2248870; shift the shoji/crowd band upward so the empty wall above the heads is \u2264120px; let the MOVES/gear buttons sit against the lit shoji instead of floating in a dark void, and let bloom from the windows occupy the reclaimed top area."
+    },
+    {
+      "id": "auto-start-countdown-vs-cta",
+      "title": "Auto-start countdowns contradict the primary buttons and force a rematch after a loss",
+      "what": "Intro card (screenshots 2, 11, 14) shows a large gold FIGHT button with 'STARTING IN 2' printed directly beneath it; the result screen (screenshot 8) shows REMATCH with 'STARTING IN 8' under it. The countdown ticks independently of the button \u2014 there is no way to stop it, and after losing 0\u20132\u00bd the player is pulled into another bout within 8 seconds.",
+      "why": "Two affordances telling opposite stories makes the big gold CTA look decorative, and a player who is still reading 'BOUTS WON 0/1' on the loss screen gets yanked into a fight they did not choose \u2014 the single most common 'this game plays itself' complaint on touch.",
+      "how": "Make the button authoritative: tapping FIGHT/REMATCH starts instantly. Keep an auto-continue only on the pre-round intro, rendered as its own small row ('Auto-start in 8' + a tappable 'Cancel' link) that halts the timer on tap; remove the countdown from the results screen entirely and instead offer a second, quieter 'Back to menu' target beside REMATCH."
+    },
+    {
+      "id": "techniques-modal-touch-language",
+      "title": "Techniques list uses console 'stick' language, cryptic glyphs, and a row sliced in half at the modal edge",
+      "what": "Techniques modal (screenshot 6) is sectioned under gold headings '\u25b8 RIGHT STICK FORWARD', '\u25b8 RIGHT STICK BACK', '\u25b8 RIGHT STICK UP', each row led by a tiny circle-with-dot / circle-with-triangle glyph pair that does not match the chevrons used on the on-screen pads. The final visible row 'Roundhouse Kick' is cut mid-glyph at the modal's bottom edge with no scrollbar, fade, or count, and the right-hand 'mid \u00b7 Half point' meta is dim gray at ~12px.",
+      "why": "This is the only rules surface in a touch-first game, and it describes hardware the phone player does not have; the truncated row makes the list look broken and many players will assume there are only 11 moves, so they never learn the half-point/full-point economy the round is built on.",
+      "how": "Retitle sections by the on-screen control ('TECHNIQUE \u2192 (flick right)', 'TECHNIQUE \u2191 (flick up)', 'STANCE \u25b2 + TECHNIQUE \u2192'), redraw the row glyphs as the exact chevrons the HUD legend card already uses, add 24px bottom padding with a fading scroll mask plus a '11 of 20 techniques' counter, and lift the right-hand meta to \u226513px at full opacity in the same gold as the headings."
+    }
+  ],
+  "raw": null
+}
