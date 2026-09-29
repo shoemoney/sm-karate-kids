@@ -133,6 +133,8 @@ const TINT_STRENGTH = 0.7;
 export class Stage {
   readonly scene = new Scene();
   readonly camera = new PerspectiveCamera(FOV, 1, 0.1, 200);
+  /** The painted room, scaled to cover the frustum. See coverBackdrop(). */
+  private backdropPanel: Mesh<PlaneGeometry, MeshBasicMaterial> | null = null;
   private width = 1;
   private height = 1;
   private distance = 8;
@@ -344,6 +346,7 @@ export class Stage {
       panel.material.color.set('#968675');
       panel.position.set(0, 5.4, BACKDROP_Z + 0.05);
       this.scene.add(panel);
+      this.backdropPanel = panel;
     }
 
     if (crowd !== null) {
@@ -535,6 +538,36 @@ export class Stage {
     this.height = height;
     this.camera.aspect = width / Math.max(height, 1);
     this.camera.updateProjectionMatrix();
+    this.coverBackdrop();
+  }
+
+  /**
+   * Scale the painted room so it fills the frustum at any aspect.
+   *
+   * It was a fixed 34x15 world-unit plane, sized for a tall phone: portrait
+   * covers it and nothing shows past the edge. Landscape does not — the
+   * horizontal frustum at that distance is far wider than 34 units, so the
+   * plane's own edges appear inside the viewport as two hard vertical seams,
+   * with flat scene-background either side of them. That is the "pillarboxing"
+   * and "hard-edged backdrop plane" that gemini-3.6-flash, qwen3.6-27b,
+   * qwen3.5-397b-a17b and gpt-5.4-pro have all reported, and it is the single
+   * most-repeated unresolved finding in the loop.
+   *
+   * Cover, not contain: take the larger of the two ratios, so the room always
+   * reaches the edges and crops rather than letterboxes. The plane's aspect is
+   * allowed to change — it is a painted room behind a lit one, and the visible
+   * part of it is the middle either way.
+   */
+  private coverBackdrop(): void {
+    const panel = this.backdropPanel;
+    if (panel === null) return;
+    const halfFov = (FOV * Math.PI) / 360;
+    const dist = Math.abs(this.camera.position.z - (BACKDROP_Z + 0.05));
+    const visH = 2 * dist * Math.tan(halfFov);
+    const visW = visH * this.camera.aspect;
+    const base = panel.geometry.parameters;
+    const k = Math.max(visW / base.width, visH / base.height);
+    panel.scale.set(k, k, 1);
   }
 
   /**
