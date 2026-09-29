@@ -1571,3 +1571,20 @@ raised, which is a different and more useful signal than a fix.
 - `loading-*` (all three) — the twentieth appearance, unchanged since round 35.
 - `settings-modal-obscures-fight` (seed-2.0-mini) — the pad is hidden behind a
   sheet as of round 24; the stage is deliberately still visible behind it.
+
+### Round 47 — verifying the round-28 lesson was actually learned
+
+- `kick-sprite-missing-foot: "extended kick frames end in an empty gi cuff with
+  no foot"` (qwen3.8-max-prime) — **refuted, from the atlas.** Pulled
+  `front_kick` frames 61–66 out of `shiro-1.webp` and looked at all six: guard,
+  knee lifting, knee up, extending, **fully extended with the foot on the end
+  of the leg**, retracting. The foot is there.
+
+  And frame 65 — the fully extended one, bottom-middle above — is the exact
+  frame that carried a detached foot floating beside the fighter until round 29
+  erased it. It now reads clean.
+
+  Worth noting how this one was checked, because round 28 is the reason. That
+  round refuted the same family on the *back* kick, correctly, and let a correct
+  refutation of one move dismiss a finding about fourteen. This time the move
+  named in the report was the move that was opened.
