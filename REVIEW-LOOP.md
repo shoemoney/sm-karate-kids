@@ -1475,3 +1475,41 @@ raised, which is a different and more useful signal than a fix.
   raised to `--text-sm` in round 30 for the coach legend but not these.
 - `openai/gpt-5.6-sol-pro-ultra` and `qwen/qwen3.8-flash:free` — invalid and
   retired slugs respectively.
+
+### Round 44 — gpt-5.6-terra — `4fa8c45`
+
+- `settings-screen-empty-misgrouped-record: "remove the orphaned record message
+  from Settings"` — **ACCEPTED, and it is round 34's complaint arriving ten rounds
+  late.** gemini-3.5-flash-lite called the same thing "orphaned career stats" in
+  round 34. Round 35 tried to fix it and failed, by pinning the career line to
+  the bottom of a mostly-blank screen — and gpt-5.6-terra came back describing
+  the same emptiness in a new position.
+
+  Both fixes treated the symptom. The cause is round 24, which made every sheet
+  full-screen because the *Techniques* list needed the whole height. Six rows do
+  not. The settings sheet is a panel now: sized to its content, anchored under
+  its header, ending where its content ends — which also leaves the dojo
+  visible beneath it, so the player can see they are in a game with a panel open
+  over it. 469px of an 844px screen; the X still closes it.
+
+  **The emptiness was never the problem. The full-screen sheet was, and two
+  rounds of tidying inside it could not fix it because they were tidying the
+  wrong container.**
+
+  Third appearance of the same shape as the strip in round 15: a fix applied to
+  the right principle and the wrong scope, re-raised every few rounds until
+  somebody goes back and asks *why the container is that shape at all*.
+- `landscape-control-dead-zone` (gpt-5.6-terra) — landscape, seventh model.
+  Backdrop closed at `90152ff`; the control composition is the architecture
+  argument, unchanged.
+- `control-legend-obscures-arena` (gpt-5.6-terra) — the coach, fifth
+  appearance, first-run only, and `14-phone-returning` is in the set.
+- `technique-list-input-legibility: "make the move-list input recipes readable at
+  phone size"` (gpt-5.6-terra) — the glyph pairs in the moves rows. Real and
+  unchanged: they carry a per-group header naming the stick direction, but the
+  glyph itself is still an unexplained arrow.
+- `loading-progress-invisible` (gpt-5.6-terra) — the nineteenth appearance.
+  Unchanged since round 35 established the cause.
+- `qwen/qwen3.5-27b-instruct` — not a valid slug; the catalogue entry has an
+  `-instruct` suffix the API does not accept.
+  `mistralai/mistral-large-2512` — 429, Mistral's shared pool again.
