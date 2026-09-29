@@ -76,6 +76,14 @@ def main() -> int:
     ap.add_argument("model")
     ap.add_argument("shotdir")
     ap.add_argument("--out")
+    ap.add_argument(
+        "--max-images",
+        type=int,
+        default=0,
+        help="Cap the number of screenshots sent. Some providers refuse more "
+        "than 8 (Mistral: 'Total number of images exceeds the maximum allowed "
+        "of 8'). Keeps the highest-value screens when over the cap.",
+    )
     ap.add_argument("--key-file", default=os.path.expanduser("~/.config/openrouter/key"))
     args = ap.parse_args()
 
@@ -94,6 +102,16 @@ def main() -> int:
     if not shots:
         print(f"no images in {args.shotdir}", file=sys.stderr)
         return 2
+
+    dropped: list[str] = []
+    if args.max_images and len(shots) > args.max_images:
+        # Keep the highest-value screens: the ones a player spends the most
+        # time looking at, in the order the harness names them. Boot, fight,
+        # strike, controls, result, settings, moves, desktop.
+        priority = ("00-", "02-", "07-", "04-", "06-", "05-", "08-")
+        shots.sort(key=lambda p: next((i for i, pre in enumerate(priority) if pre in p), 99))
+        dropped = [os.path.basename(p) for p in shots[args.max_images :]]
+        shots = shots[: args.max_images]
 
     content = [{"type": "text", "text": PROMPT}]
     for path in shots:
@@ -173,6 +191,7 @@ def main() -> int:
         "elapsed_s": round(elapsed, 1),
         "usage": usage,
         "shots": [os.path.basename(s) for s in shots],
+        "dropped_for_cap": dropped,
         "items": parsed,
         "raw": None if parsed else text,
     }

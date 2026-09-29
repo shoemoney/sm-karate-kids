@@ -46,7 +46,7 @@ successive rounds are not five variants of the same opinion.
 | 7 | `qwen/qwen3.8-omni-flash` | Alibaba | landed `dd37810` |
 | 8 | `bytedance-seed/seed-2.0-code` | ByteDance | landed `d5336dd` |
 | 9 | `deepseek/deepseek-v4.1-flash` | DeepSeek | landed `e627548` |
-| 10 | `mistralai/mistral-medium-3.1` | Mistral | pending |
+| 10 | `mistralai/mistral-medium-3.1` | Mistral | reviewed — 0 of 5 accepted |
 | 11 | `meta-llama/llama-4-maverick` | Meta | pending |
 | 12 | `cohere/command-a-plus` | Cohere | pending |
 | 13 | `amazon/nova-premier-v1` | Amazon | pending |
@@ -329,3 +329,36 @@ a thumb, a diagnostic in the clock's slot), and a rule that was right in one
 context and wrong in another (dimming during a countdown, hiding a knob that
 was the affordance). The findings that die are almost all reads of a still
 frame — motion, depth, and state that the capture cannot show.
+
+### Round 10 — mistralai/mistral-medium-3.1 — **0 of 5 accepted**
+
+The first round where nothing survived verification, logged as such because a
+log that implies every model finds gold is not a log.
+
+Mistral refuses more than 8 images (`Total number of images exceeds the maximum
+allowed of 8`), so the harness grew `--max-images` and keeps the
+highest-value screens when over a provider's cap. It saw 8 of 11.
+
+- `fighter-shadow-anchoring` ("cast no visible shadows") — **rejected on a
+  crop.** Round 4 raised the contact shadow to 0.66 alpha with a hard core;
+  the mat shows two clear dark pools under the two stances. This is the third
+  model to report a defect that a previous round had already fixed, and the
+  first to do it about something measured two rounds earlier.
+- `rematch-button-glare` ("bloom washes out the text and edges") — **rejected
+  on a crop.** The `REMATCH` glyphs are the darkest thing on the button. There
+  is a warm halo around the pill, which is the art direction.
+- `hud-score-legibility` — **rejected.** `.points` is `var(--text)`, near-white
+  on a dark bar, and the gold clock already carries the 2px dark stroke round
+  5 added for exactly this claim.
+- `loading-logo-contrast` — **rejected on policy.** Same as round 7: the mark
+  is proprietary, and AGENTS.md forbids recolouring, filtering or restyling it.
+- `settings-toggle-visibility` — **rejected, fourth time, same reason.** Every
+  toggle in the capture is off; the image cannot show a checked state.
+
+**What an all-reject round means.** Ten rounds in, the obvious wins are gone and
+the remaining reports are dominated by reads of a still frame. The loop is past
+the point where a fresh model finds something new on the same eleven screens —
+which is a fact about the *screens*, not about the models. The next useful move
+is either a different set of screens (a real contact, a rematch, a loss
+position, a first-run with the coach up) or a different question. Continuing to
+re-shoot the same eleven and calling it coverage would not be.

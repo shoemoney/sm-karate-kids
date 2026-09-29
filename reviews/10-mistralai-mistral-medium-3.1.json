@@ -1,0 +1,80 @@
+{
+  "model": "mistralai/mistral-medium-3.1",
+  "elapsed_s": 8.7,
+  "usage": {
+    "prompt_tokens": 9225,
+    "completion_tokens": 596,
+    "total_tokens": 9821,
+    "cost": 0.004882,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.004882,
+      "upstream_inference_prompt_cost": 0.00369,
+      "upstream_inference_completions_cost": 0.001192
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "02-phone-fight.png",
+    "07-phone-result.png",
+    "04-phone-controls.png",
+    "06-phone-settings.png",
+    "05-phone-techref.png",
+    "08-desktop-fight.png",
+    "01-phone-title.png"
+  ],
+  "dropped_for_cap": [
+    "03-phone-strike.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png"
+  ],
+  "items": [
+    {
+      "id": "loading-logo-contrast",
+      "title": "Logo lacks punch on dark background",
+      "what": "The blue 'S' logo on the loading screen has low contrast against the black background, appearing dim and losing edge definition due to soft lighting or compression.",
+      "why": "First impression is weakened; players may not immediately recognize the brand or feel the game\u2019s energy.",
+      "how": "Add a subtle white or gold outline (1-2px) to the logo or increase its brightness/contrast in the texture to make it pop without breaking the warm aesthetic."
+    },
+    {
+      "id": "hud-score-legibility",
+      "title": "Score text blends into warm HUD",
+      "what": "The '30' center score on the HUD uses a gold/yellow color that is too close to the warm background, reducing readability at a glance.",
+      "why": "Players need to see the score instantly during fast-paced bouts; low contrast slows recognition.",
+      "how": "Change the score color to a high-contrast white with a thin black stroke or dark outline to ensure visibility against the warm HUD."
+    },
+    {
+      "id": "fighter-shadow-anchoring",
+      "title": "Fighters appear to float above the floor",
+      "what": "The sprite fighters cast no visible shadows on the tatami, making them look disconnected from the 3D floor.",
+      "why": "Breaks immersion and weakens the sense of physical presence in the dojo, a core part of the game\u2019s cinematic feel.",
+      "how": "Add a subtle, semi-transparent drop shadow beneath each fighter sprite, matched to the floor\u2019s lighting angle and color temperature."
+    },
+    {
+      "id": "rematch-button-glare",
+      "title": "Rematch button has excessive bloom glare",
+      "what": "The 'REMATCH' button\u2019s gold bloom effect is so strong that it washes out the button\u2019s text and edges, making it hard to read.",
+      "why": "Players may hesitate or mis-tap due to unclear affordance, hurting replayability flow.",
+      "how": "Reduce the bloom intensity on the button by 50% and add a subtle inner shadow to the text to improve legibility."
+    },
+    {
+      "id": "settings-toggle-visibility",
+      "title": "Settings toggles are hard to see as interactive",
+      "what": "The checkboxes in the Settings menu use a dark gray that blends into the black background, making it unclear they are tappable.",
+      "why": "Players may miss accessibility options or struggle to change settings, impacting usability.",
+      "how": "Increase the toggle contrast with a white or light gray outline and add a subtle glow or highlight on the active state."
+    }
+  ],
+  "raw": null
+}
