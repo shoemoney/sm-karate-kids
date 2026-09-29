@@ -211,6 +211,16 @@ export class Juice {
     this.punch *= Math.pow(0.0015, dt);
   }
 
+  /**
+   * How hard the frame should be pushed right now, 0..~0.14. The post stack
+   * reads this to lift saturation and grain on impact, so the visual punch
+   * decays on exactly the same curve as the camera punch-in — the hit and its
+   * colour kick end together instead of one trailing the other.
+   */
+  impactPunch(): number {
+    return this.punch;
+  }
+
   /** Apply shake and punch-in on top of wherever the stage put the camera. */
   applyCamera(nowMs: number): void {
     if (this.punch > 0.001) {

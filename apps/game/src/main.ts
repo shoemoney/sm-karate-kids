@@ -25,6 +25,7 @@ import { PlayerInput } from './input/index.js';
 import { loadCareer, loadPlayerName, recordBoutResult, recordRun, savePlayerName } from './persist.js';
 import { Leaderboard } from './leaderboard.js';
 import { createRenderer } from './renderer.js';
+import { createPostStack } from './post.js';
 import { FighterRig, loadEmblem } from './rig.js';
 import { SettingsStore, type Settings } from './settings.js';
 import { tryLoadSpriteViews } from './spriteRig.js';
@@ -213,9 +214,15 @@ async function boot(): Promise<void> {
     fighterMode = 'mesh';
   }
 
-  const stage = new Stage(state.arena);
+  const stage = new Stage(state.arena, import.meta.env.BASE_URL);
   for (const view of views) stage.scene.add(view.root);
   hud.setNames(state.fighters[0].spec.name, state.fighters[1].spec.name);
+
+  // Bloom, grade, grain and vignette. This runs on the same node system under
+  // both backends — `forceWebGL` selects the identical WebGL2 backend the
+  // automatic WebGPU fallback uses — so there is exactly one render path and no
+  // capability branch to keep in sync.
+  const post = createPostStack(renderer, stage.scene, stage.camera);
 
   const resize = (): void => {
     const width = stageEl.clientWidth;
@@ -223,6 +230,10 @@ async function boot(): Promise<void> {
     if (width === 0 || height === 0) return;
     renderer.setSize(width, height, false);
     stage.resize(width, height);
+    // PassNode re-reads the drawing buffer size every frame, so this is belt
+    // and braces rather than the mechanism — but an explicit size keeps the
+    // first frame after a rotation from allocating a stale target.
+    post.resize(width, height);
     stage.frame(0, state.separation, true);
   };
   new ResizeObserver(resize).observe(stageEl);
@@ -523,7 +534,10 @@ async function boot(): Promise<void> {
     juice.update(now, frameDt);
     juice.applyCamera(now);
     hud.update(state, now);
-    renderer.render(stage.scene, stage.camera);
+    // The impact punch decays on the same curve as the camera punch-in, so the
+    // colour kick and the hit land together instead of trailing each other.
+    post.punch.value = juice.impactPunch() * 6;
+    post.render();
 
     perfFrames += 1;
     perfTicks += ticks;
@@ -561,7 +575,16 @@ async function boot(): Promise<void> {
         p1Move: state.fighters[0].move?.id ?? null,
         lastStarted,
         p1Phase: state.fighters[0].phase,
+        p2Move: state.fighters[1].move?.id ?? null,
+        p2Phase: state.fighters[1].phase,
       }),
+      /**
+       * The atlas cell each fighter last drew, with the pose it came from and
+       * the phase the simulation was in. Lets the e2e suite assert the real
+       * renderer is running the same frame rule the unit tests pin down.
+       */
+      spriteFrames: () =>
+        views.map((view) => view.frameInfo?.() ?? { cell: -1, pose: 'none', phase: 'neutral' as const }),
       checksum: () => checksumOf(state),
       tournament: () => ({
         active: tournament,

@@ -6,7 +6,7 @@
  * no-ROM-data rules (see docs/asset-provenance.md). Every binary asset must:
  *   - exist and be non-empty
  *   - be under 512 KB
- *   - have a provenance entry in apps/game/public/brand/PROVENANCE.json
+ *   - have a provenance entry in the nearest PROVENANCE.json under public/
  *   - that entry must have non-empty source/license/holder and an
  *     `approved: true` flag
  *
@@ -14,12 +14,12 @@
  * extension (.rom, .bin, .zip, .7z).
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative, extname } from 'node:path';
+import { join, relative, extname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url));
 const PUBLIC_DIR = join(REPO_ROOT, 'apps/game/public');
-const PROVENANCE_PATH = join(PUBLIC_DIR, 'brand/PROVENANCE.json');
+
 
 const MAX_ASSET_BYTES = 512 * 1024;
 const FORBIDDEN_EXTENSIONS = new Set(['.rom', '.bin', '.zip', '.7z']);
@@ -87,31 +87,30 @@ function main(): void {
   }
   pass(`no forbidden extensions present (${[...FORBIDDEN_EXTENSIONS].join(', ')})`);
 
-  let provenanceRaw: string;
-  try {
-    provenanceRaw = readFileSync(PROVENANCE_PATH, 'utf8');
-  } catch (err) {
-    fail(
-      'apps/game/public/brand/PROVENANCE.json exists',
-      err instanceof Error ? err.message : String(err),
-    );
+  // Provenance manifests are discovered, not hardcoded. Every directory under
+  // public/ may carry its own PROVENANCE.json whose keys are relative to the
+  // public root (docs/asset-provenance.md). The root manifest covers everything
+  // with no nearer manifest, so brand/ and fighters/ keep working unchanged.
+  const manifests = new Map<string, Record<string, ProvenanceEntry>>();
+  const manifestPaths = new Set<string>();
+
+  for (const file of files.filter((f) => basename(f) === 'PROVENANCE.json')) {
+    const key = relative(PUBLIC_DIR, file).split('\\').join('/');
+    manifestPaths.add(key);
+    try {
+      const parsed = JSON.parse(readFileSync(file, 'utf8')) as Record<string, ProvenanceEntry>;
+      manifests.set(key, parsed);
+      pass(`${key} exists and parses`);
+    } catch (err) {
+      fail(`${key} is valid JSON`, err instanceof Error ? err.message : String(err));
+    }
   }
 
-  let provenance: Record<string, ProvenanceEntry>;
-  try {
-    provenance = JSON.parse(provenanceRaw) as Record<string, ProvenanceEntry>;
-  } catch (err) {
-    fail(
-      'apps/game/public/brand/PROVENANCE.json is valid JSON',
-      err instanceof Error ? err.message : String(err),
-    );
+  if (manifests.size === 0) {
+    fail('apps/game/public/brand/PROVENANCE.json exists', 'no PROVENANCE.json found under public/');
   }
-  pass('apps/game/public/brand/PROVENANCE.json exists and parses');
 
-  const provenancePathRelativeToPublic = relative(PUBLIC_DIR, PROVENANCE_PATH);
-  const assetFiles = files.filter(
-    (file) => relative(PUBLIC_DIR, file) !== provenancePathRelativeToPublic,
-  );
+  const assetFiles = files.filter((file) => !manifestPaths.has(relative(PUBLIC_DIR, file).split('\\').join('/')));
 
   for (const file of assetFiles) {
     const key = relative(PUBLIC_DIR, file).split('\\').join('/');
@@ -125,9 +124,18 @@ function main(): void {
       fail(`${label} is under 512 KB`, `size=${stat.size} bytes`);
     }
 
-    const entry = provenance[key];
+    // The manifest governing an asset is the NEAREST ancestor manifest, so a
+    // directory's own record takes precedence over the root one. Every manifest
+    // is also consulted, so a root entry still covers a file that a nearer
+    // manifest simply does not mention.
+    let entry: ProvenanceEntry | undefined;
+    for (const manifest of manifests.values()) {
+      entry ??= manifest[key];
+    }
+
     if (!entry) {
       fail(`${label} has a PROVENANCE.json entry`, `no entry keyed "${key}"`);
+      continue;
     }
     if (!isNonEmptyString(entry.source)) {
       fail(`${label} provenance has a non-empty "source"`, `source=${JSON.stringify(entry.source)}`);

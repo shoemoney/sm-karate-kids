@@ -17,8 +17,12 @@ blob-report/
 # The product spec is kept out of the public repository.
 smkk.md
 
-# Incoming art, not ready to ship yet.
-/assets/
+# Incoming art, not ready to ship yet. The generated dojo art set IS shipped,
+# and its originals are the only copy of the pre-optimization masters —
+# regenerate them with tools/gen-art.sh. A negation cannot re-include anything
+# under an excluded *directory*, so the parent has to be re-included first.
+/assets/*
+!/assets/generated/
 
 # Workflow agent worktrees.
 .claude/worktrees/

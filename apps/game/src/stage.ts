@@ -17,8 +17,11 @@ import {
   PerspectiveCamera,
   PlaneGeometry,
   PointLight,
+  RepeatWrapping,
   Scene,
+  TextureLoader,
 } from 'three/webgpu';
+import type { Texture } from 'three/webgpu';
 import type { ArenaSpec } from '@smkk/sim';
 
 const FOV = 34;
@@ -28,6 +31,44 @@ const FRAME_HALF_HEIGHT = 1.3;
 const MIN_HALF_WIDTH = 1.25;
 /** Breathing room outside the pair, in metres. */
 const EDGE_MARGIN = 0.6;
+
+/**
+ * Where the dojo furniture lives, in metres. The camera only ever dollies and
+ * pans along +Z, so these are fixed placements the frame is composed around.
+ */
+const BACKDROP_Z = -13.9;
+const CROWD_Z = -8.2;
+const SHAFT_Z = -3.2;
+
+function loadTexture(url: string, opts: { srgb?: boolean; repeat?: number } = {}): Promise<Texture> {
+  return new Promise<Texture>((resolve, reject) => {
+    new TextureLoader().load(
+      url,
+      (texture) => {
+        texture.colorSpace = SRGBColorSpace;
+        if (opts.repeat !== undefined) {
+          texture.wrapS = RepeatWrapping;
+          texture.wrapT = RepeatWrapping;
+          texture.repeat.set(opts.repeat, opts.repeat);
+        }
+        resolve(texture);
+      },
+      undefined,
+      (error) => reject(error instanceof Error ? error : new Error(String(error))),
+    );
+  });
+}
+
+/** Resolves whether a generated asset exists, without throwing on a 404. */
+async function tryLoad(url: string, opts?: { repeat?: number }): Promise<Texture | null> {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    if (!response.ok) return null;
+    return await loadTexture(url, opts ?? {});
+  } catch {
+    return null;
+  }
+}
 
 export class Stage {
   readonly scene = new Scene();
@@ -39,7 +80,7 @@ export class Stage {
   private readonly rightShadow: Mesh<CircleGeometry, MeshBasicMaterial>;
   private readonly pool: Mesh<CircleGeometry, MeshBasicMaterial>;
 
-  constructor(arena: ArenaSpec) {
+  constructor(arena: ArenaSpec, baseUrl: string) {
     const backdrop = new Color(arena.backdropColor);
     this.scene.background = backdrop;
     this.scene.fog = new Fog(backdrop, 16, 60);
@@ -60,7 +101,8 @@ export class Stage {
     this.scene.add(wall);
 
     // A tatami seam every metre. Cheap, and it makes spacing legible, which is
-    // the whole game.
+    // the whole game. Only ever visible when the generated mat texture failed
+    // to load — over real tatami they read as scratches, not seams.
     const seams = new Group();
     const seamMaterial = new MeshStandardMaterial({ color: '#8c6743', roughness: 1 });
     for (let x = -12; x <= 12; x += 1) {
@@ -141,6 +183,114 @@ export class Stage {
     this.pool.rotation.x = -Math.PI / 2;
     this.pool.position.set(0, 0.004, 0.2);
     this.scene.add(this.pool);
+
+    // The generated art layer. Every piece is optional: a missing asset leaves
+    // the procedural room exactly as it was, so the game still boots and still
+    // looks deliberate with none of them present.
+    void this.dressWithGeneratedArt(baseUrl, floor, seams);
+  }
+
+  /**
+   * Swaps the flat procedural surfaces for the generated set, one asset at a
+   * time and independently. Nothing here is allowed to throw: a 404 on one
+   * texture must not take the room down with it.
+   */
+  private async dressWithGeneratedArt(
+    baseUrl: string,
+    floor: Mesh,
+    seams: Group,
+  ): Promise<void> {
+    const [backdrop, mat, crowd, shaft, banner] = await Promise.all([
+      tryLoad(`${baseUrl}generated/dojo-backdrop.webp`),
+      tryLoad(`${baseUrl}generated/dojo-floor.webp`, { repeat: 8 }),
+      tryLoad(`${baseUrl}generated/crowd-silhouette.webp`),
+      tryLoad(`${baseUrl}generated/volumetric-shaft.webp`),
+      tryLoad(`${baseUrl}generated/banner-vertical.webp`),
+    ]);
+
+    if (mat !== null) {
+      const material = floor.material as MeshStandardMaterial;
+      material.map = mat;
+      // The generated mat is a bright, evenly-lit plate. Left at full strength
+      // it out-competes the fighters for attention and the frame reads as one
+      // flat wash. Tinted down and roughened so the mat sits UNDER the fight.
+      material.color.set('#8d7458');
+      material.roughness = 0.97;
+      material.needsUpdate = true;
+      // The procedural seams exist to make spacing legible when there is no
+      // mat texture. Over real tatami they read as scratches across the weave,
+      // so they come out as soon as the texture lands.
+      seams.visible = false;
+    }
+
+    if (backdrop !== null) {
+      // A single plane carrying the painted room, pushed behind the procedural
+      // wall so the flat wall never shows through the art. Deliberately dark:
+      // it is the room the fighters are lit AGAINST, and anything brighter
+      // than the fighters steals the silhouette.
+      const panel = new Mesh(
+        new PlaneGeometry(34, 15),
+        new MeshBasicMaterial({ map: backdrop, toneMapped: true }),
+      );
+      panel.material.color.set('#7d6e5e');
+      panel.position.set(0, 5.4, BACKDROP_Z + 0.05);
+      this.scene.add(panel);
+    }
+
+    if (crowd !== null) {
+      // Seated students behind the fighting area: depth cue and scale
+      // reference. Sunk low against the mat and pushed well back, so it reads
+      // as a distant row of spectators rather than as shapes floating at the
+      // fighters' shoulder height.
+      const row = new Mesh(
+        new PlaneGeometry(13, 1.5),
+        new MeshBasicMaterial({
+          map: crowd,
+          transparent: true,
+          depthWrite: false,
+          opacity: 0.62,
+          toneMapped: true,
+        }),
+      );
+      row.material.color.set('#3a2f24');
+      row.position.set(0, 0.62, CROWD_Z);
+      this.scene.add(row);
+    }
+
+    if (shaft !== null) {
+      // A broad additive cone of haze across the mat, catching the key light.
+      // Kept subtle — it is atmosphere, not a spotlight, and at full strength
+      // it washes the mat out to white.
+      const beam = new Mesh(
+        new PlaneGeometry(16, 13),
+        new MeshBasicMaterial({
+          map: shaft,
+          transparent: true,
+          opacity: 0.22,
+          depthWrite: false,
+          blending: AdditiveBlending,
+          toneMapped: true,
+        }),
+      );
+      beam.material.color.set('#a08a66');
+      beam.position.set(-1.6, 3.4, SHAFT_Z);
+      beam.renderOrder = -2;
+      this.scene.add(beam);
+    }
+
+    if (banner !== null) {
+      const bannerMaterial = new MeshBasicMaterial({
+        map: banner,
+        transparent: true,
+        side: DoubleSide,
+        toneMapped: true,
+      });
+      for (const side of [-1, 1]) {
+        const cloth = new Mesh(new PlaneGeometry(0.95, 2.5), bannerMaterial);
+        cloth.position.set(side * 5.4, 3.9, -13.3);
+        this.scene.add(cloth);
+      }
+    }
   }
 
   resize(width: number, height: number): void {
@@ -183,7 +333,8 @@ export class Stage {
 /**
  * Restrained depth behind the mat: a beam overhead, shoji-style panels
  * catching the rim light, and a couple of hanging banners. All original
- * shapes, nothing evoking a specific existing game's dojo.
+ * shapes, nothing evoking a specific existing game's dojo. This is the
+ * fallback room; the generated backdrop covers it when it loads.
  */
 function buildBackdrop(arena: ArenaSpec): Group {
   const group = new Group();

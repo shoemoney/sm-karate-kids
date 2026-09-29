@@ -10,7 +10,8 @@ import {
 } from 'three/webgpu';
 import type { Texture } from 'three/webgpu';
 import { heightOf, type FighterSpec, type FighterState } from '@smkk/sim';
-import type { EmblemInfo, FighterView } from './fighterView.js';
+import type { EmblemInfo, FighterView, FrameInfo } from './fighterView.js';
+import { resolveSpriteFrame, IDLE_POSE } from './spriteFrames.js';
 
 interface SpriteManifest {
   readonly version: number;
@@ -22,15 +23,7 @@ interface SpriteManifest {
     string,
     { readonly pages: readonly string[]; readonly cols: number; readonly rows: number }
   >;
-  readonly poses: Record<string, { readonly frames: readonly number[]; readonly contact: number }>;
-}
-
-const IDLE_POSE = 'idle';
-/** Ticks an idle frame holds before advancing, a slow loop rather than a still image. */
-const IDLE_FRAME_HOLD_TICKS = 10;
-
-function clamp01(t: number): number {
-  return t < 0 ? 0 : t > 1 ? 1 : t;
+  readonly poses: Readonly<Record<string, { readonly frames: readonly number[]; readonly contact: number; readonly fps?: number }>>;
 }
 
 /** Loose structural check — enough to refuse to render garbage, not a full schema. */
@@ -91,45 +84,6 @@ function cloneTexture(source: Texture): Texture {
   return clone;
 }
 
-function pickRamped(frames: readonly number[], phaseTicks: number, totalTicks: number): number | undefined {
-  if (frames.length === 0) return undefined;
-  const t = clamp01(phaseTicks / Math.max(1, totalTicks));
-  const index = Math.min(frames.length - 1, Math.floor(t * frames.length));
-  return frames[index];
-}
-
-function idleFrame(manifest: SpriteManifest, elapsedTicks: number): number {
-  const idle = manifest.poses[IDLE_POSE];
-  if (idle === undefined || idle.frames.length === 0) return 0;
-  const index = Math.floor(elapsedTicks / IDLE_FRAME_HOLD_TICKS) % idle.frames.length;
-  return idle.frames[index] ?? 0;
-}
-
-/**
- * The frame a fighter shows this tick. The referee's decision is made during
- * `active`, so that whole window holds the pose's `contact` frame — never a
- * frame mid-ramp toward or away from it.
- */
-function resolveFrame(manifest: SpriteManifest, fighter: FighterState, elapsedTicks: number): number {
-  const move = fighter.move;
-  if (move === null) return idleFrame(manifest, elapsedTicks);
-
-  const pose = manifest.poses[move.id];
-  if (pose === undefined) return idleFrame(manifest, elapsedTicks);
-
-  const contact = pose.frames[pose.contact];
-  if (contact === undefined) return idleFrame(manifest, elapsedTicks);
-
-  if (fighter.phase === 'startup') {
-    return pickRamped(pose.frames.slice(0, pose.contact), fighter.phaseTicks, move.startup) ?? contact;
-  }
-  if (fighter.phase === 'recovery') {
-    return pickRamped(pose.frames.slice(pose.contact + 1), fighter.phaseTicks, move.recovery) ?? contact;
-  }
-  // 'active' and 'frozen' both hold the referee's frame.
-  return contact;
-}
-
 /**
  * A textured plane standing in the same 3D dojo as the mesh rig — a 2.5D
  * billboard, not a 2D rewrite. It never rotates after construction: the
@@ -154,6 +108,8 @@ export class SpriteFighterView implements FighterView {
   private ghostCursor = 0;
   private lastGhostTick = -99;
   private frameCell = { page: 0, offsetX: 0, offsetY: 0, repeatX: 1, repeatY: 1 };
+  /** The cell this fighter last drew, for the e2e suite. */
+  private shownFrame: FrameInfo | undefined;
 
   private constructor(
     private readonly manifest: SpriteManifest,
@@ -309,7 +265,22 @@ export class SpriteFighterView implements FighterView {
     this.root.position.y = heightOf(fighter);
     const baseFacingRight = this.manifest.facing !== 'left';
     const mirrored = baseFacingRight ? fighter.facing === -1 : fighter.facing === 1;
-    this.setCell(resolveFrame(this.manifest, fighter, elapsedTicks), mirrored);
+    const move = fighter.move;
+    const cell = resolveSpriteFrame(
+      this.manifest.poses,
+      {
+        moveId: move?.id ?? null,
+        phase: fighter.phase,
+        phaseTicks: fighter.phaseTicks,
+        startup: move?.startup ?? 1,
+        recovery: move?.recovery ?? 1,
+      },
+      elapsedTicks,
+    );
+    this.setCell(cell, mirrored);
+    // Kept for the e2e suite: which cell this fighter is actually drawing, so
+    // a test can hold the renderer to the same rule spriteFrames.ts is tested on.
+    this.shownFrame = { cell, pose: move?.id ?? IDLE_POSE, phase: fighter.phase };
 
     const striking =
       fighter.move?.kind === 'strike' && (fighter.phase === 'startup' || fighter.phase === 'active');
@@ -318,6 +289,10 @@ export class SpriteFighterView implements FighterView {
       this.lastGhostTick = elapsedTicks;
     }
     this.updateGhosts();
+  }
+
+  frameInfo(): FrameInfo {
+    return this.shownFrame ?? { cell: -1, pose: IDLE_POSE, phase: 'neutral' };
   }
 
   emblemInfo(): EmblemInfo {

@@ -1,0 +1,51 @@
+{
+  "generated/dojo-backdrop.webp": {
+    "source": "Original dojo backdrop artwork created for this project by Jeremy Schoemaker, downscaled and converted to WebP by tools/optimize-art.sh",
+    "license": "Proprietary artwork of Jeremy Schoemaker. NOT covered by this repository's MIT grant.",
+    "holder": "Jeremy Schoemaker",
+    "approved": true,
+    "notes": "Back-wall stage plate. Original PNG master is kept out of the shipped bundle in assets/generated/. See docs/asset-provenance.md."
+  },
+  "generated/dojo-ceiling.webp": {
+    "source": "Original dojo ceiling and upper-wall artwork created for this project by Jeremy Schoemaker, downscaled and converted to WebP by tools/optimize-art.sh",
+    "license": "Proprietary artwork of Jeremy Schoemaker. NOT covered by this repository's MIT grant.",
+    "holder": "Jeremy Schoemaker",
+    "approved": true,
+    "notes": "Ceiling and beam stage plate. Original PNG master is kept out of the shipped bundle in assets/generated/. See docs/asset-provenance.md."
+  },
+  "generated/dojo-floor.webp": {
+    "source": "Original tatami mat artwork created for this project by Jeremy Schoemaker, downscaled and converted to WebP by tools/optimize-art.sh",
+    "license": "Proprietary artwork of Jeremy Schoemaker. NOT covered by this repository's MIT grant.",
+    "holder": "Jeremy Schoemaker",
+    "approved": true,
+    "notes": "Seamless tileable floor texture. Original PNG master is kept out of the shipped bundle in assets/generated/. See docs/asset-provenance.md."
+  },
+  "generated/crowd-silhouette.webp": {
+    "source": "Original seated-crowd silhouette artwork created for this project by Jeremy Schoemaker, downscaled and converted to WebP by tools/optimize-art.sh",
+    "license": "Proprietary artwork of Jeremy Schoemaker. NOT covered by this repository's MIT grant.",
+    "holder": "Jeremy Schoemaker",
+    "approved": true,
+    "notes": "Alpha-cut crowd band drawn in front of the stage. Original PNG master is kept out of the shipped bundle in assets/generated/. See docs/asset-provenance.md."
+  },
+  "generated/banner-vertical.webp": {
+    "source": "Original vertical banner artwork created for this project by Jeremy Schoemaker, downscaled and converted to WebP by tools/optimize-art.sh",
+    "license": "Proprietary artwork of Jeremy Schoemaker. NOT covered by this repository's MIT grant.",
+    "holder": "Jeremy Schoemaker",
+    "approved": true,
+    "notes": "Alpha-cut hanging banner prop. Original PNG master is kept out of the shipped bundle in assets/generated/. See docs/asset-provenance.md."
+  },
+  "generated/volumetric-shaft.webp": {
+    "source": "Original volumetric light-shaft artwork created for this project by Jeremy Schoemaker, downscaled and converted to WebP by tools/optimize-art.sh",
+    "license": "Proprietary artwork of Jeremy Schoemaker. NOT covered by this repository's MIT grant.",
+    "holder": "Jeremy Schoemaker",
+    "approved": true,
+    "notes": "Additive-blend light shaft VFX, alpha preserved. Original PNG master is kept out of the shipped bundle in assets/generated/. See docs/asset-provenance.md."
+  },
+  "generated/dust-mote.webp": {
+    "source": "Original dust-mote particle artwork created for this project by Jeremy Schoemaker, downscaled and converted to WebP by tools/optimize-art.sh",
+    "license": "Proprietary artwork of Jeremy Schoemaker. NOT covered by this repository's MIT grant.",
+    "holder": "Jeremy Schoemaker",
+    "approved": true,
+    "notes": "Alpha-cut particle sprite lit inside the light shaft. Original PNG master is kept out of the shipped bundle in assets/generated/. See docs/asset-provenance.md."
+  }
+}
