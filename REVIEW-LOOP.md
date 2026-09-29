@@ -2003,3 +2003,46 @@ work and it is not something this review loop found.
   stating plainly: a model given one frame of a system that has more than one
   state will confidently infer the rule from the instance. That is not a defect
   in the reviewer. It is what happens when the instrument shows one state.
+
+### Round 60 — gpt-5.6-sol — no product change, and that is now the norm
+
+- `strengthen-hit-contact` — the impact stack, rebuilt in r23 (recoil), r26
+  (flash peak halved, 140ms → 95ms) and r46 (sparks given tapers).
+- `reduce-gameplay-instruction-clutter` — the coach, **ninth** appearance.
+  First-run only; `14-phone-returning` is in the set and shows it retired.
+- `add-post-bout-exit` — declined in r49 with reasoning: the card is
+  `NEW TOURNAMENT` → `newRun()`, one mode means no branch to exit from, and a
+  quit screen on a browser arcade game costs the one-tap path back to a fight.
+- `fix-landscape-touch-layout` — **twelfth** model. The backdrop seam is closed
+  (`90152ff`); the stage/pad split is architecture with the argument written
+  down there.
+- `x-ai/grok-4.3` — 502/403 Forbidden from xAI. `qwen/qwen3.8-27b:free` — 429.
+
+### The honest read on saturation
+
+Three rounds running, the product has taken one change: `75add44`, a stick
+distinction that was reverted once before it was verified. Round 58's finding was
+real, and it came from the one dimension added in round 55 — a frame with a score
+on it.
+
+**Twenty of the last thirty-five findings have been stale, refused, or a design
+tension with a reason already written down.** The review set is seventeen frames
+of one game at its first fifteen seconds, plus one played bout, and the models
+have read all of it thoroughly.
+
+What the loop has established, and it is not nothing:
+
+- **Eight real defects** the frames *did* contain, the largest being fourteen
+  detached limbs and a winning kick that left the screen.
+- **Five confident, specific, wrong reports** that traced to the instrument
+  rather than the product — a half-faded card, an unstyled page, a Playwright
+  focus artifact, a 0–0 score, an all-off toggle row.
+- **A pattern that generalises past this project**: a reviewer given one frame
+  of a multi-state system will infer the rule from the instance, and the fix is
+  never to argue with the reviewer but to go and vary the frame.
+
+**The next dimension is not another model on these seventeen frames.** It is a
+new frame: a bout in its last exchange, a jump, a block, a bout where the player
+lost, the high-contrast theme, the large-controls theme. Each is a state the
+review set has never shown anyone, and each is a place where a defect can hide
+with the same confidence as the ones already found.

@@ -1,0 +1,85 @@
+{
+  "model": "openai/gpt-5.6-sol",
+  "elapsed_s": 39.6,
+  "usage": {
+    "prompt_tokens": 16238,
+    "completion_tokens": 2244,
+    "total_tokens": 18482,
+    "cost": 0.0630335,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 16235,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0630335,
+      "upstream_inference_prompt_cost": 0.0405935,
+      "upstream_inference_completions_cost": 0.02244
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1435,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "replace-jagged-boot-logo",
+      "title": "Use a clean, high-resolution mark on the loading screen",
+      "what": "On the pre-boot loading screen, the central ShoeMoney emblem has visibly stair-stepped black edges and a pale fringe around the blue \u201cS,\u201d while the surrounding title text is much sharper.",
+      "why": "This is the first asset every player sees, so the low-resolution cutout immediately makes the product look unfinished before the game has loaded.",
+      "how": "Replace the emblem with an SVG or a 2x\u20133x transparent WebP/PNG, remove the baked white edge matte, and render it at an integer-aligned size appropriate for the 390 px viewport."
+    },
+    {
+      "id": "strengthen-hit-contact",
+      "title": "Give scoring contact a stronger visual impact",
+      "what": "In the IPPON screenshots, the kick and punch land with only a few tiny white slivers near the contact point; the fighters otherwise look like static cutouts overlapping beneath the large result text.",
+      "why": "Point karate revolves around one decisive clean hit, so weak contact feedback makes the core payoff hard to feel and the winning technique less satisfying to read.",
+      "how": "Add a 100\u2013150 ms contact flash centered on the struck body part, a compact directional spark or ring, one-frame attacker emphasis, and a short defender recoil before freezing for the IPPON presentation."
+    },
+    {
+      "id": "reduce-gameplay-instruction-clutter",
+      "title": "Remove the persistent command card from active play",
+      "what": "On the portrait gameplay screen, the brown STANCE/TECHNIQUE instruction card spans nearly the full width directly above the sticks and covers the lower edge of the tatami. Its four tiny command labels per side remain visible during attacks and IPPON moments.",
+      "why": "The dense card competes with the fighters and score while players are already operating two touch controls, reducing arena space and forcing small text into a high-attention combat screen.",
+      "how": "Show the card only for the opening tutorial seconds, then animate it away. Keep a small first-use callout beside each stick and leave the full command reference in the existing MOVES panel."
+    },
+    {
+      "id": "add-post-bout-exit",
+      "title": "Provide a clear way to leave the post-bout screen",
+      "what": "The HASANABI WINS screen shows only a large REMATCH button followed by \u201cSTARTING IN 8\u201d; no back, home, or cancel action is visible anywhere on the screen.",
+      "why": "The presentation implies an automatic rematch and gives a touch player no visible way to stop, review options, or leave after a completed bout.",
+      "how": "Add a secondary \u201cExit\u201d or \u201cBack to matchup\u201d button beneath Rematch and make the countdown explicitly cancelable, for example \u201cAuto-rematch in 8 \u00b7 Cancel.\u201d"
+    },
+    {
+      "id": "fix-landscape-touch-layout",
+      "title": "Do not shrink the touch UI across the landscape edges",
+      "what": "In the landscape screenshot, the two sticks are reduced and pinned to opposite bottom corners with a very large empty black region between them; the score names and MOVES/settings controls are also much smaller than in portrait.",
+      "why": "The landscape version loses the large, legible touch targets established by the portrait layout and spreads essential controls across the full phone width, making play harder to read and operate.",
+      "how": "Either lock gameplay to portrait with a rotate-device prompt or create a landscape layout with minimum 120 px stick targets, safe-area padding, larger HUD text, and both sticks positioned within comfortable thumb reach rather than at the extreme corners."
+    }
+  ],
+  "raw": null
+}
