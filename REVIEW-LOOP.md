@@ -575,3 +575,39 @@ remaining.** The local snapshot was inventing IDs — `glm-4.7v` and
 - `loading-bar-never-fills` (mimo) — the MEASURING state.
 - `portrait-fight-frame-wasted`, `fighters-edge-proximity` — framing, in its
   ninth and tenth iteration. Standing judgement: warm and low.
+
+### Round 20 — claude-sonnet-5.5, gpt-6-sol, seed-2-1-turbo, step-3.7-flash — `ee0b17a`
+
+- `ippon-banner-collision` / `ippon-overlay-collision` /
+  `ippon-text-obscuration` (claude-sonnet-5.5, gpt-6-sol, step-3.7-flash) —
+  **accepted, three providers converging.** Stamp spans y=156–231, technique
+  pill y=195–220 — the pill sat *entirely inside* the stamp. 25px of overlap,
+  two competing plates over the fighters' heads at the moment the player is
+  meant to read the result. Cause: `Hud.call()` wrote the move name to the
+  separate technique pill instead of to the stamp. A scored point is one
+  statement, so it is one element now — the move is a third line in the stamp
+  and the pill is cleared.
+- `hint-panel-covers-sticks` / `control-legend-overlaps-joysticks`
+  (claude-sonnet-5.5, seed-2-1-turbo; qwen3.8-27b in round 17) — **accepted.**
+  Strip bottom 684, ring top 634: 50px of overlap, with the UP chevron at y=650
+  underneath it — the strip was covering the affordance it exists to teach.
+
+  The rings could not move: the pad is 228px holding 170px rings, 29px of slack
+  against a 59px strip, so stepping them down clips them off the pad. Tried,
+  captured, reverted. The strip leaves instead, over the dojo's lower edge,
+  directly above the controls it describes. Re-measured: zero overlap.
+
+  **Rejected a plausible fix on a captured screenshot.** The step-down looked
+  right in the DOM and clipped both rings in the frame. Three findings in three
+  rounds said the strip covered the sticks, and the fix that satisfies the
+  measurement had to be thrown away for the one that satisfies the product.
+- `fighter-ground-clipping` (step-3.7-flash) — new, and not reproduced: the
+  contact shadows anchor the feet above the mat edge by design.
+- `teach-sticks-before-fight`, `first-bout-ends-before-learning` (gpt-6-sol) —
+  the coach strip is exactly this, and it is on the pre-fight card.
+- `fight-button-countdown-unclear-affordance` (seed-2-1-turbo) — no skip hint
+  on the auto-start countdown. Noted.
+- `loading-screen-empty-progress-bar` — the MEASURING state, in its eighth
+  appearance across four providers.
+- `fighter-framing-wastes-vertical-space`, `fighters-small-empty-mat` —
+  framing, in its eleventh and twelfth iteration. Standing: warm and low.
