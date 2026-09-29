@@ -1872,3 +1872,33 @@ must never call `focus()`. **The two tests that guard that rule are the two that
 flake**, which is worth more than either failure: the rule is load-bearing and
 its coverage is the least reliable in the suite. Fixing that is a real piece of
 work and it is not something this review loop found.
+
+### Round 56 — gpt-5.6-luna, qwen3.6-flash, grok-4.5 — `7d2a6f1`
+
+- `label-round-timer: "explain the unlabeled gold number in the match HUD"`
+  (gpt-5.6-luna) — **accepted, and it is the third instance of one class.**
+
+  The bout countdown (r27/34), the half-point notation (r36/53) and now the
+  round clock. A number in the middle of a scoreline that reads as another
+  score until something says what it counts. Round 26 gave the clock a dial,
+  which moved it from "a number" to "a number in a box" — better, and still
+  unlabelled. A model looked again thirty rounds later and called it exactly
+  what it was.
+
+  One lowercase letter, small, baseline-aligned, inside the dial, with the
+  accessible name spelling the word.
+
+  **A first attempt at disambiguation is usually worth about half the distance
+  and gets reported again later.** That is not a stale finding and it is not the
+  loop failing — it is the loop doing the thing it is for, and the second
+  report is the measurement that the first fix was insufficient.
+- `qualifier-intro-buries-fighters` (grok-4.5) — the pre-fight card stacks
+  round name, opponent, tell, FIGHT button and countdown. It is four seconds
+  long, every element on it has been argued in this log, and the alternative is
+  less information in the same four seconds. Declined.
+- `top-right-ui-contrast: "low visibility for action buttons"` (qwen3.6-flash) —
+  the MOVES and gear plaques sit on the scoreline's own surface at 60px.
+- `fix-landscape-layout` (gpt-5.6-luna) — eleventh model. Architecture argued
+  at `90152ff`.
+- `control-hint-obstruction` (qwen3.6-flash), `clarify-control-language`
+  (gpt-5.6-luna) — the coach, eighth appearance, first-run only.
