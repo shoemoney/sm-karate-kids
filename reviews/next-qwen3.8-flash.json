@@ -1,0 +1,83 @@
+{
+  "model": "qwen/qwen3.8-flash",
+  "elapsed_s": 67.1,
+  "usage": {
+    "prompt_tokens": 11598,
+    "completion_tokens": 5395,
+    "total_tokens": 16993,
+    "cost": 0.00427535,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00427535,
+      "upstream_inference_prompt_cost": 0.0017397,
+      "upstream_inference_completions_cost": 0.00253565
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 4017,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "controls-clipped-by-legend",
+      "title": "The help legend pushes the twin-stick touch targets off the bottom of the screen",
+      "what": "On the in-bout fight screen (the shots showing the rounded 'STANCE / TECHNIQUE \u00b7 step/jump/crouch' legend panel), that ~110px legend band sits directly above the two stick rings and shoves them down so their lower arcs, the down-chevron, and the 'STANCE'/'TECHNIQUE' captions fall past the 844px viewport edge \u2014 the bottom of each ring is visibly cut off. In the shots where the legend is absent (qualifier intro, high-contrast view) the identical sticks fit with room to spare. The legend is the culprit.",
+      "why": "The sticks are the entire game. If the down-direction and the bottom third of the ring are off-screen, the player's thumb can't reach or even see half the input surface, and the 'crouch / low' flicks become guesswork. This breaks the core loop on the design-baseline device.",
+      "how": "Make the legend non-occupying: either render it as a collapsible tap-to-show strip that floats over the dimmed dojo instead of in the control column, or anchor the stick cluster to a fixed bottom safe-area inset (e.g. bottom: env(safe-area-inset-bottom) + 8px) and scale the rings down ~12% so the whole pad plus captions always fit within 844px. Verify with the legend both shown and hidden."
+    },
+    {
+      "id": "loading-bar-no-progress",
+      "title": "The boot loading bar shows zero progress, so a slow load looks like a hang",
+      "what": "On the ShoeMoney pre-boot screen, the thin rounded track at vertical center (~y785) is an empty dark line \u2014 no fill, no percentage, no shimmer, no moving element. The logo, title and 'Downloading the game' text are completely static above and below it.",
+      "why": "This is the first 5 seconds of the product. A player who sees a dead bar and a frozen screen on a real mobile network will assume the app crashed and background it, costing an install before a single frame of the dojo renders.",
+      "how": "Drive the bar fill from actual asset-download bytes and add a percentage label ('62%') plus a subtle gold shimmer sweep so motion is always present even when bytes stall. If the loader is a single blocking fetch, swap to a stepped 'warming the dojo' progress that ticks on rAF so the bar never sits at 0."
+    },
+    {
+      "id": "stick-chevrons-low-contrast",
+      "title": "The four flick-direction chevrons on each stick are nearly invisible in the default theme",
+      "what": "In the default fight shots, the up/down/left/right arrow glyphs on each ring are drawn in a dim brown close to the ring color, on a near-black pad \u2014 they read as smudges. The 'High contrast' screenshot shows the exact same chevrons in bright white and they instantly become legible, proving the default contrast is the problem, not the size.",
+      "why": "Twin-stick karate lives on knowing which way to flick. If a new player can't see the four affordances, they don't learn that 'up = jump, right = forward' and the move list feels arbitrary \u2014 the onboarding cliff is the controls themselves.",
+      "how": "Raise the chevron color to the warm HUD gold (#d9b873) at ~70% opacity (or white in high-contrast) and bump the glyph size a couple of px, while keeping the ring itself dark so the cinematic low-key look is preserved. Add a faint directional highlight on the ring segment matching the stick's current output so the active axis is obvious."
+    },
+    {
+      "id": "movelist-combo-notation-cryptic",
+      "title": "The Techniques list uses unlabeled glyph pairs that don't map to the in-fight legend",
+      "what": "In the full-screen TECHNIQUES overlay, each move is shown as two small circles holding a single glyph (a center dot, or a left/right/up/down triangle) joined by '+', e.g. '\u25b6\u25c0 = Back Kick'. Nothing labels which circle is stance vs technique, the triangles are ~16px, and the in-fight legend describes the same axes with words ('step/jump/crouch', 'reverse/forward/high/low') that don't visually match the glyphs.",
+      "why": "The move list is the player's reference card. If they can't decode a row into 'left thumb here, right thumb there', they memorize by trial-and-error mid-bout and quit the qualifier. The notation fails exactly the players the list exists for.",
+      "how": "Label the two circles inline ('STANCE' over the first, 'TECH' over the second) in the same small caps used elsewhere, enlarge the glyphs, and reuse the in-fight word legend as a header so '\u25b6 = forward step' is consistent across both screens. Optionally show a tiny stick diagram per row."
+    },
+    {
+      "id": "ippon-flash-blows-out-head",
+      "title": "The IPPON hit-flash clips the struck head to a featureless white blob",
+      "what": "On the IPPON banner shot, the white gi fighter's head and face are rendered as a flat pure-white silhouette \u2014 the bloom/split-tone chain has clipped the impact flash past #fff, erasing the face, hair detail and gi collar. It reads as a missing-texture glitch rather than a clean strike.",
+      "why": "The scoring moment is the emotional peak of a point-karate bout. A blown-out head destroys the read of who got hit and makes the otherwise gorgeous post chain look broken at the worst time.",
+      "how": "Clamp the hit-flash contribution so it tints toward warm gold (#ffd9a0) instead of pure white, and cap the bloom threshold on the flash layer (e.g. soft-knee the highlight roll-off above ~0.9 luminance) so the face stays readable while still punching. Keep the spark dashes; only tame the additive white on the body mask."
+    }
+  ],
+  "raw": null
+}

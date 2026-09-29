@@ -1,0 +1,83 @@
+{
+  "model": "xiaomi/mimo-v2.6-pro",
+  "elapsed_s": 188.1,
+  "usage": {
+    "prompt_tokens": 11547,
+    "completion_tokens": 6675,
+    "total_tokens": 18222,
+    "cost": 0.010830195,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.010830195,
+      "upstream_inference_prompt_cost": 0.005022945,
+      "upstream_inference_completions_cost": 0.00580725
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 5322,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "hud-timer-score-misread",
+      "title": "Make the round timer stop reading like the player's score",
+      "what": "Top bar on every fight screen (y\u22480-70): 'ASMONGOLD 0 [30] 0 HASANABI'. The gold pill with '30' is the round countdown, but it is the biggest, brightest element and sits dead center between the two scores, while the actual scores are small white/red '0's at the far edges with no label. On the results screen the same column shows '0 \u2014 2\u00bd' with an unexplained half-point fraction.",
+      "why": "In the first 5 seconds a player reads 30 as a score and thinks they are 30 points down; mid-fight there is no glanceable 'who is winning'. The karate 2\u00bd notation is never explained, so a loss reads as arbitrary rather than earned.",
+      "how": "Move the countdown into the existing 'ROUND 1/5 \u00b7 QUALIFIER' chip as 'ROUND 1/5 \u00b7 0:30', and rebuild the two score counters as equal-size chips color-keyed to each fighter (white chip for ASMONGOLD, red for HASANABI) so the score is always the dominant number. Under the results line add a one-line legend: 'IPPON 1 \u00b7 WAZA-ARI \u00bd'."
+    },
+    {
+      "id": "sprites-float-on-warm-scene",
+      "title": "Grade and ground the fighter sprites into the tungsten dojo",
+      "what": "Fight screen, center band (y\u2248450-800): both photographic sprites are lit cool and flat \u2014 Asmongold's gi reads neutral gray-white against the amber tatami, HasanAbi's gi is a flat saturated red with no warm rim. Cutout edges are hard and slightly aliased against the bloom haze, and the bare feet sit on the mat with no contact shadow (only the distant light pool behind them).",
+      "why": "The fighters are the product; if they do not share the scene's light the whole game reads as a mock-up, and with no contact shadow a player on a 390px screen cannot judge foot placement or strike range.",
+      "how": "Multiply a warm tint (e.g. #FFC98A at ~25%) into the sprite material and add a thin warm rim on the camera-facing edge to match the ceiling light; draw a soft elliptical contact shadow under each foot that scales with the sprite; run sprites through the same bloom/vignette pass (or feather 1-2px of alpha) so the cutout edges sit in the haze instead of on top of it."
+    },
+    {
+      "id": "fight-framing-dead-bands",
+      "title": "Crop the fight view to the fighters instead of empty mat and ceiling",
+      "what": "Portrait fight screens: the fighters occupy roughly y 450-800 while the top third (y 130-320) is empty warm haze and shoji, and a ~150px band of bare tatami runs from their feet to the control panel. The landscape capture is far worse \u2014 the fighters sit in a middle letterbox strip, the mat ends at ~y 570 of 812, and everything below is pure black with tiny stick rings in the far corners.",
+      "why": "The two characters \u2014 the entire game \u2014 fill about 35% of the frame. Wasted ceiling/mat pushes the action away from the thumb zone, and on landscape the black band makes a shipping build look unfinished.",
+      "how": "Raise and zoom the in-fight camera ~20% so heads land near y 300 and feet near y 760 in portrait. In landscape, fill the height instead of letterboxing: extend the tatami texture below the mat line and scale the camera so the fighters occupy ~70% of the height, with the sticks pulled in to the mat's edge."
+    },
+    {
+      "id": "stick-labels-clipped-by-rings",
+      "title": "Stop the stick rings from covering their own labels and the legend",
+      "what": "Portrait control panel: the 'TECHNIQUE' caption under the right stick (y\u22481240) is sliced by the stick's outer ring \u2014 the letters are half-hidden behind the circle \u2014 while 'STANCE' on the left is fully clear, so the panel reads as broken. In the LUNGE PUNCH frame the touched stick's ring scales up and overlaps the 'STANCE / TECHNIQUE \u00b7 \u25c0 step \u25b2 jump \u2026' legend box above it, and that legend duplicates the labels already printed under the sticks.",
+      "why": "Text clipped by a UI circle is instantly legible as unfinished, and the touch-time overlap hides the exact mapping a new player is reading while trying to learn their first move.",
+      "how": "Move each caption above its ring (or delete it and keep only the legend \u2014 one copy only), add 20px of bottom padding so rings can never reach the text, and on touch scale only the inner nub, not the outer ring."
+    },
+    {
+      "id": "loading-progress-invisible",
+      "title": "Give the ShoeMoney loading bar a visible fill and fix the title typo",
+      "what": "Loading screen: the caption reads 'Downloading the game' but the pill bar below (y\u2248810) is a uniform light streak across the entire track with no fill edge, percentage, or byte count \u2014 0% and 100% look identical. The matchup line above reads 'ASMON GOLD VS HASANABI' with a stray space, while every in-game screen spells it 'ASMONGOLD'.",
+      "why": "This is the first screen a player sees; a bar that never visibly fills triggers 'is it stuck?' abandonment on a phone connection, and a misspelled fighter name in the intro undercuts the branded look immediately.",
+      "how": "Fill the track with the existing gold gradient up to a hard leading edge tied to real asset progress and add a right-aligned percentage in the mono caption style (e.g. '42%'); fix the string to 'ASMONGOLD VS HASANABI'."
+    }
+  ],
+  "raw": null
+}

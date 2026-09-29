@@ -1,0 +1,83 @@
+{
+  "model": "sakana/fugu-max",
+  "elapsed_s": 57.1,
+  "usage": {
+    "prompt_tokens": 16705,
+    "completion_tokens": 6290,
+    "total_tokens": 22995,
+    "cost": 0.07115,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.07115,
+      "upstream_inference_prompt_cost": 0.03341,
+      "upstream_inference_completions_cost": 0.03774
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 5324,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "front-kick-decoupled-foot-sprite",
+      "title": "Fix severed foot sprite on Asmongold's front kick",
+      "what": "In screenshot 13, during Asmongold's 'FRONT KICK' animation frame, the kicking right leg is cut off into an empty stump below the knee, while a detached foot sprite floats mid-air behind his back at hip height.",
+      "why": "This is a severe sprite asset/rigging defect right in the primary gameplay focal point, destroying fighter believability and looking like a broken cutout.",
+      "how": "Re-export and re-anchor the front kick sprite frame coordinates in the fighter animation controller so the foot connects to the distal leg joint instead of rendering at an inverted offset behind the torso."
+    },
+    {
+      "id": "joystick-safe-area-bottom-clipping",
+      "title": "Shift twin-stick controls up to prevent bottom-edge clipping",
+      "what": "In active combat screens (screenshots 3, 4, 5, 8, 10, 12, 13), both the Stance and Technique joystick outer housing rings and the text labels underneath them ('STANCE' and 'TECHNIQUE') are sliced off by the bottom bezel of the 390x844 frame.",
+      "why": "On a portrait phone, controls shoved against the bottom bezel interfere with the mobile OS home-swipe indicator and put thumbs into an uncomfortable, cramped reach.",
+      "how": "Add safe-area bottom padding (e.g. env(safe-area-inset-bottom, 24px) + 12px) to the joystick container so the entire circular housing and label typography sit fully above the bottom screen edge."
+    },
+    {
+      "id": "dismiss-in-bout-control-legend",
+      "title": "Auto-hide the Stance/Technique cheat-sheet during active combat",
+      "what": "In screenshots 3, 4, 5, 10, and 13, a solid dark-brown card detailing stick directions ('STANCE: step/jump/crouch', 'TECHNIQUE: reverse/forward/high/low') sits permanently between the fighters' feet and the joysticks.",
+      "why": "It consumes roughly 70px of vertical space during live gameplay, pushing the joysticks into the bottom bezel and blocking the tatami view with static instructional text that players only need during onboarding.",
+      "how": "Transition the card out (opacity fade to 0) as soon as the 'FIGHT' countdown completes, and allow players to reopen it on demand via the upper-right 'MOVES' button."
+    },
+    {
+      "id": "align-hit-spark-vfx-to-impact-point",
+      "title": "Anchor strike spark VFX to contact point rather than head height",
+      "what": "In screenshot 12 ('IPPON'), the radial yellow impact sparks detonate over Asmongold's forehead and eyes, even though HasanAbi's spinning back kick connects against the upper chest and forearm.",
+      "why": "Sparks detonating away from the actual contact surface make attacks look like they hit invisible hitboxes or misfire, weakening the punchy feedback required for point-karate scoring.",
+      "how": "Calculate the particle emitter world position dynamically from the attacking limb's contact bone or hitbox collision point rather than anchoring hit bursts to a fixed head/face offset."
+    },
+    {
+      "id": "relocate-move-callout-banner",
+      "title": "Move attack name banner away from fighter head silhouettes",
+      "what": "In screenshot 5 ('LUNGE PUNCH') and screenshot 13 ('FRONT KICK'), the dark pill banner is rendered directly above Asmongold's head, touching his hair and obscuring the shoji grid behind him.",
+      "why": "Placing high-contrast text directly above moving fighters clutters the visual space needed to read wind-ups, telegraphs, and facial reactions in close combat.",
+      "how": "Reposition the move-name notification to the upper HUD zone (centered directly below the round timer pill at the top) or increase vertical clearance by 40px so it floats in the empty upper dojo space."
+    }
+  ],
+  "raw": null
+}

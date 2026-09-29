@@ -1,0 +1,83 @@
+{
+  "model": "x-ai/grok-4.6",
+  "elapsed_s": 107.1,
+  "usage": {
+    "prompt_tokens": 12856,
+    "completion_tokens": 8734,
+    "total_tokens": 21590,
+    "cost": 0.078116,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.078116,
+      "upstream_inference_prompt_cost": 0.025712,
+      "upstream_inference_completions_cost": 0.052404
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7848,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "empty-loading-screen",
+      "title": "Boot screen is mostly empty black with a hairline progress bar",
+      "what": "Loading screen (first image): the diamond-$ logo, three short gold text lines and a 2 px gold rule sit dead-center in a 390\u00d7844 black frame; roughly 80 % of the pixels are unused void.",
+      "why": "First five seconds give almost no proof the game is downloading or how long it will take; the layout reads as a placeholder and raises bounce on launch.",
+      "how": "Scale the logo 1.5\u00d7, thicken the bar to 8 px with a live percent, and add a looping, very low-opacity light-ray or particle in the empty vertical bands while keeping the tungsten-black grade."
+    },
+    {
+      "id": "fighters-lost-in-portrait",
+      "title": "Fighters sit small with a band of empty tatami below them",
+      "what": "In-fight portrait frames (82aNm, z2m30, 6T3bq, iYk5L): the two sprites occupy the middle-lower third of the 3D view; a wide unused strip of tatami lies between their feet and the analog HUD, while glowing windows dominate the top half.",
+      "why": "On a phone the karateka become postage-stamp sized, hits lack weight, and the player\u2019s eyes must travel from the sticks up to distant characters every exchange.",
+      "how": "Dolly/crop the camera so heads reach the upper third and feet sit just above the HUD, filling ~60 % of the 3D viewport; preserve the existing night-dojo lighting."
+    },
+    {
+      "id": "portrait-sticks-not-in-corners",
+      "title": "Analog sticks clustered bottom-center instead of lower corners",
+      "what": "Portrait fight HUDs (g4SRy, 82aNm, AJ6Gu, z2m30) park both large rings side-by-side in the bottom-center; the landscape capture (Sk92j) already places them in the far lower-left and lower-right corners.",
+      "why": "Thumbs are forced inward, covering more of the action and causing accidental dual-stick hits; corner placement is the mobile twin-stick standard.",
+      "how": "Inset stance stick 16 px from left+bottom and technique stick 16 px from right+bottom in portrait, matching the landscape treatment already shipping."
+    },
+    {
+      "id": "techniques-list-unreadable",
+      "title": "Moves overlay is a dense low-contrast wall of 12 px type",
+      "what": "TECHNIQUES panel (5EsFj): ten rows of small gold-on-dark text, tiny stick-glyph icons and right-aligned \u201cmid \u00b7 Half point\u201d labels that require squinting on a 390 px screen.",
+      "why": "The only in-game way to learn the ten combinations is this list; if unreadable, players never leave the two default punches and the game feels shallow.",
+      "how": "Raise body to 17 px, enlarge stick diagrams to 32 px, use white for move names and a brighter gold for point values, and add a simple color pip for full vs half-point."
+    },
+    {
+      "id": "settings-toggles-invisible",
+      "title": "Settings uses blank gray squares instead of recognizable controls",
+      "what": "SETTINGS overlay (G23xp): six options appear as empty gray rounded squares with no fill, check or switch track; the left-handed explanation and career stats line are even smaller and lower-contrast.",
+      "why": "Accessibility features (reduced motion, large controls, left-handed, high contrast) that already exist are undiscoverable, so players who need them never enable them.",
+      "how": "Replace squares with standard 44 pt switches or clearly checked boxes, raise label contrast, and give the career stats its own larger row."
+    }
+  ],
+  "raw": null
+}

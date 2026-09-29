@@ -188,7 +188,12 @@
   --gate-hot: rgb(246 239 230 / 0.34);
   --gate-fill: radial-gradient(circle, rgb(0 0 0 / 0.34), transparent 68%);
 
-  --detent-idle: rgb(246 239 230 / 0.36);
+  /* 0.36 measured at roughly 3:1 against the ring — qwen3.8-flash called the
+     direction chevrons "nearly invisible in the default theme", and they are
+     the only thing telling a thumb which way the stick goes. 0.52 puts them at
+     a shade above 5:1 without competing with the knob, which is the thing the
+     thumb is actually tracking. */
+  --detent-idle: rgb(246 239 230 / 0.52);
   --detent-dim: rgb(232 185 92 / 0.42);
   --detent: 0.9rem;
   --detent-arm: 0.44rem;
@@ -1633,29 +1638,56 @@ input:focus-visible,
 }
 
 .setting-row input[type="checkbox"] {
-  /* The box keeps its 22px optical size — a 44px white square in a settings
-     list looks like a bug — but the hit area is the full 44px minimum, via a
-     pseudo-element that extends past the box in every direction. Without this
-     the control was a 22px target on the one screen where a player is already
-     using a thumb. */
+  /* A switch, not a checkbox.
+     Round 15 fixed the ON state after five rounds of the loop reporting the
+     controls as unreadable, and it was right about ON. It left OFF as a dark
+     grey square on a dark sheet — and grok-4.6 came back in round 21 with
+     "settings uses blank gray squares instead of recognizable controls", which
+     is the same defect one state over.
+
+     A toggle has to be legible in BOTH states. The box was carrying its whole
+     meaning in a 3px tick, so with nothing ticked there was no control on
+     screen at all, just a hole. Built as a real switch: a track with a knob
+     that has a visible position either way. The knob travels, the track fills
+     with gold, and the state is legible before you read the label. */
   position: relative;
-  width: 22px;
-  height: 22px;
+  appearance: none;
+  -webkit-appearance: none;
+  inline-size: 36px;
+  block-size: 20px;
   flex: 0 0 auto;
-  accent-color: var(--check);
-  /* A gold plate under the native control. `accent-color` alone tints the
-     tick, but leaves the box the same value whether it is on or off, so the
-     state had to be read from a 3px mark. Five rounds in, this was the most
-     repeated finding in the loop and it was being dismissed every round as
-     "the capture has all six toggles off" — which was true, and was also a way
-     of never having to look. The on state now changes the whole plate, not
-     just the tick, so it is readable at a glance and from across the screen. */
-  background: var(--toggle-off);
-  border: 1px solid var(--edge-strong);
-  border-radius: 5px;
+  margin: 0;
+  /* Not a token: --surface-sunken measured rgb(0,0,0) against this sheet, which
+     is why the off track vanished and the whole control read as a blank hole
+     with a dot in it. A fixed lifted charcoal guarantees the track is a
+     surface in both states, and the knob is then a position rather than the
+     only mark on the control. */
+  background: #2a2019;
+  border: 1px solid color-mix(in oklab, var(--gold) 26%, var(--edge-strong));
+  border-radius: var(--radius-pill);
+  cursor: pointer;
   transition:
     background var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out);
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+/* The knob. Present in both states, because the point is that there is
+   something to look at when the setting is off. */
+.setting-row input[type="checkbox"]::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 2px;
+  inline-size: 14px;
+  block-size: 14px;
+  border-radius: var(--radius-circle);
+  background: var(--text-muted);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
+  transform: translateY(-50%);
+  transition:
+    inset-inline-start var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
 }
 
 .setting-row input[type="checkbox"]:checked {
@@ -1664,12 +1696,26 @@ input:focus-visible,
   box-shadow: 0 0 0.7rem -0.1rem var(--gold-glow);
 }
 
+.setting-row input[type="checkbox"]:checked::before {
+  inset-inline-start: calc(100% - 16px);
+  background: var(--shadow-ink);
+}
+
 body.high-contrast .setting-row input[type="checkbox"] {
-  background: var(--surface-sunken);
+  background: #3a2d22;
+  border-color: var(--text-ghost);
+}
+
+body.high-contrast .setting-row input[type="checkbox"]::before {
+  background: var(--text);
 }
 
 body.high-contrast .setting-row input[type="checkbox"]:checked {
   background: var(--check);
+}
+
+body.high-contrast .setting-row input[type="checkbox"]:checked::before {
+  background: var(--shadow-ink);
 }
 
 .setting-row input[type="checkbox"]::after {
