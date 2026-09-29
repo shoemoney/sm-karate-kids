@@ -164,6 +164,82 @@ await capture('10-phone-tournament', phone, async (page) => {
   await page.screenshot({ path: `${OUT}/10-phone-tournament.png` });
 });
 
+/* ---------------------------------------------------------------------------
+ * The states round 10 proved we were missing.
+ *
+ * Ten rounds of the same eleven screens produced an all-reject round: a fresh
+ * model on an exhausted set of screens stops finding things. These are the
+ * screens the game actually has that nothing was shooting — a real contact, a
+ * fighter off the ground, and the tournament ladder before a round card is up.
+ * ------------------------------------------------------------------------- */
+
+// A landed strike, framed at the moment of contact.
+//
+// The first version of this shot watched for a kick pose and screenshotted
+// there, which captured a *missed* kick: the fighters were not touching, so
+// there was no contact and therefore no impact art — and the obvious
+// conclusion, "the impact VFX never render", was wrong. The reliable signal is
+// `navigator.vibrate`, which `juice.impact()` calls on every contact. Shoot on
+// that, not on a pose.
+await capture('11-phone-impact', phone, async (page) => {
+  await page.addInitScript(() => {
+    globalThis.__hits = 0;
+    navigator.vibrate = () => {
+      globalThis.__hits += 1;
+      return true;
+    };
+  });
+  await page.goto(`${BASE}/?mode=classic`, { waitUntil: 'networkidle' });
+  await waitFight(page);
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const before = await page.evaluate(() => globalThis.__hits);
+    await page.keyboard.down('ArrowRight');
+    await page.waitForTimeout(330);
+    await page.keyboard.up('ArrowRight');
+    await page.keyboard.down('ArrowLeft');
+    await page.waitForTimeout(80);
+    await page.keyboard.up('ArrowLeft');
+    await page.keyboard.down('ArrowUp');
+    await page.keyboard.down('ArrowRight');
+    let landed = false;
+    for (let tick = 0; tick < 25 && !landed; tick += 1) {
+      landed = (await page.evaluate(() => globalThis.__hits)) > before;
+      if (!landed) await page.waitForTimeout(35);
+    }
+    await page.keyboard.up('ArrowUp');
+    await page.keyboard.up('ArrowRight');
+    if (landed) {
+      await page.waitForTimeout(60);
+      await page.screenshot({ path: `${OUT}/11-phone-impact.png` });
+      return;
+    }
+    await page.waitForTimeout(600);
+  }
+});
+
+// A fighter in the air. Vertical state is a different pose set, a different
+// shadow, and a different silhouette — none of which any capture had shown.
+await capture('12-phone-jump', phone, async (page) => {
+  await page.goto(`${BASE}/?mode=dojo`, { waitUntil: 'networkidle' });
+  await page.waitForFunction(
+    () => globalThis.__smkk?.state?.().phase === 'fight',
+    null,
+    { timeout: 30000 },
+  );
+  await page.keyboard.down('ArrowUp');
+  await page.waitForTimeout(230);
+  await page.screenshot({ path: `${OUT}/12-phone-jump.png` });
+  await page.keyboard.up('ArrowUp');
+});
+
+// The tournament ladder before a round card covers it. Ten captures had only
+// ever seen the round card, never the thing the round card is covering.
+await capture('13-phone-ladder', phone, async (page) => {
+  await page.goto(`${BASE}/?mode=tournament`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(250);
+  await page.screenshot({ path: `${OUT}/13-phone-ladder.png` });
+});
+
 await browser.close();
 console.log(`shots in ${OUT}`);
 if (errors.length) console.log('console errors:\n' + [...new Set(errors)].join('\n'));

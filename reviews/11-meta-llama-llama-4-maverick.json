@@ -1,0 +1,82 @@
+{
+  "model": "meta-llama/llama-4-maverick",
+  "elapsed_s": 48.9,
+  "usage": {
+    "prompt_tokens": 19316,
+    "completion_tokens": 501,
+    "total_tokens": 19817,
+    "cost": 0.0039486525,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0039486525,
+      "upstream_inference_prompt_cost": 0.00362175,
+      "upstream_inference_completions_cost": 0.0003269025
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-text",
+      "title": "Improve loading screen text clarity",
+      "what": "The loading screen text 'Downloading the game' is too small and light to be easily readable on a phone screen (screenshot 1).",
+      "why": "This hurts the player's experience as it may cause frustration or confusion during the loading process.",
+      "how": "Increase the font size and contrast of the loading text to make it more visible."
+    },
+    {
+      "id": "control-labels",
+      "title": "Enhance control label visibility",
+      "what": "The labels 'STANCE' and 'TECHNIQUE' below the control joysticks are too small and dim, making them hard to read (screenshot 2).",
+      "why": "This affects the player's ability to understand the controls, potentially leading to confusion or incorrect usage.",
+      "how": "Increase the font size and brightness of the control labels to improve readability."
+    },
+    {
+      "id": "move-list-contrast",
+      "title": "Improve move list contrast",
+      "what": "The move list text is very low contrast against the dark background, making it difficult to read (screenshot 6).",
+      "why": "Low contrast text can cause eye strain and make it harder for players to access information about available moves.",
+      "how": "Increase the contrast of the move list text by using a brighter color or adjusting the background."
+    },
+    {
+      "id": "settings-contrast",
+      "title": "Enhance settings text contrast",
+      "what": "The settings menu text is also low contrast, similar to the move list, making it hard to read (screenshot 7).",
+      "why": "This can lead to difficulties in navigating and understanding the settings options.",
+      "how": "Improve the contrast of the settings text by using a more visible color or adjusting the background."
+    },
+    {
+      "id": "fighter-composition",
+      "title": "Adjust fighter composition on screen",
+      "what": "The fighters are positioned too low on the screen, leaving a significant empty space below them (screenshot 2).",
+      "why": "This composition issue can make the game feel unbalanced and less engaging.",
+      "how": "Adjust the camera or fighter positioning to better utilize the screen space and create a more balanced composition."
+    }
+  ],
+  "raw": null
+}
