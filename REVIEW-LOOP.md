@@ -1270,3 +1270,32 @@ is what a corrected sample does.
 - `prefight-layout-hierarchy` (gpt-5.2-pro),
   `techniques-menu-density` (qwen3.6-27b) — density and framing, twenty-third
   iteration. Standing: warm and low.
+
+### Round 38 — grok-4.20-multi-agent, gpt-5.6-sol-pro — `f1c4e88`
+
+- `placeholder-career-text: "unfinished career stats in Settings"`
+  (grok-4.20-multi-agent) — **accepted.** "Career — played 0 · won 0 · best
+  time —" is three values, two of them zero and one a dash standing in for a
+  number that does not exist. It reads as an unfinished string rather than an
+  empty record, and it is the first thing a new player sees of a feature they
+  have not used. A sentence now; a real row once there is a record; "no win yet"
+  rather than a dash for a player who has not won.
+
+  **An em-dash is a good way to say "no number yet" inside a row of numbers,
+  and a bad way to say the row does not exist yet.**
+- `keep-hits-in-frame: "keep both fighters fully visible during scoring hits"`
+  (gpt-5.6-sol-pro) — new, and a gameplay concern rather than a look: a strike
+  that carries a fighter out of frame hides the outcome of the only verb in the
+  game. Not checked yet.
+- `fix-landscape-layout: "replace the broken landscape control composition"*
+  (gpt-5.6-sol-pro) — the backdrop seam is closed as of `90152ff`; the stranded
+  bottom pad is the architecture, and the reasoning for leaving it is written
+  down there.
+- `ground-fighter-sprites` (gpt-5.6-sol-pro) — contact shadows, present under
+  both fighters in every bout frame since round 3.
+- `loading-progress-indicator: "static unfilled loading bar"*
+  (grok-4.20-multi-agent) — the loop's fifteenth appearance of this family, and
+  the answer has not changed since round 35: the harness was photographing an
+  unstyled page. The bar is correct and the capture is now correct.
+- `anthropic/claude-sonnet-5.5:free` — 404, the free tier of that slug is gone.
+  The paid one has been asked.
