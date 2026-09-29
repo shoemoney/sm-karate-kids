@@ -731,3 +731,41 @@ remaining.** The local snapshot was inventing IDs — `glm-4.7v` and
   `portrait-composition-waste`, `control-occlusion-hud` — framing, in its
   fourteenth iteration. Standing: warm and low. The pad measures 27.0% of an
   844px screen, which is thumb reach, and 40% was never true.
+
+### Round 24 — kimi-k2.7-code, gpt-5.6-sol, minimax-m3, mistral-medium-3-5 — `217a165`
+
+- `modals-leak-controls: "moves and Settings panels leave the dual sticks
+  visible underneath, eating scroll space"` (minimax-m3) — **accepted, and both
+  halves were true.** The sheet was `inset: 0` inside #stage, and #stage ends
+  228px above the bottom of the phone, so the Techniques list ran out of room
+  with a move row sliced in half, no scroll affordance, and the dimmed pad
+  eating a third of the screen. Eleven of eighteen moves visible.
+
+  `position: fixed` under `body:has(.sheet:not([hidden]))` lifts it out of the
+  stage's flow; the pad is now hidden behind a sheet rather than dimmed.
+  Eighteen visible, and the next section header lands at the fold.
+
+  The result card deliberately keeps the dimmed treatment: a sheet is a
+  document, a result card is a card over a live bout, and the arena should stay
+  faintly visible behind it.
+- `unexplained-action-button-badges` (kimi-k2.7-code) and
+  `qualifier-intro-typography: ... an unexplained 'FIGHT N' badge` (minimax-m3)
+  — **accepted, next round.** Two models independently called the countdown
+  numeral on the FIGHT button unexplained. It is a countdown, but nothing in
+  the control says so.
+- `ippon-face-stickers` (minimax-m3), `tame-impact-whiteout` (gpt-5.6-sol) —
+  the defender's white flash reads as a sticker over the face rather than an
+  impact. Round 23 gave the struck fighter recoil; the flash peak is the
+  remaining half.
+- `mistralai/mistral-medium-3-5` — rejected the set at 15 images: "Total number
+  of images exceeds the maximum allowed of 8". Same cap round 9 hit on
+  mistral-medium-3.1; the review set has outgrown Mistral twice now and the
+  retry passes `--max-images 8`.
+- `sharpen-loading-brand` (gpt-5.6-sol), `loading-screen-void` (minimax-m3) —
+  the MEASURING state, in its tenth appearance across seven providers.
+- `ground-fighter-sprites: add contact shadows` (gpt-5.6-sol) — round 3 added
+  them and they are visible under both fighters in every bout frame.
+- `controls-obscure-fighters`, `control-panel-dominates-screen`,
+  `virtual-stick-knobs-too-small`, `portrait-camera-wastes-frame`,
+  `tighten-portrait-fight-framing`, `repair-landscape-layout` — framing, in its
+  fifteenth iteration. Standing: warm and low.
