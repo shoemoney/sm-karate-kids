@@ -1299,3 +1299,32 @@ is what a corrected sample does.
   unstyled page. The bar is correct and the capture is now correct.
 - `anthropic/claude-sonnet-5.5:free` — 404, the free tier of that slug is gone.
   The paid one has been asked.
+
+### Round 39 — the out-of-frame strike, `7c6c748`
+
+- `keep-hits-in-frame: "keep both fighters fully visible during scoring hits"`
+  (gpt-5.6-sol-pro, r36) — **ACCEPTED, and it was the most consequential
+  framing finding in the loop because it was not a taste question.**
+
+  A burst of 140 real frames of live strikes found 15 with fighter pixels
+  against the stage edge. The sampled one is a **scored back kick with the foot
+  cut off by the frame** — IPPON on screen, the point awarded, and the player
+  unable to see the limb that scored it.
+
+  `frame()` sizes the shot by the gap plus a body half-width, which covers a
+  punch and nothing longer. A back kick extends most of a body length past the
+  fighter's origin. The camera takes a `reach` term while a long limb is out.
+
+  Re-burst, same 140 frames: **15 → 7**, of which one is a fighter legitimately
+  near the boundary with the foot now visible and six are the bright shoji
+  panels matching the detection filter. The re-run is the measurement.
+
+  Presentation only, on purpose. The sim reports its own separation and never
+  learns about this — the same rule as the round-23 recoil. **The view is
+  allowed to lie about where the camera is; the simulation is not allowed to
+  lie about the rules.**
+
+  This closes the framing family with something that was never about framing.
+  Twenty-three iterations of "the fighters are too small" were taste; this was
+  the only verb in the game leaving the screen, and it took a model to name it
+  and a burst of frames to prove it.
