@@ -1,0 +1,84 @@
+{
+  "model": "x-ai/grok-4.20-multi-agent",
+  "elapsed_s": 125.9,
+  "usage": {
+    "prompt_tokens": 331323,
+    "completion_tokens": 24600,
+    "total_tokens": 355923,
+    "cost": 0.18313215,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 278592,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.18313215,
+      "upstream_inference_prompt_cost": 0.18313215,
+      "upstream_inference_completions_cost": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 20121,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "low-fighter-framing",
+      "title": "Fighters framed too low with empty foreground",
+      "what": "In gameplay and ready screens (wide dojo view with both fighters in stance, LUNGE PUNCH/FRONT KICK popups, and dual control sticks), the fighters' feet align near the bottom of the 3D scene, leaving a large empty tatami area in the lower third before the UI overlay.",
+      "why": "On portrait phone (390x844 baseline) this shrinks the perceived scale of the action and draws the eye downward to blank floor instead of the karate exchange, reducing excitement and readability while thumbs cover bottom controls.",
+      "how": "Raise the camera target Y-position or adjust camera rotation/fov in the Three.js scene setup so fighters occupy the central 45-55% of the vertical 3D frame; verify shadows, volumetric lights, and vignette still read correctly."
+    },
+    {
+      "id": "redundant-control-labels",
+      "title": "Duplicate STANCE/TECHNIQUE labels",
+      "what": "In multiple in-game views (pre-fight, LUNGE PUNCH, IPPON, and stance help visible), the words 'STANCE' and 'TECHNIQUE' appear both in the upper help bar (with arrow mappings like '\u25c0 step \u25b2 jump') and again as large labels centered directly beneath each circular stick control.",
+      "why": "Unnecessary repetition creates visual clutter at the bottom of the tall portrait screen where space is premium, making the touch controls feel busier and less elegant than the otherwise clean warm HUD.",
+      "how": "Remove the bottom labels beneath the sticks (keep only the descriptive help bar above or vice versa); confirm touch targets remain clear in both left- and right-handed layout modes."
+    },
+    {
+      "id": "dense-techniques-list",
+      "title": "Techniques reference is overcrowded",
+      "what": "The TECHNIQUES modal screenshot shows 4 long sections (RIGHT STICK FORWARD/BACK/UP/DOWN) with ~20 tightly packed rows of small icons, move names (e.g. 'Lunge Punch', 'Spinning Back Kick'), and descriptors like 'mid \u00b7 Half point' in a dark theme.",
+      "why": "New players cannot quickly parse or memorize inputs on a mobile screen; the dense layout hurts the learning curve and makes the moves list feel like a chore rather than a helpful reference in the first session.",
+      "how": "Enlarge direction icons by 1.5x, increase row height/padding, bold the move names, color-code point values (gold for full, silver for half), and add a one-line legend at the top explaining the stick symbols."
+    },
+    {
+      "id": "loading-progress-indicator",
+      "title": "Static unfilled loading bar on first screen",
+      "what": "The initial loading screenshot displays 'Downloading the game' above a thin, completely static brown horizontal line with no fill, percentage, or progress animation beneath the glowing logo and 'SM KARATE KIDS' title.",
+      "why": "This is the very first thing a player sees; lack of visible feedback during WebGPU/Three.js asset loading creates uncertainty on mobile and weakens the premium cinematic first impression.",
+      "how": "Implement a visible gold progress bar (matching the title glow and HUD colors) with real-time fill from the loader, plus centered percentage text (e.g. '45%') updated via Three.js LoadingManager."
+    },
+    {
+      "id": "placeholder-career-text",
+      "title": "Unfinished career stats in Settings",
+      "what": "The SETTINGS screenshot displays the footer 'Career \u2014 played 0 \u00b7 won 0 \u00b7 best time \u2014' with em-dashes and incomplete phrasing right below the toggles (including the highlighted 'Show performance HUD').",
+      "why": "This is the most obvious polish failure; players tapping the gear icon early see debug-like placeholders, immediately undermining the professional cinematic presentation and perceived completeness of the shipping product.",
+      "how": "Replace with a clean dynamic string such as 'Career \u2022 0 played \u2022 0 won \u2022 \u2014 best time' or hide the entire row until real career data is available; pull values from the game state instead of hard-coded placeholders."
+    }
+  ],
+  "raw": null
+}

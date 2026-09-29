@@ -1,0 +1,84 @@
+{
+  "model": "openai/gpt-5.6-sol-pro",
+  "elapsed_s": 75.9,
+  "usage": {
+    "prompt_tokens": 54679,
+    "completion_tokens": 8155,
+    "total_tokens": 62834,
+    "cost": 0.1357488,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 30644,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.1357488,
+      "upstream_inference_prompt_cost": 0.0541988,
+      "upstream_inference_completions_cost": 0.08155
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 5655,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fix-landscape-layout",
+      "title": "Replace the broken landscape control composition",
+      "what": "On the landscape gameplay screen, the arena occupies the upper portion while the lower roughly 230 pixels are an almost empty black field; the two sticks shrink to small controls at the extreme left and right corners.",
+      "why": "The sticks become harder to reach and read, while the large unused center makes the game look unfinished when the phone rotates.",
+      "how": "For landscape, enlarge each stick to at least a 140\u2013160 CSS-pixel diameter, inset them from the side and bottom safe areas, and let the arena extend behind the control region with a dark gradient instead of ending at a hard horizontal seam."
+    },
+    {
+      "id": "show-loading-progress",
+      "title": "Make first-boot download progress visibly measurable",
+      "what": "On the ShoeMoney loading screen, the long bar beneath \u201cDownloading the game\u201d appears effectively empty and has no percentage, downloaded size, or current asset label.",
+      "why": "A player cannot distinguish an active download from a stalled browser during the first seconds of the product.",
+      "how": "Add a high-contrast gold fill that advances across the existing track and display a numeric value such as \u201c42%\u201d beside the status. If byte progress is unavailable, show an indeterminate animated sweep and rotate specific statuses such as \u201cLoading fighters\u201d and \u201cPreparing dojo.\u201d"
+    },
+    {
+      "id": "strengthen-stick-contrast",
+      "title": "Raise default contrast on the two primary controls",
+      "what": "In the normal portrait gameplay screens, the sticks\u2019 brown outer rings, inner rings, and directional chevrons are only slightly lighter than the near-black control bed. The high-contrast screenshot makes the same geometry dramatically clearer.",
+      "why": "These are the game\u2019s primary touch targets, and players must locate their centers and directional range instantly while watching the fighters.",
+      "how": "Move the default stick outlines and chevrons halfway toward the values used by High Contrast mode, brighten the active thumb dot, and add a subtle warm radial backing behind each stick while preserving the dark tungsten palette."
+    },
+    {
+      "id": "ground-fighter-sprites",
+      "title": "Anchor the fighter sprites to the tatami",
+      "what": "Across the portrait gameplay screens, both fighters have hard cutout edges and their bare feet meet the floor without visible contact shadows, making them look pasted over the rendered dojo.",
+      "why": "The mismatch between photoreal fighters and the dimensional floor weakens depth perception and makes the central combat presentation feel less polished.",
+      "how": "Add soft, horizontally compressed contact shadows under each planted foot, darken them at the sole, and feather the sprite alpha by roughly one pixel at the feet and gi edges. Tint the shadows warm-brown to match the tatami lighting."
+    },
+    {
+      "id": "keep-hits-in-frame",
+      "title": "Keep both fighters fully visible during scoring hits",
+      "what": "In the IPPON screenshot, the white fighter is pushed into the left edge so that parts of his arm, leg, and silhouette are visibly cropped during the decisive spinning back kick.",
+      "why": "Cropping the defender at the exact scoring moment makes impact direction and body reaction harder to read and reduces the payoff of the bout\u2019s most important event.",
+      "how": "Reserve a fighter-width margin at both arena edges and dynamically zoom out or shift the combat camera when either sprite\u2019s action bounds approach that margin. Clamp knockback presentation so the full hit reaction remains inside the portrait viewport."
+    }
+  ],
+  "raw": null
+}

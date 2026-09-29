@@ -90,9 +90,19 @@ function makeOpponent(mode: string, seed: number): Opponent {
 
 function updateCareerSummary(): void {
   const record = loadCareer();
-  const best = record.bestWinTicks === null ? '—' : `${(record.bestWinTicks / 60).toFixed(1)}s`;
-  byId<HTMLElement>('career-summary').textContent =
-    `Career — played ${record.boutsPlayed} · won ${record.boutsWon} · best time ${best}`;
+  const el = byId<HTMLElement>('career-summary');
+  // A new player gets a sentence, not a row of em-dashes.
+  //
+  // "Career — played 0 · won 0 · best time —" is three values where two are zero
+  // and one is a dash standing in for a number that does not exist, and it
+  // reads as an unfinished string rather than as an empty record.
+  // grok-4.20-multi-agent called it "placeholder career text" and was right.
+  if (record.boutsPlayed === 0) {
+    el.textContent = 'No bouts yet — your record starts with your first fight.';
+    return;
+  }
+  const best = record.bestWinTicks === null ? 'no win yet' : `best win ${(record.bestWinTicks / 60).toFixed(1)}s`;
+  el.textContent = `Career — ${record.boutsPlayed} played · ${record.boutsWon} won · ${best}`;
 }
 
 /** Slides a sheet open/closed, skipping the transition wait when motion is reduced. */
