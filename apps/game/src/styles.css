@@ -455,6 +455,29 @@ body {
    lone right-aligned line between two centred things reads as a mistake.
    It sits ABOVE the rail and the credit sits below, so the two lines can never
    be read as one block of body text. */
+/* The product name, between the mark and the status line. */
+.boot-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--gold-bright);
+  text-shadow: 0 0 0.6rem var(--gold-glow);
+}
+
+.boot-subtitle {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--text-muted);
+}
+
 .boot-stage {
   /* A reserved line, so the card does not reflow under the mark every time
      the label changes length. */
@@ -1262,18 +1285,19 @@ body:has(.result[data-phase='result'].show) .stick-zone {
 
 /* ---------- First-run control coach ---------- */
 
-/* A caption inside each stick ring, and only on the first bout. It sits in the
-   middle of the ring rather than under it so it never competes with the STANCE
-   and TECHNIQUE labels the player is already looking at, and it lifts away on
-   the first committed technique. */
+/* A caption inside each stick ring, and only on the first bout. It is biased to
+   the UPPER half of the ring: the ring is the hit area, the thumb rests low
+   and central on it, and a legend set dead centre is a legend the player cannot
+   read while using the control it describes. The STANCE and TECHNIQUE labels
+   under the ring are untouched — the mark titles now use the same two words. */
 .coach-mark {
   position: absolute;
-  inset: 0;
+  inset: 0 0 22% 0;
   display: grid;
-  align-content: center;
+  align-content: start;
   justify-items: center;
   gap: 3px;
-  padding-inline: var(--space-2);
+  padding-block-start: 18%;
   text-align: center;
   pointer-events: none;
   animation: coach-in var(--dur-slow) var(--ease-out) both;

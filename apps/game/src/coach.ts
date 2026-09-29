@@ -29,13 +29,21 @@ export interface ControlCoach {
   dismiss(): void;
 }
 
+/**
+ * The title on each mark is the control's own name, not a description of it.
+ * The pad labels them STANCE and TECHNIQUE, the aria-labels say "Stance stick"
+ * and "Technique stick", and the reference sheet is "Techniques" — the coach
+ * was calling the right-hand one STRIKE, so the same control had three names
+ * depending on where you met it. The legend below the title is where the
+ * description lives, which is what the mark is for.
+ */
 const LESSONS: ReadonlyArray<{
   zone: string;
   title: string;
   pairs: readonly string[];
 }> = [
-  { zone: 'zone-left', title: 'Move & jump', pairs: ['◀ step', '▲ jump', '▶ step', '▼ crouch'] },
-  { zone: 'zone-right', title: 'Strike', pairs: ['◀ reverse', '▶ forward', '▲ high', '▼ low'] },
+  { zone: 'zone-left', title: 'Stance', pairs: ['◀ step', '▲ jump', '▶ step', '▼ crouch'] },
+  { zone: 'zone-right', title: 'Technique', pairs: ['◀ reverse', '▶ forward', '▲ high', '▼ low'] },
 ];
 
 export function createControlCoach(): ControlCoach {

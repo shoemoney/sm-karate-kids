@@ -40,6 +40,16 @@
           />
         </div>
         <!--
+          The product's own name. The card had a publisher mark and a publisher
+          credit and nothing that said what you were about to play — a boot
+          screen that names the studio but not the game. The title element
+          already carries this string; it is duplicated here deliberately rather
+          than injected, because this markup has to be on screen before a single
+          module of main.ts has run.
+        -->
+        <h1 class="boot-title">SM Karate Kids</h1>
+        <p class="boot-subtitle">Asmongold vs HasanAbi</p>
+        <!--
           Opens in the MEASURING state, not at "0%". The one span of cold boot
           this card cannot put a number on is the module download itself: the
           code that would report progress is inside the thing being downloaded.

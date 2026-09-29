@@ -1,0 +1,78 @@
+{
+  "model": "deepseek/deepseek-v4.1-flash",
+  "elapsed_s": 152.0,
+  "usage": {
+    "prompt_tokens": 6096,
+    "completion_tokens": 5499,
+    "total_tokens": 11595,
+    "cost": 0.002895174,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.002895174,
+      "upstream_inference_prompt_cost": 0.000420624,
+      "upstream_inference_completions_cost": 0.00247455
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 4305,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png"
+  ],
+  "items": [
+    {
+      "id": "loading-screen-identity",
+      "title": "Pre-boot screen never names the game and the progress bar reads as empty",
+      "what": "The loading screen shows only the blue ShoeMoney 'S' mark, the line 'Downloading the game', a hairline horizontal bar with no visible fill or percentage, and 'A SHOEMONEY AI LABS GAME'. The game's own title never appears anywhere on the screen, and the bar is a flat 1px line that looks identical whether loading has started or stalled.",
+      "why": "This is the first five seconds of the product. A player who tapped a link for a karate game sees a publisher logo and an apparently frozen line, which reads as a hung download and invites a back-tap before the game ever renders a frame. It also wastes the only moment where you can set the tone (dojo, fighters, brand).",
+      "how": "Add the game title/logo lockup directly under the ShoeMoney mark, give the progress bar a filled gold segment (matching the FIGHT button gold) plus a numeric percentage or a 'Loading dojo\u2026' label, and animate a slow shimmer across the unfilled portion so motion proves the page is alive."
+    },
+    {
+      "id": "control-naming-inconsistency",
+      "title": "The same two touch controls are called three different things",
+      "what": "The labels under the two rings read 'STANCE' and 'TECHNIQUE'. The text inside the same rings reads 'MOVE & JUMP' and 'STRIKE'. The Techniques panel headers read 'RIGHT STICK FORWARD' and 'RIGHT STICK BACK'. Three vocabularies for two inputs, all visible within the first minute of play.",
+      "why": "A new player has to build a mental model of two sticks during the first fight. If the move list says 'RIGHT STICK FORWARD' but the on-screen control is labelled 'TECHNIQUE' and 'STRIKE', the Techniques screen cannot be used as a reference while playing \u2014 the player has to translate every row, which is exactly the friction a move list is supposed to remove.",
+      "how": "Pick one pair of names (e.g. STANCE / STRIKE) and apply it everywhere: under the rings, inside the rings, and in the Techniques panel headers ('STANCE STICK \u2014 FORWARD', 'STRIKE STICK \u2014 FORWARD'). One rename pass across the HUD, the panel headers, and the tutorial copy."
+    },
+    {
+      "id": "in-stick-label-clutter",
+      "title": "Direction hints are printed inside the touch rings, under the player's thumb",
+      "what": "Each ~150px ring contains the control name ('MOVE & JUMP', 'STRIKE') plus four directional word hints ('step / jump / crouch', 'reverse / forward / high / low') in roughly 10px type, layered over the ring stroke and the chevron arrows. The thumb lands on the ring's center, which is exactly where this text sits.",
+      "why": "The hints are unreadable at the moment they are needed because the thumb covers them, and the density makes the control read as a diagram rather than a pad. On a 390px-wide phone this is the primary interaction surface, so visual noise here costs every single exchange.",
+      "how": "Move the control name outside the ring (it is already duplicated below as STANCE/TECHNIQUE), and replace the four word lists with four short glyphs or single words pinned to the ring's edge (e.g. \u25b2 jump, \u25bc crouch) so nothing sits under the thumb. Keep the full word list only in the Techniques panel."
+    },
+    {
+      "id": "hud-top-safe-area",
+      "title": "Score row and round timer sit flush against the top edge, dead center under the notch",
+      "what": "In every portrait fight screenshot the HUD row (ASMONGOLD 0 \u00b7 30 \u00b7 0 HASANABI) and the MOVES/gear buttons are flush against the top of the 390x844 frame with roughly 10px of padding. The round timer '30' is centered horizontally at the very top of the screen.",
+      "why": "On notched and Dynamic Island phones the center-top is exactly where the cutout lives, so the round timer \u2014 the most time-critical number in the match \u2014 is the element most likely to be clipped or obscured. The MOVES and gear buttons sit in the top-right corner where rounded display corners also intrude.",
+      "how": "Add a top safe-area inset (env(safe-area-inset-top)) and push the whole HUD row below it, or move the timer out of the center-top and into the score row's baseline so the center of the screen is free of critical UI."
+    },
+    {
+      "id": "settings-checkbox-state",
+      "title": "Settings toggles have no visible on-state",
+      "what": "In the Settings panel, every option \u2014 Reduced motion, High contrast, Large controls, Left-handed layout, Mute sound, Show performance HUD \u2014 uses the same dark gray square with a faint lighter border. No checked state is visible anywhere in the panel, so there is no reference for what 'on' looks like.",
+      "why": "These are the accessibility and comfort toggles. A player who needs Large controls or High contrast cannot tell whether their tap registered, and will reasonably conclude the setting is broken \u2014 the exact users these options exist for are the ones most likely to bounce.",
+      "how": "Give the checkbox a clear on-state (filled gold square with a dark check glyph, reusing the FIGHT button's gold) and a distinct off-state outline, and make the entire row the tap target with the label switching weight or color when active."
+    }
+  ],
+  "raw": null
+}
