@@ -1,0 +1,83 @@
+{
+  "model": "moonshotai/kimi-k2.7-code",
+  "elapsed_s": 18.7,
+  "usage": {
+    "prompt_tokens": 16010,
+    "completion_tokens": 4685,
+    "total_tokens": 20695,
+    "cost": 0.0277646,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0277646,
+      "upstream_inference_prompt_cost": 0.0113671,
+      "upstream_inference_completions_cost": 0.0163975
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 4100,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "unexplained-action-button-badges",
+      "title": "Primary action buttons show unexplained numeric badges.",
+      "what": "On the qualifier screen the bottom-center gold button reads \"FIGHT 2\" (screenshot 2), and on the results screen it reads \"REMATCH 8\" (screenshot 8). The circled number has no label, icon, or tooltip explaining whether it is cost, lives, attempts, or level.",
+      "why": "Players repeatedly tap the main call-to-action without understanding if they are spending currency, using a limited retry, or entering a harder stage; this creates hesitation and can lead to accidental purchases or frustration.",
+      "how": "Add a small text label or icon next to the number (e.g., a ticket/coin icon for cost, a heart for lives) and a tooltip on long-press; if it is a countdown, animate it or label it \"Attempts: 2\"."
+    },
+    {
+      "id": "controls-obscure-fighters",
+      "title": "On-screen controls cover the fighters' lower bodies and the mat.",
+      "what": "In portrait gameplay screenshots 2, 10, and 15, the STANCE and TECHNIQUE virtual sticks occupy the bottom ~25% of the screen and the large FIGHT button sits just above them, overlapping the fighters' legs and the tatami floor.",
+      "why": "Foot distance, stance width, and low attacks are unreadable, so players cannot judge range or react to crouching/low techniques.",
+      "how": "Move the camera framing up so the fighters' feet sit above the control chrome, or make the sticks and button semi-transparent during play and shrink their visual footprint while keeping the touch targets large."
+    },
+    {
+      "id": "portrait-camera-wastes-frame",
+      "title": "Portrait framing shows too much empty mat and too little dojo atmosphere.",
+      "what": "In portrait screenshots 2, 10, and 15, the fighters are centered with a large band of empty tatami below them and only a narrow strip of windows/wall behind them; the roof beams, banners, and crowd silhouettes visible in the landscape screenshot 9 are cropped out.",
+      "why": "The warm cinematic dojo art direction is lost on the primary device, making the scene look like a flat brown wall instead of a generated 3D environment.",
+      "how": "Tighten the portrait camera: zoom in slightly and lower the horizon so the fighters occupy the lower-middle third and the dojo architecture fills the upper frame, while keeping heads and feet inside the safe area."
+    },
+    {
+      "id": "virtual-stick-knobs-too-small",
+      "title": "Virtual stick knobs and directional hints are too small for reliable input.",
+      "what": "In screenshots 2, 10, and 15, the inner knob of each stick is a small gray dot inside a large outer ring, and the up/down/left/right chevrons are thin, low-contrast lines.",
+      "why": "During fast bouts, thumbs easily drift outside the active zone or miss diagonals, causing unintended stances/techniques and making the game feel unresponsive.",
+      "how": "Enlarge the active knob and add a high-contrast pressed state; increase the size and contrast of the directional chevrons; add a subtle glow or color shift when a stick is held in a cardinal direction."
+    },
+    {
+      "id": "moves-modal-gamepad-terminology",
+      "title": "Moves reference gamepad sticks with tiny, hard-to-read icons.",
+      "what": "Screenshot 6's TECHNIQUES modal labels sections \"RIGHT STICK FORWARD\" and \"RIGHT STICK BACK\", and each move is paired with two small arrow-in-circle icons that are only a few pixels across.",
+      "why": "On a touch-first phone game, players do not think in sticks; the tiny icons are illegible at a glance, so learning combos is frustrating.",
+      "how": "Relabel to STANCE STICK and TECHNIQUE STICK, replace the miniature arrow icons with larger, color-coded directional pad glyphs, and increase the list font size by at least 2 pt."
+    }
+  ],
+  "raw": null
+}

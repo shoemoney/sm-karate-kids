@@ -1,0 +1,83 @@
+{
+  "model": "minimax/minimax-m3",
+  "elapsed_s": 62.8,
+  "usage": {
+    "prompt_tokens": 16128,
+    "completion_tokens": 8386,
+    "total_tokens": 24514,
+    "cost": 0.01486344,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 159,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.01486344,
+      "upstream_inference_prompt_cost": 0.00480024,
+      "upstream_inference_completions_cost": 0.0100632
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 6803,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "control-panel-dominates-screen",
+      "title": "Twin-stick control panel eats roughly a third of the phone screen and breaks the warm HUD",
+      "what": "Across every portrait gameplay shot (e.g. the LUNGE PUNCH frame, screenshot 5, and the neutral stance frame, screenshot 15) the lower ~30% of the 390x844 phone is a cold black panel holding two ~250px dual-stick dials. In the landscape capture (screenshot 9) the same panel balloons to nearly 40% of the screen height while dimmed and inactive, leaving a dead black band under the fight. The 'STANCE' and 'TECHNIQUE' word labels under each dial are redundant \u2014 every dial already prints up/down/left/right arrows at its cardinal points.",
+      "why": "A phone player is forced to choose between watching the fight and seeing the action buttons. A 30% cold slab contradicts the warm tatami atmosphere the rest of the screen is selling, and a 40% slab in landscape is unforgivable real-estate waste. New players in the first five seconds will read the screen as 'mostly menus' before they ever throw a punch.",
+      "how": "Shrink each stick to ~180px and recolor the panel to a warm translucent brown (roughly rgba(30,18,8,0.6)) so it melts into the tatami, or render each stick as a free-floating soft vignette with no backing panel. Drop the redundant 'STANCE'/'TECHNIQUE' word labels \u2014 the on-dial arrows already say it. In landscape, hide the panel entirely during active rounds and surface sticks on a 'tap to show controls' affordance, or auto-fade after 2s of input."
+    },
+    {
+      "id": "modals-leak-controls",
+      "title": "Moves and Settings panels leave the dual sticks visible underneath, eating scroll space",
+      "what": "In the Moves list (screenshot 6) and the Settings list (screenshot 7) the dimmed twin-stick dials are still drawn at the bottom of the screen, taking up the same ~30% of vertical space as during play. The Moves list of 10 techniques is forced against a hard bottom edge, and the Settings list ends at 'Show performance HUD' with a huge empty void before the dimmed sticks.",
+      "why": "Modal screens are the player's reference card and options menu \u2014 they should be fully readable. Sharing a 390x844 phone with dead controls means the Moves list is partially below the fold and Settings has an obvious empty void the player will read as a layout bug.",
+      "how": "Hide (or fully fade to opacity 0) the control panel whenever a modal is open and let the modal content expand to fill the full height. Add internal scrolling inside the Moves list and a closing safe-area buffer so the last toggle ('Show performance HUD') and the last Moves row are reachable with a thumb."
+    },
+    {
+      "id": "qualifier-intro-typography",
+      "title": "Qualifier intro has weak type hierarchy and an unexplained 'FIGHT N' badge",
+      "what": "On the Qualifier intro screen (screenshots 2, 11, 14) the bold gold sans-serif 'QUALIFIER' is paired with 'vs HasanAbi' in a thin white serif that visually fights it instead of supporting it. The tagline 'PATIENT. HE WAITS FOR YOUR WIND-UP \u2014 THEN MAKES YOU PAY.' sits in a tiny pill that is barely legible on a 390x844 phone. The big gold 'FIGHT' button carries a small numbered circle that reads '2', then '3', then '4' across attempts (screenshot 8 also shows 'REMATCH 8') with no legend, no round label, and no counter that the player can map it to.",
+      "why": "This is the first impression of a bout. Mismatched typefaces read as a design bug, the tiny tagline is functionally invisible, and the numbered badge is a mystery the player has to ignore \u2014 or worse, distrust. The same unexplained number reappears on the Rematch button, reinforcing that it is decorative or, at best, a debug counter that leaked into the shipping UI.",
+      "how": "Match 'vs HasanAbi' to the same sans-serif family as 'QUALIFIER' (a lighter weight is fine) so the lockup reads as one heading. Promote the tagline to a full-width translucent card with a larger type, or fold it into a single subtitle line. Replace the inner numbered circle on FIGHT/REMATCH with an undecorated tap target, or with an icon that actually labels what's happening \u2014 a '1/5' round counter or a clock glyph that explains the countdown."
+    },
+    {
+      "id": "loading-screen-void",
+      "title": "ShoeMoney loading screen wastes most of the phone screen as empty black",
+      "what": "Screenshot 1 places the diamond SM logo, 'SM KARATE KIDS' gold title, 'ASMONGOLD VS HASANABI' subtitle, 'Downloading the game' status, a thin gold progress bar, and the 'A SHOEMONEY AI LABS GAME' footer all in a tight vertical band that occupies roughly the middle 30% of a 390x844 portrait. The top ~35% and the bottom ~35% of the screen are pure black with nothing in them, and the progress bar has no percentage label.",
+      "why": "This is the very first thing every player sees. The brand mark is fighting with empty void for attention, and on a 4G download that lasts many seconds the player is staring at a logo floating in blackness with only a thin line as feedback.",
+      "how": "Either (a) push the cluster up and add a vertically-progressing visual \u2014 a tatami weave filling top-down, or a slow amber glow rising behind the logo \u2014 so the eye has somewhere to travel, or (b) letterbox the content to a 16:9 block centred on a textured warm vignette so the screen never reads as empty. Add a percentage label next to the progress bar so the bar visibly moves."
+    },
+    {
+      "id": "ippon-face-stickers",
+      "title": "IPPON hit effect reads as face paint, not impact",
+      "what": "On the 'IPPON / HASANABI / SPINNING BACK KICK' KO screen (screenshot 12) the impact effect renders as three bright yellow, sharp-edged lightning-bolt sprites sitting on Asmongold's face and hair. They are unblurred, high-contrast, and static, and they sit on the head rather than radiating from the contact point (HasanAbi's foot against the chest).",
+      "why": "This is the biggest beat in the game \u2014 a one-hit KO \u2014 and the rest of the frame works hard to sell a warm, cinematic dojo. The opaque yellow sprites look like UI marks or face paint glued to the character, breaking the photographic illusion and reading as a rendering bug rather than a hit.",
+      "how": "Replace the sprite bolts with a TSL-driven bloom flash that emanates from the actual contact point (the chest, where the kick lands), a short radial chromatic-aberration pulse, and a single motion-blurred contact frame. If a lightning shape is wanted, render it as a soft additive flare that animates outward and fades in ~200ms, instead of an opaque decal parked on the face."
+    }
+  ],
+  "raw": null
+}

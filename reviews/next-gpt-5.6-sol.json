@@ -1,0 +1,83 @@
+{
+  "model": "openai/gpt-5.6-sol",
+  "elapsed_s": 30.7,
+  "usage": {
+    "prompt_tokens": 14412,
+    "completion_tokens": 1675,
+    "total_tokens": 16087,
+    "cost": 0.0527785,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 14409,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0527785,
+      "upstream_inference_prompt_cost": 0.0360285,
+      "upstream_inference_completions_cost": 0.01675
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 814,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "tame-impact-whiteout",
+      "title": "Preserve fighter readability during scoring hits",
+      "what": "On the IPPON screen, the hit flash clips nearly the entire white-gi fighter from chest to ankles into featureless white, while a broad horizontal flare washes across both fighters and the mat.",
+      "why": "The decisive contact pose is the bout's visual payoff, but the current bloom hides the defender's silhouette, limb position, and exact impact point.",
+      "how": "Reduce the impact emitter intensity and bloom contribution by roughly 40%, clamp post-bloom highlights, and confine the brightest flash to a small contact-centered radial burst. Keep the white gi below clipping and use the existing yellow impact marks to carry emphasis."
+    },
+    {
+      "id": "sharpen-loading-brand",
+      "title": "Make the loading screen look intentional and informative",
+      "what": "On the pre-boot screen, the central ShoeMoney mark has visibly jagged, low-resolution edges and a muddy shadow, while the progress track near the lower middle is an almost-black hairline with no clearly visible filled portion.",
+      "why": "This is the player's first view of the product; a rough logo and unreadable progress indicator make the game appear stalled or unfinished before the dojo loads.",
+      "how": "Replace the logo with an SVG or a 2x/3x transparent asset, remove the heavy dark fringe, and render a 4\u20136 px progress track with a distinct warm-gold fill. Add a numeric percentage or changing asset-stage label beneath \u201cDownloading the game.\u201d"
+    },
+    {
+      "id": "tighten-portrait-fight-framing",
+      "title": "Use more of the portrait arena for the fighters",
+      "what": "In the standard portrait gameplay screens, the fighters occupy only the middle-lower band around y470\u2013790, while roughly 300 px of mostly empty smoky wall and windows sits between the HUD and their heads.",
+      "why": "Faces, guards, and foot placement are relatively small at phone size, making opponent reads harder while prime screen area is spent on non-interactive background.",
+      "how": "Lower the portrait camera aim and increase fighter screen scale by about 15%. Keep both feet above the help panel and reserve only the upper 80\u2013120 px of the arena for move callouts such as \u201cFRONT KICK.\u201d"
+    },
+    {
+      "id": "ground-fighter-sprites",
+      "title": "Add contact shadows and match the fighters to the floor",
+      "what": "Across the idle gameplay and pre-fight screens, the photoreal fighters have crisp cutout edges and little visible contact shadow beneath their bare feet, while the tatami and backdrop are softer and hazier. The feet consequently look pasted onto the mat.",
+      "why": "Weak grounding undermines the otherwise cinematic dojo and makes movement and attack distance harder to judge.",
+      "how": "Add soft elliptical contact shadows under each planted foot, darken them at the sole, and let them widen and fade with foot height. Apply a subtle warm floor bounce and a very light edge-softening pass to the fighter sprites so their sharpness and color temperature match the rendered scene."
+    },
+    {
+      "id": "repair-landscape-layout",
+      "title": "Do not shrink the touch controls into landscape corners",
+      "what": "In the landscape screenshot, the arena ends near mid-screen and the entire lower half becomes an empty black field, with the two sticks reduced to small controls at the far left and right corners. The HUD names and buttons are also much smaller than in portrait.",
+      "why": "A phone rotated during play produces tiny targets, excessive thumb travel, and a layout that looks broken rather than deliberately adapted.",
+      "how": "Either lock gameplay to portrait with a branded rotate-device prompt, or implement a landscape preset that enlarges both sticks to at least 140 CSS px, anchors them within thumb reach, and allows the arena to extend behind the control region instead of leaving a solid black lower half."
+    }
+  ],
+  "raw": null
+}

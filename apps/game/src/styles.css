@@ -1326,7 +1326,29 @@ body.show-perf #backend {
    to get back to one, so dimming its pad meant the controls were at 18% seconds
    before the player had to use them. Dimming there is the opposite of the
    intent. */
-body:has(.sheet:not([hidden])) #pad,
+/* A sheet is a full-screen document, so it gets the full screen. It used to be
+   laid out inside #stage, which ends 228px above the bottom, so the Techniques
+   list ran out of room with a row sliced in half and no scroll affordance —
+   and the dimmed pad sat underneath eating a third of the phone.
+   minimax-m3 reported exactly that: "moves and Settings panels leave the dual
+   sticks visible underneath, eating scroll space".
+
+   `position: fixed` lifts the sheet out of the stage's flow so it covers the
+   pad's band too, and the pad is hidden rather than dimmed: behind an open
+   sheet it is not a dead control, it is nothing at all. The result card keeps
+   the old dimmed treatment — it sits over a live bout and the arena should stay
+   faintly visible behind it. */
+body:has(.sheet:not([hidden])) .sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+
+body:has(.sheet:not([hidden])) #pad {
+  display: none;
+}
+
+body:has(.sheet:not([hidden])) .result[data-phase='result'].show,
 body:has(.result[data-phase='result'].show) #pad {
   opacity: 0.18;
   filter: saturate(0.6);
