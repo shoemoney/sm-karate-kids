@@ -188,6 +188,17 @@ async function boot(): Promise<void> {
   hud.renderTechniques(byId('tech-ref-list'), indexMoves(content));
   updateCareerSummary();
 
+  // The round/result card's painted backdrop. Set as a token rather than written
+  // into styles.css because the stylesheet cannot know the app's base URL, and
+  // this build ships with `base: './'` — a literal `/generated/...` in CSS
+  // breaks the moment the bundle is served from a subdirectory, which is
+  // exactly what the arcade does. `body.high-contrast` overrides the token back
+  // to `none`, so the art never survives into contrast mode.
+  document.documentElement.style.setProperty(
+    '--card-plate',
+    `url("${import.meta.env.BASE_URL}generated/title-backdrop.webp")`,
+  );
+
   let state = createMatch({ content, startSeparation });
   let opponent = makeOpponent(mode, seed);
 
@@ -246,8 +257,7 @@ async function boot(): Promise<void> {
   document.addEventListener('keydown', unlock, { once: true });
 
   const juice = new Juice(stage.scene, stage.camera, stageEl, () =>
-    document.body.classList.contains('reduced-motion'),
-  );
+    document.body.classList.contains('reduced-motion'), import.meta.env.BASE_URL);
 
   // The rules measure distance in tournament metres; the art is drawn at human
   // proportions, and a strike in the art reaches about half as far as the

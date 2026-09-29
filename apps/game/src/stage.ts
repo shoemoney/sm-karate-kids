@@ -18,13 +18,12 @@ import {
   PerspectiveCamera,
   PlaneGeometry,
   PointLight,
-  RepeatWrapping,
   Scene,
-  TextureLoader,
   type Material,
+  type Texture,
 } from 'three/webgpu';
-import type { Texture } from 'three/webgpu';
 import type { ArenaSpec } from '@smkk/sim';
+import { loadGenerated } from './artLoader.js';
 
 const FOV = 34;
 /** Metres of headroom the frame always keeps above and below the action. */
@@ -46,6 +45,59 @@ const FIGHTER_HALF_WIDTH = 0.42;
 const BACKDROP_Z = -13.9;
 const CROWD_Z = -8.2;
 const SHAFT_Z = -3.2;
+/** Where the light shaft is centred across the mat. The dust hangs in it. */
+const SHAFT_X = -1.6;
+
+/**
+ * The ceiling is an EAVE at the back wall, not a roof over the whole room.
+ *
+ * The camera is level at chest height with a 34° vertical FOV, so the top edge
+ * of the frame is a ray climbing at about 17°. Any ceiling shallower than that
+ * ray — which is every flat ceiling, and every ceiling hung at a believable
+ * eight metres — is above the frustum at every depth the camera ever takes, and
+ * is therefore never drawn. A ceiling you can actually see has to be brought
+ * down and tipped steeply toward the lens, and the version that works here is
+ * the shallow eave the back wall's rafters would make: it leans away from the
+ * camera from just above the shoji transom, and it owns roughly the top fifth
+ * of the frame while leaving the lit screen the fighters are read against.
+ *
+ * Numbers are chosen so the eave's upper edge lands on the top of the frame at
+ * both viewports. The camera dollies between ~4.4m (desktop, fighters close) and
+ * ~7.2m (portrait, fighters apart), and a fixed plane that only frames at one of
+ * those is a plane that is broken at the other.
+ */
+const CEILING_Y = 6.9;
+const CEILING_Z = -13.4;
+const CEILING_TILT = 0.26;
+const CEILING_W = 20;
+const CEILING_H = 5.6;
+
+/**
+ * Dust in the air, suspended in the shaft. Positions are a pure function of
+ * wall time — no integration, no accumulated state — so a dropped frame or a
+ * backgrounded tab resumes in exactly the right place instead of leaving the
+ * motes stranded wherever the tab stopped.
+ */
+const MOTE_COUNT = 18;
+const MOTE_Y_MIN = 0.4;
+const MOTE_Y_MAX = 4.0;
+/** Half-width of the beam's lit core; a mote outside it is only half a mote. */
+const MOTE_SPREAD = 2.3;
+
+/**
+ * One speck of airborne dust. Positions are derived from wall time every frame
+ * rather than integrated, so nothing here is a velocity or an accumulator.
+ */
+interface Mote {
+  readonly mesh: Mesh<PlaneGeometry, MeshBasicMaterial>;
+  readonly x: number;
+  readonly z: number;
+  readonly y0: number;
+  readonly phase: number;
+  readonly sway: number;
+  readonly peak: number;
+  readonly rate: number;
+}
 
 /** How far the contact shadow reaches across the mat, and how deep it smears. */
 const SHADOW_SPAN = 0.98;
@@ -72,47 +124,6 @@ const POOL_OPACITY = 0.24;
  */
 const TINT_STRENGTH = 0.7;
 
-function loadTexture(url: string, opts: { srgb?: boolean; repeat?: number } = {}): Promise<Texture> {
-  return new Promise<Texture>((resolve, reject) => {
-    new TextureLoader().load(
-      url,
-      (texture) => {
-        texture.colorSpace = SRGBColorSpace;
-        if (opts.repeat !== undefined) {
-          texture.wrapS = RepeatWrapping;
-          texture.wrapT = RepeatWrapping;
-          texture.repeat.set(opts.repeat, opts.repeat);
-        }
-        resolve(texture);
-      },
-      undefined,
-      (error) => reject(error instanceof Error ? error : new Error(String(error))),
-    );
-  });
-}
-
-/**
- * Loads a generated asset, returning null instead of throwing when it is
- * genuinely absent.
- *
- * There is deliberately no HEAD probe here. A HEAD preflight costs a second
- * request per asset and — worse — many CDNs and object stores answer HEAD with
- * 405, at which point this would silently drop the entire art layer and fall
- * back to the procedural room with nothing in the console. TextureLoader
- * already distinguishes "not found" from "loaded", so a single GET is both
- * cheaper and more honest; the warn below is what makes a miss diagnosable.
- */
-async function tryLoad(url: string, opts?: { repeat?: number }): Promise<Texture | null> {
-  try {
-    return await loadTexture(url, opts ?? {});
-  } catch {
-    console.warn(
-      `[smkk] generated art "${url}" failed to load; the dojo keeps its procedural fallback for this piece`,
-    );
-    return null;
-  }
-}
-
 export class Stage {
   readonly scene = new Scene();
   readonly camera = new PerspectiveCamera(FOV, 1, 0.1, 200);
@@ -132,6 +143,8 @@ export class Stage {
    */
   private readonly unlitCutouts: MeshBasicMaterial[] = [];
   private unlitScanned = false;
+  /** Airborne dust in the shaft. Empty until the mote texture resolves. */
+  private readonly motes: Mote[] = [];
 
   constructor(arena: ArenaSpec, baseUrl: string) {
     const backdrop = new Color(arena.backdropColor);
@@ -277,12 +290,14 @@ export class Stage {
     seams: Group,
     fallbackBanners: Group,
   ): Promise<void> {
-    const [backdrop, mat, crowd, shaft, banner] = await Promise.all([
-      tryLoad(`${baseUrl}generated/dojo-backdrop.webp`),
-      tryLoad(`${baseUrl}generated/dojo-floor.webp`, { repeat: 8 }),
-      tryLoad(`${baseUrl}generated/crowd-silhouette.webp`),
-      tryLoad(`${baseUrl}generated/volumetric-shaft.webp`),
-      tryLoad(`${baseUrl}generated/banner-vertical.webp`),
+    const [backdrop, mat, crowd, shaft, banner, ceiling, mote] = await Promise.all([
+      loadGenerated(baseUrl, 'dojo-backdrop.webp'),
+      loadGenerated(baseUrl, 'dojo-floor.webp', { repeat: 8 }),
+      loadGenerated(baseUrl, 'crowd-silhouette.webp'),
+      loadGenerated(baseUrl, 'volumetric-shaft.webp'),
+      loadGenerated(baseUrl, 'banner-vertical.webp'),
+      loadGenerated(baseUrl, 'dojo-ceiling.webp'),
+      loadGenerated(baseUrl, 'dust-mote.webp'),
     ]);
 
     if (mat !== null) {
@@ -350,7 +365,7 @@ export class Stage {
         }),
       );
       beam.material.color.set('#a08a66');
-      beam.position.set(-1.6, 3.4, SHAFT_Z);
+      beam.position.set(SHAFT_X, 3.4, SHAFT_Z);
       beam.renderOrder = -2;
       this.scene.add(beam);
     }
@@ -376,6 +391,118 @@ export class Stage {
       // tatami seams do when real art lands.
       fallbackBanners.visible = false;
     }
+
+    if (ceiling !== null) {
+      // The room had no lid. Everything above the back wall's shoji was just
+      // more of the same wall plate, and the top fifth of a portrait frame is
+      // the largest single region in the composition with nothing in it.
+      //
+      // Leaned away from the camera, not laid flat: a flat lid at this height
+      // is seen edge-on and the rafters compress into a stripe, while the
+      // eave's own tilt opens the underside up to the lens so the beams read as
+      // beams going back over your head. Its lower edge is placed where the
+      // wall's lit transom ends, so the art joins the room instead of sitting on
+      // it, and its upper edge meets the top of frame. Untinted-dark for the
+      // same reason the back wall is: this is the room the fighters are lit
+      // AGAINST and must never out-shout them — the ceiling art's paper lantern
+      // is a near-white in the source and would steal every silhouette.
+      const lid = new Mesh(
+        new PlaneGeometry(CEILING_W, CEILING_H),
+        new MeshBasicMaterial({ map: ceiling, side: DoubleSide, toneMapped: true }),
+      );
+      lid.material.color.set('#463a2d');
+      lid.position.set(0, CEILING_Y, CEILING_Z);
+      lid.rotation.x = -CEILING_TILT;
+      lid.renderOrder = -3;
+      this.scene.add(lid);
+    }
+
+    if (mote !== null) {
+      this.spawnMotes(mote);
+    }
+  }
+
+  /**
+   * Seeds the airborne dust: `MOTE_COUNT` independent quads sharing one tiny
+   * plane, each with its own material so opacity and drift stay independent.
+   * Additive, because a mote is a speck of light caught in a beam and nothing
+   * about it should ever darken what is behind it.
+   *
+   * They are seeded inside the shaft's footprint and nowhere else. A mote out
+   * in the unlit half of the room is a speck of light with no beam to belong
+   * to, and a field of those reads as noise on the lens.
+   *
+   * They are also kept near the lens, at the front of the shaft rather than at
+   * the back wall. The camera is ~7m out on a phone and ~4.4m on a desktop, so
+   * a mote the width of a fingertip at the wall is a sub-pixel grey smudge at
+   * that distance — invisible, and invisible on BOTH viewports for the same
+   * reason. Up close the same sprite is a legible speck of dust.
+   */
+  private spawnMotes(texture: Texture): void {
+    const geometry = new PlaneGeometry(1, 1);
+    for (let i = 0; i < MOTE_COUNT; i += 1) {
+      const material = new MeshBasicMaterial({
+        map: texture,
+        color: new Color('#ffe2b4'),
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        blending: AdditiveBlending,
+        toneMapped: true,
+      });
+      const mesh = new Mesh(geometry, material);
+      mesh.visible = false;
+      mesh.scale.setScalar(0.055 + (i % 4) * 0.022);
+      // In front of the fighters: dust hangs in the air between the lens and
+      // the fight, and a mote that the men occlude has stopped being in the
+      // room the player is looking at.
+      mesh.renderOrder = 11;
+      this.scene.add(mesh);
+      // Seeded on an even walk rather than Math.random so the motes are never
+      // clumped into one corner of the beam by an unlucky draw.
+      const t = (i + 0.5) / MOTE_COUNT;
+      this.motes.push({
+        mesh,
+        // A gentle cone, widest at the bottom of the shaft and narrowing as it
+        // climbs, which is the shape a beam of light actually makes.
+        x: (t - 0.5) * 2 * MOTE_SPREAD + SHAFT_X,
+        z: -3.0 + ((i * 7) % 9) * 0.42,
+        y0: MOTE_Y_MIN + ((i * 13) % 17) * 0.2,
+        phase: i * 1.7,
+        sway: 0.22 + (i % 4) * 0.11,
+        // Dimmer the further out it hangs. A field of equally bright specks is
+        // dirt on the lens; a field brightest down the middle of the beam is
+        // the beam being visible.
+        peak: (0.4 + (i % 3) * 0.16) * (1 - 0.45 * Math.abs(t * 2 - 1)),
+        rate: 0.72 + (i % 6) * 0.09,
+      });
+    }
+  }
+
+  /**
+   * Dust, placed from wall time alone.
+   *
+   * A mote's height is `y0 + (t / rate) mod range`, so nothing is integrated
+   * frame to frame: there is no velocity to accumulate, no catch-up burst after
+   * a stall, and a tab that was backgrounded for a minute comes back to the
+   * same field it left. Opacity eases in and out over the ends of the climb so
+   * a mote never pops into existence at the bottom of the beam or vanishes
+   * mid-air at the top.
+   */
+  private updateMotes(nowMs: number): void {
+    const span = MOTE_Y_MAX - MOTE_Y_MIN;
+    for (const mote of this.motes) {
+      const t = (nowMs / 1000 / mote.rate + mote.phase * 3.1) % 1;
+      const y = MOTE_Y_MIN + t * span;
+      mote.mesh.position.set(
+        mote.x + Math.sin(nowMs / 1000 * mote.sway + mote.phase) * 0.34,
+        y,
+        mote.z + Math.cos(nowMs / 1000 * mote.sway * 0.7 + mote.phase) * 0.18,
+      );
+      const fade = Math.min(1, t * 6) * Math.min(1, (1 - t) * 4);
+      mote.mesh.material.opacity = mote.peak * fade;
+      mote.mesh.visible = mote.mesh.material.opacity > 0.004;
+    }
   }
 
   resize(width: number, height: number): void {
@@ -390,8 +517,12 @@ export class Stage {
    * camera far enough back to turn both fighters into dolls. The frame instead
    * holds only the distance actually between them, dollying in as the exchange
    * closes and back out as it opens.
+   *
+   * `nowMs` is wall time and drives the airborne dust only. It is presentation
+   * and never reaches the simulation, which is fed fixed steps from the clock in
+   * the caller.
    */
-  frame(midpointX: number, gap: number, immediate = false): void {
+  frame(midpointX: number, gap: number, immediate = false, nowMs = performance.now()): void {
     const aspect = this.width / Math.max(this.height, 1);
     const halfFov = (FOV * Math.PI) / 360;
     const tan = Math.tan(halfFov);
@@ -421,6 +552,7 @@ export class Stage {
     this.rightPool.position.x += (midpointX + gap / 2 - this.rightPool.position.x) * follow;
     this.leftShadow.position.x = midpointX - gap / 2;
     this.rightShadow.position.x = midpointX + gap / 2;
+    this.updateMotes(nowMs);
     this.applyRoomLight();
   }
 
