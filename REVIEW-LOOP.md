@@ -39,7 +39,7 @@ successive rounds are not five variants of the same opinion.
 |---|-------|--------|--------|
 | 1 | `google/gemini-3.8-flash` | Google | landed `087be7a` |
 | 2 | `z-ai/glm-5.3-flash` | Zhipu | landed `bc53eda` |
-| 3 | `anthropic/claude-opus-5.5` | Anthropic | pending |
+| 3 | `anthropic/claude-opus-5.5` | Anthropic | landed `e7762da`, `9e3bfe6` |
 | 4 | `openai/gpt-5.2` | OpenAI | pending |
 | 5 | `x-ai/grok-4-vision` | xAI | pending |
 | 6 | `moonshotai/kimi-k3` | Moonshot | pending |
@@ -96,4 +96,39 @@ Five items, all real, all verified before implementing:
   after every round, not just at the end — the overshoot is invisible in code.
 - **A real finding is not always a code finding.** The boot bar and the WEBGPU
   slot were both correct behaviour in a bad position.
+
+### Round 3 — anthropic/claude-opus-5.5 — `e7762da`, `9e3bfe6`
+
+The most productive round so far, and the only one that found a *missing feature*
+rather than a misplaced one.
+
+- `teach-sticks-in-context` — **there was no onboarding at all.** Grepped for
+  `coach|tutorial|onboard|first-run` across `apps/game/src` and `index.html`:
+  zero hits. The grammar lived only in the Techniques sheet, which a new player
+  has no reason to open. Added `coach.ts` — one-time captions inside each stick
+  ring, real touch devices only, dismissed by the first committed technique.
+  Non-blocking by design: never pauses the clock, never takes focus, never traps
+  a tap. Note the gate caught this one — the first draft called `readFlag`/
+  `writeFlag`, which do not exist; the real API is `loadValue`/`saveValue`.
+- `fix-moves-sheet-readability` — every row spelled out "stance + technique" in
+  full, restating the group heading above it and squeezing names until "Crouching
+  Reverse Punch" wrapped to two lines. Two lit glyph pips now; the spelled-out
+  form survives as the accessible name. Every name is one line.
+- `keep-faces-clear-on-cards` — **first attempt failed silently.** `margin-block-start:
+  auto` went into a new rule, and a later `.result-rematch { margin-top }` maps
+  to the same property and won. The button stayed across both fighters' faces
+  and the screenshot was the only thing that noticed. Fixed by editing the
+  existing rule rather than adding a competing one.
+- `clean-hud-chrome` — the renderer badge now rides the "Show performance HUD"
+  setting, which already prints the backend. Separately, the portrait header's
+  second row collapsed into a floating pair: ~90px of chrome holding two
+  controls, handed back to the viewport.
+- `tighten-portrait-framing` — **partially rejected.** Opus asked for heads at
+  ~35% and feet at ~85% of the viewport. Rounds 1 and 2 already took the camera
+  in twice, and round 1's full-suggestion attempt cropped the fighters at the
+  knees. The honest reading is that the remaining dead space above the fighters
+  is mostly *ceiling*, not framing error. Attacking it by reclaiming the header
+  strip instead is a real gain that does not risk the crop; the camera is left
+  alone this round.
+
 
