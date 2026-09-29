@@ -1749,3 +1749,42 @@ anything the review loop has found.
   `:batch` family in the catalogue is therefore **not reachable by this harness**,
   which is worth knowing: it is roughly a fifth of the entries the live API lists
   and none of them can be asked a question this way.
+
+### Round 53 — mimo-v2.6-pro-ultraspeed, gpt-5.2 — `ed05146`
+
+- `half-point-formatting: "fix half-point score rendering so it can't read as
+  21/2"` (gpt-5.2) — **accepted, and it says round 36's fix made this worse.**
+
+  Rendered the glyph in isolation at 4x: in this font stack, and in most system
+  sans faces on every platform this ships to, U+00BD renders as a *slashed*
+  fraction. `2½` is visually three characters and reads as three. It is 36px
+  wide against a digit's 27px — which is the width that clipped `10½` in round
+  43.
+
+  Round 36 replaced a decimal `2.5` with that glyph because six models in six
+  rounds called the decimal cluttered. It was less cluttered and not less
+  ambiguous. **A notation chosen to be unambiguous turned out to be worse, and
+  the only reason anyone noticed is that a model read the digits rather than the
+  intent.** Two stacked numerals now, built in the DOM, with an aria-label for
+  anything hearing it.
+
+- `techniques-modal-touch-language: "uses console 'stick' language, cryptic
+  glyphs, and a row sliced in half"` (mimo-v2.6-pro-ultraspeed) — **accepted,
+  partly.** The group headings said "RIGHT STICK FORWARD/BACK/UP/DOWN" on a game
+  with two thumb sticks on a touch pad and no gamepad input at all — and
+  contradicted the key at the top of that same sheet, which has said
+  "STANCE + TECHNIQUE" since round 45.
+
+  **Round 28 fixed half of this by aligning the coach legend to the sheet, and
+  the other half went unnoticed for twenty-five rounds because the two halves
+  were consistent with each other and inconsistent with the game.** That is a
+  failure mode with no external signal at all: two things agreeing with each
+  other is not evidence that either is right.
+
+  The sliced row is the fold, fixed in the previous round.
+- `sprite-grounding-shadows: "add contact shadows"` (gpt-5.2) — present and
+  verified at 3x in round 42.
+- `fighter-sprite-matte-halo` (mimo-v2.6-pro-ultraspeed) — the warm grade landed
+  in round 49; the halos were checked at 2x in rounds 37 and 42 and are not
+  there. "Camera-flat lighting" is accurate and inherent: the fighters are
+  unlit `MeshBasicMaterial` quads, which is what lets them key cleanly at all.
