@@ -921,3 +921,30 @@ remaining.** The local snapshot was inventing IDs — `glm-4.7v` and
 - `fighters-too-small-on-phone`, `fighter-vertical-cramping`,
   `portrait-combat-framing-too-wide`, `control-legend-too-small` — framing, in
   its nineteenth iteration. Standing: warm and low.
+
+### Round 29 — the detached fragments, `a47ad7b`
+
+Round 28's open item is closed, and it is the largest single defect the loop has
+found.
+
+Connected-component analysis over both fighters' atlases — six pages, 44 cells
+each — found **14 detached fragments**. They are not confined to one frame: the
+back hand is drawn as its own island because the keyer separated it from the
+sleeve, and in several frames the figure already has both fists up in guard, so
+the island is a duplicate of a hand that is already there.
+
+`tools/despeckle-fighters.py` erases them. One rule: within each cell keep the
+largest connected component of opaque pixels, drop the rest. Bodies run
+14000–26000px, the largest fragment is 550px — a factor of 25, no per-frame
+tuning. `--check` reports and exits non-zero.
+
+**The lesson, which is the whole loop in one line:** a reviewer describing an
+artefact reliably points at a frame where something is wrong, and cannot name
+it. Five reviewers naming five different body parts is one artefact seen five
+times, and every name was wrong, because it is not a body part — it is a body
+part attached to nothing.
+
+And the process failure that let it live nine rounds: in round 22 I bursted the
+*back* kick, found it clean, and refuted a finding that was about a *different
+move*. A correct refutation scoped to the wrong thing is worse than no
+refutation, because it looks like diligence.
