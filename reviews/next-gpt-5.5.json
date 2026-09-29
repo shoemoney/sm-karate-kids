@@ -1,0 +1,84 @@
+{
+  "model": "openai/gpt-5.5",
+  "elapsed_s": 50.9,
+  "usage": {
+    "prompt_tokens": 15325,
+    "completion_tokens": 2970,
+    "total_tokens": 18295,
+    "cost": 0.165725,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.165725,
+      "upstream_inference_prompt_cost": 0.076625,
+      "upstream_inference_completions_cost": 0.0891
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 2070,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "make-loading-progress-readable",
+      "title": "Make the pre-boot loading progress visibly reassuring",
+      "what": "On the branded loading screen, the progress bar near the lower middle is a very thin dark-brown hairline, roughly x37\u2013554 and only about 5\u20136 px tall, with the fill barely distinguishable from the track and background.",
+      "why": "This is one of the first things a player sees; if the bar barely moves or is hard to read, the page can feel stalled even when the game is loading.",
+      "how": "Increase the bar height to at least 10\u201312 px on the 390 px portrait layout, use a clearer gold fill against a darker track, and add a small percentage or asset-count text directly above or inside the bar."
+    },
+    {
+      "id": "crop-empty-wall-enlarge-fighters",
+      "title": "Use more portrait height for the fighters, not empty upper dojo wall",
+      "what": "On the main gameplay screen, the region from just under the HUD down to the window line is mostly empty smoky wall and rafters, while the fighters occupy only the middle band of the screen and appear small compared with the two large touch sticks below.",
+      "why": "The player needs to read stance, range, and strikes quickly on a phone; spending so much vertical space on non-interactive background makes the actual bout harder to parse.",
+      "how": "For portrait gameplay, tighten the camera/framing by about 10\u201315%: crop more of the upper wall/rafters, enlarge the fighters, and keep their feet just above the helper panel/control dock so the combat silhouettes get more pixels."
+    },
+    {
+      "id": "fix-stance-helper-duplicate-step",
+      "title": "Clarify the stance stick labels in the in-fight helper",
+      "what": "In the gameplay helper panel above the sticks, the STANCE section labels both the left arrow and right arrow as \u201cstep,\u201d while up is \u201cjump\u201d and down is \u201ccrouch.\u201d The duplicated \u201cstep\u201d text is visible on the same two-line legend.",
+      "why": "A new touch player cannot tell what left versus right on the stance stick actually does, which weakens the first-session learning loop for a twin-stick game.",
+      "how": "Rename the two horizontal stance labels to distinct actions, such as \u201cback step\u201d and \u201cforward step,\u201d or \u201cretreat\u201d and \u201cadvance.\u201d If the meaning flips by facing direction, label them relative to the opponent and keep the text large enough to read at phone size."
+    },
+    {
+      "id": "reduce-hit-flash-clipping",
+      "title": "Preserve fighter readability during big hit flashes",
+      "what": "On the IPPON impact screenshot, the white fighter\u2019s torso, sleeve, and head area are blown out to near-solid white by the hit flash and bloom, while the spark burst covers the contact point on the face.",
+      "why": "Impact feedback should feel powerful, but here the player temporarily loses the character silhouette and exact contact read, making the strike look overexposed rather than crisp.",
+      "how": "Clamp the hit-flash/bloom intensity, shorten the full-white frame, and mask the additive burst more tightly around the contact point. Keep a darker rim or silhouette pass on the fighter so the body shape remains readable during IPPON effects."
+    },
+    {
+      "id": "handle-landscape-or-lock-portrait",
+      "title": "Do not let landscape show a broken-feeling layout",
+      "what": "In the landscape gameplay screenshot, the dojo is squeezed into the upper portion while a large black control dock fills the lower half; the two sticks sit tiny and far apart at the bottom corners, far from natural thumb reach.",
+      "why": "Even if portrait is the design baseline, mobile browser players can rotate their phones. This view makes the product look unfinished and makes touch control ergonomics worse.",
+      "how": "Either lock the game to portrait with a polished rotate-device message, or build a dedicated landscape layout: enlarge the sticks, move them inward for thumb reach, reduce the empty black dock, and reframe the arena to use the wider view intentionally."
+    }
+  ],
+  "raw": null
+}

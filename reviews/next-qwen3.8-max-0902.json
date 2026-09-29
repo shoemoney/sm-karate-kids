@@ -1,0 +1,84 @@
+{
+  "model": "qwen/qwen3.8-max-0902",
+  "elapsed_s": 235.1,
+  "usage": {
+    "prompt_tokens": 12295,
+    "completion_tokens": 9800,
+    "total_tokens": 22095,
+    "cost": 0.08339,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.08339,
+      "upstream_inference_prompt_cost": 0.02459,
+      "upstream_inference_completions_cost": 0.0588
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 8396,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "portrait-camera-dead-headroom",
+      "title": "Reframe the portrait camera: a third of the viewport is empty roof above tiny fighters",
+      "what": "In every in-bout portrait frame (idle bout screen, FRONT KICK frame), viewport y\u2248100\u2013550 of the 390-wide layout is unlit roof/void with only faint dust motes; the fighters' heads start at y\u2248580 and their feet end at y\u22481000, so the actual fight occupies a ~35% band while ~30% of the screen above it is dead space. In the IPPON frame the camera drifts low enough that the white fighter's feet slip under the STANCE/TECHNIQUE legend chip at y\u22481135.",
+      "why": "On a phone the player reads wind-ups, steps and kick tells from sprite posture; sprites this small inside a thin mid-band waste the scarcest resource (screen height) and make tells hard to parse, and feet occluded by the legend chip hide footwork at the exact moment a point is scored.",
+      "how": "Raise the camera target to chest height and pull the distance/FOV in so a standing sprite fills ~55\u201360% of viewport height with the head near 25\u201330% from the top; clamp the camera's lower bound so feet never cross the top edge of the legend chip (treat the chip and stick deck as safe-area insets in the camera fit calculation)."
+    },
+    {
+      "id": "kick-sprite-crop-artifacts",
+      "title": "Fix kick sprite cropping/depth: floating limb fragment and a kick foot that vanishes into the torso",
+      "what": "In the FRONT KICK frame there is a detached skin-coloured hand/foot fragment floating in empty space at roughly (115, 820), left of the white fighter's belt, unconnected to any body part while his kick extends right. In the HASANABI WINS freeze-frame the red fighter's kicking leg terminates in a blunt stump at the white fighter's chest \u2014 no foot is ever drawn \u2014 so the finishing kick reads as a leg fused into the torso.",
+      "why": "Kicks are the core verb of the game and the win freeze-frame is the most-screenshotted moment; a disembodied limb mid-kick and a missing foot at contact break the photoreal sprite illusion exactly where players look closest.",
+      "how": "Audit the kick atlas frames: tighten per-frame UV crops and add per-frame anchor offsets so off-axis limbs of neighbouring frames are not sampled (fixes the floating fragment); during hit-freeze render the attacker's contact limb in front of the receiver (raise the attacker's render order or split the contact limb to its own layer) so the foot visibly presses into, rather than disappearing inside, the receiver's silhouette. Verify with a frame-by-frame capture of Front Kick and Spinning Back Kick."
+    },
+    {
+      "id": "hit-flash-clips-receiver",
+      "title": "Tone down the scoring flash: the receiver clips to a featureless white blob on IPPON",
+      "what": "In the IPPON frame the white fighter's gi is overexposed to pure clipped white across torso and arms (y\u2248700\u20131000) \u2014 no folds, no shading, no silhouette detail \u2014 while yellow spark dashes burst around his head even though the red foot contacts at chest height.",
+      "why": "The score freeze-frame is the player's explanation of why a point was awarded; a blown-out blob hides which technique landed and where, and reads as a rendering bug rather than deliberate cinematic flash, undermining confidence in the scoring system.",
+      "how": "Cap the receiver flash at ~50% exposure so gi folds and belt stay readable (apply the flash as a rim/matcap tint instead of full-body additive white), exclude sprite albedo from the bloom threshold during the freeze, and spawn the impact spark burst at the actual contact socket (chest for mid techniques, head only for high techniques)."
+    },
+    {
+      "id": "technique-callout-attribution",
+      "title": "Anchor technique callouts to the acting fighter and mark who performed them",
+      "what": "The 'LUNGE PUNCH' and 'FRONT KICK' pills render at a fixed top-centre position (~y410), roughly 200px above the fighters' heads inside the empty roof zone, and use the identical dark pill style whether the move was performed by the player or the opponent.",
+      "why": "During an exchange the player's eyes are locked on the fighters, so a label floating in dead space is missed entirely; with no actor cue, the opponent's technique reads as the player's own input, which corrupts learning of the move list.",
+      "how": "Project the callout to screen space just above the acting sprite's head (clamped inside the viewport safe area), tint its border/glow with the actor's HUD colour (white-gi player vs red-gi opponent, matching the score row), and keep the current 1-line caps type with a 120ms in / 400ms out fade."
+    },
+    {
+      "id": "loading-bar-no-progress",
+      "title": "Give the pre-boot bar determinate progress and a stage caption",
+      "what": "On the ShoeMoney pre-boot screen the track at y\u22481050 is a uniform dark rail with only a static centre sheen \u2014 no fill edge, no percentage, no stage text \u2014 under the single caption 'Downloading the game', with the lower third of the screen left as empty black.",
+      "why": "WebGPU boot includes download plus TSL shader compile stalls that can pause for seconds; with zero progress feedback a player cannot tell a slow compile from a hung tab and will background or kill the game before the first bout ever renders.",
+      "how": "Drive the fill from real steps (manifest bytes, texture decode, TSL shader compile, dojo generation) as a left-to-right gold fill matching the HUD tungsten palette, show a right-aligned percent or stage caption ('textures', 'shaders', 'dojo') above the track, keep the shimmer only while a step is genuinely indeterminate, and pull the 'A SHOEMONEY AI LABS GAME' line up under the track so the lockup isn't floating in a half-empty screen."
+    }
+  ],
+  "raw": null
+}

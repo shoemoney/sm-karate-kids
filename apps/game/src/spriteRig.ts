@@ -292,8 +292,26 @@ export class SpriteFighterView implements FighterView {
     }
   }
 
+  /**
+   * The struck-fighter pop. It used to be `1 + amount * 2.4`, and at a full
+   * point that is a 3.4x multiplier on an already-lit texture, which clipped
+   * the whole figure to a featureless white silhouette — face, gi and arms all
+   * gone, for 140ms, at the exact moment the player is trying to see that the
+   * hit landed and what it landed on.
+   *
+   * Five models across three rounds reported it and none of them could name it:
+   * perceptron-mk1.5 "a bright white glow completely obscures the fighter in
+   * white", gpt-5.6-sol "preserve fighter readability during scoring hits",
+   * gpt-5.5 "reduce hit flash clipping", qwen3.8-max-0902 "the receiver clips
+   * to a featureless white blob on IPPON", minimax-m3 "reads as face paint,
+   * not impact". All five were describing the same erased man, and the captured
+   * impact frame shows exactly what they saw.
+   *
+   * A hit should brighten, not delete. 1.75 reads as a hard pop against the
+   * tungsten and still leaves the face, the belt and the gi readable.
+   */
   flash(amount: number): void {
-    this.mesh.material.color.setScalar(1 + amount * 2.4);
+    this.mesh.material.color.setScalar(1 + amount * 0.75);
   }
 
   /**

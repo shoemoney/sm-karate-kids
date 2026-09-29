@@ -1,0 +1,48 @@
+{
+  "model": "perceptron/perceptron-mk1.5",
+  "elapsed_s": 7.7,
+  "usage": {
+    "prompt_tokens": 11556,
+    "completion_tokens": 886,
+    "total_tokens": 12442,
+    "cost": 0.0030624,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0030624,
+      "upstream_inference_prompt_cost": 0.0017334,
+      "upstream_inference_completions_cost": 0.001329
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": null,
+  "raw": "```json\n[\n  {\n    \"id\": \"volumetric-light-overpower\",\n    \"title\": \"Volumetric light washes out fighters during attacks\",\n    \"what\": \"In the screenshot showing an 'IPPON' hit, a bright white glow from the volumetric light effect completely obscures the fighter in white, making it impossible to see their reaction or the impact point.\",\n    \"why\": \"This visual feedback is critical for a fighting game. The player cannot confirm if their attack landed correctly, leading to confusion and frustration.\",\n    \"how\": \"Reduce the intensity of the bloom/volumetric light pass specifically on the character sprites when they are being hit. Apply a mask to the post-processing chain so that the brightest parts of the screen (the hit) do not blow out the characters.\"\n  },\n  {\n    \"id\": \"control-label-occlusion\",\n    \"title\": \"Control labels hidden by active technique menu\",\n    \"what\": \"In screenshots where the 'TECHNIQUE' menu is open (e.g., showing 'LUNGE PUNCH'), the text label 'TECHNIQUE' below the right joystick is completely obscured by the semi-transparent menu panel floating above it.\",\n    \"why\": \"The labels help players identify which joystick controls what. When they disappear, especially during fast-paced gameplay, it forces the player to look away from the action to reorient themselves, slowing down reaction time.\",\n    \"how\": \"Move the 'STANCE' and 'TECHNIQUE' text labels outside the bounds of the control panels, perhaps placing them lower on the screen or integrating them into the joystick design itself as permanent text.\"\n  },\n  {\n    \"id\": \"menu-scroll-overflow\",\n    \"title\": \"Technique list cuts off at bottom without scroll indicator\",\n    \"what\": \"In the 'TECHNIQUES' menu screenshot, the last visible item is 'High Block'. Below it, there is a section header 'RIGHT STICK DOWN', but the actual techniques for that direction are cut off by the bottom edge of the screen with no visible scrollbar or hint that more content exists.\",\n    \"why\": \"Players will assume the list is complete and miss half of the available moves, severely limiting gameplay strategy and exploration.\",\n    \"how\": \"Add a subtle vertical scrollbar to the right side of the technique list. Alternatively, add a small chevron icon at the bottom of the list indicating that more options are available below.\"\n  },\n  {\n    \"id\": \"loading-screen-static\",\n    \"title\": \"Loading screen lacks progress indication\",\n    \"what\": \"The loading screen shows a static logo and the text 'Downloading the game' with a thin line underneath. There is no animated progress bar, percentage counter, or any visual cue to indicate how much of the download is complete.\",\n    \"why\": \"Long downloads can feel endless without feedback. A static screen increases perceived wait time and may cause users to abandon the app before it finishes loading.\",\n    \"how\": \"Replace the static line with an animated progress bar that fills from left to right as the download progresses. Add a percentage number next to the text (e.g., 'Downloading... 45%').\"\n  },\n  {\n    \"id\": \"hud-score-clarity\",\n    \"title\": \"Score display uses ambiguous fraction notation\",\n    \"what\": \"On the 'HASANABI WINS' screen, the score is displayed as '0 \u2014 2\u00bd'. This fractional notation is unusual for a sports/fighting game scoreboard and requires cognitive effort to interpret compared to standard integers like '0 - 3'.\",\n    \"why\":=\"In a fast-paced mobile game, instant readability is key. Fractions slow down the player's ability to quickly understand the match result and compare scores across rounds.\",\n    \"how\": \"Change the score format to use whole numbers only (e.g., '0 - 3'). If fractions are necessary for the game's scoring system, consider displaying them as decimals ('0 - 2.5') or using a different visual representation like separate boxes for each round's points.\"\n  }\n]\n```"
+}

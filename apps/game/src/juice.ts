@@ -193,7 +193,9 @@ export class Juice {
       this.punchTargetX = x;
       if (kind !== 'block') {
         if (defender?.flash !== undefined) {
-          this.fighterFlashes.push({ view: defender, start: nowMs, until: nowMs + (heavy ? 140 : 100), peak: heavy ? 1 : 0.7 });
+          // Shorter as well as dimmer: the pop has to be out of the way before
+          // the fighter's recoil is worth watching.
+          this.fighterFlashes.push({ view: defender, start: nowMs, until: nowMs + (heavy ? 95 : 70), peak: heavy ? 1 : 0.7 });
         }
         // Pushed away from the striker, harder on a full point, and always
         // sprung back to zero by the rig.

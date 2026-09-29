@@ -1,0 +1,84 @@
+{
+  "model": "x-ai/grok-4.5",
+  "elapsed_s": 27.9,
+  "usage": {
+    "prompt_tokens": 13655,
+    "completion_tokens": 1237,
+    "total_tokens": 14892,
+    "cost": 0.0345144,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 128,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0345144,
+      "upstream_inference_prompt_cost": 0.0270924,
+      "upstream_inference_completions_cost": 0.007422
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighter-scale-framing",
+      "title": "Fighters too small with empty mat dominating the frame",
+      "what": "In every in-bout shot (e.g. the neutral stance frames and the Front Kick / Lunge Punch frames) the two fighters occupy roughly the middle horizontal band while a large empty tatami stretch sits under their feet and a tall dojo void sits above their heads. On a 390\u00d7844 portrait canvas they read as small action figures, not duelists.",
+      "why": "First-second readability and impact collapse. On a phone held at arm\u2019s length the sprites and their hit sparks become hard to parse; the cinematic \u2018karate movie\u2019 fantasy the art direction wants never lands because the camera is too wide.",
+      "how": "Lower the camera, push it closer, and frame so the fighters\u2019 heads sit near the upper third and their feet near the lower third (roughly 55\u201365 % of canvas height). Keep the same dojo backdrop; just crop tighter. Re-tune the existing vignette so it still softens the edges after the tighter crop."
+    },
+    {
+      "id": "dual-stick-reach",
+      "title": "Twin sticks sit too low and leave a dead zone under the fighters",
+      "what": "Across the fight UI screens the two large circular stick bases sit at the very bottom edge of the 844-px-tall portrait frame, with a wide empty dark band between the bottom of the tatami and the top of the sticks. Thumbs must travel to the bezel.",
+      "why": "On a real phone the lower bezel and the user\u2019s grip already steal reach. Placing both sticks at the extreme bottom forces constant thumb travel, slows stance/technique changes, and makes the lower third of the 3D scene feel wasted.",
+      "how": "Raise both stick clusters 64\u201396 px so their tops sit closer to the fighters\u2019 feet. Slightly reduce stick diameter if needed to preserve the safe area, and keep the existing \u2018Left-handed layout\u2019 swap. Re-test with thumb zones on a physical 390-wide device."
+    },
+    {
+      "id": "ippon-result-hierarchy",
+      "title": "IPON / win call is readable but the following result screen is sparse",
+      "what": "The \u2018IPON HASANABI SPINNING BACK KICK\u2019 moment is clear, yet the subsequent full-result screen (\u2018HASANABI WINS 0\u20142\u00bd\u2019) shows only a large title, a thin score line, a tiny \u2018BOUTS WON 0/1\u2019 pill, and a single REMATCH button over a dimmed action freeze. No next-round cue, no reward beat, no clear loser feedback beyond the score.",
+      "why": "After the excitement of the ippon the player is dropped into a quiet, under-specified screen. On a mobile session this is exactly when retention or \u2018one more round\u2019 intent is decided; the sparse layout lets energy leak away.",
+      "how": "Add a short vertical stack under the score: round outcome chip, a one-line coach note (\u2018Patience punished the wind-up\u2019), and dual CTAs\u2014REMATCH (primary) and NEXT QUALIFIER (secondary). Keep the warm tungsten palette and the frozen kick pose as background; just give the player an obvious next action within the first second."
+    },
+    {
+      "id": "move-list-density",
+      "title": "Techniques sheet is a long wall of tiny icons and text",
+      "what": "The MOVES overlay (RIGHT STICK FORWARD / BACK / UP / DOWN sections) is a dense scrollable list of small circle-arrow glyphs + move names + \u2018mid \u00b7 Half point\u2019 labels on a dark brown panel. In the captured frame the lower half of the list is already cut off and every row is the same weight.",
+      "why": "A player who opens MOVES mid-round on a phone needs an at-a-glance answer, not a manual. Uniform tiny rows force reading every line; the most useful full-point attacks do not stand out, so the sheet trains people to close it rather than learn it.",
+      "how": "Re-group by stick direction as collapsible cards, bold the Full-point moves, increase row tap height to \u226544 px, and pin a one-line legend (\u2018Full point = ippon threat\u2019) at the top. Truncate to the five highest-value moves per direction with a \u2018show all\u2019 expand so the first screenful is immediately scannable."
+    },
+    {
+      "id": "pre-fight-countdown-occlusion",
+      "title": "FIGHT N button and qualifier copy sit on top of the fighters",
+      "what": "On the QUALIFIER vs HasanAbi pre-bout screens the large gold \u2018FIGHT 2/3/4\u2019 pill and the flavour bar (\u2018PATIENT. HE WAITS FOR YOUR WIND-UP\u2026\u2019) are centred directly over the two fighters\u2019 torsos and lead legs, while the ROUND 1/5 chip floats above. The characters are partially covered at the exact moment the player is supposed to study them.",
+      "why": "The first look at the opponent is the moment the player forms a plan. Covering the bodies with UI removes that information and makes the screen feel like a poster instead of a fight about to start.",
+      "how": "Move the flavour bar to the top third (under the round chip) and anchor the FIGHT pill to the lower third, clear of the feet, or turn it into a slim bottom-sheet CTA. Leave the centre 40 % of the canvas as pure fighter silhouette so the matchup is readable before the bout starts."
+    }
+  ],
+  "raw": null
+}
