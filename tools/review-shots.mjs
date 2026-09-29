@@ -266,6 +266,29 @@ await capture('14-phone-returning', phone, async (page) => {
   await page.screenshot({ path: `${OUT}/14-phone-returning.png` });
 });
 
+/* The settings sheet with a MIXED set of states.
+ *
+ * Every settings frame the loop has ever shown a model had all six toggles off,
+ * because the harness never touched one. So the state system was invisible: a
+ * reviewer looking at six identical dark tracks in round 21 correctly concluded
+ * "settings toggles lack visual state feedback" (mistral-medium-3-5, round 25)
+ * about switches that had been legible in both states since round 21, and the
+ * same sampling blind spot that hid the returning-player pad for three rounds
+ * hid the ON state for four more.
+ *
+ * Two on, four off, so the frame actually shows the thing it is a review of. */
+await capture('15-phone-settings-mixed', phone, async (page) => {
+  await page.goto(`${BASE}/?mode=dojo`, { waitUntil: 'networkidle' });
+  await waitFight(page);
+  await page.locator('.hud-actions button').last().click();
+  await page.waitForTimeout(600);
+  const rows = page.locator('.setting-row input');
+  await rows.nth(1).click();
+  await rows.nth(3).click();
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `${OUT}/15-phone-settings-mixed.png` });
+});
+
 await browser.close();
 console.log(`shots in ${OUT}`);
 if (errors.length) console.log('console errors:\n' + [...new Set(errors)].join('\n'));

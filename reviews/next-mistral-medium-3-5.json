@@ -1,0 +1,84 @@
+{
+  "model": "mistralai/mistral-medium-3-5",
+  "elapsed_s": 7.7,
+  "usage": {
+    "prompt_tokens": 9225,
+    "completion_tokens": 569,
+    "total_tokens": 9794,
+    "cost": 0.018105,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.018105,
+      "upstream_inference_prompt_cost": 0.0138375,
+      "upstream_inference_completions_cost": 0.0042675
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "02-phone-fight.png",
+    "07-phone-result.png",
+    "04-phone-controls.png",
+    "06-phone-settings.png",
+    "05-phone-techref.png",
+    "08-desktop-fight.png",
+    "01-phone-title.png"
+  ],
+  "dropped_for_cap": [
+    "03-phone-strike.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "items": [
+    {
+      "id": "loading-logo-contrast",
+      "title": "Loading screen logo lacks contrast",
+      "what": "The blue ShoeMoney 'S' logo on the loading screen has low contrast against the dark background, making it appear washed out and hard to read.",
+      "why": "Players may not immediately recognize the brand or understand the game's identity during the first impression.",
+      "how": "Add a subtle white or gold outline/stroke to the 'S' logo to improve visibility without breaking the warm art direction."
+    },
+    {
+      "id": "fighter-vertical-placement",
+      "title": "Fighters positioned too low in frame",
+      "what": "In gameplay screens, the fighters occupy the lower third of the screen, leaving excessive empty tatami mat space below them.",
+      "why": "Wastes vertical screen real estate on a portrait phone, making the action feel cramped and reducing visual impact.",
+      "how": "Raise the camera height or adjust the dojo floor plane so fighters occupy the center 60% of the screen vertically."
+    },
+    {
+      "id": "hud-score-legibility",
+      "title": "Score text is hard to read mid-fight",
+      "what": "The score numbers (e.g., '30') in the HUD use a thin, low-contrast gold font that blends into the warm background.",
+      "why": "Players struggle to quickly check the score during fast-paced bouts, breaking immersion.",
+      "how": "Increase the font weight of the score numbers and add a subtle dark stroke or drop shadow for contrast."
+    },
+    {
+      "id": "rematch-button-visibility",
+      "title": "Rematch button blends into the background",
+      "what": "The 'REMATCH' button on the results screen uses a gold-on-dark gradient that camouflages against the dojo backdrop.",
+      "why": "Players may overlook the primary call-to-action, delaying replay and reducing engagement.",
+      "how": "Add a high-contrast outline (e.g., white or black) to the button and increase its size by 10-15%."
+    },
+    {
+      "id": "settings-toggle-clarity",
+      "title": "Settings toggles lack visual state feedback",
+      "what": "The toggle switches in Settings use identical off/on states with no color or icon change to indicate active/inactive.",
+      "why": "Players cannot quickly confirm their selected options, leading to confusion or accidental changes.",
+      "how": "Add a distinct color (e.g., warm gold for 'on') and a checkmark/icon to the active state of each toggle."
+    }
+  ],
+  "raw": null
+}
