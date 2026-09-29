@@ -43,7 +43,7 @@ successive rounds are not five variants of the same opinion.
 | 4 | `openai/gpt-5.2` | OpenAI | landed `fc8425e` |
 | 5 | `x-ai/grok-4.20` | xAI | landed `b0197d6` |
 | 6 | `moonshotai/kimi-k3` | Moonshot | landed `f1fd3cf` |
-| 7 | `qwen/qwen3.8-omni-flash` | Alibaba | pending |
+| 7 | `qwen/qwen3.8-omni-flash` | Alibaba | landed `dd37810` |
 | 8 | `bytedance-seed/seed-2.0-code` | ByteDance | pending |
 | 9 | `deepseek/deepseek-v4.1-flash` | DeepSeek | pending |
 | 10 | `mistralai/mistral-medium-3.1` | Mistral | pending |
@@ -233,3 +233,39 @@ The rest of the queue has now been validated against the live catalogue.
 made in round 5**: reading a still frame as a statement about behaviour. A
 screenshot cannot show that something is not moving, and it cannot show that a
 number is deliberately absent.
+
+### Round 7 — qwen/qwen3.8-omni-flash — `dd37810`
+
+The highest-value round for a single line, and a lesson about the loop itself.
+
+- `portrait-sticks-have-no-knob-or-chevrons` — **a regression I introduced in
+  round 3 and did not see for four rounds.** While the first-run coach mark is
+  up, the knob and chevrons were hidden outright, so the sticks were two empty
+  rings with text floating in them — on a first run, the exact moment a player
+  most needs to know these are sticks, they stopped looking like sticks. The
+  stick now recedes (knob 0.72, chevrons retained) instead of vanishing.
+- `crowd-silhouettes-flat-gray-collide-with-fighters` — **rejected on
+  measurement.** The claim was "#8a8a8a-ish light gray, intersecting the
+  fighters' thighs". The row is `#4a3320` at 0.3 alpha, 8.2 units behind the
+  fighting plane; it only *appears* to overlap because a billboard at that depth
+  projects to the fighters' hip line. Third fix to this row. Refusing a fourth
+  on a misread is the point — the loop's own failure mode is overcorrection.
+- `boot-logo-black-extrusion-misregistered` — **rejected on policy, verified on
+  pixels.** The model is right that the black shield reads as a misregistered
+  extrusion. It is also the shipped artwork: the source PNG carries ~141k
+  near-black opaque pixels, so the black is in the asset and not in my pipeline.
+  AGENTS.md forbids recolouring, restyling or distorting the ShoeMoney mark.
+  A correct observation about an asset we are not allowed to touch is still not
+  a task.
+- `loading-bar-shows-zero-progress` — **third round to photograph the MEASURING
+  state as a dead bar.** Rounds 5 and 6 rejected this; the same rejection stands
+  and is now on the record three times, which is the point of keeping the log.
+- `portrait-fight-framing-dead-top` — fifth framing complaint.
+
+**The loop's blind spot, named:** rounds 3 through 7 all had the same
+screenshots available, and the round-3 regression sat in every one of them. A
+model looking at a *new* composition notices what changed since the last round.
+Nothing in the loop was looking at a *given* screen across time. The re-capture
+each round is what surfaced it — not because a reviewer got better, but because
+the previous round's fix put the marks in front of the sticks for the first
+time and someone finally looked at that combination.
