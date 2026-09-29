@@ -42,7 +42,7 @@ successive rounds are not five variants of the same opinion.
 | 3 | `anthropic/claude-opus-5.5` | Anthropic | landed `e7762da`, `9e3bfe6` |
 | 4 | `openai/gpt-5.2` | OpenAI | landed `fc8425e` |
 | 5 | `x-ai/grok-4.20` | xAI | landed `b0197d6` |
-| 6 | `moonshotai/kimi-k3` | Moonshot | pending |
+| 6 | `moonshotai/kimi-k3` | Moonshot | landed `f1fd3cf` |
 | 7 | `qwen/qwen3.8-omni-flash` | Alibaba | pending |
 | 8 | `bytedance-seed/seed-2.0-code` | ByteDance | pending |
 | 9 | `deepseek/deepseek-v4.1-flash` | DeepSeek | pending |
@@ -203,3 +203,33 @@ The rest of the queue has now been validated against the live catalogue.
 
 
 
+
+### Round 6 — moonshotai/kimi-k3 — `f1fd3cf`
+
+- `crowd-cardboard-cutouts` — the **fourth** model to flag this row. Round 2's
+  warmth fix helped the hue and not the depth, which is the useful shape of that
+  correction: right symptom, wrong lever. Distance is sold by size, height and
+  opacity, not by tint. The row is now smaller, lower, fainter and further back.
+- `intro-card-duplicate-round-info` — the HUD read "Round 1/5 · Qualifier", the
+  headline read "QUALIFIER", and a kicker read "ROUND 1 OF 5". Three statements
+  of two facts. The kicker is gone.
+- `stick-legend-microtype` — accepted, but for a reason the model did not give.
+  It flagged that the legend "vanishes after first touch". That was round 3's
+  design: retire on the first committed technique. But a player who has learned
+  to step and has never touched the technique stick has not finished the lesson.
+  The marks now retire once **both** sticks have been used, which needed an
+  `onEngage` hook on `TouchInput` — the stance stick has no simulation event of
+  its own, because moving is not a move.
+- `loading-no-progress-feedback` — **rejected.** This is round 5's fix being
+  photographed: the card is in its MEASURING state, which is an animated sweep,
+  and a still frame cannot show motion. The missing percentage is the point —
+  during the first four seconds the reporter has not downloaded. A number there
+  would be a lie.
+- `portrait-action-squeezed` — **rejected after measuring.** Pad is 228px of an
+  844px screen (27.0%), each zone 179px wide. That is thumb reach. Shrinking it
+  is an accessibility regression wearing a layout win.
+
+**Two rounds, two rejections, and both rejections were the same mistake I nearly
+made in round 5**: reading a still frame as a statement about behaviour. A
+screenshot cannot show that something is not moving, and it cannot show that a
+number is deliberately absent.
