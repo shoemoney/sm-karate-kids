@@ -41,12 +41,11 @@ jobs:
       - name: Validate assets
         run: pnpm validate:assets
 
-      - name: Build
-        run: pnpm build
-
       - name: Install Playwright browsers (chromium)
         run: pnpm --filter @smkk/game exec playwright install --with-deps chromium
 
+      # No separate build step: `pnpm test:e2e` builds the bundle it serves.
+      # A standalone build here would race a second, identical one.
       - name: Browser tests (e2e)
         run: pnpm test:e2e
 

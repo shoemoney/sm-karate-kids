@@ -28,16 +28,22 @@ pnpm build                # -> pnpm --filter @smkk/game build
 pnpm preview              # -> pnpm --filter @smkk/game preview
 pnpm typecheck            # tsc -b --force (packages/sim, packages/content, apps/game) + tools/
 pnpm test                 # vitest run (unit + simulation tests)
-pnpm test:e2e             # -> pnpm --filter @smkk/game test:e2e (playwright test)
+pnpm test:e2e             # -> builds the bundle, then playwright test against it
 pnpm validate:content     # tsx tools/validate-content.ts
 pnpm validate:assets      # tsx tools/validate-assets.ts
 pnpm check                # typecheck && test && validate:content && validate:assets
 ```
 
 ⚠️ `pnpm check` does **not** run `pnpm build` or `pnpm test:e2e` — CI (`.github/workflows/ci.yml`)
-does, in that order, plus a secret scan. If your change touches rendering, input adapters, or
-anything under `apps/game/src`, run `pnpm build && pnpm test:e2e` yourself before opening a PR;
+does, plus a secret scan. If your change touches rendering, input adapters, or
+anything under `apps/game/src`, run `pnpm test:e2e` yourself before opening a PR;
 don't rely on `pnpm check` alone to catch it.
+
+`pnpm test:e2e` **builds before it tests**, on purpose. The Playwright config serves
+`apps/game/dist/` via `vite preview`, so a suite that doesn't rebuild will happily pass
+against whatever bundle was last on disk — the whole browser gate can go green on
+arbitrarily old source. Don't add a separate `pnpm build` in front of it; that's the
+one thing this is guarding against. For the same reason CI has no standalone build step.
 
 There is currently no `pnpm lint` script. Don't invent one in CI or docs until it exists.
 
@@ -57,8 +63,8 @@ There is currently no `pnpm lint` script. Don't invent one in CI or docs until i
 - No health bars or damage accumulation in Classic Rules — one clean contact ends the exchange,
   the referee calls half or full point, first to `pointsToWin` wins.
 - Add tests before changing command parsing, scoring, timer, or replay formats.
-- Run `pnpm check` before declaring a task complete; run `pnpm build && pnpm test:e2e` too if you
-  touched `apps/game`.
+- Run `pnpm check` before declaring a task complete; run `pnpm test:e2e` too if you
+  touched `apps/game` (it builds the bundle it tests, so it needs no `pnpm build` first).
 
 ### 📱 Mobile-first (standing rule, added 2026-09-27 — see `docs/adr/0001-mobile-first-twin-stick.md`)
 

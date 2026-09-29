@@ -119,7 +119,7 @@ pnpm dev          # http://127.0.0.1:5173
 | `pnpm dev` | Dev server with HMR |
 | `pnpm build` | Production bundle |
 | `pnpm test` | Simulation unit + soak tests (vitest) |
-| `pnpm test:e2e` | Playwright, portrait phone + desktop |
+| `pnpm test:e2e` | Builds the bundle, then Playwright, portrait phone + desktop |
 | `pnpm validate:content` | Every grammar move has frame data, and nothing is orphaned |
 | `pnpm validate:assets` | Every shipped asset has provenance |
 | `pnpm check` | All of the above — run it before you call anything done |

@@ -38,12 +38,15 @@ pnpm check          # typecheck + unit tests + content validation + asset valida
 If your change touches `apps/game` (rendering, input adapters, UI), also run:
 
 ```bash
-pnpm build
 pnpm test:e2e
 ```
 
+No `pnpm build` first — `pnpm test:e2e` builds the bundle it serves. Running the browser
+suite against a `dist/` you forgot to rebuild is how a green suite ends up testing last
+week's code.
+
 CI (`.github/workflows/ci.yml`) runs all of the above plus a secret scan on every push and pull
-request — it will not pass just because `pnpm check` passed locally if you skipped the build/e2e
+request — it will not pass just because `pnpm check` passed locally if you skipped the e2e
 step.
 
 ## 🧩 Adding or changing game content
