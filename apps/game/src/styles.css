@@ -1696,6 +1696,17 @@ input:focus-visible,
 
 /* The knob. Present in both states, because the point is that there is
    something to look at when the setting is off. */
+.setting-row input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+}
+
+/* The switch carries its own focus ring above; the browser's default outline
+   on top of it read as a stray box (qwen3.6-plus, round 27). */
+.setting-row input[type="checkbox"]:focus:not(:focus-visible) {
+  outline: none;
+}
+
 .setting-row input[type="checkbox"]::before {
   content: '';
   position: absolute;
@@ -1728,7 +1739,18 @@ body.high-contrast .setting-row input[type="checkbox"] {
   border-color: var(--text-ghost);
 }
 
-body.high-contrast .setting-row input[type="checkbox"]::before {
+body.high-contrast .setting-row input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+}
+
+/* The switch carries its own focus ring above; the browser's default outline
+   on top of it read as a stray box (qwen3.6-plus, round 27). */
+.setting-row input[type="checkbox"]:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.setting-row input[type="checkbox"]::before {
   background: var(--text);
 }
 
@@ -2353,7 +2375,13 @@ body.high-contrast .result-score {
   place-items: center;
   min-inline-size: 1.6em;
   margin-inline-start: var(--space-2);
-  padding: 0 0.4em;
+  padding: 0 0.5em;
+  /* No circle. A bare numeral in a round badge beside a score is a point
+     total, which is what four rounds of reviewers read it as; the words
+     "in 3" carry the meaning instead, and the pill just holds them apart. */
+  border-radius: var(--radius-sm);
+  letter-spacing: var(--track-wide);
+  font-family: var(--font-sans);
   border-radius: var(--radius-pill);
   background: rgb(0 0 0 / 0.22);
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.28);

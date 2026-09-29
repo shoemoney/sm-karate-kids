@@ -1,0 +1,84 @@
+{
+  "model": "deepseek/deepseek-v4-flash-vision-exp",
+  "elapsed_s": 87.7,
+  "usage": {
+    "prompt_tokens": 6018,
+    "completion_tokens": 10569,
+    "total_tokens": 16587,
+    "cost": 0.00813351,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00813351,
+      "upstream_inference_prompt_cost": 0.0012974808,
+      "upstream_inference_completions_cost": 0.0068360292
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 9668,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "countdown-button-affordance",
+      "title": "FIGHT/REMATCH button looks tappable but is a countdown",
+      "what": "In the pre-fight screen (screenshot 2) and post-fight screen (screenshot 8), the large gold 'FIGHT' and 'REMATCH' buttons have a dark countdown circle inside them (e.g., '2' and '8'). The gold button styling makes it look like an active, tappable control.",
+      "why": "A player's first instinct is to tap the button to start the match or rematch. When tapping does nothing because it's just a countdown, it feels broken and creates friction at the most critical moment.",
+      "how": "Either make the countdown a separate element from the button (e.g., a countdown number floating above the button), or grey out the button during the countdown, or make the button actually tappable to skip the countdown."
+    },
+    {
+      "id": "fight-scene-composition",
+      "title": "Fighters are small and sit low, leaving dead space above",
+      "what": "In screenshots 3 and 13, the two fighters are rendered in the lower-middle of the frame, with a large amount of empty dojo backdrop above them. The fighters are roughly 30% of the screen height.",
+      "why": "The action feels distant and less impactful. On a phone, the player's attention is drawn to the center, but the fight is happening in the lower half, making it harder to track the characters and read the action.",
+      "how": "Zoom the camera in to make the fighters larger, and/or shift the camera up so the fighters are more vertically centered. Alternatively, reduce the vertical dead space by making the dojo backdrop less empty."
+    },
+    {
+      "id": "stick-arrow-contrast",
+      "title": "Directional arrows on the STANCE and TECHNIQUE sticks are hard to see",
+      "what": "In screenshots 3, 4, and 13, the arrows on the two large circular controls are thin grey glyphs on a dark background. The central dots are small and colored (blue/yellow).",
+      "why": "The player needs to instantly understand which direction is 'step' or 'jump'. Low contrast arrows make the controls illegible in the game's dark, warm lighting, especially on a phone with glare or in a bright room.",
+      "how": "Increase the brightness of the arrows (e.g., a lighter grey or gold), make them thicker, or add a subtle glow behind them. The 'High contrast' setting should also increase the arrow visibility."
+    },
+    {
+      "id": "top-right-touch-targets",
+      "title": "MOVES and settings buttons are too small to tap reliably",
+      "what": "In screenshot 3, the 'MOVES' button and the settings gear in the top-right are about 30px tall. The 'MOVES' button is a small rectangle and the gear is a small circle.",
+      "why": "On a 390px-wide portrait phone, the recommended minimum touch target is 44x44px. These buttons are below that, leading to missed taps and frustration, especially during a fight.",
+      "how": "Increase the size of both buttons to at least 44x44px, increase the padding around the icons, and consider moving them slightly down from the status bar."
+    },
+    {
+      "id": "techniques-list-readability",
+      "title": "TECHNIQUES list is too small and dense to read on a phone",
+      "what": "In screenshot 6, the move list uses small text (~12px) and small icons for the stick inputs. The rows are tightly packed with little separation.",
+      "why": "The player needs to read the move names and understand the inputs. On a phone, this small text is hard to read and the dense layout makes it easy to accidentally tap the wrong row.",
+      "how": "Increase the font size and row height, and enlarge the input icons. Make the modal full-screen or use a larger scrollable area so the text is comfortably readable."
+    }
+  ],
+  "raw": null
+}

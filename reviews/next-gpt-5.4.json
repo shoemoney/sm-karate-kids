@@ -1,0 +1,84 @@
+{
+  "model": "openai/gpt-5.4",
+  "elapsed_s": 25.1,
+  "usage": {
+    "prompt_tokens": 15325,
+    "completion_tokens": 1106,
+    "total_tokens": 16431,
+    "cost": 0.0549025,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0549025,
+      "upstream_inference_prompt_cost": 0.0383125,
+      "upstream_inference_completions_cost": 0.01659
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighters-too-small-on-phone",
+      "title": "Scale the fighters up in portrait combat and intro screens",
+      "what": "On the portrait fight screens and qualifier intro screens, both fighters occupy a surprisingly small band in the middle of the display. There is a large empty area of dark dojo air above their heads and a large controls area below them; on screens like the plain combat view and the qualifier card, the characters look reduced to roughly the middle third of the phone.",
+      "why": "On a phone, the fighters are the product. If they read small, facial direction, hit spacing, and move silhouettes are harder to parse at a glance, which weakens both readability and excitement in the first few seconds.",
+      "how": "Push the portrait gameplay camera in 10\u201320% and lower the framing so the fighters fill more vertical space between the scoreboard and the move/joystick panel. Keep both full bodies visible, but target a composition where heads sit closer to the upper-middle and feet sit just above the move legend panel."
+    },
+    {
+      "id": "top-hud-crowded-and-uneven",
+      "title": "Rebalance the top HUD so names, scores, and timer stop competing",
+      "what": "In the top scoreboard bar, the center timer medallion is visually dominant and the name fields are cramped. Long names like HASANABI are letterspaced into the edges, while the giant white and red score digits pull attention away from the actual action. On the Ippon screen, the right score becomes a large pink \u201c1\u201d that overpowers the name even more.",
+      "why": "This is the most persistent UI on screen. If the header feels cramped and visually noisy, players spend effort decoding the bar instead of reading the fight. It also makes streamer-name matchups look less premium because the layout breaks first on longer names.",
+      "how": "Reduce score numeral size slightly, give both name areas more horizontal padding, and tighten letterspacing on names. Shrink the timer chip a bit so the three elements feel balanced. Add truncation or scale-down rules for long names before they collide with the score rhythm."
+    },
+    {
+      "id": "controls-dominating-lower-half",
+      "title": "Compress the lower control stack to give gameplay more screen real estate",
+      "what": "In portrait gameplay, the two virtual sticks plus the wide move-legend slab consume nearly the entire lower half of the screen. The sticks are visually huge, and the legend panel sits directly above them, creating three stacked bands that push the match area upward.",
+      "why": "For a touch-first game, controls need to be usable, but right now they visually dominate the phone. That makes the actual bout feel secondary and reduces perceived production value because too much of the screen is UI chrome instead of combat.",
+      "how": "Trim the joystick outer ring diameter, reduce the vertical gap between stick and label, and either collapse the move legend into a smaller two-line strip or show it only on first round / when Moves is expanded. Aim to recover at least 80\u2013120 px of vertical space for the arena and fighters."
+    },
+    {
+      "id": "result-overlays-obscure-key-action",
+      "title": "Move win and scoring banners away from the impact area",
+      "what": "On the Ippon screen, the large \u201cIPPON / HASANABI / SPINNING BACK KICK\u201d stack sits directly over the fighters\u2019 upper bodies, while hit spark effects are also happening around the white fighter\u2019s face. On the win screen, \u201cHASANABI WINS\u201d and the score block dominate the same central band where the finishing pose lives.",
+      "why": "The decisive hit is the emotional peak of the match. Covering the torsos and heads with big centered text weakens the clarity and spectacle of the moment, especially on a small phone where every covered pixel matters.",
+      "how": "Anchor celebration and result text higher, nearer the scoreboard, or split it into top and mid-top lines that avoid the fighters\u2019 head-and-chest zone. Keep the center lane clear during impact frames so the kick/punch silhouette and hit effects are fully readable."
+    },
+    {
+      "id": "low-contrast-small-body-text",
+      "title": "Improve readability of small instructional text and secondary labels",
+      "what": "Several small text elements are hard to read against the warm brown UI: the loading screen line \u201cDownloading the game,\u201d the round subtitle chip, the move legend text above the sticks, and the settings helper copy \u201cSwaps which side the stance and technique sticks sit on.\u201d They sit in low-contrast beige/gray on dark brown and look thin at phone size.",
+      "why": "These are the lines that teach the game. If they are faint, players miss critical onboarding and control information, which is especially damaging in a control scheme that already asks for learning two sticks and directional combinations.",
+      "how": "Increase contrast on secondary text by shifting it lighter and/or bolder, especially for 12\u201316 px copy. On the move legend, enlarge the labels slightly and reduce transparency of the panel behind them. In settings and loading, use a brighter text token for active status and helper lines."
+    }
+  ],
+  "raw": null
+}

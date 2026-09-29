@@ -1,0 +1,84 @@
+{
+  "model": "qwen/qwen3.6-plus",
+  "elapsed_s": 193.8,
+  "usage": {
+    "prompt_tokens": 12282,
+    "completion_tokens": 11324,
+    "total_tokens": 23606,
+    "cost": 0.02607345,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.02607345,
+      "upstream_inference_prompt_cost": 0.00399165,
+      "upstream_inference_completions_cost": 0.0220818
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 10378,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "countdown-button-ambiguity",
+      "title": "\"FIGHT\" button text confuses countdown with round number",
+      "what": "In the pre-fight screens (e.g., screenshots #2, #10, #13), the large gold button reads \"FIGHT 2\", \"FIGHT 3\", and \"FIGHT 4\". Since the top-left HUD displays \"ROUND 1/5\", a player will likely interpret \"FIGHT 4\" as \"Fight Number 4\" or \"Round 4\" rather than a 4-second countdown timer.",
+      "why": "This creates confusion about the game state. Players might hesitate, thinking the button indicates progression to a later stage rather than an imminent start, breaking the flow of the bout.",
+      "how": "Change the button text to dynamically display \"STARTING... 4\", \"3\", \"2\", \"1\", and finally \"FIGHT!\" in large text, removing the static \"FIGHT\" label during the countdown phase."
+    },
+    {
+      "id": "score-fraction-readability",
+      "title": "Score fraction \"2 1/2\" is hard to parse quickly",
+      "what": "In the Game Over screen (screenshot #8), the final score is displayed as \"0 \u2014 2\u00bd\". The fraction character is visually dense and smaller than the integers, making it harder to read at a glance compared to the rest of the HUD.",
+      "why": "In a competitive game, score clarity is paramount. Fractions require more cognitive load to parse than decimals, and the mixed formatting (integer vs fraction) looks inconsistent.",
+      "how": "Switch the score display to use decimals (e.g., \"2.5\") which are standard in digital interfaces and instantly recognizable."
+    },
+    {
+      "id": "landscape-camera-zoom",
+      "title": "Fighters are too small in landscape orientation",
+      "what": "In the landscape screenshot (#9), the fighters occupy less than 20% of the screen height, appearing tiny and distant. The dojo background dominates the frame, and the fighters' details (stances, spacing) are lost.",
+      "why": "For a fighting game, seeing the spacing and animation of the fighters is critical. In landscape mode, the action is illegible, making the game feel broken or unpolished on wider screens.",
+      "how": "Implement a responsive camera adjustment that zooms in (increases fighter scale) when the aspect ratio is landscape, cropping the background if necessary to keep the fighters prominent."
+    },
+    {
+      "id": "browser-focus-ring",
+      "title": "Ugly browser focus outline on Settings toggle",
+      "what": "In the High Contrast settings screenshot (#15), the \"Left-handed layout\" row has a thick, white rectangular border around it. This is a default browser focus ring that has not been styled or removed.",
+      "why": "It looks like a bug or unstyled HTML element, breaking the immersion and the \"cinematic\" art direction. It signals a lack of polish in the web implementation.",
+      "how": "Add CSS `outline: none;` to the interactive elements or style the `:focus` state to match the game's UI (e.g., a subtle gold glow) to maintain the aesthetic."
+    },
+    {
+      "id": "move-feedback-visibility",
+      "title": "Move name feedback is too subtle compared to score events",
+      "what": "When a move is executed (e.g., \"LUNGE PUNCH\" in #5, \"FRONT KICK\" in #12), the text appears in a small, dark pill with white text. This is visually weak compared to the massive, glowing gold \"IPPON\" text in screenshot #11.",
+      "why": "Players need immediate, clear confirmation that their input registered, especially during the \"wind-up\" phase mentioned in the tips. The current feedback is easy to miss and feels like a debug label.",
+      "how": "Increase the font size of the move name, change the text color to the HUD gold/yellow, and remove the dark background pill so the text floats more prominently over the action, similar to the \"QUALIFIER\" text style."
+    }
+  ],
+  "raw": null
+}

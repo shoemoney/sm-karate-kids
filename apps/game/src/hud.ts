@@ -248,15 +248,25 @@ export class Hud {
       this.resultButton.setAttribute('aria-label', this.resultAction);
       return;
     }
-    // "FIGHT · 3" put a bare number on a gold pill next to a score, and a bare
-    // number on that surface reads as a point total. The verb is the label and
-    // the number is a clock, so the clock gets its own mark and the two are
-    // marked apart for anything reading it aloud or navigating by voice.
+    // This has now been reported four times across three rounds and the fix was
+    // wrong twice: kimi-k2.7-code "unexplained numeric badges", minimax-m3 "an
+    // unexplained 'FIGHT N' badge", deepseek-v4-flash "looks tappable but is a
+    // countdown", qwen3.6-plus "'FIGHT' button text confuses countdown with
+    // round number".
+    //
+    // The first answer gave the number its own badge and marked the two apart
+    // for screen readers, which fixed the accessibility and not the picture: a
+    // bare numeral in a circle on a gold pill beside a score reads as a point
+    // total, because that is exactly what a numeral in a circle beside a score
+    // means everywhere else in this HUD.
+    //
+    // So it says what it is. "FIGHT IN 3" cannot be misread as a round number,
+    // and the action word stays the largest thing on the pill.
     this.resultButton.textContent = this.resultAction;
     const clock = document.createElement('span');
     clock.className = 'result-count';
     clock.setAttribute('aria-hidden', 'true');
-    clock.textContent = String(seconds);
+    clock.textContent = `in ${seconds}`;
     this.resultButton.appendChild(clock);
     this.resultButton.setAttribute(
       'aria-label',
