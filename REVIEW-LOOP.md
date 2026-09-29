@@ -535,3 +535,43 @@ Rejected this round, with the measurement:
   iteration across four models. Standing judgement: warm and low.
 - `hud-score-contrast` (gemma-3-27b) — rounds 5/10.
 - `landscape-control-scaling` (qwen3.8-35b) — taste, not a defect.
+
+### Round 19 — glm-4.6v, grok-4.7, ling-3.0-flash-vl, mimo-v2.6-flash — `fe558fe`
+
+Catalogue refreshed from the live API first: **292 vision models, 23 asked, 271
+remaining.** The local snapshot was inventing IDs — `glm-4.7v` and
+`glm-4.6v-flash` do not exist; `glm-4.6v` does.
+
+- `strikes-dont-read` (grok-4.7) and `attack-banner-idle-pose`
+  (mimo-v2.6-flash) — **accepted, and this is the one that mattered.** Two
+  unrelated providers, no shared lineage, the same reading of the same frames:
+  "the LUNGE PUNCH chip is up while both fighters hold the exact same neutral
+  guard as the idle frame", and "move-name banners display while the fighter is
+  still in the untouched idle stance".
+
+  Neither could have seen the cause, because the cause is three lines:
+  `showTechnique(name) { this.technique.textContent = name; }` — the whole
+  method. The referee banner beside it has carried a `bannerUntil` expiry since
+  round 4. The technique chip never had one. The last move you threw stayed on
+  screen for the rest of the bout, so it read as a state readout rather than a
+  confirmation and the next strike was indistinguishable from a stale label.
+
+  Confirmed by driving real CDP touch input — both zone anchors, both sticks,
+  ◄ technique and ► stance together. Two earlier attempts used the wrong
+  selector and `touchscreen.tap` and returned clean empty results that looked
+  like "the input doesn't work"; the harness's own `thumbs.ts` dispatches raw
+  CDP touch points, and a technique is two simultaneous sticks, not a tap. Chip
+  now appears at 100ms and clears at 794ms.
+- `scorebar-clock-reads-as-score` (mimo-v2.6-flash) — **accepted.** The clock was
+  typeset exactly like the two scores, in one row, so the header parsed as
+  "0 30 0". Boxed in a dial frame; the scores stay bare and flat.
+- `post-fight-navigation` claims (qwen3.8-35b, prior round) — the card is
+  `action: 'NEW TOURNAMENT'` → `newRun()`. No menu exists to navigate back to.
+- `settings-checkbox-size`, `fight-button-number-visibility`, `techniques-icon-size`
+  (glm-4.6v) — all sized deliberately in earlier rounds, with measurements.
+- `controls-label-clarity` (glm-4.6v) — the weakest of the batch and the only
+  one with a whiff of substance; `--text-2xs` on STANCE/TECHNIQUE is small.
+  Noted, not actioned.
+- `loading-bar-never-fills` (mimo) — the MEASURING state.
+- `portrait-fight-frame-wasted`, `fighters-edge-proximity` — framing, in its
+  ninth and tenth iteration. Standing judgement: warm and low.
