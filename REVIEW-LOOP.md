@@ -1361,3 +1361,37 @@ is what a corrected sample does.
 **A round with no product change is a real result.** It means the loop asked
 three models and the product had nothing left to answer on the things they
 raised, which is a different and more useful signal than a fix.
+
+### Round 41 — seed-1.6, grok-build-0.1 — `cae0c92`
+
+- `post-fight-controls-unnecessary-visibility: "hide control sticks on
+  post-fight result screens"` (seed-1.6) — **accepted, and the fix already
+  existed nine rounds ago applied to the wrong element.** Round 24 established
+  that a sheet gets the whole screen because a sheet is a full-screen document,
+  and hid the pad behind one for exactly that reason. The same argument applies
+  to the result card: it is a card about a fight that has already happened, and
+  there is nothing on that pad to control.
+
+  Dimming was right for the *pre-fight* card — a countdown that ends in a fight
+  — and the stylesheet says so at length because the distinction is load-bearing.
+  It was never right for the result. Two dead rings under a REMATCH button read
+  as a control the player has been invited to use and cannot.
+
+  **Round 24's reasoning was right and its scope was too narrow.** A principle
+  that lands once tends to look like a special case, and the next element it
+  applies to has to be argued for from scratch.
+- `techniques-menu-no-selected-move-highlight: "add a selected move highlight"`
+  (seed-1.6) — a real gap and a good idea: during a bout there is no way to see
+  which entry of the reference you just performed. Not actioned; it needs a
+  decision about whether the sheet is a reference or a log.
+- `pre-fight-controls-no-inactivation-cue` (seed-1.6),
+  `small-touch-sticks` (grok-build-0.1) — the sticks are 170px on a 390px
+  viewport, labelled, with bright detents since round 33.
+- `left-handed-layout-description-low-visibility` (seed-1.6) — the hint under
+  that row, `--text-2xs` on the sheet.
+- `invisible-loading-progress` (grok-build-0.1),
+  `loading-bar-no-progress-indicator` (seed-1.6) — the seventeenth and
+  eighteenth appearances, unchanged since round 35.
+- `excessive-headroom-arena`, `callout-obscures-fighters` (grok-build-0.1) —
+  framing, twenty-fourth iteration.
+- `google/gemma-3-4b-it` — 429, DeepInfra overloaded.
