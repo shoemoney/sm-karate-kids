@@ -146,7 +146,11 @@ export class Hud {
       if (score > this.lastScores[index]) Hud.replay(el, 'pop');
       this.lastScores[index] = score;
     }
-    this.timer.textContent = String(Math.ceil(state.timerTicks / 60));
+    const seconds = Math.ceil(state.timerTicks / 60);
+    this.timer.textContent = String(seconds);
+    // The unit is a visual mark only; the accessible name says the word, so a
+    // screen reader does not have to spell out "s".
+    this.timer.setAttribute('aria-label', `${seconds} seconds remaining`);
 
     if (this.bannerUntil !== 0 && nowMs > this.bannerUntil) {
       this.banner.classList.remove('show');

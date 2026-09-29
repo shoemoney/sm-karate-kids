@@ -1,0 +1,49 @@
+{
+  "model": "x-ai/grok-4.5",
+  "elapsed_s": 23.9,
+  "usage": {
+    "prompt_tokens": 14454,
+    "completion_tokens": 972,
+    "total_tokens": 15426,
+    "cost": 0.0345224,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 128,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0345224,
+      "upstream_inference_prompt_cost": 0.0286904,
+      "upstream_inference_completions_cost": 0.005832
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": null,
+  "raw": "[\n  {\n    \"id\": \"pre-fight-overlay-clutter\",\n    \"title\": \"Qualifier intro buries fighters under stacked chrome\",\n    \"what\": \"On the QUALIFIER vs HasanAbi pre-fight screens the title, subtitle, flavor-text pill, giant FIGHT button, and STARTING IN n countdown occupy the entire vertical center while the two fighters are pushed into the lower third and partially covered.\",\n    \"why\": \"The first thing a player sees is wall-of-text UI, not the matchup. On a 390-px-wide phone the characters\u2014the entire fantasy\u2014are secondary to chrome, killing hype before the bout starts.\",\n    \"how\": \"Collapse flavor text into a single thin line or fade it after 1 s; move the countdown into the FIGHT button itself; raise the fighter pair so their heads sit near the vertical center and the button clears their feet by at least 24 px.\"\n  },\n  {\n    \"id\": \"twin-stick-dead-zone-and-labels\",\n    \"title\": \"Stance/Technique sticks lack active wedge feedback\",\n    \"what\": \"In every in-round shot the two large circular sticks show only a tiny blue/yellow dot; the four cardinal arrows stay dim even when a direction is held, and the STANCE / TECHNIQUE captions sit below the hit targets.\",\n    \"why\": \"Players cannot tell which discrete direction registered until the move name pops up later. Missed inputs feel like lag, and the first-time tutorial value of the sticks is lost.\",\n    \"how\": \"Highlight the active 90\u00b0 wedge and its arrow at 100 % opacity while the opposite wedge drops to 30 %; pulse the center dot on commit; move the STANCE/TECHNIQUE labels inside the outer ring so they are not outside the thumb zone.\"\n  },\n  {\n    \"id\": \"move-list-cutoff\",\n    \"title\": \"Techniques sheet truncates the UP list and never shows DOWN\",\n    \"what\": \"The TECHNIQUES modal (screenshot) ends mid-entry with 'Rising Knee' and a clipped 'Down\\ldots' line; no TECHNIQUE DOWN section is visible without scrolling that the sheet does not indicate.\",\n    \"why\": \"Half the move set is undiscoverable on the first open. Players who open MOVES to learn options leave thinking the kit is smaller than it is.\",\n    \"how\": \"Make the sheet a full-height scroll with a persistent 'STANCE + TECHNIQUE' legend and a bottom fade + scroll hint; guarantee all four direction groups (Forward/Back/Up/Down) are reachable in one flick.\"\n  },\n  {\n    \"id\": \"ippon-banner-vs-action\",\n    \"title\": \"IPPON splash hides the connecting strike\",\n    \"what\": \"On both the HasanAbi Spinning Back Kick and Asmongold Stepping Lunge Punch ippon frames the huge gold IPPON + name + move-title block is composited dead-center, covering torsos and the actual hit spark/contact point.\",\n    \"why\": \"The satisfaction of a clean point is the contact itself. Covering it with type turns the money moment into a text card and weakens the 'one clean hit' fantasy the rules screen sells.\",\n    \"how\": \"Anchor the IPPON stack to the top third (below the score bar) or slide it in from the scorer's side; keep the contact zone clear for 0.4 s before any text lands; scale type down ~20 % on the 390-px baseline.\"\n  },\n  {\n    \"id\": \"result-screen-score-legibility\",\n    \"title\": \"Final score 0\u20142\u00bd is tiny and easy to misread\",\n    \"what\": \"The HASANABI WINS result screen shows the decisive '0 \u2014 2\u00bd' in a thin, mid-size gold face centered under the title; the fractional half-point is especially easy to parse as noise, and the bout record pill beneath it is lower-contrast still.\",\n    \"why\": \"After a loss the player needs instant clarity on margin. A weak score treatment makes the outcome feel vague and reduces the urge to tap REMATCH.\",\n    \"how\": \"Set the final score in the largest weight of the display font, at least 48 sp, with the fraction in a tabular-lining face; add a 2-px dark occluder behind it so it survives the warm dojo bloom; keep the REMATCH button exactly where it is.\"\n  }\n]"
+}

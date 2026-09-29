@@ -1,0 +1,85 @@
+{
+  "model": "openai/gpt-5.6-luna",
+  "elapsed_s": 41.9,
+  "usage": {
+    "prompt_tokens": 16238,
+    "completion_tokens": 2609,
+    "total_tokens": 18847,
+    "cost": 0.00719015,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 16235,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00719015,
+      "upstream_inference_prompt_cost": 0.00405935,
+      "upstream_inference_completions_cost": 0.0031308
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1740,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "show-loading-progress",
+      "title": "Make the boot screen communicate actual download progress",
+      "what": "On the ShoeMoney loading screen, the rail beneath \u201cDownloading the game\u201d appears almost entirely dark with no visible percentage, downloaded size, phase, or activity beyond the static message.",
+      "why": "A player waiting on a mobile WebGPU download cannot tell whether loading is progressing or stalled, increasing abandonment before the first bout.",
+      "how": "Fill the rail from the real asset-loader ratio, add text such as \u201c42% \u00b7 18 MB / 43 MB,\u201d rotate the phase label through \u201cPreparing arena,\u201d \u201cLoading fighters,\u201d and \u201cCompiling shaders,\u201d and show a retry control if progress has not changed for several seconds."
+    },
+    {
+      "id": "clarify-control-language",
+      "title": "Remove ambiguity from the two-stick instructions",
+      "what": "In the lower gameplay legend, STANCE labels both horizontal directions as \u201cstep\u201d \u2014 \u201c\u25c0 step\u201d and \u201c\u25b6 step\u201d \u2014 while the technique stick uses \u201cback / forward.\u201d The move list also relies on tiny circular direction icons that are not immediately self-explanatory.",
+      "why": "A first-time phone player cannot tell what the two horizontal stance inputs do or how a visible stick gesture becomes a named attack, causing missed inputs and unnecessary opening the Moves panel.",
+      "how": "Change the legend to explicit labels such as \u201cstep left / step right\u201d or \u201cretreat / advance,\u201d add a one-line first-use prompt showing \u201chold stance direction + technique direction,\u201d and display a larger gesture diagram for the currently selected move."
+    },
+    {
+      "id": "fix-landscape-layout",
+      "title": "Give the wide viewport a real gameplay layout",
+      "what": "In the landscape screenshot, the dojo occupies only the upper portion of the screen, the fighters and playfield are relatively small, and a large unused black area sits below them; the stance and technique sticks are reduced to tiny controls at the far left and right edges.",
+      "why": "The wide layout wastes screen space and makes touch controls harder to hit, while the player loses the cinematic scale and immediate readability present in portrait.",
+      "how": "Add a landscape breakpoint that expands the playfield vertically into the unused lower region, places the two sticks in a dedicated bottom control band, and scales each stick to a minimum touch diameter of roughly 120\u2013140 CSS pixels."
+    },
+    {
+      "id": "make-moves-panel-scannable",
+      "title": "Turn the Moves sheet into a usable phone reference",
+      "what": "The TECHNIQUES panel is a dense full-height list; at the bottom of the shown screen, \u201cRising Knee\u201d is followed by a partially cut-off next row with no obvious scrollbar, tab structure, or indication that more moves continue below.",
+      "why": "Players trying to learn combinations cannot reliably see the complete move set or know whether the panel is scrollable, forcing trial and error during a timed bout.",
+      "how": "Group moves into compact Forward, Back, Up, and Down sections with collapsible headers, reserve safe-area padding below the last row, add a visible scroll cue, and keep each move row to a clear input graphic, name, and scoring result."
+    },
+    {
+      "id": "label-round-timer",
+      "title": "Explain the unlabeled gold number in the match HUD",
+      "what": "During gameplay, the top HUD shows a gold \u201c30,\u201d then \u201c29,\u201d in the center between the fighters\u2019 scores, but the number has no TIME label, clock icon, or unit; it visually resembles another score.",
+      "why": "Point-karate decisions depend on knowing how much time remains, and an unlabeled changing number makes the most urgent match state slower to parse on a small screen.",
+      "how": "Add a compact \u201cTIME\u201d caption or clock icon above the number, keep the seconds visually distinct from both scores, and apply a clear final-five-seconds state such as a restrained pulse or color shift without changing the warm dojo palette."
+    }
+  ],
+  "raw": null
+}

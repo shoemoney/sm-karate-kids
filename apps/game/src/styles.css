@@ -799,6 +799,26 @@ body.show-perf #backend {
    frame makes the middle numeral an instrument at a glance without touching
    the type: the two scores stay bare and flat, and the clock is the only
    boxed thing in the bar. */
+/* The unit. A bare gold numeral in a dial, with nothing saying what it counts,
+   is the same class of problem as the FIGHT button's countdown and it took the
+   same shape of report: a gold number in the middle of a scoreline reads as
+   another score until something says otherwise. Round 26 gave it a dial; that
+   moved it from "a number" to "a number in a box", and gpt-5.6-luna in round 56
+   still called it "the unlabeled gold number in the match HUD".
+
+   One lowercase letter, set small and baseline-aligned inside the dial. It is
+   the difference between a number and a quantity, it costs no width, and it is
+   what every scoreboard in every sport has always done. */
+#timer::after {
+  content: 's';
+  display: inline-block;
+  margin-inline-start: 0.08em;
+  font-size: 0.42em;
+  font-weight: var(--weight-bold);
+  color: var(--gold-deep);
+  translate: 0 -0.5em;
+}
+
 #timer {
   min-width: 2.6ch;
   padding: 0.06em 0.34em 0.1em;

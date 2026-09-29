@@ -1,0 +1,85 @@
+{
+  "model": "qwen/qwen3.6-flash",
+  "elapsed_s": 134.6,
+  "usage": {
+    "prompt_tokens": 13004,
+    "completion_tokens": 6527,
+    "total_tokens": 19531,
+    "cost": 0.009781125,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.009781125,
+      "upstream_inference_prompt_cost": 0.00243825,
+      "upstream_inference_completions_cost": 0.007342875
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 5566,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "thumb-zone-compression",
+      "title": "Pre-fight controls crushed by CTA",
+      "what": "In the pre-fight screen (screenshot 2), the massive golden 'FIGHT' button occupies the lower-middle third of the screen, pushing the dual joysticks ('STANCE' and 'TECHNIQUE') to the extreme bottom edge, leaving less than 40px of clearance.",
+      "why": "On a 390x844 display, the bottom bezel/home-indicator area is physically difficult to reach with thumbs. Squashing the primary input controls here forces awkward hand positioning and increases missed inputs before the game even starts.",
+      "how": "Reduce the height of the 'FIGHT' button by 25% and shift its position upward. Ensure the joysticks maintain at least 60px of padding from the bottom screen edge to accommodate the device's gesture bar and comfortable thumb reach."
+    },
+    {
+      "id": "control-hint-obstruction",
+      "title": "Combat control hints blocking footwork",
+      "what": "During active bouts (screenshots 3, 4, 5), the semi-transparent control hint bar ('STANCE: step, jump...' / 'TECHNIQUE: back, forward...') floats directly over the fighters' lower legs and feet.",
+      "why": "In point karate, foot placement (stepping, crouching, jumping) is the primary mechanic. Obscuring the fighters' feet with a UI overlay removes critical visual feedback regarding distance and stance, making it harder for players to judge timing and positioning.",
+      "how": "Move this hint panel to the top of the screen (below the timer/round info) or implement a 'fade-out' animation that hides the panel after 3 seconds of inactivity. Alternatively, make the panel thinner and position it strictly above the joysticks without overlapping the character models."
+    },
+    {
+      "id": "top-right-ui-contrast",
+      "title": "Low visibility for action buttons",
+      "what": "The 'MOVES' and Settings gear buttons in the top-right corner (screenshots 3, 4, 5) are dark grey pills that blend into the warm, low-key dojo background lighting.",
+      "why": "Low contrast reduces discoverability. Players scanning the screen during a fight may miss the ability to check their move list or pause settings, leading to accidental taps on the background or frustration trying to find the menu.",
+      "how": "Add a semi-transparent dark backing (e.g., rgba(0,0,0,0.6)) or a subtle drop shadow behind these buttons to separate them from the background environment and increase legibility."
+    },
+    {
+      "id": "ippon-text-balance",
+      "title": "Unbalanced hit-feedback typography",
+      "what": "On a successful point (screenshot 12), the text stack reads 'IPPON' (huge) -> 'HASANABI' (medium) -> 'SPINNING BACK KICK' (small). The technique name is disproportionately small compared to the announcer text.",
+      "why": "The specific technique name is crucial educational feedback for a fighting game. Making it too small wastes a key teaching moment where the player just executed a complex move like a 'Spinning Back Kick'.",
+      "how": "Increase the font size of the technique name ('SPINNING BACK KICK') by approximately 50% and tighten the vertical line-height between the three lines of text to create a more cohesive, impactful announcement block."
+    },
+    {
+      "id": "post-match-placeholder",
+      "title": "Broken stats line on victory screen",
+      "what": "In the victory screen (screenshot 8), the text 'BOUTS WON 0 / 1 - BEST -' ends with 'BEST -', which is empty and looks like a broken placeholder rather than intentional design.",
+      "why": "Visible placeholders erode polish. It suggests incomplete data handling or a missing feature, distracting the player from the actual result ('HASANABI WINS').",
+      "how": "Remove the '- BEST -' suffix entirely until a streak or best-time metric is available. If the stat is irrelevant for a single-bout qualifier, hide the entire line or replace it with a 'Next Opponent' indicator."
+    }
+  ],
+  "raw": null
+}
