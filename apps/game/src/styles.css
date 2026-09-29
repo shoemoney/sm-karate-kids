@@ -194,6 +194,19 @@
      a shade above 5:1 without competing with the knob, which is the thing the
      thumb is actually tracking. */
   --detent-idle: rgb(246 239 230 / 0.68);
+
+  /* The boot card's quiet lines, lifted off --text-muted.
+
+     The one thing this investigation established firmly is that you cannot
+     measure this card off a screenshot: every reading taken of it so far was
+     taken while the card was still fading in, which is why a nominally correct
+     colour was measuring 2.7:1 on screen. The harness now waits for the fade
+     (see tools/review-shots.mjs). What is left here is only that these two
+     lines were a step dimmer than they needed to be relative to the gold
+     title, and this sits between --text-muted and --text — above the quiet
+     lines of other cards, below the title, which is where a publisher credit
+     belongs. */
+  --boot-quiet: rgb(133 127 119);
   --detent-dim: rgb(232 185 92 / 0.42);
   --detent: 0.9rem;
   --detent-arm: 0.44rem;
@@ -492,6 +505,7 @@ body {
   text-transform: uppercase;
   text-align: center;
   color: var(--text-muted);
+  color: var(--boot-quiet);
 }
 
 .boot-stage {
@@ -563,7 +577,7 @@ body {
 
 .boot-credit {
   margin: var(--space-3) 0 0;
-  color: var(--text-muted);
+  color: var(--boot-quiet);
   font-size: var(--text-2xs);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--track-label);

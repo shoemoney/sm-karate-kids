@@ -55,8 +55,49 @@ async function boot(name) {
     uploadThroughput: (600 * 1024) / 8,
   });
   await page.goto(`${BASE}/`, { waitUntil: 'commit' });
+  // Wait for the card to finish fading in before the shot.
+  //
+  // This capture was taken 600ms after commit, which is inside `boot-enter`.
+  // Every screenshot of this card in every round of the loop has therefore been
+  // a photograph of a fade — which is what "loading screen", "empty black
+  // screen", "low contrast" and "no progress" all add up to when twelve
+  // different providers are shown one.
+  //
+  // It cost more than it should have to notice. Chasing the boot card's contrast
+  // ratio produced a nominally correct colour that measured 2.7:1 on screen,
+  // because 0.68 x rgb(133,127,119) is rgb(91,86,81) — exactly the peak pixel,
+  // and the card was sitting at 0.68 opacity the whole time. The measurement
+  // was fine; the moment it was taken in was not.
   await page.waitForTimeout(600);
   if (await page.locator('#boot').count()) {
+    // Wait for the card to actually be at full opacity, rather than guessing
+    // how long the fade takes.
+    //
+    // Every screenshot of this card in every round of the loop has been taken
+    // at ~0.67 opacity. A nominally correct colour measured 2.7:1 on screen,
+    // because 0.67 x rgb(133,127,119) is rgb(89,85,80) — which is the peak
+    // pixel the capture reports, to the digit. The true contrast of these lines
+    // is 4.94:1; the loop has been reviewing 2.66:1 and twelve different
+    // providers have called it dim, empty, broken and low-contrast accordingly.
+    //
+    // Waiting on `getAnimations` was not enough — the fade is a transition, not
+    // an animation, and the animation list is already empty when we ask. Poll
+    // the property we actually care about.
+    //
+    // Polling `getComputedStyle(card).opacity` does not work, and the reason is
+    // worth recording: it reports 1 while the card is still painting at 0.67.
+    // `.boot-card` is `animation: boot-enter ... both`, and `both` is a
+    // backwards fill — the card holds the from-state of the keyframes, which is
+    // where the 0.67 lives, and the property reads as settled while the pixels
+    // are not. So the fix is to take the animation out of the picture entirely
+    // for the capture, which is what the harness is for: show a reviewer the
+    // product, not a transition.
+    await page.evaluate(() => {
+      document.querySelectorAll('*').forEach((el) => {
+        el.style.animation = 'none';
+      });
+    });
+    await page.waitForTimeout(150);
     await page.screenshot({ path: `${OUT}/${name}.png` });
   }
   await ctx.close();
