@@ -504,3 +504,34 @@ Rejected this round, with the measurement:
   plaques. A taste question, not a defect.
 - `score-readability-low-contrast`, `ui-layering-occlusion` — already handled
   in rounds 5/10 and 1 respectively.
+
+### Round 18 — gemma-3-27b, qwen3.8-35b — `8dd8bb9`
+
+- `permanent-control-overlay` (qwen3.8-35b) — the THIRD independent model to
+  report the coach strip as permanent, and the third time the answer was wrong
+  in the same way. The strip clears on the first bout once both sticks have been
+  used. The reason three reviewers converged on the same false conclusion is
+  that the conclusion was **underdetermined, not agreed-upon**: every capture in
+  this harness ran in a fresh browser context with an empty localStorage, so
+  the first-run state was in every frame the loop ever showed a model. None had
+  seen the other state.
+
+  Fixed the sampling rather than the strip. `14-phone-returning` seeds the seen
+  flag and captures the same bout with it retired; the review set now carries
+  both states.
+
+  **A review harness is a sampling of the product, and a sample that never
+  varies a dimension cannot see anything about that dimension.**
+- `techniques-menu-contrast` (qwen3.8-35b) — **accepted.** The moves-sheet
+  scoring column was `--text-faint`, a deliberate ghost. But that column carries
+  the scoring rule — "mid · Half point" is the entire reason a point-karate game
+  has no health bars. Lifted to `--text-muted`.
+- `post-fight-navigation-dead-end` / `missing-pre-fight-navigation`
+  (qwen3.8-35b) — rejected: the end-of-tournament card is
+  `action: 'NEW TOURNAMENT'` → `newRun()`. The product has one mode of play at
+  its front door, so there is no menu to navigate back to and nothing to dead-end
+  into.
+- `fighter-mat-spacing` (gemma-3-27b) — the framing call, in its eighth
+  iteration across four models. Standing judgement: warm and low.
+- `hud-score-contrast` (gemma-3-27b) — rounds 5/10.
+- `landscape-control-scaling` (qwen3.8-35b) — taste, not a defect.
