@@ -47,11 +47,11 @@ successive rounds are not five variants of the same opinion.
 | 8 | `bytedance-seed/seed-2.0-code` | ByteDance | landed `d5336dd` |
 | 9 | `deepseek/deepseek-v4.1-flash` | DeepSeek | landed `e627548` |
 | 10 | `mistralai/mistral-medium-3.1` | Mistral | reviewed — 0 of 5 accepted |
-| 11 | `meta-llama/llama-4-maverick` | Meta | pending |
-| 12 | `cohere/command-a-plus` | Cohere | pending |
+| 11 | `meta-llama/llama-4-maverick` | Meta | reviewed — 0 of 5, all vague |
+| 12 | `cohere/command-a-plus` | Cohere | reviewed — feature asks, 0 defects |
 | 13 | `amazon/nova-2-lite-v1` | Amazon | pending |
-| 14 | `inclusionai/ling-3.0-flash-vl` | InclusionAI | pending |
-| 15 | `nex-agi/nex-n2.5-pro` | Nexa | pending |
+| 14 | `inclusionai/ling-3.0-flash-vl` | InclusionAI | landed `36c4b3e` |
+| 15 | `nex-agi/nex-n2.5-pro` | Nexa | provider returns empty content, 2 tries |
 
 ## Log
 
@@ -362,3 +362,42 @@ which is a fact about the *screens*, not about the models. The next useful move
 is either a different set of screens (a real contact, a rematch, a loss
 position, a first-run with the coach up) or a different question. Continuing to
 re-shoot the same eleven and calling it coverage would not be.
+
+### Rounds 11-14 — maverick, cohere, nova-2-lite, ling
+
+- **maverick — 0 of 5, and the model repeated itself verbatim** on a second
+  pass with the same images, which is worth knowing about temperature-0.4
+  determinism. All five items were contrast/composition suggestions with no
+  measurable referent ("improve loading screen text clarity", "enhance control
+  label visibility"). Nothing to verify, nothing to reject on evidence either.
+- **cohere — feature requests, not defects.** "Redesign touch controls",
+  "simplify move system", "create engaging post-match experience". Two of its
+  asks are already shipped: `juice.impact()` draws sparks, a shockwave ring on
+  full points, hitstop, shake and a camera punch, and the post-match path has
+  WAZA-ARI/BLOCKED calls, a slam-in result card, match-point slow motion and a
+  distinct `CHAMPION`/`DEFEATED` headline carrying career records. A reviewer
+  proposing a redesign is answering a different question from the one asked.
+- **amazon/nova-premier-v1 is EOL** — 404, "reached the end of its life". The
+  live vision model in that family is `nova-2-lite-v1`.
+- **ling-3.0-flash-vl — 2 accepted.** The technique caption was pinned to the
+  bottom of the stage, directly above the pad, which is where both thumbs rest:
+  a confirmation the player cannot see while performing the thing it confirms.
+  And the gear button sat flush against the right bezel after round 3 collapsed
+  the header row, putting part of a 44px target off-screen.
+- **nex-agi/nex-n2.5-pro could not be reviewed.** It answers HTTP 200 with a
+  null `content`, twice, 762 seconds apart. That is a provider failure, not a
+  review, and the harness now records it instead of crashing on it.
+
+**Where the loop stands.** Twelve rounds, ten distinct model families, roughly
+half the reported items accepted and the other half rejected against a crop, a
+CSS line, or a pixel count. The accepted work clusters hard: a missing feature
+(onboarding), a missing identity (the game's name on its own boot card), a
+debug badge shipping to players, controls dimmed during the countdown that
+starts the fight, a caption printed under the player's thumbs, and a coach mark
+that had stopped the sticks looking like sticks.
+
+**Two of those were regressions this loop introduced.** Round 1's dim-behind-
+modals rule and round 3's hidden knob each looked correct in the place they
+were written and were wrong one context away, and both took eight rounds and a
+fresh pair of eyes to surface. Every round re-captures the whole product, which
+is the only reason either was caught.
