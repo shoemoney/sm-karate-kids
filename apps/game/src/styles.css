@@ -34,6 +34,16 @@
     ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
     sans-serif;
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  /* The tournament-poster face, for the round name, the result headline and the
+     game's name on the boot card. These three are the only words in the game
+     set in it, and all three referenced `--font-display` before it existed —
+     which resolves to nothing, so they have been rendering in whatever the
+     browser defaults to, with no control and no intent. Condensed faces are
+     preferred because the art direction is a tall narrow poster letterform,
+     and the stacks are all system faces so the game ships no webfont. */
+  --font-display:
+    "Haettenschweiler", "Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed",
+    "Franklin Gothic Medium Cond", "Oswald", Impact, ui-sans-serif, system-ui, sans-serif;
 
   /* ---- Surfaces: the room at night ---------------------------------------- */
   /* Four warm neutrals. Everything that used to be a hand-picked near-black
@@ -2143,6 +2153,7 @@ body.no-backdrop-filter .result-detail {
 }
 
 .result-headline {
+  font-family: var(--font-display);
   font-size: var(--text-title);
   font-weight: var(--weight-black);
   line-height: 0.95;

@@ -1,0 +1,82 @@
+{
+  "model": "meta-llama/llama-4-scout",
+  "elapsed_s": 19.5,
+  "usage": {
+    "prompt_tokens": 19316,
+    "completion_tokens": 502,
+    "total_tokens": 19818,
+    "cost": 0.00377306,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00377306,
+      "upstream_inference_prompt_cost": 0.00347688,
+      "upstream_inference_completions_cost": 0.00029618
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "poor-hit-indicator",
+      "title": "Hit Indicator Hard to See",
+      "what": "The hit indicator for successful punches is a small, subtle burst of light that can be hard to see, especially in bright or busy moments.",
+      "why": "The current hit indicator is not clear or noticeable enough, making it difficult for players to understand when they have successfully landed a hit.",
+      "how": "Increase the size and brightness of the hit indicator, or make it more visually distinct from the background."
+    },
+    {
+      "id": "confusing-technique-tooltips",
+      "title": "Technique Tooltips Are Not Clear",
+      "what": "The tooltips for techniques are not clear or descriptive, making it hard for players to understand what each technique does.",
+      "why": "The current tooltips do not provide enough information about each technique, leading to confusion and frustration for players.",
+      "how": "Rewrite the tooltips to be more descriptive and provide clear information about each technique."
+    },
+    {
+      "id": "inconsistent-button-size",
+      "title": "Inconsistent Button Size",
+      "what": "The buttons for techniques and stances are not consistent in size, making it hard to navigate and use them.",
+      "why": "The inconsistent button size can lead to accidental taps and frustration for players.",
+      "how": "Make all buttons consistent in size and layout."
+    },
+    {
+      "id": "poor-navigation",
+      "title": "Navigation Between Rounds Is Confusing",
+      "what": "The navigation between rounds is not clear or intuitive, making it hard for players to understand what to do next.",
+      "why": "The current navigation can lead to confusion and frustration for players, especially new ones.",
+      "how": "Add clear and intuitive navigation between rounds, such as a clear \"Next\" or \"Previous\" button."
+    },
+    {
+      "id": "lack-of-feedback",
+      "title": "Lack of Feedback for Successful Actions",
+      "what": "There is not enough feedback for successful actions, such as landing a hit or winning a round.",
+      "why": "The lack of feedback can make it hard for players to understand what they are doing right or wrong.",
+      "how": "Add clear and visual feedback for successful actions, such as a sound effect or animation."
+    }
+  ],
+  "raw": null
+}

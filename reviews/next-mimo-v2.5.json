@@ -1,0 +1,82 @@
+{
+  "model": "xiaomi/mimo-v2.5",
+  "elapsed_s": 49.5,
+  "usage": {
+    "prompt_tokens": 11065,
+    "completion_tokens": 1243,
+    "total_tokens": 12308,
+    "cost": 0.0018707976,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 192,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0018707976,
+      "upstream_inference_prompt_cost": 0.0015227576,
+      "upstream_inference_completions_cost": 0.00034804
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 432,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-progress-stuck",
+      "title": "Loading progress bar is stuck at zero",
+      "what": "On the 'ShoeMoney pre-boot loading screen', the thin progress bar under 'Downloading the game' text is completely empty, showing no fill or animation.",
+      "why": "The player receives no feedback on download or loading progress, creating uncertainty and perceived slowness. On a phone, this is a critical trust issue during first launch.",
+      "how": "Replace the static bar element with an animated progress indicator that fills from left to right as assets load. Update its value based on actual download/load completion percentage."
+    },
+    {
+      "id": "title-card-font-glyph",
+      "title": "Broken glyph in 'QUALIFIER' title",
+      "what": "In the 'QUALIFIER vs HasanAbi' pre-fight screen, the 'Q' in 'QUALIFIER' is rendered as a garbled, black-and-white checkered square (likely a missing glyph from the font atlas).",
+      "why": "This is a prominent visual bug on a screen meant to hype the player before a fight. It looks unprofessional and damages the polished cinematic aesthetic.",
+      "how": "Inspect the font atlas or text rendering for the 'Q' character. Ensure the correct glyph is included in the texture and that UV mapping is correct. Alternatively, ensure the specified web font has loaded before rendering."
+    },
+    {
+      "id": "score-color-indistinguishable",
+      "title": "Player scores are same color, hard to track",
+      "what": "In the HUD bar, both 'ASMONGOLD' and 'HASANABI' have their score numbers (0) rendered in the same white color, with only the player names having a slight color difference.",
+      "why": "During fast-paced play, the player needs to instantly distinguish their score from the opponent's. Having both numbers the same color forces extra cognitive load to check which side is which.",
+      "how": "Change the color of the score number for one player (e.g., the right-side player/HASANABI) to red or another accent color that matches the name's hue, creating immediate visual separation."
+    },
+    {
+      "id": "joystick-size-obstructive",
+      "title": "Twin-stick joysticks are too large for phone screen",
+      "what": "The virtual 'STANCE' and 'TECHNIQUE' joysticks in gameplay screens occupy approximately the bottom 35-40% of the portrait screen height, with thick outer rings.",
+      "why": "This significantly reduces the visible combat arena on a phone, hiding crucial action (like opponent's footwork or low attacks) behind the player's own thumbs and UI, increasing difficulty unnecessarily.",
+      "how": "Reduce the overall scale of both joystick rings and their touch areas by ~20-25%. Consider allowing players to toggle between 'Large' and 'Small' control presets in settings, referencing the existing 'Large controls' option."
+    },
+    {
+      "id": "technique-label-overlap",
+      "title": "Technique stick label and move text overlap",
+      "what": "On the technique stick, the label 'TECHNIQUE' at the bottom and the helper text 'low \u25bc' inside the ring are positioned too close, with the 'low' text partially obscured by the inner stick circle in some frames.",
+      "why": "This reduces readability of the control hint, especially important for new players learning the layout. It appears cluttered and poorly spaced.",
+      "how": "Increase the vertical offset of the 'TECHNIQUE' label downwards, or slightly reposition the 'high/low' helper text upwards within the stick ring to eliminate the visual collision. Ensure consistent spacing with the stance stick."
+    }
+  ],
+  "raw": null
+}

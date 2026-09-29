@@ -1,0 +1,82 @@
+{
+  "model": "qwen/qwen3-vl-32b-instruct",
+  "elapsed_s": 30.7,
+  "usage": {
+    "prompt_tokens": 10826,
+    "completion_tokens": 877,
+    "total_tokens": 11703,
+    "cost": 0.001490736,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.001490736,
+      "upstream_inference_prompt_cost": 0.001125904,
+      "upstream_inference_completions_cost": 0.000364832
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fight-button-too-small",
+      "title": "Fight button is too small for touch on portrait phone",
+      "what": "In the pre-fight screen (screenshot 2), the 'FIGHT' button spans only ~30% of the screen width and is vertically centered, leaving large empty areas above and below. Its height is ~15% of the screen, which is below recommended touch target size for mobile.",
+      "why": "Players will frequently miss taps or accidentally tap adjacent UI elements like the fighter silhouettes or background. This causes frustration during critical moments before a match starts.",
+      "how": "Increase the button's height to at least 20% of screen height and center it vertically in the lower third. Add subtle visual feedback (e.g., ripple) on press to confirm input."
+    },
+    {
+      "id": "control-sticks-occlude-view",
+      "title": "Twin sticks occupy bottom 40% of screen, blocking gameplay view",
+      "what": "In all gameplay screens (e.g., screenshot 3), the two circular control sticks dominate the bottom half of the screen, covering the tatami floor and forcing fighters into the upper half. The visible fight area is compressed to ~60% of the vertical space.",
+      "why": "Players lose visual context of footwork, stance shifts, and opponent positioning\u2014critical for timing and strategy in karate. This reduces immersion and makes combat feel cramped.",
+      "how": "Reduce stick size by 30% and move them closer to the bottom corners. Use transparent backgrounds with slight alpha to let the dojo floor show through, preserving spatial awareness."
+    },
+    {
+      "id": "technique-feedback-lag",
+      "title": "Technique selection lacks immediate visual feedback during input",
+      "what": "When selecting a technique (e.g., screenshot 5), the TECHNIQUE stick shows a yellow dot moving toward the chosen direction, but there\u2019s no concurrent visual cue on the fighter or HUD until the move executes (e.g., screenshot 4).",
+      "why": "Players cannot confirm their input was registered in real-time, leading to uncertainty and hesitation. This breaks flow and increases perceived latency in fast-paced combat.",
+      "how": "Add a brief, glowing outline around the selected fighter\u2019s limb (e.g., fist or leg) when the stick is moved, lasting 0.2 seconds. Also animate the move name label to appear immediately upon stick release."
+    },
+    {
+      "id": "score-display-confusing",
+      "title": "Score display uses non-standard notation that confuses players",
+      "what": "In the win screen (screenshot 8), Hasanabi\u2019s score is shown as '2\u00bd', while Asmongold\u2019s is '0'. In other screens (e.g., screenshot 12), scores are integers. The fractional score appears without explanation.",
+      "why": "Players may misinterpret the scoring system, thinking it\u2019s a typo or glitch. This undermines trust in the game\u2019s mechanics and creates confusion about how points are awarded.",
+      "how": "Replace '2\u00bd' with '2.5' or use a dedicated icon (e.g., half-point symbol) next to the number. Add a tooltip or brief text under the score explaining: 'Half points for partial hits.'"
+    },
+    {
+      "id": "pre-boot-loading-screen-dark",
+      "title": "Pre-boot loading screen has low contrast and no progress indicator",
+      "what": "The initial loading screen (screenshot 1) features a dark background with faint gold text and a blue logo. The progress bar is barely visible, blending into the background. No animation or visual feedback indicates loading progress.",
+      "why": "On a dimly lit phone screen, players may not notice they\u2019re loading, leading to premature tapping or closing the app. The lack of feedback increases perceived wait time and anxiety.",
+      "how": "Increase the progress bar\u2019s opacity to 70% and add a subtle pulse animation. Make the logo glow slightly brighter. Add a small animated spinner or percentage counter next to 'Downloading the game' for clarity."
+    }
+  ],
+  "raw": null
+}
