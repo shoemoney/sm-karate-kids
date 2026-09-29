@@ -1,6 +1,11 @@
-node_modules/
-dist/
-dist-types/
+# No trailing slashes on the dep/build patterns. A trailing-slash pattern
+# matches only real DIRECTORIES, so `ln -s <main>/node_modules node_modules`
+# in an agent worktree is a symlink and gets staged by `git add -A`. Merging
+# that branch replaces the real node_modules with a link to itself:
+# "Too many levels of symbolic links", and every test exits 194.
+node_modules
+dist
+dist-types
 .tsbuild/
 *.tsbuildinfo
 coverage/
