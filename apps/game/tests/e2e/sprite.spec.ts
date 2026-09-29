@@ -2,11 +2,32 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test } from './fixtures.js';
 
-// The asset pipeline generates this file separately. Until it exists there is
-// nothing for the sprite renderer to load, so the whole suite stays green
-// rather than red on a build that simply hasn't been asset-generated yet.
+/**
+ * The fighter atlas is git-tracked, so a missing manifest is a broken checkout
+ * rather than a build that simply hasn't been asset-generated yet — there is no
+ * normal state in which it is legitimately absent.
+ *
+ * Reading it used to happen at module scope, so a missing file threw ENOENT
+ * during test COLLECTION, before any `test.skip` could run: the whole file
+ * vanished and the run printed "Total: 0 tests in 0 files" plus a stack
+ * pointing at the readFileSync line. A green run in which six real checks
+ * never executed is the failure this module now refuses to produce.
+ *
+ * The read is therefore lazy and guarded — the tests still COLLECT without the
+ * atlas, and are then skipped with a reason naming the path and the command
+ * that restores it. A skip alone is not enough, though: Playwright still exits
+ * 0 when every test in a file is skipped, which is the same green-nothing-ran
+ * report wearing a different hat. So the skip is backed by an `afterAll` that
+ * fails the run outright, and hooks do not run under `--list`, which keeps the
+ * listing honest about what would be collected.
+ */
 const MANIFEST_PATH = resolve(import.meta.dirname, '../../public/fighters/manifest.json');
 const manifestExists = existsSync(MANIFEST_PATH);
+const MISSING_MANIFEST =
+  `fighter atlas is missing: ${MANIFEST_PATH} — it is git-tracked, so restore it with ` +
+  '`git checkout -- apps/game/public/fighters/manifest.json`. This fails the sprite suite as a ' +
+  'whole: every test in this file was SKIPPED, not run, and Playwright files the error against ' +
+  'whichever test happened to run last.';
 
 const TICKS = 1500;
 const SEED = 424242;
@@ -15,18 +36,24 @@ interface Manifest {
   readonly poses: Record<string, { readonly frames: readonly number[]; readonly contact: number }>;
 }
 
+// Empty when the atlas is absent, which is exactly when nothing may consult it:
+// the two tests that read this map are skipped along with the rest.
 const contactByMove = new Map<string, number>(
-  Object.entries(
-    (
-      JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')) as Manifest
-    ).poses,
-  ).map(([id, pose]) => [id, pose.frames[pose.contact] as number]),
+  manifestExists
+    ? Object.entries(
+        (
+          JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')) as Manifest
+        ).poses,
+      ).map(([id, pose]) => [id, pose.frames[pose.contact] as number])
+    : [],
 );
 
-/** One observation of one fighter, captured inside the page. */
-
 test.beforeEach(() => {
-  test.skip(!manifestExists, 'apps/game/public/fighters/manifest.json does not exist yet');
+  test.skip(!manifestExists, MISSING_MANIFEST);
+});
+
+test.afterAll(() => {
+  expect(manifestExists, MISSING_MANIFEST).toBe(true);
 });
 
 test('?fighters=sprite boots with the sprite renderer and no console errors', async ({ page }) => {
@@ -81,7 +108,7 @@ test('the sprite renderer never touches simulation state', async ({ page }) => {
 });
 
 test('the sprite fighters are the default, and ?fighters=mesh opts out', async ({ page }) => {
-  test.skip(!manifestExists, 'fighter atlas not generated yet');
+  test.skip(!manifestExists, MISSING_MANIFEST);
   await page.goto('/');
   await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk']?.ready === true);
   expect(await page.evaluate(() => (globalThis as Record<string, any>)['__smkk'].fighters)).toBe('sprite');
@@ -110,7 +137,7 @@ interface SweepEntry {
  * which covers the whole move list in milliseconds with no race.
  */
 test('every technique plays its own frames, holding contact through the active window', async ({ page }) => {
-  test.skip(!manifestExists, 'fighter atlas not generated yet');
+  test.skip(!manifestExists, MISSING_MANIFEST);
 
   await page.goto('/?fighters=sprite');
   await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk']?.ready === true);
@@ -175,7 +202,7 @@ test('every technique plays its own frames, holding contact through the active w
 });
 
 test('a live bout draws atlas cells and holds contact when the referee is deciding', async ({ page }) => {
-  test.skip(!manifestExists, 'fighter atlas not generated yet');
+  test.skip(!manifestExists, MISSING_MANIFEST);
 
   await page.goto('/');
   await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk']?.ready === true);
