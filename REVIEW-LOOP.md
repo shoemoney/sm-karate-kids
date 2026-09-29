@@ -1232,3 +1232,41 @@ is what a corrected sample does.
 - `controls-contrast-and-feedback` (gpt-5.2-pro) — the detents were 0.36 → 0.52
   → 0.68 across rounds 21, 30 and 33.
 - `mistralai/mistral-medium-3-5` — 8-image cap hit again, third time.
+
+### Round 37 — landscape, the most repeated open request — `90152ff`
+
+- `landscape-mode-bug` / `landscape-viewport-pillarboxing` /
+  `landscape-camera-framing` / `landscape-layout-letterboxed` /
+  `repair-landscape-layout` (qwen3.6-27b, gemini-3.6-flash,
+  qwen3.5-397b-a17b, gpt-5.4-pro, gpt-5.1) — **five models, three rounds, and
+  they were right about the part that is a defect.**
+
+  The room is one plane carrying `dojo-backdrop.webp` at 34×15 world units,
+  sized for a tall phone. Portrait covers it. Landscape does not — the
+  horizontal frustum at that depth is much wider, so the plane's own left and
+  right edges land *inside* the viewport as two hard vertical seams with flat
+  background either side. That is the pillarboxing, and it is now covered: the
+  panel scales to the frustum on every resize, taking the larger ratio so it
+  crops rather than letterboxes. Portrait is unchanged, because the cover factor
+  there is below 1 and the room reads identically.
+
+  What is deliberately NOT fixed, and will be raised again: the black band
+  above the stage and the black pad the sticks sit in are the stage/pad split.
+  That is architecture. The ADR makes landscape a *scaled* secondary target, and
+  scaling means the room fills the frame — not that the frame is re-authored.
+  Anyone asking for that is asking for a second product, which is a decision to
+  make deliberately rather than a bug to close.
+- `sprite-edge-grounding: "fix cutout halos"` (gpt-5.2-pro) — **refuted at 2×
+  zoom.** Hair, gi edges and belt cut clean against the dojo, no fringing.
+  Round 29's re-encode at quality 82 with `alpha_quality: 100` did not introduce
+  halos — which needed checking precisely because it was my own work and I had
+  no prior right to assume it was clean.
+- `hud-instruction-boxes-block-legs` (qwen3.6-27b),
+  `ippon-text-overlap` (qwen3.6-27b) — the coach and the IPPON stamp, both of
+  which have been through a full round each.
+- `results-hud-state: "cleanly switch HUD states on the win/results screen"**
+  (gpt-5.2-pro) — the modal-only dimming in round 1, extended to the result
+  card in round 20.
+- `prefight-layout-hierarchy` (gpt-5.2-pro),
+  `techniques-menu-density` (qwen3.6-27b) — density and framing, twenty-third
+  iteration. Standing: warm and low.
