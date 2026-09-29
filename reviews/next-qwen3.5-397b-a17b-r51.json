@@ -1,0 +1,84 @@
+{
+  "model": "qwen/qwen3.5-397b-a17b",
+  "elapsed_s": 112.4,
+  "usage": {
+    "prompt_tokens": 12218,
+    "completion_tokens": 5082,
+    "total_tokens": 17300,
+    "cost": 0.0207441,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0207441,
+      "upstream_inference_prompt_cost": 0.0054981,
+      "upstream_inference_completions_cost": 0.015246
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 3925,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "central-toast-occlusion",
+      "title": "Action text blocks impact view",
+      "what": "In screenshots 5 and 13, the black pill notifications ('LUNGE PUNCH', 'FRONT KICK') appear directly in the vertical center of the screen, overlaying the fighters' torsos and the critical space between them.",
+      "why": "In a fighting game, seeing the hit connect (or the spacing of a miss) is the core feedback loop. Obscuring the point of impact with UI text reduces the visual satisfaction of the hit and makes spacing judgment harder.",
+      "how": "Relocate move notifications to the top center (just below the timer) or attach them to the specific fighter. Alternatively, reduce the display duration to under 0.5s so they fade before the next input."
+    },
+    {
+      "id": "persistent-instruction-clutter",
+      "title": "Static legend wastes screen space",
+      "what": "In screenshots 3, 4, 5, and 15, a semi-transparent box containing 'STANCE step/jump...' and 'TECHNIQUE back/forward...' sits permanently above the virtual sticks, consuming roughly 15% of the vertical play area.",
+      "why": "This UI element forces the camera to zoom out or the fighters to be rendered smaller to fit everything on screen. It creates visual noise in the lower third where the player's thumbs need clear visibility of the stick feedback.",
+      "how": "Remove this static legend entirely after the tutorial phase. Rely on the 'MOVES' button for reference. Optionally, show a transient directional hint near the stick only when the player has been idle for 3+ seconds."
+    },
+    {
+      "id": "redundant-prefight-interaction",
+      "title": "Confusing pre-fight button and countdown",
+      "what": "In screenshot 2, a large gold 'FIGHT' button is displayed over the fighters' legs, while text immediately below it says 'STARTING IN 2'.",
+      "why": "This creates input confusion: the player doesn't know if they must tap the button to begin or if it auto-starts. It suggests interactivity where there is a timed event, leading to accidental inputs or hesitation.",
+      "how": "Remove the 'FIGHT' button. Replace it with a non-interactive cinematic countdown overlay ('3... 2... 1... FIGHT!') that fades away, leaving the controls clear."
+    },
+    {
+      "id": "text-heavy-moves-list",
+      "title": "Combo list is hard to parse",
+      "what": "In screenshot 6, the 'TECHNIQUES' menu uses large orange text headers ('RIGHT STICK FORWARD') to group moves, followed by dense rows of text descriptions.",
+      "why": "Fighting game inputs are learned visually and kinesthetically (muscle memory), not by reading. The text-heavy layout makes it difficult to quickly scan for a specific move like 'Spinning Back Kick' during a match.",
+      "how": "Replace the text headers with large, clear schematic diagrams of the stick motion. Prioritize the Move Name (e.g., 'Spinning Back Kick') as the largest text, with the input diagram as the leading icon."
+    },
+    {
+      "id": "incomplete-match-info",
+      "title": "Missing match format details",
+      "what": "In screenshot 8 (Game Over), the sub-header reads 'BOUTS WON 0 / 1 \u00b7 BEST -'. The 'BEST -' section appears empty or cut off.",
+      "why": "Players need to know the win condition (Best of 3? Best of 5?) to understand the tournament stakes. An empty string looks like a bug and leaves the player unsure of the progression structure.",
+      "how": "Fix the UI string formatting to ensure the match limit variable is passed correctly (e.g., 'BEST OF 5'). If space is tight, use an icon (e.g., a trophy with '3/5') instead of text."
+    }
+  ],
+  "raw": null
+}

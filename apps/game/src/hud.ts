@@ -405,6 +405,28 @@ export class Hud {
     key.append(item('·', 'stance'), join, item('·', 'technique'));
     container.append(key);
 
+    // The rules, once, above the moves that follow from them.
+    //
+    // The coach teaches the controls. Nothing in the game teaches what the
+    // controls are FOR: that one clean contact ends the exchange, that a half
+    // point is a half point, that first to two takes the round. qwen3.5-397b
+    // put it as "incomplete match info — missing match format details", and it
+    // is the only finding in that batch that was neither stale nor already
+    // fixed.
+    //
+    // It belongs here rather than on the round card, because the round card is
+    // four seconds long and already carries the round name, the opponent, their
+    // tell and a button. This is the screen a player opens when they do not
+    // understand something, and until now there was nothing on it that told
+    // them what they were looking at.
+    const rules = document.createElement('p');
+    rules.className = 'tech-rules';
+    rules.textContent =
+      'Point karate. One clean contact ends the exchange — no health bars, no damage. ' +
+      'IPPON scores a full point; a half point is awarded for a technique that lands only partway. ' +
+      'First to 2 takes the round.';
+    container.append(rules);
+
     for (const family of FAMILIES) {
       const group = document.createElement('section');
       group.className = 'tech-group';
