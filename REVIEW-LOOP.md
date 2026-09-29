@@ -41,7 +41,7 @@ successive rounds are not five variants of the same opinion.
 | 2 | `z-ai/glm-5.3-flash` | Zhipu | landed `bc53eda` |
 | 3 | `anthropic/claude-opus-5.5` | Anthropic | landed `e7762da`, `9e3bfe6` |
 | 4 | `openai/gpt-5.2` | OpenAI | landed `fc8425e` |
-| 5 | `x-ai/grok-4-vision` | xAI | pending |
+| 5 | `x-ai/grok-4.20` | xAI | pending |
 | 6 | `moonshotai/kimi-k3` | Moonshot | pending |
 | 7 | `qwen/qwen3.8-omni-flash` | Alibaba | pending |
 | 8 | `bytedance-seed/seed-2.0-code` | ByteDance | pending |

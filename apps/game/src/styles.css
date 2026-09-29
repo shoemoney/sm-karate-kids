@@ -691,6 +691,12 @@ body.show-perf #backend {
   font-weight: var(--weight-black);
   font-variant-numeric: tabular-nums;
   color: var(--gold-bright);
+  /* The glow alone left the digits sitting at about the same luminance as the
+     warm bloom behind them, and the clock is the one number in the header a
+     player reads under pressure. A tight dark stroke is what separates gold
+     from gold without touching the colour. */
+  -webkit-text-stroke: 2px var(--shadow-ink);
+  paint-order: stroke fill;
   text-shadow:
     0 0 0.7rem var(--gold-glow),
     0 var(--space-1) 0 var(--shadow-ink);
@@ -1099,12 +1105,18 @@ body.show-perf #backend {
 }
 
 .stick-zone.engaged .knob {
-  /* Pressed: the drop collapses, the lip thins, the cap glows with its accent. */
+  /* Pressed: the drop collapses, the lip thins, the cap glows with its accent.
+     It also scales up, because the stick is being held *now* and a 1px state
+     change is not readable by a thumb that is already moving. */
+  transform: scale(1.09);
   box-shadow:
     0 1px 0 0 var(--knob-lip),
     0 0.1rem 0.25rem var(--shadow-ink),
-    0 0 1rem -0.15rem var(--stick-glow),
+    0 0 1.4rem -0.05rem var(--stick-glow),
     inset 0 1px 0 var(--edge-highlight);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .stick-zone.engaged .knob::before {
@@ -1275,7 +1287,7 @@ body:has(.result.show) .stick-zone {
   gap: 1px var(--space-2);
   justify-content: center;
   font-family: var(--font-mono);
-  font-size: 0.58rem;
+  font-size: 0.66rem;
   font-style: normal;
   line-height: 1.4;
   /* Was --text-muted. The coach mark is the one piece of text on the pad that
@@ -1951,6 +1963,45 @@ body.left-handed #zone-right {
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
+}
+
+/* While the card is still measuring, the track shimmers and no fill is drawn.
+   The span before the app can measure anything is real work whose size the card
+   cannot know, and drawing 0% for nine seconds says "nothing is happening" when
+   in fact the largest download of the session is in flight. A travelling sheen
+   says "working, size unknown", which is the truth. `advance()` turns this off
+   on the first real report and the bar becomes determinate. */
+.boot[data-measuring='true'] .boot-bar::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inline-size: 38%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--boot-glint) 45%,
+    var(--boot-glint) 55%,
+    transparent
+  );
+  animation: boot-sweep 1500ms var(--ease-out) infinite;
+}
+
+.boot[data-measuring='true'] .boot-fill {
+  opacity: 0;
+}
+
+@keyframes boot-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+body.reduced-motion .boot[data-measuring='true'] .boot-bar::after {
+  animation-duration: 3000ms;
 }
 
 /* Everything in the result column sits on this. Tight to the text, so the

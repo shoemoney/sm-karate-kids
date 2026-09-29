@@ -26,7 +26,7 @@
          that opens the moment the page is painted and before this module has
          even been evaluated. main.ts owns taking it down; the watchdog below is
          the only part of the feature that does not depend on that code. -->
-    <div id="boot" class="boot" data-state="live">
+    <div id="boot" class="boot" data-state="live" data-measuring="true">
       <div class="boot-card">
         <div class="boot-mark">
           <img
@@ -39,11 +39,18 @@
             fetchpriority="high"
           />
         </div>
-        <!-- Carries the 0% from the very first paint. The first unit of real
-             work is a bundle fetch, so on a slow connection this line sits
-             unchanged for a second and a half; without a number it reads as a
-             stuck gauge rather than a busy one. -->
-        <p class="boot-stage" id="boot-stage" role="status" aria-live="polite">Starting up · 0%</p>
+        <!--
+          Opens in the MEASURING state, not at "0%". The one span of cold boot
+          this card cannot put a number on is the module download itself: the
+          code that would report progress is inside the thing being downloaded.
+          Measured on a throttled link, the first app resource lands at 4s and
+          the WebGPU module at 9.1s — nine seconds of a bar reading 0%, which
+          is not "not started", it is "no reporter alive yet". So the honest
+          first state is indeterminate: the track shimmers, and the label says
+          what is actually true. The first advance() call from the app flips
+          this to determinate.
+        -->
+        <p class="boot-stage" id="boot-stage" role="status" aria-live="polite">Downloading the game</p>
         <div
           class="boot-bar"
           id="boot-bar"

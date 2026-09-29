@@ -172,6 +172,14 @@ export function mountBootScreen(): BootScreen {
       if (wanted <= already) return;
       shares.set(unit, wanted);
 
+      // The first report that actually moves the bar is also the signal that
+      // the module has finished downloading and something is finally in a
+      // position to measure — so the card stops being indeterminate exactly
+      // here and not one call earlier. Doing it on *any* call was wrong: the
+      // atlas reports 0/6 pages before it starts, and flipping on that turned
+      // the shimmer into a dead 0% determinate bar.
+      el.dataset['measuring'] = 'false';
+
       earned = 0;
       for (const [key, done] of shares) earned += UNITS[key].weight * done;
 

@@ -1,0 +1,78 @@
+{
+  "model": "x-ai/grok-4.20",
+  "elapsed_s": 10.1,
+  "usage": {
+    "prompt_tokens": 9536,
+    "completion_tokens": 769,
+    "total_tokens": 10305,
+    "cost": 0.0136409,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 192,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0136409,
+      "upstream_inference_prompt_cost": 0.0117184,
+      "upstream_inference_completions_cost": 0.0019225
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png"
+  ],
+  "items": [
+    {
+      "id": "loading-progress-stuck",
+      "title": "Loading screen shows 0% indefinitely",
+      "what": "In the first screenshot the central logo is displayed above the text \"Starting up \u00b7 0%\" with a completely empty progress bar and the footer \"A SHOEMONEY AI LABS GAME\" on a black background.",
+      "why": "Players see no visual feedback that the game is actually loading for several seconds; on mobile this immediately feels broken and increases perceived load time.",
+      "how": "Hook the real Three.js asset loading progress (or a fake 0\u2192100 ramp over 2\u20133 s) to both the numeric label and the length of the horizontal bar so it visibly fills from left to right."
+    },
+    {
+      "id": "score-timer-unreadable",
+      "title": "Score and timer numbers lack contrast on warm HUD",
+      "what": "Across multiple screenshots the yellow timer (30 \u2192 27) sits on a dark translucent header bar; the yellow is only marginally brighter than the background glow and has no outline or drop-shadow.",
+      "why": "On a phone in bright ambient light the timer is hard to read at a glance, which is critical information in a fast-paced fighting game.",
+      "how": "Add a crisp 2 px black outline or a subtle dark outer glow to all score/timer digits in the top bar; test at 390 px width."
+    },
+    {
+      "id": "control-labels-too-small",
+      "title": "MOVE & JUMP / STRIKE labels are too small to read comfortably",
+      "what": "In screenshots 2, 3, 9 and 10 the white instructional text inside the two bottom circular zones is set in a thin sans-serif at roughly 10\u201312 px effective size on a 390 px wide canvas.",
+      "why": "Touch-first mobile players glance at the controls constantly; unreadable labels force them to memorize or ignore the tutorial layer, hurting onboarding.",
+      "how": "Increase font size by 40 %, tighten tracking, and add a soft dark backing plate or thicker stroke so the labels remain legible even when the sticks are being dragged."
+    },
+    {
+      "id": "fighters-too-low-in-frame",
+      "title": "Fighters sit too low, wasting bottom third of portrait screen",
+      "what": "In the wide fighting shots (especially screenshot 8 and 10) the feet of both characters are only ~15 % from the bottom edge while a large empty tatami area occupies the lower third of the viewport.",
+      "why": "On a tall phone this pushes the action away from the thumbs and makes the fighters feel small; the composition feels bottom-heavy and less cinematic.",
+      "how": "Raise the camera or the fighters\u2019 root position by ~80\u2013100 px so the belt line sits near the horizontal center of the screen while still leaving room for the bottom HUD."
+    },
+    {
+      "id": "technique-stick-visual-feedback-weak",
+      "title": "Right stick highlight does not clearly show chosen direction",
+      "what": "In screenshot 4 the right (TECHNIQUE) stick shows a small yellow dot and a faint ring, but the highlight is low-contrast and does not scale or brighten when the stick is actively dragged.",
+      "why": "Players cannot instantly see which of the eight directions is registered, especially during fast combos; this breaks the direct visual link between thumb and on-screen result.",
+      "how": "Scale the inner yellow dot 1.6\u00d7 and increase its opacity/glow intensity while the stick is touched; add a matching colored arc on the outer ring that rotates to the chosen quadrant."
+    }
+  ],
+  "raw": null
+}
