@@ -40,7 +40,7 @@ successive rounds are not five variants of the same opinion.
 | 1 | `google/gemini-3.8-flash` | Google | landed `087be7a` |
 | 2 | `z-ai/glm-5.3-flash` | Zhipu | landed `bc53eda` |
 | 3 | `anthropic/claude-opus-5.5` | Anthropic | landed `e7762da`, `9e3bfe6` |
-| 4 | `openai/gpt-5.2` | OpenAI | pending |
+| 4 | `openai/gpt-5.2` | OpenAI | landed `fc8425e` |
 | 5 | `x-ai/grok-4-vision` | xAI | pending |
 | 6 | `moonshotai/kimi-k3` | Moonshot | pending |
 | 7 | `qwen/qwen3.8-omni-flash` | Alibaba | pending |
@@ -130,5 +130,31 @@ rather than a misplaced one.
   is mostly *ceiling*, not framing error. Attacking it by reclaiming the header
   strip instead is a real gain that does not risk the crop; the camera is left
   alone this round.
+
+### Round 4 — openai/gpt-5.2 — `fc8425e`
+
+- `sprite-grounding-shadows` — the most precise claim any model has made: "no
+  contact shadow **directly under the soles**". A crop of the mat confirmed it
+  and also corrected it — a shadow *did* exist, but at 0.44 alpha with a soft
+  22%-radius falloff it read as a smudge behind the feet. Fixed by separating
+  two things that had been drawn as one: a hard dark core under the sole, and a
+  wide soft cast shadow around it. Worth noting the model was right about the
+  symptom and wrong about the cause.
+- `overlay-tap-targets-clarity` — settings checkboxes were a **22px** target.
+  The box keeps its optical size; a 44px white square in a settings list looks
+  like a bug, so the hit area is extended by pseudo-element instead.
+- `prefight-hierarchy-bloat` — the round card spent the top third of a phone
+  and pushed both fighters into the mat. Fixed with a scoped `data-phase`, not
+  by shrinking the result headline, which is the payoff and earns its size.
+- `controls-too-dim` / `loading-state-legibility` — contrast lifts on the coach
+  legend, the stick labels, and the boot percent.
+- **A regression from the previous round, caught by screenshot.** Round 3's
+  floating MOVES and gear buttons landed across the round name. The e2e suite
+  stayed green throughout — nothing asserts about visual overlap. This is now
+  the second time in three rounds that only a screenshot caught a fault, and the
+  second time the fault was introduced by an earlier round's own fix. **Rounds
+  are not independent, and a fix's real cost shows up in the next round's
+  capture.**
+
 
 
