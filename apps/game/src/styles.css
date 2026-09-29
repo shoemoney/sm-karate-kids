@@ -2385,22 +2385,19 @@ body.high-contrast .result-score {
    point total — which is exactly what a bare numeral on a gold pill next to a
    scoreboard was. */
 .result-count {
-  display: inline-grid;
-  place-items: center;
-  min-inline-size: 1.6em;
+  /* Not a badge, not a pill, no border and no fill.
+     Round 27 changed the text to "IN 3" and that fixed the ambiguity four
+     rounds of reviewers were reporting. qwen3.5-397b then reported the next
+     thing: "countdown timer looks like a clickable button" — which is right,
+     and is a fault of the *frame*, not the wording. A bordered pill sitting
+     inside a gold button reads as a second control nested in the first, and a
+     player is being invited to press something that does nothing. So the
+     wording stays and the container goes: it is now just quiet text, set apart
+     by space and colour only. */
   margin-inline-start: var(--space-2);
-  padding: 0 0.5em;
-  /* No circle. A bare numeral in a round badge beside a score is a point
-     total, which is what four rounds of reviewers read it as; the words
-     "in 3" carry the meaning instead, and the pill just holds them apart. */
-  border-radius: var(--radius-sm);
   letter-spacing: var(--track-wide);
   font-family: var(--font-sans);
-  border-radius: var(--radius-pill);
-  background: rgb(0 0 0 / 0.22);
-  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.28);
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-bold);
   font-size: 0.8em;
   line-height: 1.5;
 }

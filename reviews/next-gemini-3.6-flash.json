@@ -1,0 +1,84 @@
+{
+  "model": "google/gemini-3.6-flash",
+  "elapsed_s": 21.3,
+  "usage": {
+    "prompt_tokens": 17704,
+    "completion_tokens": 3624,
+    "total_tokens": 21328,
+    "cost": 0.026868,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.026868,
+      "upstream_inference_prompt_cost": 0.013278,
+      "upstream_inference_completions_cost": 0.01359
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 2774,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "landscape-viewport-pillarboxing",
+      "title": "Fix camera letterboxing and awkward joystick spacing in landscape viewports",
+      "what": "In landscape orientation (Image 9), the 3D dojo viewport is squished into a centered box with black horizontal and vertical letterboxing, while the dual joysticks are pushed to extreme bottom corners separated by a massive black expanse.",
+      "why": "Playing on desktop browsers or landscape mobile devices results in a severely degraded visual presentation and physically uncomfortable control spacing.",
+      "how": "Update camera aspect ratio logic in Three.js to render full-bleed wide viewports on desktop/landscape viewports (`@media (min-aspect-ratio: 1/1)`), floating the HUD elements and joysticks over the 3D canvas with inset corner padding."
+    },
+    {
+      "id": "control-legend-overlay-clutter",
+      "title": "Remove static control legend card covering the lower arena floor",
+      "what": "In active gameplay (Images 3, 4, 5, 10, 13, 15), a large brown card displaying direction bindings ('STANCE / TECHNIQUE') hangs permanently over the tatami mat, directly above joysticks that already repeat 'STANCE' and 'TECHNIQUE' labels beneath them.",
+      "why": "It eats up over 100 pixels of vertical screen real estate on portrait mobile screens, obscuring lower fighter footwork and visually cluttering the combat zone.",
+      "how": "Fade out the helper card after the round timer starts, or move directional icon indicators directly onto the circular joystick base graphic."
+    },
+    {
+      "id": "cyan-logo-palette-mismatch",
+      "title": "Recolor cyan diamond emblem to match the warm tungsten dojo aesthetic",
+      "what": "The glossy electric blue/cyan 'S$' diamond emblem on the loading screen (Image 1) and gi chest badges (Images 2-5, 8, 10-15) starkly contrasts with the warm golden-brown environment.",
+      "why": "The bright saturated blue badge breaks the dark cinematic 'tungsten and tatami' art direction, looking like an unintegrated placeholder asset.",
+      "how": "Replace the cyan gi badge texture and splash emblem graphics with a warm metallic gold (`#D4AF37`) or brass variant that blends with the UI high-key accents."
+    },
+    {
+      "id": "move-announcement-placement",
+      "title": "Move active technique text pill closer to fighter action focus",
+      "what": "During technique execution (Images 5 and 13), move name notification pills ('LUNGE PUNCH', 'FRONT KICK') float high in the ambient shoji screen space above the fighters.",
+      "why": "Players must divert their eyes away from the combat point of impact at the center of the frame to check what move was registered.",
+      "how": "Attach the move indicator pill floating directly above the performing fighter's sprite, or integrate it immediately below their respective player name in the top HUD banner."
+    },
+    {
+      "id": "low-contrast-score-hud",
+      "title": "Increase color contrast and stroke clarity on opponent red score readout",
+      "what": "In scoring and result screens (Images 8 and 12), opponent point indicators ('1', '2 \u00bd') use a dark muted red text color on a near-black header background.",
+      "why": "The dark red score text falls below basic legibility contrast thresholds, making it difficult for players to quickly read opponent points during fast match resets.",
+      "how": "Brighten the opponent score tint to a saturated coral crimson (`#FF5B5B`) and apply a subtle text glow style matching the golden player score counter."
+    }
+  ],
+  "raw": null
+}

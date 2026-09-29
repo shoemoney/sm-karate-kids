@@ -1,0 +1,84 @@
+{
+  "model": "openai/gpt-5.1",
+  "elapsed_s": 13.3,
+  "usage": {
+    "prompt_tokens": 14989,
+    "completion_tokens": 1089,
+    "total_tokens": 16078,
+    "cost": 0.02962625,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.02962625,
+      "upstream_inference_prompt_cost": 0.01873625,
+      "upstream_inference_completions_cost": 0.01089
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighters-floating-on-mat",
+      "title": "Ground fighters with contact shadows so they stop looking pasted-on",
+      "what": "On all in-fight and pre-fight screens (e.g., screenshot with \u201cFRONT KICK\u201d callout and the wide desktop shot), the soles of both fighters are sharply lit with no visible contact shadow or occlusion on the tatami; the mat shading continues uniformly under their feet, making them appear to float slightly above the floor.",
+      "why": "This breaks the otherwise cinematic realism and depth of the dojo and makes the core characters feel less solid, which players will notice immediately since their eyes stay on the fighters during play.",
+      "how": "Add tight, darkened contact shadows directly beneath the feet using either blob shadow meshes that follow the foot bones or a projected decal/plane with a soft alpha gradient; match the mat\u2019s light direction and tint so the shadows are subtle but clearly darken the tatami right under the heels and toes."
+    },
+    {
+      "id": "fighters-too-low-in-frame",
+      "title": "Raise camera framing so fighters aren\u2019t cramped against UI",
+      "what": "In the main fight layout on phone (e.g., the last screenshot with both sticks visible), the fighters\u2019 heads sit just above the midline while a large empty band of background occupies the top third, and the bottom quarter of their legs is crowded by the stance/technique panel.",
+      "why": "The core action feels visually small and distant on a 390\u00d7844 screen, reducing excitement and making it harder for players to read technique animations quickly.",
+      "how": "Nudge the fight camera or fighter layer up by ~40\u201360 px and slightly scale the fighters up (5\u201310%), while shaving ~20\u201330 px of vertical padding from the top HUD and from the stance/technique instruction bar so more of the screen\u2019s vertical space is devoted to the fighters\u2019 bodies and strikes."
+    },
+    {
+      "id": "low-contrast-top-hud-text",
+      "title": "Improve score/timer readability in top HUD",
+      "what": "On the fight HUD (score bar at top), labels like \u201cASMONGOLD\u201d and \u201cHASANABI\u201d are in thin, low-contrast light text on a warm, semi-transparent dark background, and the small round timer (30) uses a soft golden outline; on phone these elements blur together, especially when glanced mid-action.",
+      "why": "Players need to parse time and score at a glance without squinting; low contrast and fine weights increase eye strain and make it easier to miss remaining time or current score.",
+      "how": "Increase text contrast by using near-white for active values, slightly darken the HUD background behind text (or add a subtle solid strip just under the glyphs), and bump font weight up one step; for the timer pill, thicken the outline and slightly brighten the fill so the \u201c30\u201d has a crisper edge against the halo glow."
+    },
+    {
+      "id": "fight-button-countdown-confusion",
+      "title": "Clarify countdown labeling on FIGHT and REMATCH buttons",
+      "what": "On the pre-bout and post-bout screens, the primary button reads \u201cFIGHT IN 4\u201d / \u201cREMATCH IN 8\u201d with a small inset capsule containing only the number; visually it can read as three separate words (\u201cFIGHT IN\u201d + badge \u201c4\u201d) and the shrinking number isn\u2019t obviously a live countdown.",
+      "why": "This can make players unsure whether they should tap immediately or wait, and the lack of clear countdown affordance may cause them to think the game is frozen or unresponsive.",
+      "how": "Animate the inset capsule as a clear timer: add a ticking radial or horizontal progress bar inside it, or replace the static \u2018IN\u2019 with a small countdown label like \u201cSTARTS IN\u201d above the number; optionally separate the verb (\u201cFIGHT\u201d / \u201cREMATCH\u201d) on one line and place a smaller, clearly-timed \u201cStarts in 3\u20262\u20261\u201d label directly beneath."
+    },
+    {
+      "id": "moves-list-density-on-phone",
+      "title": "Reduce visual clutter and increase tap targets in Moves sheet",
+      "what": "In the Techniques/Moves overlay (screenshot with long list of attacks), rows are tightly stacked with small icons, thin dividers, and mid-size text; on a 390\u00d7844 phone the individual move entries look cramped with very little vertical breathing room and small hit areas.",
+      "why": "High information density makes it harder for players to scan for a move they want and increases the chance of missing or mis-tapping an item, especially during quick reference between rounds.",
+      "how": "Increase row height by ~4\u20136 px, add more vertical padding around the move names, and enlarge the tap region to at least ~44 px high; slightly lighten the move names while dimming the metadata (e.g., \u201cmid \u00b7 Half point\u201d) so hierarchy is clearer, and consider collapsing less-critical sections with accordions to keep the first viewport focused on the most common techniques."
+    }
+  ],
+  "raw": null
+}
