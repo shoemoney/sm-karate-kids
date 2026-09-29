@@ -443,3 +443,36 @@ The yield curve has flattened to near zero on repeated screens and the accepted
 work is now concentrated in a handful of surfaces. What keeps producing: a
 finding that recurs across independent models, and a change that is visual
 enough to have a containing-block bug nobody can see.
+
+### Round 16 — qwen3-vl-32b, llama-4-scout, mimo-v2.5 — `c57190b`
+
+- `title-card-font-glyph: "broken glyph in QUALIFIER"` (mimo) — **accepted, and
+  the glyph was not the problem.** `.result-headline`, `.boot-title` and the
+  boot subtitle all referenced `var(--font-display)`, and the custom property
+  was never defined in the stylesheet. A `var()` with no definition and no
+  fallback resolves to nothing, so the round name, the result headline and the
+  game's own name on the boot card have all been in the browser default this
+  whole time. `.result-headline` did not even declare a family — it inherited
+  the body sans. What read as a malformed A was Helvetica Neue Black at weight
+  900 carrying a 1.5px text-stroke, whose crossbar filled in under the outline.
+  With the condensed display face applied, the artefact disappears on its own.
+
+  **A model reporting a visual artefact is often reporting a cause.** Nobody
+  in fifteen rounds had read a stylesheet looking for an undefined custom
+  property; one model reported a glyph as broken and that led straight to it.
+
+Rejected this round, with the measurement:
+
+- `score-color-indistinguishable: player scores are the same colour` (mimo) —
+  they are not. Asmongold's score is `var(--text)`, near-white; HasanAbi's is
+  red. The HUD crop shows it plainly.
+- `joystick-size-obstructive` / `control-sticks-occlude-view: bottom 40%` —
+  measured: the pad is 228px on an 844px screen, **27.0%**. Scout's 40% is
+  wrong, and 27% is thumb reach, not obstruction.
+- `fight-button-too-small` / `inconsistent-button-size` — the button is
+  `min-width: 12rem; min-height: 52px`, which is 192x52, comfortably past the
+  44px minimum in both axes.
+- `loading-progress-stuck` / `pre-boot-loading-screen-dark` — the MEASURING
+  state, now on its seventh appearance in the log.
+- `technique-label-overlap` (mimo) — the technique chip moved to 25% of the
+  stage in round 12; the TECHNIQUE label is on the pad. They are ~380px apart.
