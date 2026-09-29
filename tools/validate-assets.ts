@@ -13,12 +13,17 @@
  * No file anywhere under apps/game/public/ may use a forbidden ROM-adjacent
  * extension (.rom, .bin, .zip, .7z).
  */
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, extname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url));
 const PUBLIC_DIR = join(REPO_ROOT, 'apps/game/public');
+const GENERATED_DIR = join(PUBLIC_DIR, 'generated');
+const GENERATED_PROVENANCE = join(GENERATED_DIR, 'PROVENANCE.json');
+const ART_MANIFEST = join(REPO_ROOT, 'tools/art-manifest.tsv');
+const SRC_DIR = join(REPO_ROOT, 'apps/game/src');
+const INDEX_HTML = join(REPO_ROOT, 'apps/game/index.html');
 
 
 const MAX_ASSET_BYTES = 512 * 1024;
@@ -56,6 +61,131 @@ function walk(dir: string): string[] {
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
+}
+
+interface ManifestRow {
+  name: string;
+  maxWidth: number;
+  alpha: boolean;
+  prompt: string;
+}
+
+function parseArtManifest(): ManifestRow[] {
+  let raw: string;
+  try {
+    raw = readFileSync(ART_MANIFEST, 'utf8');
+  } catch (err) {
+    fail(
+      'tools/art-manifest.tsv exists',
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+
+  const rows: ManifestRow[] = [];
+  const seen = new Set<string>();
+
+  raw.split('\n').forEach((line, index) => {
+    // Comments and the column-name header row are both `#`-prefixed so the
+    // scripts and the validator can skip them with one rule.
+    if (line.trim() === '' || line.startsWith('#')) return;
+    const lineNo = index + 1;
+    const cols = line.split('\t');
+    if (cols.length < 4) {
+      fail(
+        `tools/art-manifest.tsv line ${lineNo} has 4 tab-separated columns`,
+        `got ${cols.length}: ${line.slice(0, 80)}`,
+      );
+    }
+    const [name, maxWidth, alpha, ...prompt] = cols;
+    if (!isNonEmptyString(name) || !/^[a-z0-9-]+$/.test(name)) {
+      fail(`tools/art-manifest.tsv line ${lineNo} has a valid name`, `name=${JSON.stringify(name)}`);
+    }
+    if (seen.has(name)) {
+      fail(`tools/art-manifest.tsv has no duplicate name`, `duplicate row for "${name}"`);
+    }
+    seen.add(name);
+    const width = Number(maxWidth);
+    if (!Number.isInteger(width) || width < 1) {
+      fail(`tools/art-manifest.tsv line ${lineNo} has a positive maxWidth`, `maxWidth=${maxWidth}`);
+    }
+    if (alpha !== 'yes' && alpha !== 'no') {
+      fail(`tools/art-manifest.tsv line ${lineNo} alpha is yes|no`, `alpha=${JSON.stringify(alpha)}`);
+    }
+    const promptText = prompt.join('\t');
+    if (!isNonEmptyString(promptText)) {
+      fail(`tools/art-manifest.tsv line ${lineNo} has a prompt`, 'prompt column is empty');
+    }
+    rows.push({ name, maxWidth: width, alpha: alpha === 'yes', prompt: promptText });
+  });
+
+  if (rows.length === 0) {
+    fail('tools/art-manifest.tsv lists at least one asset', 'manifest has no asset rows');
+  }
+  return rows;
+}
+
+/**
+ * Every generated WebP must be named somewhere in the app source. An asset that
+ * ships in public/ but is never requested is a silent ~50 KB (sometimes 200 KB)
+ * of download for a texture nothing draws — the exact orphan this check exists
+ * to keep out. Scoped to apps/game/public/generated/ on purpose: fighters/*.webp
+ * are addressed through computed names, so a literal grep would be all false
+ * positives there.
+ */
+function checkGeneratedArtIsWired(manifestNames: Set<string>): void {
+  const shipped: string[] = [];
+  for (const file of walk(GENERATED_DIR).filter((f) => f.toLowerCase().endsWith('.webp'))) {
+    shipped.push(basename(file));
+  }
+  if (shipped.length === 0) {
+    fail('apps/game/public/generated/ ships at least one .webp', 'no WebP assets found');
+  }
+
+  const sources: string[] = [];
+  try {
+    sources.push(...walk(SRC_DIR));
+    if (existsSync(INDEX_HTML)) sources.push(INDEX_HTML);
+  } catch (err) {
+    fail(
+      'apps/game/src is walkable',
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+  const haystack = sources
+    .filter((file) => /\.(ts|tsx|js|jsx|css|html|json|md)$/i.test(file))
+    .map((file) => readFileSync(file, 'utf8'))
+    .join('\n');
+
+  const orphans = shipped.filter((name) => !haystack.includes(name)).sort();
+  if (orphans.length > 0) {
+    fail(
+      'every apps/game/public/generated/*.webp is referenced from app source',
+      `orphaned (never loaded): ${orphans.join(', ')}`,
+    );
+  }
+  pass(`all ${shipped.length} generated asset(s) are referenced from app source`);
+
+  // The generator scripts and the shipped bundle must describe the same set, so
+  // a row added to the manifest without regenerating (or vice versa) is a build
+  // failure rather than a surprise at art time.
+  const shippedBase = new Set(shipped.map((name) => name.replace(/\.webp$/, '')));
+  for (const name of manifestNames) {
+    if (!shippedBase.has(name)) {
+      fail(
+        'tools/art-manifest.tsv matches the shipped generated assets',
+        `manifest row "${name}" has no apps/game/public/generated/${name}.webp`,
+      );
+    }
+  }
+  for (const name of [...shippedBase].sort()) {
+    if (!manifestNames.has(name)) {
+      fail(
+        'tools/art-manifest.tsv matches the shipped generated assets',
+        `apps/game/public/generated/${name}.webp has no manifest row`,
+      );
+    }
+  }
+  pass(`tools/art-manifest.tsv and the shipped assets agree (${shippedBase.size} asset(s))`);
 }
 
 function main(): void {
@@ -152,6 +282,41 @@ function main(): void {
 
     pass(`${label} (${stat.size} bytes) — provenance OK`);
   }
+
+  // The generated art set gets two extra guarantees on top of provenance: a
+  // single shared manifest that the generator scripts both read, and a wiring
+  // check so nothing ships in public/generated/ without being loaded.
+  const manifest = parseArtManifest();
+  pass(`tools/art-manifest.tsv parses (${manifest.length} row(s))`);
+
+  let generatedProvenance: Record<string, ProvenanceEntry>;
+  try {
+    generatedProvenance = JSON.parse(
+      readFileSync(GENERATED_PROVENANCE, 'utf8'),
+    ) as Record<string, ProvenanceEntry>;
+  } catch (err) {
+    fail(
+      'apps/game/public/generated/PROVENANCE.json is valid JSON',
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+
+  for (const row of manifest) {
+    const key = `generated/${row.name}.webp`;
+    const entry = generatedProvenance[key];
+    if (!entry) {
+      fail(
+        'every manifest row has a generated/PROVENANCE.json entry',
+        `no entry keyed "${key}"`,
+      );
+    }
+    if (entry.approved !== true) {
+      fail(`${key} provenance is approved`, `approved=${JSON.stringify(entry.approved)}`);
+    }
+  }
+  pass(`every manifest row is approved in generated/PROVENANCE.json (${manifest.length} row(s))`);
+
+  checkGeneratedArtIsWired(new Set(manifest.map((row) => row.name)));
 
   console.log('');
   console.log(`assets OK: ${assetFiles.length} asset(s) validated against provenance`);

@@ -8,6 +8,8 @@ import {
   type PerspectiveCamera,
   type Scene,
 } from 'three/webgpu';
+import { loadGenerated } from './artLoader.js';
+
 
 /**
  * Everything that makes a hit feel like a hit. Presentation only: the one
@@ -28,8 +30,24 @@ interface Particle {
   spin: number;
 }
 
+/**
+ * A contact burst or a shockwave: one drawn sprite, no motion of its own beyond
+ * growing and fading, so it is its own shape rather than another particle.
+ */
+interface Burst {
+  mesh: Mesh<PlaneGeometry, MeshBasicMaterial>;
+  life: number;
+  maxLife: number;
+  from: number;
+  to: number;
+  peak: number;
+}
+
 const POOL_SIZE = 64;
 const DUST_POOL = 24;
+/** Enough for a flurry; a full-point hit reuses the oldest rather than waiting. */
+const FLASH_POOL = 4;
+const RING_POOL = 3;
 const SPARK = new Color('#fff1c9');
 const SPARK_HOT = new Color('#ffb347');
 const DUST = new Color('#c9a071');
@@ -42,24 +60,30 @@ export interface Flashable {
 export class Juice {
   private readonly particles: Particle[] = [];
   private readonly dustPool: Particle[] = [];
+  private readonly bursts: Burst[] = [];
+  private readonly rings: Burst[] = [];
   private cursor = 0;
   private dustCursor = 0;
   private readonly pools = [this.particles, this.dustPool];
+  private readonly burstPools = [this.bursts, this.rings];
   private hitstopUntil = 0;
   private slowmoUntil = 0;
   private shake = 0;
   private shakeUntil = 0;
   private punch = 0;
   private punchTargetX = 0;
-  private readonly flashes: Array<{ view: Flashable; until: number; peak: number; start: number }> = [];
+  private readonly fighterFlashes: Array<{ view: Flashable; until: number; peak: number; start: number }> = [];
   private readonly screenFlash: HTMLDivElement;
+  private readonly artBaseUrl: string;
 
   constructor(
     scene: Scene,
     private readonly camera: PerspectiveCamera,
     stageElement: HTMLElement,
     private readonly reducedMotion: () => boolean,
+    baseUrl = import.meta.env.BASE_URL as string,
   ) {
+    this.artBaseUrl = baseUrl;
     const geometry = new PlaneGeometry(1, 1);
     // Two pools with fixed blending. One shared pool meant switching a
     // material's blending on every spark, which forces a shader rebuild on
@@ -80,9 +104,41 @@ export class Juice {
       (dust ? this.dustPool : this.particles).push({ mesh, vx: 0, vy: 0, life: 0, maxLife: 1, gravity: 0, spin: 0 });
     }
 
+    // The two drawn hit sprites. Their maps arrive after the first frame, so a
+    // hit in the opening second still plays — it just lands as an untinted
+    // quad rather than as a painted burst, and never as a missing object.
+    for (let i = 0; i < FLASH_POOL; i += 1) {
+      const mesh = burstMesh(geometry);
+      mesh.renderOrder = 12;
+      scene.add(mesh);
+      this.bursts.push({ mesh, life: 0, maxLife: 1, from: 0.4, to: 1, peak: 1 });
+    }
+    for (let i = 0; i < RING_POOL; i += 1) {
+      const mesh = burstMesh(geometry);
+      mesh.renderOrder = 11;
+      scene.add(mesh);
+      this.rings.push({ mesh, life: 0, maxLife: 1, from: 0.15, to: 1, peak: 1 });
+    }
+
     this.screenFlash = document.createElement('div');
     this.screenFlash.className = 'impact-flash';
     stageElement.appendChild(this.screenFlash);
+
+    void this.dressWithHitArt();
+  }
+
+  /**
+   * Pulls in the painted hit sprites. Independent of everything else here:
+   * neither load is allowed to reject into the caller, and a miss only costs the
+   * hit its art, not the fight.
+   */
+  private async dressWithHitArt(): Promise<void> {
+    const [flash, ring] = await Promise.all([
+      loadGenerated(this.artBaseUrl, 'impact-flash.webp'),
+      loadGenerated(this.artBaseUrl, 'impact-ring.webp'),
+    ]);
+    if (flash !== null) for (const burst of this.bursts) burst.mesh.material.map = flash;
+    if (ring !== null) for (const burst of this.rings) burst.mesh.material.map = ring;
   }
 
   /** How much wall time the simulation should receive this frame. */
@@ -113,13 +169,21 @@ export class Juice {
     const count = kind === 'block' ? 10 : heavy ? 26 : 16;
     for (let i = 0; i < count; i += 1) this.emit(x, y, facing, kind, heavy);
 
+    // The painted burst at the contact point, and — on a full point only — a
+    // shockwave that leaves it. A half point gets sparks and no ring: the ring
+    // is the part of the frame that says the technique scored clean all the way
+    // through, and spending it on waza-ari would mean it means nothing.
+    const flash = kind === 'block' ? 0.55 : heavy ? 1 : 0.78;
+    this.burst(this.bursts, x, y, heavy ? 0.62 : 0.34, heavy ? 1.15 : 0.8, flash);
+    if (heavy) this.burst(this.rings, x, y, 0.25, 2.2, 0.8);
+
     if (!calm) {
       this.shake = kind === 'block' ? 0.04 : heavy ? 0.16 : 0.08;
       this.shakeUntil = nowMs + (heavy ? 260 : 170);
       this.punch = heavy ? 0.14 : kind === 'block' ? 0.03 : 0.07;
       this.punchTargetX = x;
       if (defender?.flash !== undefined && kind !== 'block') {
-        this.flashes.push({ view: defender, start: nowMs, until: nowMs + (heavy ? 140 : 100), peak: heavy ? 1 : 0.7 });
+        this.fighterFlashes.push({ view: defender, start: nowMs, until: nowMs + (heavy ? 140 : 100), peak: heavy ? 1 : 0.7 });
       }
       if (heavy) this.flashScreen(0.5);
     }
@@ -141,6 +205,36 @@ export class Juice {
     // Force a style flush so the animation restarts on back-to-back hits.
     void this.screenFlash.offsetWidth;
     this.screenFlash.classList.add('go');
+  }
+
+  /**
+   * Fires the next free sprite in a pool, growing it from `from` to `to`
+   * metres over its lifetime and fading it out on the way.
+   *
+   * Steals the oldest slot rather than dropping the hit when the pool is busy:
+   * a flurry of techniques must never land one frame with no burst at all, and
+   * a burst that is already three-quarters faded is the one worth losing.
+   *
+   * Life is set in seconds, not on a wall clock, so it decays on exactly the
+   * same `dt` the sparks do — the flash cannot outlive its own contact frame
+   * when the tab is throttled or the frame rate dips.
+   */
+  private burst(pool: Burst[], x: number, y: number, from: number, to: number, peak: number): void {
+    const busy = pool.filter((b) => b.life > 0);
+    const slot = busy.length < pool.length ? busy[0] : pool.reduce((a, b) => (a.life < b.life ? a : b));
+    if (slot === undefined) return;
+    slot.from = from;
+    slot.to = to;
+    slot.peak = peak;
+    // 620ms is long enough for a full-point shockwave to leave the contact
+    // point and thin out; the flash is shorter so it reads as the punch and the
+    // ring reads as what the punch left behind.
+    slot.maxLife = to > 1.5 ? 0.62 : 0.34;
+    slot.life = slot.maxLife;
+    slot.mesh.position.set(x, y, 0.4);
+    slot.mesh.scale.setScalar(from);
+    slot.mesh.material.opacity = peak;
+    slot.mesh.visible = true;
   }
 
   private emit(x: number, y: number, facing: 1 | -1, kind: ImpactKind, heavy: boolean): void {
@@ -199,13 +293,35 @@ export class Juice {
       }
     }
 
-    for (let i = this.flashes.length - 1; i >= 0; i -= 1) {
-      const f = this.flashes[i];
+    for (const pool of this.burstPools) {
+      for (const b of pool) {
+        if (b.life <= 0) continue;
+        b.life -= dt;
+        if (b.life <= 0) {
+          b.life = 0;
+          b.mesh.visible = false;
+          continue;
+        }
+        const t = 1 - b.life / b.maxLife;
+        // Ease-out, so most of the growth happens in the first third of the
+        // life. A linear expansion spends half the burst crawling at a size the
+        // eye has already stopped reading.
+        const grow = 1 - Math.pow(1 - t, 2.2);
+        b.mesh.scale.setScalar(b.from + (b.to - b.from) * grow);
+        // Fades on a curve that holds its brightness early and then drops away
+        // fast, which is what keeps the contact frame from reading as a
+        // half-opacity sticker sitting over the fighters.
+        b.mesh.material.opacity = b.peak * Math.pow(1 - t, 1.7);
+      }
+    }
+
+    for (let i = this.fighterFlashes.length - 1; i >= 0; i -= 1) {
+      const f = this.fighterFlashes[i];
       if (f === undefined) continue;
       const span = f.until - f.start;
       const k = Math.max(0, 1 - (nowMs - f.start) / span);
       f.view.flash?.(f.peak * k);
-      if (k <= 0) this.flashes.splice(i, 1);
+      if (k <= 0) this.fighterFlashes.splice(i, 1);
     }
 
     this.punch *= Math.pow(0.0015, dt);
@@ -235,4 +351,31 @@ export class Juice {
       this.camera.position.y += (Math.random() * 2 - 1) * amp * 0.7;
     }
   }
+}
+
+/**
+ * One drawn hit sprite, hidden until a hit asks for it.
+ *
+ * `map` is left unset and attached when the texture resolves, so the material
+ * is built once, up front, with its blending already decided — attaching a map
+ * later is cheap, but rebuilding a material mid-fight is not. `alphaTest` is
+ * deliberately left at 0: the stage scans for baked cutouts by
+ * `map !== null && alphaTest > 0` in order to tint the fighters to the room
+ * light, and a hit flash is not a cutout standing in the room. It must not be
+ * dragged into that pass, or a hit would repaint the contact frame amber.
+ */
+function burstMesh(geometry: PlaneGeometry): Mesh<PlaneGeometry, MeshBasicMaterial> {
+  const mesh = new Mesh(
+    geometry,
+    new MeshBasicMaterial({
+      color: '#ffffff',
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      blending: AdditiveBlending,
+      toneMapped: true,
+    }),
+  );
+  mesh.visible = false;
+  return mesh;
 }

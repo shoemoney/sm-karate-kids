@@ -112,6 +112,12 @@
      the focus, but the art is visible behind it now. */
   --scrim-soft: rgb(14 9 5 / 0.55);
   --scrim-hard: rgb(10 7 4 / 0.86);
+  /* The flat knock-down between the round card's readability scrim and the
+     painted dojo plate beneath it. Sits at the scrim's own corner value: any
+     lighter and the plate's lit centre survives as a bright bloom right where
+     the headline is set, any heavier and the plate is invisible and the 78 KB
+     it costs is being spent on a gradient. */
+  --plate-dim: rgb(10 7 4 / 0.72);
   --plate: rgb(14 10 6 / 0.78); /* the technique caption's own ground */
   --plate-text: #f0e6d8;
   --plaque-top: rgb(38 27 19 / 0.86); /* desktop floating control plaque */
@@ -1181,6 +1187,12 @@ body.high-contrast {
   --scrim-banner: rgb(0 0 0 / 0.9);
   --scrim-soft: rgb(0 0 0 / 0.9);
   --scrim-hard: rgb(0 0 0 / 0.99);
+  --plate-dim: rgb(0 0 0 / 0.99);
+  /* The painted plate is decoration, and contrast mode is where decoration
+     goes. `none` is a valid background-image layer, so the layer stays in the
+     stack and the two scrims above it keep compositing exactly as they do in
+     the default palette. */
+  --card-plate: none;
   --plate: rgb(0 0 0 / 0.92);
   --plate-text: #ffffff;
   --plaque-top: rgb(0 0 0 / 0.92);
@@ -1373,6 +1385,16 @@ body.left-handed #zone-right {
    RESULT CARD
    `display` toggles because the e2e suite asserts toBeHidden() — never
    animate show/hide with opacity or transform.
+
+   The card is three stacked background layers, top to bottom:
+     1. the readability scrim, the only thing carrying text contrast;
+     2. a flat dim, which is what lets a photograph sit under (1) at all
+        without its lit core punching a hole through the headline;
+     3. the painted dojo plate, set from main.ts off import.meta.env.BASE_URL
+        so it survives a build served from a subdirectory.
+   With no plate (the token falls back to `none`) the card is exactly what it
+   was: a gradient over the live room. Layer 3 only ever ADDS depth — it is
+   the game's own art under its own dim, not a second room over the first.
    ========================================================================== */
 
 .result {
@@ -1386,11 +1408,16 @@ body.left-handed #zone-right {
   gap: var(--space-3);
   padding: var(--space-4);
   text-align: center;
-  background: radial-gradient(
-    ellipse at 50% 45%,
-    var(--scrim-soft),
-    var(--scrim-hard)
-  );
+  background-image: radial-gradient(
+      ellipse at 50% 45%,
+      var(--scrim-soft),
+      var(--scrim-hard)
+    ),
+    linear-gradient(var(--plate-dim), var(--plate-dim)),
+    var(--card-plate, none);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 .result.show {
