@@ -1018,3 +1018,53 @@ matches with an `assert count == 1`, so a miss is loud.
   `portrait-vertical-waste`, `control-legend-clutter` — framing and density, in
   its twentieth iteration. Standing: warm and low, and the pad is 27.0% of an
   844px screen.
+
+### Round 32 — mistral-small-3.2-24b, gemma-3-12b-it — `9486ffa`
+
+The largest single explanation in the loop's history, and it took a real
+finding to surface it.
+
+- `loading-screen-text-contrast` (mistral-small-3.2) and `loading-text-contrast`
+  (gemma-3-12b) — **two parts, and the second is the one that matters.**
+
+  *The design:* the boot card's quiet lines were on `--text-muted` at 3.9:1,
+  below the 4.5:1 floor. They now sit on `--boot-quiet` at a measured 4.94:1.
+  Not `--text` — that is 7.3:1 and made the publisher credit the brightest
+  thing on the card, inverting the hierarchy the boot screen exists to build.
+
+  *The capture:* every screenshot of this card the loop has ever taken was
+  photographed at **0.67 opacity**. A nominally correct colour measured 2.7:1,
+  because 0.67 × rgb(133,127,119) = rgb(89,85,80) — the exact peak pixel the
+  capture reported, to the digit. The true contrast has always been 4.94:1.
+
+  **That is the source of "loading screen empty", "black screen", "low
+  contrast", "no progress" and "too subtle" — twelve providers, fourteen
+  reports, one screenshot taken inside a fade.**
+
+  The reason it stayed hidden: `getComputedStyle(card).opacity` reports 1 the
+  entire time, so polling it fixed nothing. `.boot-card` is
+  `animation: boot-enter ... both`, and `both` is a *backwards* fill — the card
+  holds the from-state of its keyframes, which is where the 0.67 lives. The
+  property reads settled while the pixels are not. The harness now removes the
+  animation for the capture.
+
+  Two dead ends are on the record because they are the interesting part:
+  raising the token from `--text-muted` barely moved the screenshot (2.66:1
+  either way, because the capture was never showing the real colour), and
+  raising the font size from 10px to 12px moved it by exactly nothing — which is
+  what finally proved the attenuation was multiplicative and not typographic.
+  Both were reverted; the token lift was kept because it is independently
+  correct.
+
+  **A measurement taken at the wrong moment is not a weak measurement. It is a
+  measurement of a different thing** — and twelve reviewers agreeing with it is
+  what agreement looks like when everyone is looking at the same picture of the
+  wrong thing.
+- `countdown-timer-visibility` (mistral-small-3.2), `score-display-legibility`
+  (mistral-small-3.2), `move-indicator-clarity` — the round clock, the scores
+  and the move callout, all lifted in rounds 26 and 30.
+- `technique-list-readability` (gemma-3-12b) — the Techniques sheet is
+  full-screen since round 24 and shows all 18 moves with a header per group.
+- `hud-performance-toggle: "clarify the 'Show performance HUD' toggle"**
+  (gemma-3-12b) — worth a look: the name does not say what it does.
+- `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` — 404, no endpoints.
