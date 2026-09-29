@@ -42,8 +42,14 @@ describe('the fighter atlas covers the game', () => {
     expect(missing, `moves with no animation in the atlas: ${missing.join(', ')}`).toEqual([]);
   });
 
-  test('every move folder in the source art is in the atlas', () => {
-    if (!existsSync(ART_DIR)) return; // art is gitignored; CI has no drop to check
+  test('every move folder in the source art is in the atlas', (ctx) => {
+    // assets/ is gitignored incoming art (35 MB), so it is absent in CI. Skip
+    // visibly rather than returning quietly — a test that passes without
+    // checking anything is how a dropped technique goes unnoticed.
+    if (!existsSync(ART_DIR)) {
+      ctx.skip();
+      return;
+    }
     // A folder is a move when it carries its own animation.json. `guard/` holds
     // the two guard portraits and `generated/` the stage plates — neither is a
     // technique, and neither has frames to play.
