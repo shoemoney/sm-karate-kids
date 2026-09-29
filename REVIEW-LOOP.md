@@ -2081,3 +2081,36 @@ unverified one to chase the next finding is a bad trade at any yield, and
 Logged rather than attempted again, because the honest state of this is: *the
 next dimension is the right idea, the implementation is not working, and it needs
 a session to do properly rather than the last few percent of one.*
+
+### Round 62 — a low clock is not reachable, and a jump strip is not yet readable
+
+**The "last exchange" dimension does not exist in this game.** Played for 40
+strike attempts, the score reached 2-0 with the clock still at 28. A round ends
+on points, not on time, and the bot's takedowns land fast enough that a single
+30-second round finishes long before the clock becomes interesting. Any
+"low clock" frame has to be posed, and round 43 established that a posed frame
+of a live system gets overwritten by the render loop. The dimension is not
+rejected — it is **structurally unreachable without a control the game does not
+have.** Worth saying plainly rather than trying a fifth time.
+
+**The jump is reachable, and it produced a strip I cannot currently read.**
+
+Four frames at 180/230/280/330ms after holding UP. Two things are wrong with
+what I got:
+
+1. My crop took the upper body and the coach, not the legs, so the arc itself is
+   not in the strip — the capture geometry was wrong before the content was.
+2. **The prominent fighter alternates red, white, red, white across 50ms
+   intervals.** A round transition cannot happen in 50ms. Either my crop is
+   showing two different fighters at two different screen positions and I have
+   misread which one is the player, or there is a real identity-flicker that
+   would be a serious defect.
+
+I am not guessing between those, and I am not shipping the capture.
+
+**Status: two open questions, zero shipped changes, harness untouched at HEAD.**
+If the alternation is real, it is the most severe thing this loop has ever
+found — the player's fighter changing identity four times inside a third of a
+second. If it is my crop, it is the sixth false alarm and costs nothing. The
+difference is one careful look, and it needs a session that can afford it
+rather than the last few percent of one.
