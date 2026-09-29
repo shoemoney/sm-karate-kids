@@ -334,7 +334,7 @@ async function boot(screen: BootScreen): Promise<void> {
       if (event.type === 'move_start') {
         lastStarted = { player: event.player, moveId: event.moveId, tick: state.tick };
         if (event.player === 0) {
-          hud.showTechnique(moveName(event.moveId));
+          hud.showTechnique(moveName(event.moveId), nowMs);
           // The technique stick has been used. The marks retire once both
           // sticks have been, not on the first technique.
           coach.used('right');
@@ -415,6 +415,7 @@ async function boot(screen: BootScreen): Promise<void> {
   const clearBoutUi = (): void => {
     hud.clearCareer();
     hud.resetScores();
+    hud.clearTechnique();
     hud.hideResult();
   };
 

@@ -52,6 +52,21 @@ export class Hud {
   private readonly technique = el('technique');
   private readonly perf = el('perf-hud');
   private bannerUntil = 0;
+  private techniqueUntil = 0;
+  /**
+   * How long a move name stays up. Long enough to confirm the input registered
+   * and to be read mid-motion, short enough that it is gone well before the
+   * fighter returns to their guard.
+   *
+   * It used to have no expiry at all. `showTechnique` set the text and nothing
+   * ever cleared it, so the last move you threw sat on screen for the rest of
+   * the bout — which reads as a state readout, not a confirmation, and makes
+   * the *next* strike indistinguishable from a stale label. Two reviewers
+   * independently reported the banner being up "while the fighter is still in
+   * the untouched idle stance", which is exactly right: they were seeing a
+   * label left over from a move that had already finished.
+   */
+  private static readonly TECHNIQUE_HOLD_MS = 700;
 
   setNames(a: string, b: string): void {
     this.names[0]!.textContent = a;
@@ -85,6 +100,11 @@ export class Hud {
       this.banner.classList.remove('show');
       this.bannerUntil = 0;
     }
+
+    if (this.techniqueUntil !== 0 && nowMs > this.techniqueUntil) {
+      this.technique.textContent = '';
+      this.techniqueUntil = 0;
+    }
   }
 
   say(text: string, tone: 'full' | 'half' | 'neutral', nowMs: number, holdMs = 1500): void {
@@ -109,6 +129,9 @@ export class Hud {
     Hud.replay(this.banner, 'slam');
     this.bannerUntil = nowMs + 1800;
     this.technique.textContent = `${moveName}${call.counter ? ' · counter' : ''}`;
+    // The call is the louder statement, so the move name holds for as long as
+    // the call itself rather than stealing the move-confirmation's short window.
+    this.techniqueUntil = this.bannerUntil;
   }
 
   /** A new bout starts clean. */
@@ -116,8 +139,15 @@ export class Hud {
     this.lastScores = [0, 0];
   }
 
-  showTechnique(name: string): void {
+  showTechnique(name: string, nowMs: number): void {
     this.technique.textContent = name;
+    this.techniqueUntil = nowMs + Hud.TECHNIQUE_HOLD_MS;
+  }
+
+  /** A new bout starts with no move name left over from the last one. */
+  clearTechnique(): void {
+    this.technique.textContent = '';
+    this.techniqueUntil = 0;
   }
 
   /** Unobtrusive career line shown alongside the match-over banner. */

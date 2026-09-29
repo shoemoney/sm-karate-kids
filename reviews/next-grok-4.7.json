@@ -1,0 +1,47 @@
+{
+  "model": "x-ai/grok-4.7",
+  "elapsed_s": 126.4,
+  "usage": {
+    "prompt_tokens": 13892,
+    "completion_tokens": 8768,
+    "total_tokens": 22660,
+    "cost": 0.078664,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1152,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.078664,
+      "upstream_inference_prompt_cost": 0.026056,
+      "upstream_inference_completions_cost": 0.052608
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7372,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": null,
+  "raw": "[\n  {\n    \"id\": \"strikes-dont-read\",\n    \"title\": \"Named strikes never leave the idle guard or reach the body\",\n    \"what\": \"On the live fight screen the 'LUNGE PUNCH' chip is up while both fighters hold the exact same neutral guard as the idle frame \u2014 no step, no extended fist. On the 'FRONT KICK' frame the white gi's foot stops a full body-width short of HasanAbi, with open tatami between foot and target and no hit or miss mark. On the IPPON frame the red spinning-kick leg passes through Asmongold's chest and the bare foot draws out the far side of his torso while the sparks sit on the near shoulder.\",\n    \"why\": \"The only verb in the game is the strike. If the banner and the body disagree, a thumb input feels dropped, a whiff looks like a hit that didn't register, and the finishing blow looks like a sprite glitch instead of a point.\",\n    \"how\": \"Bind each technique chip to a pose that is already on screen the frame the chip appears: lunge punch drives the rear foot in and extends the fist. If the foot or fist will not reach the target zone, do not play the full extension \u2014 play a short chamber plus a 'TOO FAR' chip. On connect, clip the striking limb at the contact point so the foot never draws through the chest, and keep the sparks on the near side of the body.\",\n  },\n  {\n    \"id\": \"result-callouts-collide\",\n    \"title\": \"IPON and win callouts overlap, and the half-point glyph breaks the score slot\",\n    \"what\": \"Under the IPPON wordmark, 'SPINNING BACK KICK' and 'HASANABI' occupy the same dark pill and draw on top of each other, so the scorer and the technique are illegible. On the win screen 'ROUNDHOUSE KICK' is a clipped ghost line behind the 'BOUTS WON 0 / 1 \u00b7 BEST \u2014' pill. The header score is a red '2' with a small '\u00bd' tucked into its top-right, crashing into the 'HASANABI' label; the same stacked fraction repeats in '0 \u2014 2\u00bd' under the win title. The match clock (27) stays lit in the top bar through the result.\",\n    \"why\": \"This is the payoff frame. A player who just got scored on cannot read who scored, with what, or what the score now is, and the vulgar fraction reads as 21/2 or a broken glyph at phone size.\",\n    \"how\": \"Give the result stack three reserved, non-overlapping lines: outcome, technique, name. Move the bout-record pill below the REMATCH button so it cannot cover the technique. Render half points as 2.5, or as a full pip plus a half pip, inside a fixed-width score slot that ends before the name. Hide the clock and the live HUD while the result card is up.\",\n  },\n  {\n    \"id\": \"moves-sheet-says-right-stick\",\n    \"title\": \"The move list teaches a console right stick the phone does not have\",\n    \"what\": \"The TECHNIQUES sheet headers read 'RIGHT STICK FORWARD' and 'RIGHT STICK BACK' with tiny stick-icon chords, while the pads under the fight are labeled STANCE and TECHNIQUE and the settings copy calls them 'stance and technique sticks'. Nothing on the sheet uses those words, and a left-handed swap is offered in Settings with no matching sheet.\",\n    \"why\": \"Opening MOVES is how a first-session player learns the only input scheme. 'Right stick' does not exist on this screen, so the chords cannot be mapped to the thumb that is actually on the right pad.\",\n    \"how\": \"Retitle the sections 'TECHNIQUE PAD \u00b7 FORWARD' and 'TECHNIQUE PAD \u00b7 BACK', and draw the same four arrows used in the TECHNIQUE legend (reverse / forward / high / low) instead of a gamepad glyph. When Left-handed layout is on, flip the sheet to name the pad that actually fires techniques.\",\n  },\n  {\n    \"id\": \"prefight-sticks-look-live\",\n    \"title\": \"Qualifier and rematch leave both sticks hot, and the countdown looks like a badge\",\n    \"what\": \"On the 'QUALIFIER vs HasanAbi' card the FIGHT button shows a small circled 2 (and later 4) tucked inside the pill like a notification count, with no 'starts in' label. Both STANCE and TECHNIQUE sticks sit directly underneath at full opacity, same center dots as live play. The win screen repeats it: REMATCH with a circled 8, sticks still drawn and undimmed under the KO pose.\",\n    \"why\": \"A phone player thumbs the stick the moment the fighters appear. Dead input feels broken, and the circled numeral does not read as an auto-start, so the round or the rematch begins while they are still reading the flavor line or the KO.\",\n    \"how\": \"While the qualifier or rematch card is up, drop both sticks to about 35% opacity and ignore touches on them. Replace the badge with button text 'FIGHT \u00b7 starts in 2', counting in the label. Pause the countdown while a finger is down on the card so a mis-tap does not eat the round.\",\n  },\n  {\n    \"id\": \"stance-legend-both-say-step\",\n    \"title\": \"Both stance directions are labeled 'step', so distance has no name\",\n    \"what\": \"On the live fight screens the STANCE legend reads '\u25c4 step  \u25b2 jump  \u25ba step  \u25bc crouch' \u2014 the two horizontal directions are the same word. The legend is small gold type in a panel that sits on top of the stick arc, inside the thumb's resting area. TECHNIQUE beside it does distinguish reverse / forward / high / low.\",\n    \"why\": \"Closing distance is the whole read against an opponent the flavor text says waits for your wind-up. If both thumbs directions are 'step', the player cannot tell which way steps in, and the thumb covers the only hint while they hold it.\",\n    \"how\": \"Relabel the legend '\u25c4 back  \u25b2 jump  \u25ba in  \u25bc crouch' so the horizontals are not the same word. Set it at 13px or larger and park it above the stick ring, clear of the nub, not over the arc the thumb hides.\",\n  }\n]"
+}

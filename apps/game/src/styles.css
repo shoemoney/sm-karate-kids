@@ -732,8 +732,18 @@ body.show-perf #backend {
   line-height: var(--leading-tight);
 }
 
-/* The one bright thing on screen: a lamp-lit brass clock face. */
+/* The clock is the only number here that is not a score, but it used to be
+   typeset exactly like one — big, bold, tabular, and sitting between two
+   scores in a single row, so the header read "0 30 0" as three points. A dial
+   frame makes the middle numeral an instrument at a glance without touching
+   the type: the two scores stay bare and flat, and the clock is the only
+   boxed thing in the bar. */
 #timer {
+  min-width: 2.6ch;
+  padding: 0.06em 0.34em 0.1em;
+  border: 1px solid color-mix(in oklab, var(--gold) 34%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--gold) 7%, transparent);
   font-size: var(--text-2xl);
   font-weight: var(--weight-black);
   font-variant-numeric: tabular-nums;

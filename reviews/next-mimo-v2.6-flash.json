@@ -1,0 +1,83 @@
+{
+  "model": "xiaomi/mimo-v2.6-flash",
+  "elapsed_s": 219.9,
+  "usage": {
+    "prompt_tokens": 11547,
+    "completion_tokens": 8788,
+    "total_tokens": 20335,
+    "cost": 0.00407722,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00407722,
+      "upstream_inference_prompt_cost": 0.00161658,
+      "upstream_inference_completions_cost": 0.00246064
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7347,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "attack-banner-idle-pose",
+      "title": "Move-name banners display while the fighter is still in the untouched idle stance",
+      "what": "Fight screens labelled \"LUNGE PUNCH\" (screenshots 4 and 5): the banner sits at top-centre (~y=310) while Asmongold's sprite holds the exact same guard pose seen in the idle captures (screenshots 3 and 10) \u2014 no extended arm, no forward lunge, no weight shift, and Hasan shows no reaction. Only the \"FRONT KICK\" frame (screenshot 14) shows a real limb extension. The banner also floats ~150px above the fighters' heads, disconnected from the action it names.",
+      "why": "The attack animation is the player's only confirmation that a twin-stick input registered. When the technique name appears over a motionless sprite, the player cannot tell whether the move fired, is charging, or was dropped, so they mash the stick and lose the timing-based scoring the game is built on.",
+      "how": "Drive the banner from the animation's active frame range: show it on frame 1 of the attack clip and hide it when the clip returns to idle. If the clip really is that short, hold the extended pose ~200ms and add a small forward translate plus an opponent flinch on connect, so the label and the pose can never disagree."
+    },
+    {
+      "id": "loading-bar-never-fills",
+      "title": "The pre-boot download bar is 100% empty for the entire load",
+      "what": "Loading screen (screenshot 1): \"Downloading the game\" sits above a full-width progress track at ~y=818 that contains no filled segment at all \u2014 it is visible only as a faint 1px outline. There is no percentage, no byte count, no spinner and no other changing element anywhere on the screen.",
+      "why": "This is the literal first 5 seconds of the product on a phone, often over cellular data. A track that never moves reads as \"hung\"; users reload, bounce, or close the tab before the game has ever drawn a frame.",
+      "how": "Fill the existing track with the warm gold as real asset bytes arrive and add a right-aligned percent in the same letterspaced mono type as the subtitle (\"43%\"), with a 120ms shimmer on the filled edge. If byte totals are unavailable, run an eased determinate tick capped at 95% that snaps to 100% when the load callback fires."
+    },
+    {
+      "id": "result-overlay-text-overlap",
+      "title": "Result and IPPON overlays print two text layers on top of each other",
+      "what": "Results screen (screenshot 8): the \"ROUNDHOUSE KICK\" move pill is stacked with ~0px gap under the \"BOUTS WON 0/1 \u00b7 BEST \u2014\" pill and its lower half is covered by it. Same collision on the IPPON frame (screenshot 13): the \"IPPON\" wordmark's baseline lands on the \"SPINNING BACK KICK / HASANABI\" pill so the letters and the pill text interleave, and a yellow strike particle is composited over the IPPON glyphs.",
+      "why": "These are the two highest-emotion moments in the game \u2014 the point that was awarded and the bout win \u2014 and the player cannot read the move that scored because the UI layers are physically overlapping.",
+      "how": "Place title, move label and bout stats in one auto-layout column with a fixed 10px gap and suppress the persistent move banner whenever any result card is mounted; render impact particles below the results UI layer, not above it."
+    },
+    {
+      "id": "portrait-fight-frame-wasted",
+      "title": "Portrait fight view wastes a quarter of the frame on blank wall and blank mat",
+      "what": "Fight view (screenshots 3, 10, 14): between the MOVES/gear row (ends ~y=140) and the shoji screen (~y=320) there is ~180px of featureless dark gradient, and between the fighters' feet (~y=790) and the controls panel (~y=945) there is ~155px of completely empty tatami. The fighters themselves are only ~325px of the 1264px frame (~26% of screen height), centred in a strip smaller than the two information-free bands above and below it.",
+      "why": "On a 390x844 phone held at arm's length, stance, limb extension and hit sparks have to read instantly. Shrinking the fighters to fit chrome bands means a fast exchange plays out in a narrow middle sliver while a quarter of the pixels carry nothing.",
+      "how": "Push the camera in (or crop the render target) so the fighters reach ~40% of frame height and drop their foot line to ~40px above the controls panel; reclaim the 155px mat band by turning the stance/technique legend into a swipe-up drawer, or relocate it into the empty wall area above the shoji screen."
+    },
+    {
+      "id": "scorebar-clock-reads-as-score",
+      "title": "The round clock is styled identically to the scores, so it reads as a third score",
+      "what": "Top score bar on every fight screen: it renders \"ASMONGOLD 0 30 0 HASANABI\" \u2014 the countdown (30 \u2192 29 \u2192 27 across screenshots 2, 13, 8) uses the same size, weight and digit styling as the two scores and is distinguished only by amber colour, with no colon, no label and no ring. On the results screen (screenshot 8) that slot still shows a frozen \"27\" between \"0\" and \"2\u00bd\", so the bar reads 0 / 27 / 2\u00bd while the headline below reads 0 \u2014 2\u00bd.",
+      "why": "The first thing a player parses is \"who is winning and how long is left\". A bare amber numeral sitting in the middle of the scoreline gets read as a score (\"I have 27?\"), and on end-of-bout screens it becomes an unexplained third number sitting next to the real result.",
+      "how": "Wrap the clock in its own small dark pill with a depleting thin amber ring and a colon format (\"0:27\"), and blank that slot on end-of-bout screens so only the two scores remain in the bar."
+    }
+  ],
+  "raw": null
+}
