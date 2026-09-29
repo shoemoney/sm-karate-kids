@@ -401,3 +401,45 @@ modals rule and round 3's hidden knob each looked correct in the place they
 were written and were wrong one context away, and both took eight rounds and a
 fresh pair of eyes to surface. Every round re-captures the whole product, which
 is the only reason either was caught.
+
+### Round 15 — gemma-4-31b-it + gpt-6-luna — `61658d2`
+
+The round that corrected the loop, not the game.
+
+- `settings-checkbox-state` — **rejected by me five times, and I was wrong
+  every time.** The sentence was identical each round: *the capture has all six
+  toggles off, so it cannot show a checked state.* That was true, and it was
+  also a way of never having to look. `accent-color` tints the tick but leaves
+  the box the same value whether it is on or off, so the state really did have
+  to be read from a 3px mark on a near-black sheet. Five independent models saw
+  it. Fixed, and then I did the check I should have done on round one: captured
+  a settings screen with two toggles on. The gold plate is obvious.
+
+  **The lesson is about the rejection, not the fix.** A rejection is supposed to
+  rest on a measurement. Five identical rejections of the same finding, from
+  models that had no way of knowing they were repeating each other, is not a
+  measurement — it is a prior I had stopped re-examining. When a finding
+  recurs, the cheap thing is to dismiss it and the expensive thing is to go and
+  make the capture that settles it.
+- `clear-the-stick-surfaces` / `move-the-move-list-labels-above-the-joysticks` —
+  three rounds said the lesson text should not be on the stick. Accepted. Round
+  9's fix had moved it to the top of the ring, which was a smaller version of the
+  same wrong answer: the problem is the ring, not the position within it.
+  It is one strip now, and the rings keep their knobs and chevrons.
+- **A bug found by the fix, not by the review.** `#pad` is `position: static`, so
+  the new absolute strip resolved against the root and rendered at y=8, behind
+  the scoreboard — in the DOM, correct in every computed style, invisible in the
+  screenshot. A stacking/containing-block bug is invisible to both a review and
+  a type-check, and it only appeared because the change was visual.
+- `show-loading-progress` — the MEASURING state again.
+- `reframe-portrait-combat` — the seventh framing complaint.
+
+### Where the loop is now
+
+Fifteen rounds, seventeen models, **126 vision models still unasked**. The
+queue was extended past the flagship shortlist into the long tail.
+
+The yield curve has flattened to near zero on repeated screens and the accepted
+work is now concentrated in a handful of surfaces. What keeps producing: a
+finding that recurs across independent models, and a change that is visual
+enough to have a containing-block bug nobody can see.
