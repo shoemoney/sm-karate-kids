@@ -123,15 +123,27 @@ export class Hud {
     const who = document.createElement('span');
     who.className = 'call-name';
     who.textContent = scorerName;
-    this.banner.replaceChildren(word, who);
+    // The move that scored goes INSIDE the stamp. It used to be written to the
+    // separate technique pill, which sits at 25% of the stage while this stamp
+    // spans 18%–31% — the pill landed entirely inside the stamp, 25px of
+    // overlap, with two competing plates over the fighters' heads. Three
+    // unrelated reviewers reported the IPPON callout as unreadable and
+    // colliding with the move name, and all three were right.
+    //
+    // A scored point is one statement, so it is now one element. The pill is
+    // the mid-move confirmation; the stamp is the payoff, and it keeps its
+    // own copy of the move name rather than borrowing the pill's.
+    const how = document.createElement('span');
+    how.className = 'call-move';
+    how.textContent = moveName;
+    this.banner.replaceChildren(word, who, how);
     this.banner.dataset['tone'] = call.value;
     this.banner.classList.add('show');
     Hud.replay(this.banner, 'slam');
     this.bannerUntil = nowMs + 1800;
-    this.technique.textContent = `${moveName}${call.counter ? ' · counter' : ''}`;
-    // The call is the louder statement, so the move name holds for as long as
-    // the call itself rather than stealing the move-confirmation's short window.
-    this.techniqueUntil = this.bannerUntil;
+    // Clear the mid-move pill outright: the stamp now carries the move name,
+    // and leaving the pill up put two plates in the same band of screen.
+    this.clearTechnique();
   }
 
   /** A new bout starts clean. */

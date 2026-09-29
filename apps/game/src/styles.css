@@ -869,6 +869,19 @@ body.show-perf #backend {
   opacity: 0.88;
 }
 
+/* Third line of a scored point: which move did it. Quieter than the call,
+   quieter than the name — it is the receipt, not the announcement. */
+.banner .call-move {
+  margin-top: var(--space-1);
+  padding-top: var(--space-1);
+  border-top: 1px solid color-mix(in oklab, var(--text) 16%, transparent);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
 /* The dojo's edges fall into shadow so the fighters own the frame. */
 #stage::after {
   content: "";
@@ -1344,7 +1357,21 @@ body:has(.result[data-phase='result'].show) .stick-zone {
    rounds said so, and they were right. */
 .coach-strip {
   position: absolute;
-  inset-block-start: var(--space-2);
+  /* Lifted clear OUT of the pad, over the dojo's lower edge.
+     It used to sit inside the pad at inset-block-start: var(--space-2), and
+     the pad is 228px tall holding 170px rings — the strip's bottom 50px lay
+     across the rings' top 50px, and the up chevron at y=650 was underneath it.
+     That chevron is the affordance the strip exists to teach, and the strip was
+     covering it. Three rounds running (qwen3.8-27b, seed-2-1-turbo,
+     claude-sonnet-5.5) reported the strip obscuring the sticks and were right
+     about the part that matters.
+
+     The rings cannot move — the pad has 29px of slack top and bottom and the
+     strip is 59px, so clearing it pushes the ring 10px off the pad's bottom
+     edge. Stepping them down was tried and clipped them. So the strip leaves
+     instead, and sits directly above the controls it describes, over the mat. */
+  inset-block-start: auto;
+  inset-block-end: calc(100% - var(--space-3));
   inset-inline: var(--space-3);
   z-index: 3;
   display: grid;

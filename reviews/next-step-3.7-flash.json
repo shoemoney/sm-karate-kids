@@ -1,0 +1,83 @@
+{
+  "model": "stepfun/step-3.7-flash",
+  "elapsed_s": 41.8,
+  "usage": {
+    "prompt_tokens": 7024,
+    "completion_tokens": 4702,
+    "total_tokens": 11726,
+    "cost": 0.0068121,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0068121,
+      "upstream_inference_prompt_cost": 0.0014048,
+      "upstream_inference_completions_cost": 0.0054073
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-bar-visibility",
+      "title": "Invisible loading progress bar",
+      "what": "In screenshot 1, the download progress bar is an extremely thin, low-contrast line against the dark background, making progress nearly impossible to discern.",
+      "why": "Players cannot gauge download progress, leading to frustration or belief that the app is frozen during the critical first impression.",
+      "how": "Increase the progress bar height to at least 4px, add a bright accent color matching the gold HUD, and ensure it has sufficient contrast against the dark background."
+    },
+    {
+      "id": "fighter-ground-clipping",
+      "title": "Fighter feet clipping through tatami floor",
+      "what": "In screenshots 2, 3, 12, and 13, the fighters' feet appear to sink into or hover slightly above the tatami mat without proper contact shadows or ground intersection.",
+      "why": "Breaks the photorealistic promise and immersion, making the 3D space feel physically incorrect during the core gameplay loop.",
+      "how": "Adjust the Y-position of the fighter rigs to ensure proper ground contact, add dynamic contact shadows beneath the feet, and verify the tatami collision geometry matches the visual floor plane."
+    },
+    {
+      "id": "ippon-text-obscuration",
+      "title": "Oversized IPPON text obscuring fighters",
+      "what": "In screenshot 10, the IPPON announcement text is oversized and positioned across the upper torsos of both fighters during the knockout moment, obscuring the visual payoff of the Spinning Back Kick.",
+      "why": "Players miss the climactic visual of the finishing move because the UI covers the action at the most exciting moment.",
+      "how": "Reduce the font size of the IPPON text by 40%, move it to the top HUD area above the fighters, or make it translucent so the fighters remain visible behind it."
+    },
+    {
+      "id": "settings-touch-targets",
+      "title": "Undersized settings checkboxes",
+      "what": "In screenshot 6, the settings menu checkboxes and their associated text labels are visually small, appearing below the 44x44pt minimum touch target size for mobile interfaces.",
+      "why": "Players struggle to toggle settings like Reduced motion or High contrast, leading to frustration and potential missed accessibility options.",
+      "how": "Increase checkbox size to at least 24x24px with 44x44pt hit areas, increase font size to 16pt minimum, and add more vertical padding between list items."
+    },
+    {
+      "id": "move-name-positioning",
+      "title": "Move names floating over combat area",
+      "what": "In screenshots 4 and 11, move names like LUNGE PUNCH and FRONT KICK appear as centered text overlays that float between the fighters during execution, cluttering the combat view.",
+      "why": "The text obstructs the view of the technique animation and breaks immersion during active gameplay.",
+      "how": "Move move-name displays to the top HUD area near the timer, reduce opacity to 70%, or display them as subtle labels near the executing fighter's feet rather than centered on screen."
+    }
+  ],
+  "raw": null
+}

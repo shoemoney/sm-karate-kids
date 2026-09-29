@@ -1,0 +1,83 @@
+{
+  "model": "openai/gpt-6-sol",
+  "elapsed_s": 38.0,
+  "usage": {
+    "prompt_tokens": 14412,
+    "completion_tokens": 1632,
+    "total_tokens": 16044,
+    "cost": 0.0523485,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 14409,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0523485,
+      "upstream_inference_prompt_cost": 0.0360285,
+      "upstream_inference_completions_cost": 0.01632
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 979,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "first-bout-ends-before-learning",
+      "title": "Give new players time to make their first move",
+      "what": "The first bout shows HasanAbi scoring an IPPON at 29 seconds and a 2\u00bd\u20130 win at 27 seconds. The result screen arrives roughly three seconds after the 30-second start.",
+      "why": "A touch player can lose before they have worked out either stick, making the first match feel unwinnable.",
+      "how": "Make the opening bout a short guided exchange: pause the clock until the player performs a stance move and a technique, then allow the opponent to score."
+    },
+    {
+      "id": "teach-sticks-before-fight",
+      "title": "Show one executable move before the FIGHT button",
+      "what": "The qualifier intro shows the opponent\u2019s description and a large FIGHT button, but no control instruction. The small STANCE and TECHNIQUE direction key appears only on the live fight screen, above the sticks.",
+      "why": "Players must learn two unfamiliar controls while the 30-second clock is already running.",
+      "how": "Add a two-step prompt to the intro: move the left stick to step, then push the right stick forward for Lunge Punch. Let the player try both before enabling FIGHT."
+    },
+    {
+      "id": "joystick-direction-contrast",
+      "title": "Make stick directions readable under thumbs",
+      "what": "On the portrait fight screen, the small gray arrows around both bottom joysticks nearly disappear against their dark brown rings, especially the left and right arrows.",
+      "why": "The arrows are the only persistent directional cues once the instruction key is gone, and fingers will cover part of each stick.",
+      "how": "Increase arrow size and contrast on the controls\u2014not the dojo\u2014and highlight the selected direction with the existing gold or blue accent."
+    },
+    {
+      "id": "ippon-overlay-collision",
+      "title": "Separate the point callout from the move name",
+      "what": "In the IPPON screenshot, the SPINNING BACK KICK pill crosses the lower part of the large IPPON lettering, while HASANABI sits immediately beneath it.",
+      "why": "The most important scoring moment becomes harder to read at a glance.",
+      "how": "Give the scoring callout its own reserved area; move the technique pill below the callout or delay it until the IPPON animation has cleared."
+    },
+    {
+      "id": "loading-progress-visibility",
+      "title": "Make loading progress visibly progress",
+      "what": "On the pre-boot screen, \u201cDownloading the game\u201d sits above a very thin, low-contrast bar that appears unfilled in the screenshot.",
+      "why": "On a phone, players cannot tell whether the download is advancing or stalled.",
+      "how": "Keep the dark branded screen, but thicken the track, give its fill a distinct warm-gold color, and show a percentage or downloaded amount beside the status."
+    }
+  ],
+  "raw": null
+}

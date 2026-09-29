@@ -1,0 +1,83 @@
+{
+  "model": "anthropic/claude-sonnet-5.5",
+  "elapsed_s": 23.6,
+  "usage": {
+    "prompt_tokens": 16200,
+    "completion_tokens": 2128,
+    "total_tokens": 18328,
+    "cost": 0.05368,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.05368,
+      "upstream_inference_prompt_cost": 0.0324,
+      "upstream_inference_completions_cost": 0.02128
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "hint-panel-covers-sticks",
+      "title": "Control-legend card sits on top of the joysticks' upward zone",
+      "what": "In the in-fight screens (Lunge Punch, Front Kick, IPPON), the STANCE/TECHNIQUE legend card (y\u2248950\u20131035) overlaps the top of both stick rings. The up-arrow chevrons and the top arc of each ring are hidden, and only the bottom chevron shows. In the Lunge Punch shot the active technique knob, pushed up and right, is clipped by the card's lower edge. The card also stays up during live play.",
+      "why": "The card hides the part of the stick where thumbs push for jump, high and low techniques. It also breaks the read of the stick's travel range, so players can't see how far they've deflected. Fixed instructional text on a phone HUD becomes clutter after the first bout and competes with the controls.",
+      "how": "Show the legend only in the pre-fight overlay or the first bout, then fade it out after about 3 seconds or on first touch. Otherwise move it above the sticks, into the empty tatami band at y\u2248880\u2013930, or drop it in favor of the MOVES sheet. Keep both full rings visible with all four chevrons."
+    },
+    {
+      "id": "ippon-banner-collision",
+      "title": "IPPON callout overlaps the technique-name pill and is unreadable",
+      "what": "In the IPPON screenshot, the big 'IPPON' text at y\u2248250\u2013310 sits directly on the dark 'SPINNING BACK KICK / HASANABI' pill at y\u2248300\u2013340. The small technique name is struck through by the bottom of the IPPON glyphs, and 'HASANABI' is cramped underneath. The yellow hit-spark shards cover the defender's face.",
+      "why": "The scoring moment is the payoff of the game, and it looks like a rendering bug. The player can't read who scored or with what, and can't learn which move worked. The overlapping elements make the feedback feel cheap.",
+      "how": "Stack the callout: IPPON at the top, then the technique pill about 16px below it with its own clear row, or delay the technique pill by about 300ms. Move the sparks to the impact point on the body or torso rather than the face. Add a brief hit-stop and screen punch on the scoring frame."
+    },
+    {
+      "id": "fighters-small-empty-mat",
+      "title": "Fighters are small in the frame, with dead space above and below",
+      "what": "In the portrait fight view, the fighters take up about 300px of a ~850px scene. Roughly 400px above them (y\u224885\u2013470) is dark, blurry ceiling and haze with only two faint particles. Below them is about 150px of empty tatami before the HUD. The landscape shot shows the same: two small figures in the middle of a wide letterboxed stage, with the lower half of the screen black.",
+      "why": "The fight is the game, but the fighters are small on a phone. Facial expression, hands and kick timing are hard to read, and the frame feels like a stage seen from far away. Most of the scene's pixels carry no gameplay information.",
+      "how": "Tighten the portrait camera: lower the FOV or dolly in about 25\u201330% and shift the framing so the fighters' feet sit at about 62% of the scene height. Keep the windows and banners in the upper third for atmosphere. In landscape, fill the scene to the full viewport and put the sticks over the mat instead of in a black band."
+    },
+    {
+      "id": "pre-fight-overlay-crowding",
+      "title": "Pre-fight title card stacks text over the scene and the character read is muddy",
+      "what": "On the QUALIFIER screen, five text layers (round pill, QUALIFIER, 'vs HasanAbi', hint bar, FIGHT button) are stacked in the top half. The hint bar 'PATIENT. HE WAITS FOR YOUR WIND-UP \u2014 THEN MAKES YOU PAY.' is in small, letterspaced, low-contrast tan on a dark pill, and it cuts across the window row. The fighters are dimmed and the FIGHT button sits right over their feet and the mat. The 'ROUND 1/5' pill is tiny cyan text that competes with the scoreboard.",
+      "why": "The tactical hint is the most useful part of the screen and the hardest to read. The timer badge on FIGHT (2 \u2192 4) is unexplained, so it's unclear whether it is an auto-start countdown. The stacked centered text reads as a template rather than a matchup intro.",
+      "how": "Raise the hint text to 15\u201316px with normal tracking and higher contrast, and drop the all-caps. Merge the round pill and QUALIFIER into a single header line. Label the countdown ('Starting in 2') or drop it. Add a subtle vignette behind the text instead of separate pills, and keep the fighters undimmed."
+    },
+    {
+      "id": "small-hud-text-touch-targets",
+      "title": "Peripheral HUD text and buttons are too small and low-contrast for a phone",
+      "what": "The player names ASMONGOLD and HASANABI in the scoreboard are about 11px, letterspaced, in dim grey and salmon. The MOVES and gear buttons at the top right (~108\u00d762 and ~64\u00d762) sit in the dead sky area, away from the thumbs, in near-black with faint borders. The 'STANCE' and 'TECHNIQUE' labels under the sticks are dim grey ~13px. The legend card's arrow text, such as '\u25c0 step \u25b2 jump', is about 12px. The Settings checkboxes are dark grey boxes with almost no visible checked state, and the options are unlabeled beyond a bare label.",
+      "why": "On a 390px-wide phone screen these fall below comfortable reading size, especially outdoors. Low-contrast dark-on-dark buttons are hard to find, and a player might not realize MOVES exists until they are losing. The checked state on the settings toggles is likely unclear.",
+      "how": "Raise the names and labels to at least 13\u201314px with higher-contrast cream (#E8D9B8 or lighter). Give MOVES a gold outline or icon so it reads as a button. Replace the checkboxes with clear toggle switches that have a gold on-state. Keep every tap target at or above 44px."
+    }
+  ],
+  "raw": null
+}

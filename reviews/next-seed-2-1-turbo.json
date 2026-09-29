@@ -1,0 +1,83 @@
+{
+  "model": "bytedance-seed/seed-2-1-turbo",
+  "elapsed_s": 156.6,
+  "usage": {
+    "prompt_tokens": 19587,
+    "completion_tokens": 9229,
+    "total_tokens": 28816,
+    "cost": 0.032866,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.032866,
+      "upstream_inference_prompt_cost": 0.0097935,
+      "upstream_inference_completions_cost": 0.0230725
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 8129,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-screen-empty-progress-bar",
+      "title": "Loading screen progress bar has no visible fill to show download progress",
+      "what": "On the pre-boot loading screen (first screenshot), the horizontal progress bar below the 'Downloading the game' text is a uniform dark brown with no filled segment, percentage label, or animation indicating how much of the download has completed.",
+      "why": "This is the first screen players see; if the download takes more than 2-3 seconds, players will assume the game is frozen and exit, losing them before they ever reach gameplay.",
+      "how": "Add a gold filled segment to the progress bar that advances as the download completes, include a percentage label inside the bar, and add a subtle pulsing animation to the fill to confirm the game is actively loading."
+    },
+    {
+      "id": "fighter-framing-wastes-vertical-space",
+      "title": "Fighters are positioned too low, wasting portrait screen space on empty tatami",
+      "what": "In all portrait gameplay screens, fighters' feet sit at roughly 60% of the total screen height from the top, leaving ~20% of the total screen height as empty tatami mat below them, and ~30% of the total screen height as empty dojo wall/ceiling above their heads (between the top HUD and fighter heads).",
+      "why": "On a small portrait phone screen, this makes fighters smaller than necessary, making it harder to read opponent attack tells and animations \u2014 the core feedback loop of a fighting game. It wastes limited screen real estate that should prioritize action visibility.",
+      "how": "Adjust the camera position or floor height so fighters occupy ~70% of the play area height, with their heads ~15% below the top HUD and only ~10% of the play area as empty mat below their feet, cropping upper empty dojo space to make fighters larger and easier to read."
+    },
+    {
+      "id": "control-legend-overlaps-joysticks",
+      "title": "In-game control legend obscures the top of both joysticks",
+      "what": "When the STANCE/TECHNIQUE control legend panel is visible (e.g. third screenshot), its bottom edge overlaps the top 15-20% of both joystick circles, completely obscuring the upward-pointing chevron indicator at the top of each stick.",
+      "why": "The up direction is used for jumps and high attacks, a core input. Hiding its indicator removes visual feedback for that input, making controls feel less responsive and cramped for new players who rely on the legend to learn inputs.",
+      "how": "Reduce the legend panel height by 20% with tighter line spacing and slightly smaller text, then shift the panel up 25px so it sits fully above the joysticks with 10px of padding between the panel bottom and the top of the stick circles."
+    },
+    {
+      "id": "fight-button-countdown-unclear-affordance",
+      "title": "Pre-fight FIGHT/REMATCH button countdown has no tap-to-skip hint",
+      "what": "On the pre-fight qualifier screen and post-fight results screen, the large gold action button has a small circular badge with a number (e.g. '2', '8') next to the button text, with no accompanying text or visual cue explaining the number is a countdown, or that tapping the button skips the wait.",
+      "why": "Players don't know if they have to wait for the countdown to finish or if they can start immediately. This creates unnecessary friction between rounds, and impatient players may tap repeatedly or disengage if they don't understand the interaction.",
+      "how": "Add a small 'Tap to skip' label below the button (or inside the countdown badge) to make the interaction explicit, and add a subtle pulsing animation to the button to signal it is tappable while the countdown runs."
+    },
+    {
+      "id": "move-list-input-icons-too-small",
+      "title": "Techniques menu input icons are too small for quick reading on phones",
+      "what": "On the Techniques moves menu (sixth screenshot), each move entry has two ~18px diameter circular icons with small arrows representing left and right stick inputs, positioned to the left of the move name. At this size, arrow directions are hard to distinguish at a glance on a 390px-wide portrait phone.",
+      "why": "Players open this menu mid-fight to reference move inputs, and tiny, hard-to-read icons force them to take their attention off the fight for longer to understand controls, making the move list less useful and increasing the chance they get hit while looking up moves.",
+      "how": "Scale the input icons up by 80% (to ~32px wide), use thicker arrow strokes to make directions clearer, and add 10px of horizontal padding between the icons and the move name to improve at-a-glance readability."
+    }
+  ],
+  "raw": null
+}
