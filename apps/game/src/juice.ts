@@ -327,7 +327,18 @@ export class Juice {
     if (kind === 'sweep') {
       material.color.copy(DUST);
       p.vx = facing * Math.cos(angle) * speed;
-      p.vy = Math.abs(Math.sin(angle)) * speed * 0.7 + 0.4;
+      // Round 93 measured the burst on `11-phone-impact`: sparks ran from above
+      // Asmongold's head down to his belt, a column the height of his whole
+      // torso, while the contact — round 80's fix — is at the chest. The cause
+      // is arithmetic. Speed peaks at 2.6 * 1.4 * 1.35 = 4.9 u/s, and the old
+      // 0.7 factor plus a 0.4 floor let `vy` reach ~3.8; against gravity 3.2 a
+      // particle rises v^2/2g = 2.26 world units, and the fighters are 1.7 tall.
+      // So the throw carried a spark clean over the defender's head every time.
+      //
+      // A hit throws material away from the contact, not upward. Horizontal
+      // spread is `vx` and is untouched; this only brings the vertical back to
+      // a rise of about a quarter of a fighter's height, which is a burst.
+      p.vy = Math.abs(Math.sin(angle)) * speed * 0.3 + 0.15;
       p.gravity = 3.2;
       p.maxLife = 0.55 + Math.random() * 0.35;
       p.mesh.scale.setScalar(0.07 + Math.random() * 0.09);

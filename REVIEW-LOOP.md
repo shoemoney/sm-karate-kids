@@ -3776,3 +3776,56 @@ neck/shoulder line, and the burst spans the whole torso and head. Round 80 fixed
 where the burst *centres*; this is about how far it *spreads*, which is a
 different number in `juice.emit` and has never been measured. Queued, open, and
 the next thing to look at.
+
+### Round 93 — the burst was throwing sparks over the defender's head, and it was arithmetic
+
+`displaced-impact-streak`, queued last round from the standing reviewer:
+*"white particles extend from above Asmongold's head to his belt, while HasanAbi's
+kicking foot meets his neck and shoulder."*
+
+Confirmed at 780px — sparks above the head, on the jaw, the chest, the belt and
+the thigh, a column the height of the whole torso, while the contact (round 80's
+fix) is at the chest. **Two elements in one frame disagreeing**, which is the
+class of finding round 80 said this set could only just produce.
+
+**The cause was not a tuning value someone eyeballed, it was a product.**
+
+    speed   = 2.6 * (0.4 + random) * 1.35      -> peaks at 4.9 u/s
+    vy      = |sin(angle)| * speed * 0.7 + 0.4 -> peaks at ~3.8 u/s
+    gravity = 3.2
+    peak rise = v^2 / 2g = 3.8^2 / 6.4 = 2.26 world units
+
+**The fighters are 1.7 units tall.** So every heavy strike threw a spark clean
+over the defender's head — not a stylistic choice, a consequence of three numbers
+multiplied together, none of which anyone had ever looked at in isolation.
+
+    vy = |sin(angle)| * speed * 0.3 + 0.15      -> peaks at ~1.6 u/s
+    peak rise = 1.6^2 / 6.4 = 0.41 world units
+
+A quarter of a fighter's height. Horizontal spread is `vx` and is untouched,
+because a hit throws material away from the contact, not upward.
+
+**Partially resolved, and worth saying so.** Re-captured and compared: the
+column is materially tighter and most of the spray now sits at the shoulder and
+upper chest, which is the contact. A few flecks still clear the head, because
+the pool is captured mid-flight and the longest-lived particles have the most
+time to travel. This is a real improvement in the right direction and it is not
+finished; the remaining spread is a lifetime question, not a velocity one, and
+lifetime is the next thing to measure if anyone wants to close it.
+
+Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Two rounds, two things the impact stack got wrong, one pattern
+
+Round 76 — the sparks read as brown sticks and the ghost as a second fighter.
+Round 93 — the sparks travel further than the fighter is tall.
+
+**Both are the same system, and both were invisible to me because in both cases
+the effect was *plausible*.** Sticks look like things effects throw; a spray
+looks like an impact. Neither is obviously wrong until you measure it against
+something in the same frame — the fighter's height, or the contact point — and
+this set has only recently been able to show a reviewer both at once.
+
+Round 80 fixed where the burst *fires*. Rounds 76 and 93 were about how it
+*looks* and how far it *goes*, and neither was in the review set's gift until the
+strike, the impact and the body were in one shot.
