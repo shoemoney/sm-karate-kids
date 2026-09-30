@@ -1830,7 +1830,21 @@ input:focus-visible,
   flex: 1 1 auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: var(--space-3) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
+  /* The bottom padding must clear `#tech-ref::after`, which is a 3rem overlay
+     sitting ON TOP of the scrolling content at z-index 2. It is a scroll
+     affordance — "there is more below" — and it was doing its job by hiding
+     whatever was under it, which is not an affordance, it is a spoiler. Round
+     114 added a line of notation above the rows, which pushed the last one
+     down into the fade, and `openai/gpt-6.1-sol` (via codex) photographed
+     "Back Kick" at roughly a fifth of its own contrast while the row above it
+     was fully legible.
+
+     The fix is the standard one and it is the only correct one: the scroll
+     area gets enough bottom padding that the last row can always be scrolled
+     out from under the overlay. Shrinking the fade would hide the affordance;
+     making it lighter would just move the problem up a few pixels. */
+  padding: var(--space-3) var(--space-4)
+    calc(3rem + var(--space-4) + env(safe-area-inset-bottom));
 }
 
 /* The settings sheet is full-screen since round 24 — that was for the

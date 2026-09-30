@@ -4952,3 +4952,50 @@ what a first-run player needs to see and it deserves a playtest of its own rathe
 than being bundled into a round about the sheet's layout.
 
 Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 115 — a regression from my own one-line fix, and the honest state of it
+
+`technique-row-obscured`: *"the bottom fade darkens the visible Back Kick row
+while the preceding technique rows remain clearly readable."*
+
+**Round 114's one line caused it.** The notation reminder pushed the content down
+by a line, and the last row landed under `#tech-ref::after` — a 3rem overlay at
+`z-index: 2` sitting **on top of** the scrolling content. In the frame, Back Kick
+renders at roughly a fifth of its own contrast while the row above it is fully
+legible.
+
+**The mechanism is a category error in the affordance.** The fade exists to say
+"there is more below," and it was doing that by hiding whatever was under it.
+That is not an affordance, it is a spoiler: it works by making the content
+unreadable, so the moment it is slightly too tall — which is what one line of
+prose did — it eats a row instead of hinting at one.
+
+**The fix is the standard one, and it is the only correct one:**
+
+    .sheet-body padding-block-end:
+      calc(3rem + var(--space-4) + env(safe-area-inset-bottom))
+
+The scroll area gets enough bottom padding that the last row can always be
+scrolled clear of the overlay. Shrinking the fade would remove the affordance;
+lightening it would just move the problem up a few pixels and eat a *different*
+row later. Only padding makes the last row reachable.
+
+**And the honest state of the fix, which I have not verified and will not claim:
+the capture is taken at rest, and at rest the last row is still under the fade.**
+That is correct scroll behaviour — a partially visible, dimmed final row *is* the
+affordance working — and it is exactly what the reviewer photographed. What has
+changed is that the row can now be **scrolled clear of the fade**, and I have not
+demonstrated that in a browser, only written the CSS and passed the gates.
+
+So the finding is **mitigated and not confirmed closed**, and the difference
+matters: closing it needs a scrolled-to-bottom frame with a pixel measurement on
+the last row, which is the same instrument that settled the impact anchor in
+round 98 and that this round does not have budget for. It is queued with its
+check named, rather than written up as done.
+
+**`duplicate-control-headings` is the coach duplication, still deferred** — the
+round-113 narrowing stands (the *upper* pair is the redundant half now that the
+sheet carries a real key), and it is a judgement about what a first-run player
+needs rather than a defect.
+
+Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.

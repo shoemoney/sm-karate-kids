@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-30T00:37:58",
+ "reviewed_at": "2026-09-30T00:46:48",
  "items": [
   {
-   "title": "unlabeled-command-columns",
-   "claim": "In Image #6, move recipes contain two symbol circles separated by a plus sign, but the recipe columns themselves are not labeled Stance and Technique.",
-   "reason": "Players must connect each recipe back to the separate legend to identify which stick supplies each input.",
-   "suggest": "Add a Stance + Technique column header directly above the move recipes, aligned with their respective symbols."
+   "title": "technique-row-obscured",
+   "claim": "In Image #6, the bottom fade darkens the visible Back Kick row while the preceding technique rows remain clearly readable.",
+   "reason": "The presentation obscures information the player is trying to learn.",
+   "suggest": "Remove the gradient over the technique text and place a separate 'Scroll for more techniques' cue outside the scrolling list."
   },
   {
-   "title": "duplicate-stick-headings",
-   "claim": "In Image #3, Stance and Technique each appear twice: above the directional instructions and below their respective sticks.",
-   "reason": "Repeated headings add visual clutter without teaching an additional action.",
-   "suggest": "Keep the labels beneath the sticks and remove the duplicate headings from the instruction panel, retaining its directional explanations."
+   "title": "duplicate-control-headings",
+   "claim": "In Image #3, both 'STANCE' and 'TECHNIQUE' appear twice: above the directional instructions and beneath their respective sticks.",
+   "reason": "Repeated headings consume space without adding guidance.",
+   "suggest": "Consolidate each stick's name and directional instructions into one legend, preserving readable text sizes."
   },
   {
-   "title": "result-pose-disconnect",
-   "claim": "Image #18 announces Asmongold wins while Asmongold is shown in a kick pose and HasanAbi remains upright in guard.",
-   "reason": "The character poses do not reinforce the outcome announced by the text.",
-   "suggest": "Use distinct victory and defeat poses for the result display rather than retaining combat poses."
+   "title": "player-side-unidentified",
+   "claim": "In Image #3, the HUD names Asmongold and HasanAbi but does not visibly identify which fighter the player controls.",
+   "reason": "A first-time player must connect the controls to a fighter without an explicit assignment.",
+   "suggest": "Add a persistent 'You' label to the player-controlled fighter's nameplate."
   },
   {
-   "title": "text-size-unverified",
-   "claim": "The point-value labels in Image #6 are visible, but this raster does not establish whether their rendered font sizes meet the required 18 CSS-pixel minimum.",
-   "reason": "Players need readable scoring information when choosing techniques, and an unsupported size estimate could prompt the wrong fix.",
-   "suggest": "Measure computed font sizes and effective scaling in the running panel at 390\u00d7844; enlarge and reflow any labels below 18 CSS pixels rather than shrinking surrounding content."
+   "title": "countdown-without-opt-out",
+   "claim": "In Image #18, the result screen displays 'REMATCH' and 'STARTING IN 8' without a visible control to decline that advertised countdown.",
+   "reason": "A player who wants to study the result cannot see how to remain on that screen.",
+   "suggest": "Add a 'Stay on results' button that cancels the countdown, alongside the existing rematch action."
   },
   {
-   "title": "boot-progress-unverified",
-   "claim": "Image #1 shows Downloading the game above a progress track with no distinguishable filled segment, but one still cannot establish whether progress advances.",
-   "reason": "Players need truthful loading feedback; treating an initial capture as a stall could lead to misleading artificial progress.",
-   "suggest": "Leave the loader unchanged until a throttled-network recording and timestamped completed-work counters establish its behavior; fix only a demonstrated disagreement between those counters and the displayed fill."
+   "title": "round-clock-meaning-unverified",
+   "claim": "Image #18 shows 29s on the HUD and 'FASTEST ROUND 6.4S' in the result summary, but the still cannot establish whether these readouts use the same clock.",
+   "reason": "The player cannot tell whether round duration includes introductions, referee calls, or other pauses; this is not evidence that either value is incorrect.",
+   "suggest": "Compare timestamped bout boundaries, simulation ticks, and referee pauses, then label the record explicitly as 'Active fight time' or 'Total round time' according to the verified calculation."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"unlabeled-command-columns\",\n    \"claim\": \"In Image #6, move recipes contain two symbol circles separated by a plus sign, but the recipe columns themselves are not labeled Stance and Technique.\",\n    \"reason\": \"Players must connect each recipe back to the separate legend to identify which stick supplies each input.\",\n    \"suggest\": \"Add a Stance + Technique column header directly above the move recipes, aligned with their respective symbols.\"\n  },\n  {\n    \"title\": \"duplicate-stick-headings\",\n    \"claim\": \"In Image #3, Stance and Technique each appear twice: above the directional instructions and below their respective sticks.\",\n    \"reason\": \"Repeated headings add visual clutter without teaching an additional action.\",\n    \"suggest\": \"Keep the labels beneath the sticks and remove the duplicate headings from the instruction panel, retaining its directional explanations.\"\n  },\n  {\n    \"title\": \"result-pose-disconnect\",\n    \"claim\": \"Image #18 announces Asmongold wins while Asmongold is shown in a kick pose and HasanAbi remains upright in guard.\",\n    \"reason\": \"The character poses do not reinforce the outcome announced by the text.\",\n    \"suggest\": \"Use distinct victory and defeat poses for the result display rather than retaining combat poses.\"\n  },\n  {\n    \"title\": \"text-size-unverified\",\n    \"claim\": \"The point-value labels in Image #6 are visible, but this raster does not establish whether their rendered font sizes meet the required 18 CSS-pixel minimum.\",\n    \"reason\": \"Players need readable scoring information when choosing techniques, and an unsupported size estimate could prompt the wrong fix.\",\n    \"suggest\": \"Measure computed font sizes and effective scaling in the running panel at 390\u00d7844; enlarge and reflow any labels below 18 CSS pixels rather than shrinking surrounding content.\"\n  },\n  {\n    \"title\": \"boot-progress-unverified\",\n    \"claim\": \"Image #1 shows Downloading the game above a progress track with no distinguishable filled segment, but one still cannot establish whether progress advances.\",\n    \"reason\": \"Players need truthful loading feedback; treating an initial capture as a stall could lead to misleading artificial progress.\",\n    \"suggest\": \"Leave the loader unchanged until a throttled-network recording and timestamped completed-work counters establish its behavior; fix only a demonstrated disagreement between those counters and the displayed fill.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"technique-row-obscured\",\n    \"claim\": \"In Image #6, the bottom fade darkens the visible Back Kick row while the preceding technique rows remain clearly readable.\",\n    \"reason\": \"The presentation obscures information the player is trying to learn.\",\n    \"suggest\": \"Remove the gradient over the technique text and place a separate 'Scroll for more techniques' cue outside the scrolling list.\"\n  },\n  {\n    \"title\": \"duplicate-control-headings\",\n    \"claim\": \"In Image #3, both 'STANCE' and 'TECHNIQUE' appear twice: above the directional instructions and beneath their respective sticks.\",\n    \"reason\": \"Repeated headings consume space without adding guidance.\",\n    \"suggest\": \"Consolidate each stick's name and directional instructions into one legend, preserving readable text sizes.\"\n  },\n  {\n    \"title\": \"player-side-unidentified\",\n    \"claim\": \"In Image #3, the HUD names Asmongold and HasanAbi but does not visibly identify which fighter the player controls.\",\n    \"reason\": \"A first-time player must connect the controls to a fighter without an explicit assignment.\",\n    \"suggest\": \"Add a persistent 'You' label to the player-controlled fighter's nameplate.\"\n  },\n  {\n    \"title\": \"countdown-without-opt-out\",\n    \"claim\": \"In Image #18, the result screen displays 'REMATCH' and 'STARTING IN 8' without a visible control to decline that advertised countdown.\",\n    \"reason\": \"A player who wants to study the result cannot see how to remain on that screen.\",\n    \"suggest\": \"Add a 'Stay on results' button that cancels the countdown, alongside the existing rematch action.\"\n  },\n  {\n    \"title\": \"round-clock-meaning-unverified\",\n    \"claim\": \"Image #18 shows 29s on the HUD and 'FASTEST ROUND 6.4S' in the result summary, but the still cannot establish whether these readouts use the same clock.\",\n    \"reason\": \"The player cannot tell whether round duration includes introductions, referee calls, or other pauses; this is not evidence that either value is incorrect.\",\n    \"suggest\": \"Compare timestamped bout boundaries, simulation ticks, and referee pauses, then label the record explicitly as 'Active fight time' or 'Total round time' according to the verified calculation.\"\n  }\n]"
 }
