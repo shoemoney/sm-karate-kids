@@ -3422,3 +3422,67 @@ record.
 **Recorded as measured-and-open rather than refused.** It is a real observation
 from eight independent reviewers, the measurement behind it is sound, and the
 loop has now demonstrated by experiment that the obvious fix does not work.
+
+### Round 86 — the codex reviewer is working, and I was wrong that it couldn't be
+
+Jeremy: *"in your loop going forward only use openrouter with gpt-6-1-sol with
+the codex cli as the advisory reviewer."* Round 85 said that was impossible
+because the ChatGPT account was capped. **That was wrong**, and the reason it was
+wrong is worth recording because it is a specific and expensive mistake.
+
+`OPENAI_BASE_URL` and `OPENAI_API_KEY` in the environment do nothing. Codex
+selects its provider from **config**, and it will not fall through to a
+third-party endpoint because one is in the env. The route that works:
+
+    -c 'model_provider="openrouter"'
+    -c 'model_providers.openrouter.base_url="https://openrouter.ai/api/v1"'
+    -c 'model_providers.openrouter.env_key="OPENROUTER_API_KEY"'
+    -c 'model_providers.openrouter.wire_api="responses"'      # "chat" is rejected
+
+Three more traps, all of which produced a *false negative* rather than an error:
+
+- **`~/.openrouter` is stale.** It 401s `User not found` on BOTH OpenRouter
+  endpoints. The live `OPENROUTER_API_KEY` in the environment is the working one,
+  and the loop's own `vision-review.py` has been using that all along. I reached
+  for the file because a key in a file looks more durable than one in an env.
+- **`--json` is not optional.** Without it codex writes only the final text and
+  emits **no event stream**, and the extractor reads the event stream. The first
+  working run reported "no agent message" on a review that had produced one.
+- **The event shape is `item.completed` → `item.type == "agent_message"`.** My
+  first extractor looked for a top-level `agent_message` and for
+  `turn.completed.last_agent_message`, found neither, and called an answered run
+  broken.
+
+**All three are the same failure this loop has now hit four times: a correct run
+reported as a failure, because I asserted a shape instead of observing it.** The
+script now fails closed on a missing key, distinguishes the usage-limit error
+from a real run, and refuses to write a review file at all if no agent message
+comes back — a gate that cannot pass by accident.
+
+`tools/review-codex.sh` is the standing reviewer. It reads the 21-frame set,
+allows computer use, and writes `reviews/codex-advisory.json`.
+
+**First review from the new reviewer, five findings:**
+
+- `misaligned-half-points` — the stacked fraction "extends well below the
+  whole-number baseline". **This is round 82's claim, third model in a row, and
+  it is now measured and refuted**: the fraction's box is y 24.4–50.3 inside a
+  plate spanning 8.0–55.8, so it is vertically centred with 5.5px to spare. What
+  it *does* say is that three models read it as misaligned, which is a different
+  and real finding about perception rather than geometry.
+- `small-stick-captions` — captions "approximately 10 pixels tall at 390px".
+  Specific and checkable, and never measured before.
+- `duplicated-control-labels` — STANCE/TECHNIQUE appear twice, in the strip and
+  under the sticks, over "approximately the bottom 274 pixels". The coach
+  redundancy that twelve models have reported, now quantified.
+- `button-covers-foot` — the FIGHT button hides Asmongold's forward foot. The
+  pre-bout overlap, third model, and now with a specific body part named.
+- `kick-points-away` — **"In Image #18, Asmongold's extended kicking foot points
+  left while HasanAbi stands to his right."** This is the amputated/truncated
+  kick family again — five models, six rounds — reframed as a facing problem
+  rather than a missing limb, and it is the first time anyone has said the foot
+  points the *wrong way* rather than that it is missing. That is a genuinely new
+  reading of a persistent report and it is checkable against the sprite's
+  facing, which no one has looked at.
+
+The reviewer switch is done and the loop is running on it.

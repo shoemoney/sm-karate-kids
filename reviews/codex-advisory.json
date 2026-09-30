@@ -1,0 +1,39 @@
+{
+ "model": "openai/gpt-6.1-sol",
+ "harness": "codex-cli",
+ "computer_use": true,
+ "reviewed_at": "2026-09-29T21:37:42",
+ "items": [
+  {
+   "title": "misaligned-half-points",
+   "claim": "In Image #8, HasanAbi\u2019s stacked half-point fraction extends well below the whole-number baseline in both the scoreboard and the central result.",
+   "reason": "The staggered digits make the score harder to read at a glance.",
+   "suggest": "Render the half point as an inline \u00bd glyph vertically centered beside the whole number."
+  },
+  {
+   "title": "small-stick-captions",
+   "claim": "In Image #3, the STANCE and TECHNIQUE caption letters are approximately 10 pixels tall at the stated 390-pixel viewport width.",
+   "reason": "These essential control labels are difficult to read on a phone.",
+   "suggest": "Set the captions to at least 18 CSS px and adjust their spacing to accommodate the larger text."
+  },
+  {
+   "title": "duplicated-control-labels",
+   "claim": "In Image #3, STANCE and TECHNIQUE appear both in the instruction strip and beneath the sticks, with the combined control area occupying approximately the bottom 274 pixels.",
+   "reason": "Repeated labels consume space that could give the fighters more room.",
+   "suggest": "Keep one label per stick and replace the separate instruction strip with concise instructions inside the control area."
+  },
+  {
+   "title": "button-covers-foot",
+   "claim": "In Image #2, the FIGHT button hides Asmongold\u2019s forward foot while his rear foot remains visible.",
+   "reason": "The opening composition obscures the fighter\u2019s stance and connection to the floor.",
+   "suggest": "Reserve a clear action row below the fighters and move their presentation upward enough to prevent overlap."
+  },
+  {
+   "title": "kick-points-away",
+   "claim": "In Image #18, Asmongold\u2019s extended kicking foot points left while HasanAbi stands to his right.",
+   "reason": "The winner\u2019s displayed strike points away from the opponent, making the result pose visually confusing.",
+   "suggest": "Replace the frozen kick on this result screen with a victory pose facing HasanAbi."
+  }
+ ],
+ "raw": "[\n  {\n    \"title\": \"misaligned-half-points\",\n    \"claim\": \"In Image #8, HasanAbi\u2019s stacked half-point fraction extends well below the whole-number baseline in both the scoreboard and the central result.\",\n    \"reason\": \"The staggered digits make the score harder to read at a glance.\",\n    \"suggest\": \"Render the half point as an inline \u00bd glyph vertically centered beside the whole number.\"\n  },\n  {\n    \"title\": \"small-stick-captions\",\n    \"claim\": \"In Image #3, the STANCE and TECHNIQUE caption letters are approximately 10 pixels tall at the stated 390-pixel viewport width.\",\n    \"reason\": \"These essential control labels are difficult to read on a phone.\",\n    \"suggest\": \"Set the captions to at least 18 CSS px and adjust their spacing to accommodate the larger text.\"\n  },\n  {\n    \"title\": \"duplicated-control-labels\",\n    \"claim\": \"In Image #3, STANCE and TECHNIQUE appear both in the instruction strip and beneath the sticks, with the combined control area occupying approximately the bottom 274 pixels.\",\n    \"reason\": \"Repeated labels consume space that could give the fighters more room.\",\n    \"suggest\": \"Keep one label per stick and replace the separate instruction strip with concise instructions inside the control area.\"\n  },\n  {\n    \"title\": \"button-covers-foot\",\n    \"claim\": \"In Image #2, the FIGHT button hides Asmongold\u2019s forward foot while his rear foot remains visible.\",\n    \"reason\": \"The opening composition obscures the fighter\u2019s stance and connection to the floor.\",\n    \"suggest\": \"Reserve a clear action row below the fighters and move their presentation upward enough to prevent overlap.\"\n  },\n  {\n    \"title\": \"kick-points-away\",\n    \"claim\": \"In Image #18, Asmongold\u2019s extended kicking foot points left while HasanAbi stands to his right.\",\n    \"reason\": \"The winner\u2019s displayed strike points away from the opponent, making the result pose visually confusing.\",\n    \"suggest\": \"Replace the frozen kick on this result screen with a victory pose facing HasanAbi.\"\n  }\n]"
+}
