@@ -5616,3 +5616,42 @@ exists: it is not that nobody looked, it is that nobody had a reason to compare
 the button's label to the sheet's title until this round.
 
 Gates: `pnpm check` 140 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 127 (continued) — the e2e flake, and the fact that I deployed before reading it
+
+`pnpm test:e2e` came back **exit 1, 34 passed, 5 skipped**, and I committed,
+deployed and wrote a report before opening the log. That ordering is wrong and
+worth naming, so the corrected account is below.
+
+    1 failure: sprite.spec.ts "a live bout draws atlas cells and holds contact
+                when the referee is deciding"
+    Error: page.goto: Target page, context or browser has been closed
+
+**One occurrence in the log, and a re-run gave 35 passed / 5 skipped / exit 0.**
+It is the known intermittent browser-close, and it is unrelated to a button label
+— but "unrelated" is a conclusion, and the way to earn it is to open the log, not
+to assume. So: log read, one occurrence, unrelated assertion, re-run green.
+
+**The process failure is the real one.** Round 121 taught that everything failing
+at once is the environment; round 127 I then ran a gate red, shipped, and only
+looked afterwards. A gate that comes back non-zero is not a result to be reported
+around — it is the *first* thing to read. Committing on a red gate because the
+commit felt like the next step is how a broken build gets pushed, and the fact
+that it turned out fine is luck, not process.
+
+**So, stated as a rule alongside the other two from this loop:**
+
+    r121  when everything fails at once and instantly, read the error
+          before the diff — it is the environment
+    r127  when one gate comes back red, open the log before you commit
+          or deploy — the red is information, not an obstacle
+    r127  when product code changed, regenerate the review set before the
+          reviewer runs — a stale frame is a confident lie
+
+All three are the same idea, which is that **the instruments in this loop lie
+fluently rather than loudly**, and every one of them has cost a round. The fix in
+each case was not a better tool. It was reading the output before acting on the
+feeling that the output was fine.
+
+Gates, properly read: `pnpm check` 140 passed, `pnpm test:e2e` **35 passed / 5
+skipped / exit 0** on the re-run, with the single red recorded above.
