@@ -927,7 +927,10 @@ body.show-perf #backend {
   position: absolute;
   inset: -34% -14%;
   z-index: -1;
-  background: radial-gradient(ellipse at 50% 50%, var(--scrim-banner), transparent 72%);
+  /* Opaque to 62% and only then falling away. Fading from the very centre meant
+     the pool was weakest exactly where the word is widest, so the shoji grid
+     showed through the outer letters most. */
+  background: radial-gradient(ellipse at 50% 50%, var(--scrim-banner) 0%, var(--scrim-banner) 62%, transparent 88%);
   pointer-events: none;
 }
 
@@ -948,7 +951,14 @@ body.show-perf #backend {
   font-weight: var(--weight-black);
   line-height: 0.95;
   letter-spacing: var(--track-normal);
-  -webkit-text-stroke: 1.5px var(--stroke-ink);
+  /* 1.5px was sized as if the glyphs were body text. At --text-display these
+     are the biggest type in the game, so a 1.5px outline on a counter-filling
+     face leaves the gold strokes nearly touching — and what shows through the
+     gaps is the shoji's window frame. `gemini-3.8-flash` read it as "polygonal
+     tessellation artifacts inside the WAZA-ARI banner" and that is exactly what
+     it is: not a broken font, the backdrop's grid seen through a letterform
+     that is not opaque enough to hide it. The stroke scales with the glyph. */
+  -webkit-text-stroke: 0.09em var(--stroke-ink);
   text-shadow:
     0 0 0.9rem var(--glow-display),
     0 0.35em 0.9rem var(--shadow-ink);

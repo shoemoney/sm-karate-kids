@@ -1,0 +1,89 @@
+{
+  "model": "anthropic/claude-sonnet-5.5",
+  "elapsed_s": 24.0,
+  "usage": {
+    "prompt_tokens": 22290,
+    "completion_tokens": 2382,
+    "total_tokens": 24672,
+    "cost": 0.0684,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0684,
+      "upstream_inference_prompt_cost": 0.04458,
+      "upstream_inference_completions_cost": 0.02382
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighter-cutout-integration",
+      "title": "Sprite fighters look pasted onto the dojo: hard cutout edges, no grounding, mismatched light",
+      "what": "In the gameplay frames (stance, FRONT KICK, IPPON) both fighters have crisp, bright cutout silhouettes. The white gi is near-neutral and the red gi is fully saturated, while the room around them is amber and dim. Each fighter has only a thin, faint ellipse shadow under the feet. The tatami and the sprites are lit differently: no warm rim light, no color grade on the sprites, and no contact shadow that reads as a real floor shadow. In the IPPON and kick frames, sprite scale and blur visibly change between poses.",
+      "why": "This is what a player sees for the whole bout. The fighters look like stickers over a background, which undercuts the cinematic tungsten look the rest of the post chain is trying for. It also makes the characters feel weightless, so hits have less impact.",
+      "how": "Run the fighter sprites through the same warm/cool split-tone grade, or add a per-sprite tint multiplier of about 0.85\u20130.9 toward amber. Add a warm rim light from the window side using a fresnel-style edge term on the sprite alpha. Replace the faint blob shadow with a larger, softer, darker contact shadow plus a stretched secondary shadow that follows the backlight direction. Feather the alpha edge by 1px and premultiply it to remove the halo. Desaturate and darken the red gi about 10% so it sits in the scene instead of glowing."
+    },
+    {
+      "id": "controls-legend-clutter",
+      "title": "The permanent control legend card eats the fight view and duplicates the stick labels",
+      "what": "In the gameplay screens, a full-width bordered card at y\u2248865\u2013952 spells out 'STANCE \u25c0 step \u25b2 jump\u2026' and 'TECHNIQUE \u25c0 back \u25b6 forward\u2026' in tiny ~13px monospace. It stays on screen through IPPON and FRONT KICK. Directly below it, both sticks are labeled STANCE and TECHNIQUE again. The legend covers the lower tatami, and in the last screenshot it also has a bright border that competes with the fight. The stick arrows already show direction.",
+      "why": "It is tiny text that a player mid-fight cannot read, and it repeats information already on the sticks. It also adds a heavy horizontal slab between the action and the controls, crowding the arena.",
+      "how": "Show the legend only for the first bout or the first 10 seconds, then fade it out and keep it reachable under MOVES. Drop the duplicate 'STANCE/TECHNIQUE' captions under the sticks once the legend is gone. If it stays, cut it to two lines of 15\u201316px sans-serif, remove the border and fill, and let the tatami show through."
+    },
+    {
+      "id": "arena-composition-empty-space",
+      "title": "Fight is squeezed into a mid-band while large dead areas sit above and below it",
+      "what": "In portrait, roughly the top 30% of the arena (y\u224885\u2013320) is only dark ceiling and a hazy amber gradient with dust motes, and the fighters occupy just y\u2248470\u2013780. On the landscape screenshot, the 3D view is a 1280x~460 strip, with a big black void (y\u2248570\u2013800) between the arena and the two tiny sticks. Fighters are only about 35% of the screen height on the phone, and the room, crowd and banners are barely visible.",
+      "why": "On a small screen, the fighters' limbs and hit reactions are the information the player needs. Wasting the ceiling shrinks them, and the landscape layout looks unfinished and leaves the thumbs far from the action.",
+      "how": "Tighten the camera: lower the FOV or dolly in so the fighters are about 45\u201350% of the play-area height, and shift the horizon so the ceiling takes about 15%. In landscape, stretch the canvas to full viewport height and overlay the sticks and HUD on it, with the sticks semi-transparent at the bottom corners. Or lock the game to portrait and show a 'rotate device' hint."
+    },
+    {
+      "id": "hud-score-hierarchy-and-halves",
+      "title": "Score readout lacks hierarchy and half-point display is cramped and inconsistent",
+      "what": "In the top bar, the names ASMONGOLD and HASANABI are tiny (~13px, letterspaced, low contrast grey and salmon) next to large digits. Half points render as a stacked '1/2' fraction that is squeezed into the bar and pushes the bar taller (the 2\u00bd frame). On the result screen, '0 \u2014 2\u00bd' has a tiny subscript fraction that reads as '2 1 2'. The timer pill '30s' has an 's' that is nearly invisible. There is no first-to-2 indicator, so the player can't tell how close a round is.",
+      "why": "The score is the core feedback loop in a point-karate game. A stacked fraction is hard to read at a glance, and it breaks the layout consistency between the HUD and the result screen.",
+      "how": "Use decimal or 'pip' scoring, such as '\u00bd' as a single glyph or 'x.5' set at the same size as the integer, or two round pips per fighter that fill half and then full. Set the fraction glyph at cap-height with a fixed-width score slot so the bar never reflows. Raise the name text to at least 14\u201315px with higher contrast. Make the 's' unit larger or remove it."
+    },
+    {
+      "id": "stick-affordance-and-feedback",
+      "title": "Twin sticks are dark, low-contrast, and give weak state feedback for a touch-first game",
+      "what": "The stick bases are dark bronze on dark brown. The direction chevrons are ~14px thin marks in dim grey. The idle thumb knobs differ only by a tiny dot (blue for stance, gold ring for technique). In the LUNGE PUNCH frame, the technique stick activates with a gold outline and highlighted \u25b6, but the stance stick shows nothing and the resulting move name appears only in a small pill at y\u2248318, far from the thumbs. The bottom captions 'STANCE' and 'TECHNIQUE' are grey and low-contrast. In the loading and pre-fight screens the sticks look the same as in play, so it isn't clear when they are live.",
+      "why": "A player with a thumb over the stick cannot see the chevrons or the move name. The combo system (stance + technique) has no visual confirmation near the controls, and the two sticks are hard to tell apart in peripheral vision.",
+      "how": "Give each stick a distinct accent (cool blue ring for stance, gold for technique) at the base, not only the center dot. Enlarge the chevrons to about 20px with 60% opacity, brightening to 100% on the active direction on both sticks. Echo the current combo name in a larger pill just above the sticks, or make the knob itself show an icon. Dim the sticks during the pre-fight countdown and animate them to full brightness on 'FIGHT'."
+    }
+  ],
+  "raw": null
+}

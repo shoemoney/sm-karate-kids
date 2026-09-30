@@ -1,0 +1,89 @@
+{
+  "model": "google/gemini-3.8-flash",
+  "elapsed_s": 42.6,
+  "usage": {
+    "prompt_tokens": 23094,
+    "completion_tokens": 3996,
+    "total_tokens": 27090,
+    "cost": 0.0323055,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0323055,
+      "upstream_inference_prompt_cost": 0.0173205,
+      "upstream_inference_completions_cost": 0.014985
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 2951,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "foot-contact-shadows",
+      "title": "Ground fighters with localized foot contact shadows",
+      "what": "In gameplay screens (Screenshots 3, 4, 5, 9, 11, 13, 14), both Asmongold and HasanAbi have no ambient occlusion or contact shadows directly beneath their bare feet, relying only on a faint diffuse floor wash.",
+      "why": "Without dark, tight occlusion directly under the soles and toes, the photoreal 2D cutouts appear to levitate over the 3D tatami mat, breaking spatial depth instantly.",
+      "how": "Render two dark elliptical contact decals or dynamic AO sprites anchored directly to each character's foot coordinates (opacity ~0.7, sharp falloff within 15-20px) that stick to the floor plane regardless of lighting."
+    },
+    {
+      "id": "score-fraction-typography",
+      "title": "Fix misaligned stacked fractions on HUD and victory screens",
+      "what": "In Screenshots 7, 14, and 15, half points ('1/2') are rendered as vertically stacked numerals that break the baseline. In the top HUD (Screenshot 14), '1/2' pushes downward out of line with the opposing '0'; on the victory screen (Screenshot 7), '2 1/2' creates a messy cluster where the '2' sits over an offset '1' and '2'.",
+      "why": "The score is the core competitive feedback element. Distorted font alignment makes the game look unpolished and makes quick score reads difficult during fast point bouts.",
+      "how": "Replace the stacked fractional markup with inline characters (e.g. '\u00bd' or '0.5' / '1.5'), or better yet, use two distinct martial-arts round pip indicators (empty, half-filled, filled circle) next to each player's name."
+    },
+    {
+      "id": "waza-ari-font-tessellation-glitch",
+      "title": "Clean polygonal tessellation artifacts inside WAZA-ARI banner",
+      "what": "In Screenshots 14 and 15, the large central 'WAZA-ARI' banner contains visible polygonal slicing lines and triangulated fill gaps cutting through the white fill of the letters 'W', 'A', 'Z', and 'R'.",
+      "why": "Point karate hinges on high-impact callouts when an exchange concludes. Visible font mesh wireframes and broken glyph interiors look like an unrendered geometry shader bug at the bout's climax.",
+      "how": "Replace the 3D extruded/tessellated font geometry for impact text with a high-resolution 2D signed distance field (SDF) sprite or clean SVG path overlay with a solid fill and outer glow."
+    },
+    {
+      "id": "combat-guide-overlay-clutter",
+      "title": "Fade out the on-screen input cheat-sheet during active combat",
+      "what": "In Screenshots 3, 4, 5, 9, 11, and 13, a persistent brown rounded card displaying 'STANCE (step/jump/crouch)' and 'TECHNIQUE (back/forward/up/down)' sits permanently between the fighters' feet and the virtual joysticks.",
+      "why": "It crowds the center-bottom third of the portrait screen, pulls visual focus away from stance changes and leg sweeps, and competes with combat action on small mobile displays.",
+      "how": "Display this legend only during the pre-bout countdown ('STARTING IN X') and smoothly fade opacity to 0% as soon as the 'FIGHT' prompt disappears or upon the player's first registered touch."
+    },
+    {
+      "id": "settings-modal-unscrimmed-cutoff",
+      "title": "Add full-viewport backdrop dimming to the Settings sheet",
+      "what": "In Screenshots 6 and 12, the Settings menu panel ends abruptly at roughly 55% screen height, leaving the lower 45% showing raw, undimmed fighter legs, tatami mat, and controls with a hard horizontal seam.",
+      "why": "Without a full-screen scrim or backdrop blur, the dialog feels like a truncated, floating card rather than an intentional modal overlay, creating distracting visual noise underneath the settings toggles.",
+      "how": "Apply a full-screen semi-transparent backdrop overlay (`background: rgba(10, 8, 6, 0.75)` with `backdrop-filter: blur(4px)`) covering the entire 390x844 viewport behind the settings container."
+    }
+  ],
+  "raw": null
+}

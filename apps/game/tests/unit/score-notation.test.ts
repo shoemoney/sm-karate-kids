@@ -98,3 +98,43 @@ describe('the stacked fraction is sized to be read', () => {
     expect(Number(bar![1])).toBeGreaterThanOrEqual(0.12);
   });
 });
+
+/**
+ * The referee's call has to be readable against the brightest thing in the game.
+ *
+ * The call word is set at `--text-display` with a 1.5px outline, over a pool
+ * that faded to transparent almost immediately. On a shoji backdrop that
+ * combination let the window frame show through the letter counters, which a
+ * reviewer read as "polygonal tessellation artifacts inside the WAZA-ARI
+ * banner" — and it was the backdrop, not a broken font.
+ *
+ * Both values are asserted here because both fail silently: a thinner stroke or
+ * an earlier fade does not throw, does not shift layout, and does not fail a
+ * behavioural test. It just quietly makes the biggest word in the game harder to
+ * read, on the one frame the set only learned to capture in round 75.
+ */
+describe("the referee's call is legible over the shoji", () => {
+  const css = read('../../src/styles.css');
+
+  test('the outline scales with the glyph, not with body text', () => {
+    const stroke = css.match(/\.banner \.call-word \{[\s\S]*?-webkit-text-stroke:\s*([\d.]+)(em|px)/);
+    expect(stroke, '.call-word has no text-stroke').not.toBeNull();
+    const [, value, unit] = stroke!;
+    if (unit === 'em') {
+      expect(Number(value), 'an em stroke keeps the outline proportional').toBeGreaterThanOrEqual(0.07);
+    } else {
+      expect(Number(value), 'a px stroke below 3px lets the backdrop through the counters').toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  test('the pool behind the call is opaque across the width of the word', () => {
+    const pool = css.match(/\.banner::before \{[\s\S]*?radial-gradient\([^;]*;/);
+    expect(pool).not.toBeNull();
+    const stops = [...pool![0].matchAll(/(\d+(?:\.\d+)?)%/g)].map((m) => Number(m[1]));
+    const opaque = stops.filter((v) => v > 0);
+    expect(
+      Math.max(...opaque),
+      'the scrim reaches transparent before the word does, so the outer letters sit on bare backdrop',
+    ).toBeGreaterThanOrEqual(55);
+  });
+});

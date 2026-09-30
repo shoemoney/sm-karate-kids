@@ -2941,3 +2941,53 @@ Which is also why the fix pattern that finally worked is the boring one: change
 a value, re-capture the frame, put the two crops side by side, and ask whether
 it reads as the thing. No reasoning, no comment, no test. A picture, next to the
 other picture.
+
+### Round 78 — the call word, and a "font glitch" that was a backdrop
+
+Three models, and the first review round in a while with **no impact finding in
+it at all** — the sparks and the afterimage that six rounds of reports had
+produced are simply gone from the list. Round 77's fix held.
+
+`google/gemini-3.8-flash` reported something no model had ever reported:
+**"clean polygonal tessellation artifacts inside the WAZA-ARI banner."** I
+assumed a broken display face and went looking for the font. The font is fine.
+
+**It is the shoji's window frame showing through the letter.** `.call-word` is
+`--text-display` — the largest type in the game — with `-webkit-text-stroke:
+1.5px`, over a pool that faded to `transparent 72%`. On a counter-filling face
+at that size, a 1.5px outline leaves the gold strokes nearly touching, and the
+rectangular window grid behind shows through the gaps. The `A` counters are
+triangles; the grid behind them is rectangles; the eye reads the combination as
+a wireframe. It is not a glyph problem, it is a **contrast** problem, and the
+fix is opacity, not type.
+
+    .banner .call-word   -webkit-text-stroke  1.5px -> 0.09em   (scales with the glyph)
+    .banner::before      radial-gradient     transparent 72% -> opaque to 62%, clear at 88%
+
+**The second half of the fix is the more visible one.** With the lattice gone,
+the fill reads as *gold* for the first time — before, the grid bleeding through
+the strokes desaturated the whole word to grey, so the caller's colour was
+being lost as well as its legibility. One fix, two symptoms, and nobody had
+named the second because it was invisible behind the first.
+
+Two guards added, both for regressions that are silent: a thinner stroke or an
+earlier fade does not throw, does not shift layout, and fails no behavioural
+test — it just makes the biggest word in the game quietly harder to read.
+
+Gates: `pnpm check` **122 passed** (was 120), `pnpm test:e2e` 35 passed / 5
+skipped / exit 0.
+
+### Worth recording: the diagnostic that cost the most and found the least
+
+I went looking for a font bug for most of this round — `getComputedStyle` on
+`#banner`, guessing at the element, measuring a face that wasn't the one on
+screen. The measurement kept returning a 16px system font because the node I was
+reading is not the node that renders the call word (`.call-word` is its own
+child, and `#banner` carries the text). **I was measuring an element that was
+empty and drawing conclusions about the game from it.**
+
+The thing that actually found the bug was a 900px crop of the word. Four seconds
+of work. Again: a picture, next to the other picture. The loop now has three
+rounds' worth of evidence that the cheapest instrument is the one I am most
+reluctant to reach for, every single time, because reasoning about it feels
+like progress and cropping feels like nothing.

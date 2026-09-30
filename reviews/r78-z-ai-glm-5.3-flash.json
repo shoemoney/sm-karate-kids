@@ -1,0 +1,89 @@
+{
+  "model": "z-ai/glm-5.3-flash",
+  "elapsed_s": 124.5,
+  "usage": {
+    "prompt_tokens": 22056,
+    "completion_tokens": 10727,
+    "total_tokens": 32783,
+    "cost": 0.0086719,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0086719,
+      "upstream_inference_prompt_cost": 0.0033084,
+      "upstream_inference_completions_cost": 0.0053635
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 9418,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighters-too-small-dead-ceiling",
+      "title": "Zoom the camera in \u2014 the fighters are tiny with the top of the portrait frame as empty ceiling",
+      "what": "On the portrait in-fight screens (the 30s stance screenshots), the two fighters span only about a quarter of the screen height \u2014 heads at roughly 37% down the frame, feet at ~62% \u2014 while the band between the HUD and the shoji windows is empty brown gradient and dust motes. Below them, the moves legend plus the two dials consume another ~35%. The actual play area is a thin horizontal strip in the middle.",
+      "why": "A fighting game lives on readable body language: stance shifts, wind-ups, the struck fighter's recoil. At this scale the sprites read as stickers in a diorama, and on a 390x844 phone the player's thumbs already cover the bottom third, shrinking the useful image further. The first-five-seconds impression is 'empty room', not 'bout'.",
+      "how": "Lower the camera pitch and push in roughly 30% so fighter heads sit just under the HUD bar and feet land around 70% of screen height; crop most of the ceiling out of frame. Target the fighters filling 55-60% of the scene band and let the existing vignette keep it cinematic."
+    },
+    {
+      "id": "weak-hit-feedback",
+      "title": "The scoring contact lands with almost no visual payoff",
+      "what": "In the IPPON screenshots (spinning back kick, stepping lunge punch) and the WAZA-ARI lunge punch, the clean hit shows a text banner and at most a few small white sweat specks near the struck head. In the WAZA-ARI shot the red fighter's pose is identical to his idle stance as the score registers, and the frame shows no flash, no shake, and no bloom pulse.",
+      "why": "This is a one-clean-contact-scores game: the contact IS the product. If an IPPON feels visually the same as a whiffed LUNGE PUNCH callout, the core loop has no payoff and the player never feels agency.",
+      "how": "Add a 100-150ms hit-stop on contact, an additive impact flash plus spark burst sprite at the contact point, a single-frame white/gold flash or bloom-strength spike through the existing TSL chain, 4-6px of screen shake, and an exaggerated recoil pose on the struck fighter. Reserve the loudest version for IPPON and a smaller one for WAZA-ARI."
+    },
+    {
+      "id": "fight-button-overlaps-fighters",
+      "title": "The FIGHT button sits on top of the fighters it is introducing",
+      "what": "On the pre-fight intro screen, the gold FIGHT pill is centered at roughly 62% screen height and directly covers both fighters' shins and feet \u2014 the white fighter's front foot and the red fighter's back foot are hidden behind it, with 'STARTING IN 2' stacked underneath. The button floats over the scene instead of sitting in a UI band.",
+      "why": "The intro is the game's poster frame, where the photoreal fighters should sell the bout. A UI element colliding with the subject reads as a layout bug, and since the countdown auto-starts anyway, the button dominates space it doesn't need.",
+      "how": "Move the FIGHT pill down into the dark band above the dials, or make the whole screen tappable and shrink the button to a small 'TAP TO FIGHT' hint under the opponent tip. Keep the fighters fully unobstructed during the intro."
+    },
+    {
+      "id": "half-point-score-unreadable",
+      "title": "Half points render as a tiny stacked fraction that breaks the score row",
+      "what": "In the HUD on the WAZA-ARI screenshots, the left score shows a full-size '1' with a miniature '1-over-2' fraction stacked beneath it; the HASANABI WINS screen reads '0 \u2014 2' with the '\u00bd' dangling below the baseline, and the top HUD shows the same stacked '2\u00bd'. The fraction glyphs are roughly half the size of the integer numerals and sit out of alignment with the opposing '0'.",
+      "why": "Players parse score at a glance mid-exchange: '1' and '1\u00bd' are indistinguishable in peripheral vision, and with 'first to 2 takes the round' a dangling '2\u00bd' at match end is actively confusing. It also reads like a rendering fallback rather than a deliberate design.",
+      "how": "Render half points inline at full size \u2014 '1.5' / '2.5', or a same-size '\u00bd' glyph on the shared baseline \u2014 or switch to a pip display (two filled pips plus a half pip per fighter) that stays aligned in both the HUD row and the win-screen scoreline."
+    },
+    {
+      "id": "moves-legend-permanent-strip",
+      "title": "The input-legend strip squats between the scene and the thumbs all fight long",
+      "what": "In nearly every in-fight screenshot \u2014 including during the IPPON and WAZA-ARI banners \u2014 a two-column text strip ('STANCE: step/jump/crouch, TECHNIQUE: back/forward/up/down') sits between the mat and the dials, costing about 90px of vertical space and adding constant small-type noise. One screenshot shows the strip absent, so a hidden state clearly exists but is not the default.",
+      "why": "The dials' arrow glyphs already communicate direction, so after the first few inputs the strip is dead weight that permanently shrinks the play area on the exact band where thumbs hover. During scoring banners it competes with the moment for attention.",
+      "how": "Show the legend only until each direction has been used once, or for the first 10 seconds of a bout, then fade it out and let the scene breathe; keep the full mapping in the MOVES overlay, and force the strip hidden whenever a score banner is on screen."
+    }
+  ],
+  "raw": null
+}
