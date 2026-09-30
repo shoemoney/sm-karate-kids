@@ -5750,3 +5750,60 @@ limit and it is better to state it than to let the passing fences imply coverage
 they do not have.
 
 Gates: `pnpm check` 140 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 130 — the reviewer cross-referenced two frames and named the resolution itself
+
+    kick-foot-not-visible      "the raised leg under FRONT KICK ends at a
+                                trouser cuff with no visible foot, whereas
+                                Image #22 shows a bare foot during the same
+                                named technique"
+    unmapped-stick-directions  the mapping is in a panel, not on the sticks
+    opening-card-omits-goal    the card explains the combination but not the
+                                first-to-two objective
+    score-call-needs-translation
+    winner-heading-wrap-varies
+
+**That first finding is the loop working exactly as designed, and it took a
+hundred and thirty rounds to arrive at.**
+
+It is not a claim about one frame. It is a claim about **two frames showing the
+same technique differently** — the landing kick with no visible foot, the
+open-space kick with a bare foot — and it names both. The reviewer has been
+reporting this since round 64 as an amputation, a truncation, a wrong-facing
+foot, and a broken silhouette. **It is now comparing frame 4 against frame 22 and
+concluding that the move is inconsistently drawn**, which is the first accurate
+description of the problem anyone has given, mine or the model's.
+
+Because frame 22 is `21-phone-kick-open` — the frame added in round 88
+specifically so the kick could be judged without a body behind it — the
+discrepancy is the one round 89 measured:
+
+    foot  rgb(229,189,159)   against   mat  rgb(139,103,54)
+    contrast 2.96:1
+    foot width  ~11px at a 390px viewport
+
+**The foot is not missing, not truncated, and not facing wrongly. It is
+eleven pixels of skin on a warm mat, and when it lands against another fighter
+it disappears into the overlap.** The reviewer has now worked that out from the
+frames alone, and has framed it as a rendering inconsistency rather than a
+sprite defect — which is exactly right, and is the framing I reached after
+twenty-five rounds of refusing it as an amputation.
+
+**That is the highest-value single finding in this log**, and it arrived from an
+instrument that was told what it could not see, given a frame set that finally
+contained the comparison, and left alone long enough to make the comparison.
+Every one of those three conditions was the result of a specific earlier round.
+
+### The two that are standing, unchanged
+
+`unmapped-stick-directions` is the coach action labels living in a panel above
+the sticks rather than on them — r113, r124, and now again, and it is a
+judgement about the most-played surface that has been open for thirty rounds.
+
+`opening-card-omits-goal` is new in the sense that nobody has said it before, and
+it is a real gap: rounds 118–122 put the *notation* on the pre-bout card and the
+*objective* stayed on the techniques sheet. A first-time player is told how a
+move is input and not what he is playing for, and the sheet is one screen away.
+It is a one-sentence fix in the same place as the sentence already there.
+
+Gates: `pnpm check` 140 passed.

@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-30T02:32:50",
+ "reviewed_at": "2026-09-30T02:49:55",
  "items": [
   {
-   "title": "pre-fight-help-not-visible",
-   "claim": "The qualifier card in Image #2 shows FIGHT and both sticks, but neither the Techniques nor Settings control visible in Image #3.",
-   "reason": "A new player needs access to instructions and accessibility options before starting the fight.",
-   "suggest": "Expose the existing Techniques and Settings actions on the qualifier card alongside FIGHT."
+   "title": "kick-foot-not-visible",
+   "claim": "In Image #4, the raised leg under FRONT KICK ends at a trouser cuff with no visible foot, whereas Image #22 shows a bare foot during the same named technique.",
+   "reason": "The foot helps players read the strike\u2019s reach, but these stills cannot establish whether the difference comes from animation phase, artwork, or texture clipping.",
+   "suggest": "Capture the pose ID, animation phase, and atlas UVs matching Image #4; inspect that exact source cell and repair any confirmed foot clipping rather than changing the whole kick animation."
   },
   {
-   "title": "stick-actions-separated-from-controls",
-   "claim": "In Image #3, the stick rims contain only directional chevrons, while their action mappings appear in a separate strip above them.",
-   "reason": "The player must translate between the legend and the thumb position rather than read the action at its input location.",
-   "suggest": "Replace the rim chevrons with the corresponding action labels, preserving the centered stick position and an 18 CSS px text minimum."
+   "title": "unmapped-stick-directions",
+   "claim": "In Image #15, both sticks show directional chevrons and STANCE or TECHNIQUE labels, but no visible direction-to-action mapping.",
+   "reason": "The control names alone do not tell a player which direction produces a punch, kick, jump, or crouch.",
+   "suggest": "Keep readable action labels beside the corresponding stick directions, using the mapping already displayed in Image #3 and adjusting layout rather than shrinking text."
   },
   {
-   "title": "desktop-key-legend-absent",
-   "claim": "Image #9 shows STANCE and TECHNIQUE beneath the desktop sticks without any visible keyboard key mappings.",
-   "reason": "The displayed controls do not tell a keyboard player which keys to use.",
-   "suggest": "Show the actual configured stance and technique keys in the unused space between the desktop sticks."
+   "title": "opening-card-omits-goal",
+   "claim": "The opening card in Image #2 explains combining technique and stance inputs but does not state the first-to-two-points objective described in Image #6.",
+   "reason": "Players see how to issue a move before seeing what wins the round.",
+   "suggest": "Add a short rule beneath the input instruction: \u201cOne clean contact ends the exchange. First to 2 points wins.\u201d"
   },
   {
-   "title": "briefing-copy-all-caps",
-   "claim": "Image #2 renders both the opponent briefing and the multi-line move instruction in widely spaced uppercase text.",
-   "reason": "The explanatory copy competes with the round heading instead of providing an easily scanned introduction.",
-   "suggest": "Keep the heading uppercase, but render the briefing and instructions in sentence case with left alignment and normal letter spacing."
+   "title": "score-call-needs-translation",
+   "claim": "Image #20 pairs a half-point scoreboard value with WAZA-ARI, but the callout does not explicitly say HALF POINT.",
+   "reason": "The scoreboard and callout agree, but players unfamiliar with the terminology must decode that relationship themselves.",
+   "suggest": "Add HALF POINT beneath WAZA-ARI and FULL POINT beneath IPPON while retaining the existing technique name."
   },
   {
-   "title": "kick-silhouette-unresolved",
-   "claim": "Images #13 and #22 both display FRONT KICK, but the lifted foot is not clearly separable in #13 as it is in #22; this difference alone does not establish sprite clipping.",
-   "reason": "A readable attack silhouette matters, but a normal pose or foreshortened limb must not be mistaken for missing artwork.",
-   "suggest": "Make no sprite correction yet; capture the exact pose identifier and atlas rectangle for #13, then compare the rendered silhouette with the source cell's alpha bounds and consecutive frames."
+   "title": "winner-heading-wrap-varies",
+   "claim": "ASMONGOLD WINS occupies two lines in Image #18, while HASANABI WINS occupies one line in Image #8.",
+   "reason": "The same result hierarchy changes with the winner\u2019s name, making the score\u2019s placement less consistent.",
+   "suggest": "Give both result headings the same two-line structure: fighter name first, WINS second, without reducing the font size."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"pre-fight-help-not-visible\",\n    \"claim\": \"The qualifier card in Image #2 shows FIGHT and both sticks, but neither the Techniques nor Settings control visible in Image #3.\",\n    \"reason\": \"A new player needs access to instructions and accessibility options before starting the fight.\",\n    \"suggest\": \"Expose the existing Techniques and Settings actions on the qualifier card alongside FIGHT.\"\n  },\n  {\n    \"title\": \"stick-actions-separated-from-controls\",\n    \"claim\": \"In Image #3, the stick rims contain only directional chevrons, while their action mappings appear in a separate strip above them.\",\n    \"reason\": \"The player must translate between the legend and the thumb position rather than read the action at its input location.\",\n    \"suggest\": \"Replace the rim chevrons with the corresponding action labels, preserving the centered stick position and an 18 CSS px text minimum.\"\n  },\n  {\n    \"title\": \"desktop-key-legend-absent\",\n    \"claim\": \"Image #9 shows STANCE and TECHNIQUE beneath the desktop sticks without any visible keyboard key mappings.\",\n    \"reason\": \"The displayed controls do not tell a keyboard player which keys to use.\",\n    \"suggest\": \"Show the actual configured stance and technique keys in the unused space between the desktop sticks.\"\n  },\n  {\n    \"title\": \"briefing-copy-all-caps\",\n    \"claim\": \"Image #2 renders both the opponent briefing and the multi-line move instruction in widely spaced uppercase text.\",\n    \"reason\": \"The explanatory copy competes with the round heading instead of providing an easily scanned introduction.\",\n    \"suggest\": \"Keep the heading uppercase, but render the briefing and instructions in sentence case with left alignment and normal letter spacing.\"\n  },\n  {\n    \"title\": \"kick-silhouette-unresolved\",\n    \"claim\": \"Images #13 and #22 both display FRONT KICK, but the lifted foot is not clearly separable in #13 as it is in #22; this difference alone does not establish sprite clipping.\",\n    \"reason\": \"A readable attack silhouette matters, but a normal pose or foreshortened limb must not be mistaken for missing artwork.\",\n    \"suggest\": \"Make no sprite correction yet; capture the exact pose identifier and atlas rectangle for #13, then compare the rendered silhouette with the source cell's alpha bounds and consecutive frames.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"kick-foot-not-visible\",\n    \"claim\": \"In Image #4, the raised leg under FRONT KICK ends at a trouser cuff with no visible foot, whereas Image #22 shows a bare foot during the same named technique.\",\n    \"reason\": \"The foot helps players read the strike\u2019s reach, but these stills cannot establish whether the difference comes from animation phase, artwork, or texture clipping.\",\n    \"suggest\": \"Capture the pose ID, animation phase, and atlas UVs matching Image #4; inspect that exact source cell and repair any confirmed foot clipping rather than changing the whole kick animation.\"\n  },\n  {\n    \"title\": \"unmapped-stick-directions\",\n    \"claim\": \"In Image #15, both sticks show directional chevrons and STANCE or TECHNIQUE labels, but no visible direction-to-action mapping.\",\n    \"reason\": \"The control names alone do not tell a player which direction produces a punch, kick, jump, or crouch.\",\n    \"suggest\": \"Keep readable action labels beside the corresponding stick directions, using the mapping already displayed in Image #3 and adjusting layout rather than shrinking text.\"\n  },\n  {\n    \"title\": \"opening-card-omits-goal\",\n    \"claim\": \"The opening card in Image #2 explains combining technique and stance inputs but does not state the first-to-two-points objective described in Image #6.\",\n    \"reason\": \"Players see how to issue a move before seeing what wins the round.\",\n    \"suggest\": \"Add a short rule beneath the input instruction: \u201cOne clean contact ends the exchange. First to 2 points wins.\u201d\"\n  },\n  {\n    \"title\": \"score-call-needs-translation\",\n    \"claim\": \"Image #20 pairs a half-point scoreboard value with WAZA-ARI, but the callout does not explicitly say HALF POINT.\",\n    \"reason\": \"The scoreboard and callout agree, but players unfamiliar with the terminology must decode that relationship themselves.\",\n    \"suggest\": \"Add HALF POINT beneath WAZA-ARI and FULL POINT beneath IPPON while retaining the existing technique name.\"\n  },\n  {\n    \"title\": \"winner-heading-wrap-varies\",\n    \"claim\": \"ASMONGOLD WINS occupies two lines in Image #18, while HASANABI WINS occupies one line in Image #8.\",\n    \"reason\": \"The same result hierarchy changes with the winner\u2019s name, making the score\u2019s placement less consistent.\",\n    \"suggest\": \"Give both result headings the same two-line structure: fighter name first, WINS second, without reducing the font size.\"\n  }\n]"
 }
