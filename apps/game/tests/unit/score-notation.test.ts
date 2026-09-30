@@ -59,3 +59,42 @@ describe('scores are rendered by one builder, not by strings', () => {
     expect(hud).toMatch(/whole\.toLocaleString\(\)/);
   });
 });
+
+/**
+ * The stacked fraction has to be a *readable* fraction, not just an
+ * unambiguous one.
+ *
+ * At 0.52em of a 22px score the numerator and denominator rendered at about
+ * 11px, which is legible only if you already know what a fraction looks like.
+ * Two reviewers called it "unreadable at HUD size" and "tiny" — and they could
+ * only say so at all because round 73 finally put a half on the board, after
+ * thirty-two rounds of the notation being invisible in every frame.
+ *
+ * The regression this guards is silent: shrinking the fraction back does not
+ * throw, does not clip (`.points` is `flex: 0 0 auto`, so the scoreline grows
+ * rather than truncates), and does not fail any behavioural test. It just
+ * quietly becomes too small to read again.
+ */
+describe('the stacked fraction is sized to be read', () => {
+  const css = read('../../src/styles.css');
+
+  test('the fraction is at least two thirds of the score it sits beside', () => {
+    const frac = css.match(/\.score-frac \{[\s\S]*?font-size:\s*([\d.]+)em;/);
+    expect(frac, '.score-frac has no font-size').not.toBeNull();
+    const em = Number(frac![1]);
+    expect(
+      em,
+      `fraction is ${em}em of the score — below the 0.66em floor set after two reviewers reported it unreadable`,
+    ).toBeGreaterThanOrEqual(0.66);
+  });
+
+  test('the score is 22px, so the floor is a real pixel floor', () => {
+    expect(css).toMatch(/--text-xl:\s*1\.375rem/);
+  });
+
+  test('the bar is thick enough to survive at that size', () => {
+    const bar = css.match(/\.score-frac-bar \{[\s\S]*?block-size:\s*([\d.]+)em;/);
+    expect(bar).not.toBeNull();
+    expect(Number(bar![1])).toBeGreaterThanOrEqual(0.12);
+  });
+});

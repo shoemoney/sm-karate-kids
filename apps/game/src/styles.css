@@ -767,13 +767,25 @@ body.show-perf #backend {
   vertical-align: -0.3em;
   line-height: 0.82;
   margin-inline-start: 0.04em;
-  font-size: 0.52em;
+  /* 0.52em of a 22px score is an 11px digit, and that is below the size at
+     which a numeral can be told from a speck without effort. Two reviewers put
+     it as "unreadable at HUD size" and "half-point display is tiny" once the
+     frame showing it finally existed — which is the first time anyone could see
+     it at all (round 73). They were reading the real thing, and it was too
+     small.
+     0.72em puts the fraction at ~16px against a 22px score: still plainly a
+     fraction and not a second digit, and legible. The scoreline cannot clip
+     this because `.points` is `flex: 0 0 auto` and the names beside it are the
+     part that ellipsises. */
+  font-size: 0.72em;
   font-weight: var(--weight-bold);
 }
 
 .score-frac-bar {
-  inline-size: 0.62em;
-  block-size: 0.09em;
+  /* Scaled with the numerals it separates, so the bar stays a rule rather than
+     becoming a hairline that disappears at a distance. */
+  inline-size: 0.66em;
+  block-size: 0.13em;
   background: currentColor;
   border-radius: 1px;
 }

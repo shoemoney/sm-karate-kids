@@ -2724,3 +2724,64 @@ New this round and genuinely unchecked:
 - `loading-bar-no-progress` — the oldest false alarm in the loop, now at six
   models. Refuted by contrast measurement and by the bar tracking real weighted
   boot units.
+
+### Round 74 — the fraction sized to be read, on the first finding nobody could have made
+
+Two reviewers said the stacked fraction was "unreadable at HUD size"
+(`glm-5.3-flash`) and "tiny" (`claude-sonnet-5.5`). That is a different claim from
+every earlier report on this notation — not ambiguous, not `21/2`, not cramped,
+but **too small to read** — and it is only makeable by someone who is looking at
+a half point.
+
+Measured, at 0.52em of a 22px score: **11.4px numerator and denominator.**
+Below the size at which a numeral can be told from a speck without effort.
+
+    .score-frac   font-size  0.52em -> 0.72em   (~11px -> ~16px against 22px)
+    .score-frac-bar  block-size 0.09em -> 0.13em, inline-size 0.62em -> 0.66em
+
+**Verified at both widths with a real half on the board, and it does not clip:**
+
+    W=320  side 103px   fraction digit 12.2px   .points 31.1px   overflow: false
+    W=390  side 138px   fraction digit 12.2px   .points 31.1px   overflow: false
+
+`10½` was the case that clipped in round 43, which is why `.points` is
+`flex: 0 0 auto` and the names beside it are what ellipsise. Growing the
+fraction makes that row wider, and the row has 70px of slack at 320px, so the
+fix and the old fix do not fight.
+
+**Three new guards**, because this regression is silent in the worst way —
+shrinking the fraction back does not throw, does not clip, and fails no
+behavioural test. It just quietly becomes unreadable again. The tests assert the
+fraction is at least 0.66em, that the score it sits in is 22px so the floor means
+something, and that the bar is thick enough to survive at that size.
+
+Gates: `pnpm check` **120 passed** (was 117), `pnpm test:e2e` 35 passed / 5
+skipped / exit 0.
+
+### Thirty-four rounds, one causal chain
+
+The half point is the loop's clearest case of a defect being invisible rather
+than absent, and the chain is worth reading end to end because every step looks
+like a small correction to the one before it:
+
+- **round 36** a decimal `2.5` is replaced with a U+00BD glyph, and gets worse
+- **round 43** `10½` clips, `.points` is pinned `flex: 0 0 auto`
+- **round 53** the stacked fraction is built from DOM nodes — **in the HUD only**
+- **rounds 54–66** thirteen models report the same notation as ambiguous, because
+  the one they can see is the one that was fixed and the one they cannot see is
+  the one that is broken
+- **round 67** the second mechanism is deleted, so the card and the HUD share one
+  builder — and the review set still contains no frame of either
+- **round 68** a scored result card enters the set for the first time in 68 rounds
+- **round 71** a half point appears to not exist at all
+- **round 72** it does exist; two rounds of clean measurement were wrong because
+  the driving pattern made every half a counter
+- **round 73** a half point is on the board, in the set, permanently
+- **round 74** and the first thing anyone says about it is that it is too small
+
+**Not one of those eleven steps was a bug in the notation.** Every one was a
+problem with being able to see it. The notation was wrong in round 36, ambiguous
+in round 36, invisible from round 36 to round 73, and only then had anything
+truthful to say about it — and the first truthful thing was about size, which
+nobody could have reported at any point before, no matter how many models were
+asked.
