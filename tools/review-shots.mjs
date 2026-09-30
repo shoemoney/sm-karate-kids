@@ -630,6 +630,54 @@ await capture('19-phone-half-point', phone, async (page) => {
   console.warn('19-phone-half-point: no half landed, frame not written');
 });
 
+/* ---------- Round 75: the call. Nothing in the set had ever shown one. ---------- */
+
+/* Four models have reported on the IPPON / WAZA-ARI announcement — that it
+ * covers the fighters, that it is illegible, that it collides with the strike.
+ * The set had no frame of a *call*. It had a strike (round 69), a scored result
+ * (round 68) and a half point (round 73), but the moment a referee awards
+ * something — the announcement, the caller's name, the move that earned it, and
+ * the new score, all at once — had never been photographed.
+ *
+ * Captured on the simulation phase rather than a timer, because `referee` is the
+ * phase the call lives in and it is short. */
+await capture('20-phone-call', phone, async (page) => {
+  await page.goto(`${BASE}/?mode=dojo`, { waitUntil: 'networkidle' });
+  await waitFight(page);
+  const anchor = async (sel) => {
+    const box = await page.locator(sel).boundingBox();
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  };
+  const L = await anchor('#zone-left');
+  const R = await anchor('#zone-right');
+  const cdp = await page.context().newCDPSession(page);
+  const pts = new Map();
+  const send = (type) =>
+    cdp.send('Input.dispatchTouchEvent', {
+      type,
+      touchPoints: [...pts].map(([id, q]) => ({ x: Math.round(q.x), y: Math.round(q.y), id })),
+    });
+
+  for (let i = 0; i < 40; i += 1) {
+    if (await page.evaluate(() => globalThis.__smkk?.state?.().phase === 'referee')) {
+      await page.screenshot({ path: `${OUT}/20-phone-call.png` });
+      return;
+    }
+    pts.clear();
+    pts.set(1, { x: L.x, y: L.y });
+    await send('touchStart');            // stance neutral, so a half stays a half
+    pts.set(2, { x: R.x, y: R.y });
+    await send('touchStart');
+    pts.set(2, { x: R.x + 58, y: R.y });
+    await send('touchMove');
+    await page.waitForTimeout(230);
+    pts.clear();
+    await send('touchEnd');
+    await page.waitForTimeout(150);
+  }
+  console.warn('20-phone-call: no call observed, frame not written');
+});
+
 await browser.close();
 console.log(`shots in ${OUT}`);
 if (errors.length) console.log('console errors:\n' + [...new Set(errors)].join('\n'));

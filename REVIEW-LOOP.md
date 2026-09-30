@@ -2785,3 +2785,47 @@ in round 36, invisible from round 36 to round 73, and only then had anything
 truthful to say about it — and the first truthful thing was about size, which
 nobody could have reported at any point before, no matter how many models were
 asked.
+
+### Round 75 — the call, and a claim about it refused with a number
+
+`deepseek/deepseek-v4.1-flash` reported that the IPPON / WAZA-ARI announcement
+"stacks on the fighters' heads at the moment of the strike". Four models have now
+said something about this announcement and the set had **no frame of a call** —
+it had a strike, a scored result and a half point, but never the moment a
+referee awards something.
+
+Caught the phase rather than a timer, and measured the claim:
+
+    WAZA-ARI banner   top 162   bottom 264   (CSS px, 390x844)
+    fighters' heads                          ~325
+    gap                                     ~60px
+
+**Refused.** The announcement does not touch the fighters, and the sub-lines
+(`ASMONGOLD`, `LUNGE PUNCH`) sit inside the same band. The banner is large, but
+large and *above* is not the same as large and *on top of* — and the difference
+is exactly what a single frame of the actual call would have shown, which nobody
+had until this round.
+
+### `20-phone-call` — and the frame the loop needed without knowing it
+
+The capture turned out to be worth more than the test. A call frame contains, in
+one image, everything this loop spent thirty-four rounds assembling separately:
+
+- the **stacked half point** on the board, at the new size, at HUD scale
+- the **announcement** — WAZA-ARI, the caller's name, the move that earned it
+- the **strike pose** at the moment of contact
+- the **clock** running, and the fighter colours and name plates
+
+That is the first frame in seventy-five rounds where the score, the call and the
+strike are all true *simultaneously*, rather than each existing in a different
+screenshot taken on a different day. Every previous gap in this loop was a
+missing frame; this is the first time the set contained a moment rather than a
+surface.
+
+Round 74's fix is also visible here, unprompted: the `1/2` sits at HUD size in a
+real scoring frame and is plainly readable, which is the third independent
+confirmation (measured at 320px, measured at 390px, and now visible in a call).
+
+The set is 21 frames: boot, title, fight, kick, **call**, settings (x2),
+techniques, bracket, scored result, **half point**, desktop, high-contrast,
+tournament, impact, returning, landscape.
