@@ -4757,3 +4757,59 @@ to fail**, which is worth more than the other six.
 
 Gates: `pnpm check` 134 passed (was 132), `pnpm test:e2e` 35 passed / 5
 skipped / exit 0.
+
+### Round 111 — mutation-testing the fence, and the gap it found
+
+Round 110 proved one assertion could fail. **This round proves all of them**, by
+reverting each fix the fence claims to guard and checking that the right
+assertion goes red — and, just as importantly, that no *other* assertion does.
+
+    M1  revert r103  legend = bare directions
+        x the technique legend carries the direction and the action together
+    M2  revert r100  duplicate stance word
+        x the stance words are distinct
+    M3  revert r104  single-column legend
+        x both legend halves are laid out in two columns, not stacked
+    M4  revert r109  the + back inside a grid cell
+        x the + between the two legend halves spans the full row
+    M5  revert r102  hand-write the rules paragraph
+        (nothing fired)
+
+**One assertion per mutation, the correct one, no collateral.** Four of five.
+
+**M5 is the finding, and it is the uncomfortable kind.** Round 102's *computed*
+rules paragraph — the fix this loop is most proud of, the one that produced its
+single most generalisable lesson, the one where I wrote down that generating the
+copy is the answer — **had no assertion around it at all.** The glyph fence had
+no opinion about it, and nothing else in the repo did either.
+
+So it is guarded now, by two assertions that fail on the exact defect:
+
+    on hand-written text   x the technique counts in the paragraph come from
+                             the move table
+                             expected 'Point karate. One clean contact…'
+                             to match /\$\{all\.length\}/
+    on the computed text   9 passed
+
+The assertion is deliberately literal: if a `20` or a `10` appears in the
+sentence, it has been hand-written again and will disagree with the table the
+moment a move is added. That is the whole failure mode, and it is a grep away.
+
+### Why the mutation test is the round's real output
+
+The fence was written in round 105 to stop a class of defect recurring. Rounds
+106–110 found four more instances of that class, three of them caused by fixes
+for the previous one, and **the fence caught none of them** — because a fence
+that has never been shown its own teeth is a comment with `expect()` in it.
+
+The discipline costs one command per mutation: copy the file, break it on
+purpose, run the gate, confirm the right assertion fails and no other does,
+put it back. It found a real gap on its first full pass, and the gap was around
+the fix I would have defended hardest.
+
+Fence is now nine assertions across two files-worth of surfaces, was five, and
+**all five guarded mutations have been proven to fire correctly.** That number is
+the part worth keeping: not nine assertions, but five demonstrations.
+
+Gates: `pnpm check` 136 passed (was 134), `pnpm test:e2e` 35 passed / 5
+skipped / exit 0.

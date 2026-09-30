@@ -28,6 +28,34 @@ const coach = read('../../src/coach.ts');
  * consistency checker, and pretending otherwise would be the same over-claiming
  * that produced rounds 78 and 90.
  */
+/**
+ * Two fences, because round 110's mutation test found a gap in the first.
+ *
+ * Four of five mutations fired the correct assertion. The fifth — reverting
+ * round 102's *computed* rules paragraph back to hand-written text — fired
+ * nothing, because the glyph fence had no opinion about it. That is the fix
+ * this loop is most proud of and the one that produced its generalisable lesson,
+ * and it was the only one in the sheet with no assertion around it.
+ */
+describe('the rules paragraph is computed, not written', () => {
+  test('the technique counts in the paragraph come from the move table', () => {
+    // If a literal "20" or "10" appears in the sentence, it is hand-written
+    // again and will disagree with the table the moment a move is added.
+    const para = hud.match(/Point karate\.[\s\S]{0,600}?takes the round\.`;/);
+    expect(para, 'could not find the techniques rules paragraph').not.toBeNull();
+    const text = para?.[0] ?? '';
+    expect(text, 'the paragraph hard-codes a technique count').toMatch(/\$\{all\.length\}/);
+    expect(text, 'the paragraph hard-codes the half count').toMatch(/\$\{halfCount\}/);
+    expect(text, 'the paragraph hard-codes the full count').toMatch(/\$\{fullCount\}/);
+  });
+
+  test('the round target comes from the ruleset, not from the sentence', () => {
+    expect(hud).toMatch(/First to \$\{pointsToWin\}/);
+    // The signature has to take it, or the template above is a lie.
+    expect(hud).toMatch(/pointsToWin: number,/);
+  });
+});
+
 describe('the glyph vocabulary is decided once', () => {
   test('the technique legend carries the direction and the action together', () => {
     // Both halves, in one word. Direction-only was round 103 and it was a copy
