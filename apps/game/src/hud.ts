@@ -46,15 +46,6 @@ const QUALIFIER_GLYPH: Record<Qualifier, string> = {
 const FAMILIES: readonly AttackFamily[] = ['forward', 'back', 'up', 'down'];
 const QUALIFIERS: readonly Qualifier[] = ['neutral', 'up', 'down', 'forward', 'back'];
 
-const POINT_LABEL = new Map<number, string>([
-  [0, '0'],
-  [0.5, '½'],
-  [1, '1'],
-  [1.5, '1½'],
-  [2, '2'],
-  [2.5, '2½'],
-  [3, '3'],
-]);
 
 /**
  * A score, as a stacked fraction where there is a half in it.
@@ -74,11 +65,32 @@ const POINT_LABEL = new Map<number, string>([
  * back the width that made `10½` clip in round 43.
  */
 function renderScore(el: HTMLElement, score: number): void {
-  const whole = Math.floor(score);
-  if (score === whole) {
-    el.textContent = POINT_LABEL.get(score) ?? String(whole);
-    return;
+  el.replaceChildren(scoreFragment(score));
+  el.setAttribute('aria-label', Number.isInteger(score) ? String(score) : `${Math.floor(score)} and a half`);
+}
+
+/**
+ * A score, as a DocumentFragment, for anywhere that renders one.
+ *
+ * Round 66 measured why the text path had to die. Five models in five rounds
+ * reported the half point as cramped, ambiguous, unreadable or as reading
+ * `21/2` — all of them looking at the result card, because that is where the
+ * score is a *string* and the HUD's stacked fraction is not used. So the fix
+ * that satisfied them in round 53 only ever reached the in-match HUD, and the
+ * card kept the U+00BD glyph the comment above explains.
+ *
+ * One builder, two callers, so the notation cannot drift again: the same nodes
+ * that render `2½` in the HUD render it on the card, with the thousands
+ * separator preserved for a four-figure career total.
+ */
+export function scoreFragment(n: number): DocumentFragment {
+  const frag = document.createDocumentFragment();
+  const whole = Math.floor(n);
+  if (n === whole) {
+    frag.append(document.createTextNode(whole.toLocaleString()));
+    return frag;
   }
+  if (whole > 0) frag.append(document.createTextNode(whole.toLocaleString()));
   const frac = document.createElement('span');
   frac.className = 'score-frac';
   const top = document.createElement('span');
@@ -90,8 +102,8 @@ function renderScore(el: HTMLElement, score: number): void {
   bottom.className = 'score-frac-num';
   bottom.textContent = '2';
   frac.append(top, bar, bottom);
-  el.replaceChildren(document.createTextNode(whole === 0 ? '' : String(whole)), frac);
-  el.setAttribute('aria-label', `${whole} and a half`);
+  frag.append(frac);
+  return frag;
 }
 
 export class Hud {
@@ -238,10 +250,10 @@ export class Hud {
    * by the caller so the game loop stays the only clock.
    */
   showResult(opts: {
-    headline: string;
+    headline: string | Node;
     tone: 'full' | 'neutral';
-    score: string;
-    detail: string;
+    score: string | Node;
+    detail: string | Node;
     rematch: () => void;
     /** The button's label. Defaults to REMATCH. */
     action?: string;
@@ -266,13 +278,16 @@ export class Hud {
     }
     const headline = document.createElement('div');
     headline.className = 'result-headline';
-    headline.textContent = opts.headline;
+    if (opts.headline instanceof Node) headline.replaceChildren(opts.headline);
+    else headline.textContent = opts.headline;
     const score = document.createElement('div');
     score.className = 'result-score';
-    score.textContent = opts.score;
+    if (opts.score instanceof Node) score.replaceChildren(opts.score);
+    else score.textContent = opts.score;
     const detail = document.createElement('div');
     detail.className = 'result-detail';
-    detail.textContent = opts.detail;
+    if (opts.detail instanceof Node) detail.replaceChildren(opts.detail);
+    else detail.textContent = opts.detail;
     const kicker = document.createElement('div');
     kicker.className = 'result-kicker';
     kicker.textContent = opts.kicker ?? '';

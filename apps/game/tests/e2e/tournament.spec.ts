@@ -1,5 +1,6 @@
 import { expect, test } from './fixtures.js';
 import type { Page } from '@playwright/test';
+import { Thumbs, anchorOf, tap } from './thumbs.js';
 
 type Tournament = { active: boolean; round: number; roundId: string | null; score: number; held: boolean };
 const tournament = (page: Page) =>
@@ -217,4 +218,56 @@ test('the old single-bout modes stay out of the tournament', async ({ page }) =>
   await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk']?.ready === true);
   expect((await tournament(page)).active).toBe(false);
   await expect(page.locator('.result')).toBeHidden();
+});
+
+/**
+ * The result card's score is the one score the player sees that is not the HUD.
+ *
+ * For thirty-one rounds it was a string while the HUD was DOM, so a glyph that
+ * renders slashed — `2½` reading as `21/2` — sat on the card for five models
+ * after the HUD itself had been fixed. This asserts the notation on the card
+ * that is actually rendered, because the defect was never in a value: it was in
+ * the card not using the same mechanism as the HUD.
+ */
+test('the result card scores with the HUD notation, never the slashed glyph', async ({ page }, info) => {
+  test.skip(info.project.name !== 'phone-portrait', 'the card layout under test is the phone card');
+  test.setTimeout(180_000);
+
+  await page.goto('/?mode=dojo');
+  await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk']?.ready === true);
+  const rematch = page.locator('.result-rematch');
+  if (await rematch.isVisible().catch(() => false)) await rematch.click();
+  await page.waitForFunction(
+    () => (globalThis as Record<string, any>)['__smkk']?.state?.().phase === 'fight',
+    null,
+    { timeout: 20_000 },
+  );
+
+  const thumbs = await Thumbs.attach(page);
+  const stance = await anchorOf(page, '#zone-left', 1);
+  const technique = await anchorOf(page, '#zone-right', 2);
+  const deadline = Date.now() + 120_000;
+  const reads = ['up', 'right', 'left', 'down'] as const;
+  let i = 0;
+
+  while (Date.now() < deadline) {
+    if (await page.locator('.result-score').isVisible().catch(() => false)) break;
+    await thumbs.release();
+    await tap(thumbs, stance, 'right');
+    const dir = reads[i++ % reads.length]!;
+    await tap(thumbs, technique, dir);
+  }
+  await thumbs.release();
+
+  const card = page.locator('.result-score');
+  await expect(card).toBeVisible({ timeout: 20_000 });
+  // No U+00BD anywhere in the rendered card, whatever the notation.
+  await expect(card).not.toContainText('\u00bd');
+  // If a half is showing it is the stacked fraction the HUD builds, and its
+  // numerator is a real 1 rather than a glyph pretending to be one.
+  if ((await card.locator('.score-frac').count()) > 0) {
+    await expect(card.locator('.score-frac-num').first()).toHaveText('1');
+  }
+  // It still reads as a score rather than as raw state.
+  await expect(card).toHaveText(/\d/);
 });

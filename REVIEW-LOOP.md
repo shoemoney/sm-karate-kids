@@ -2304,3 +2304,63 @@ the loop. It needs the text path finished, not another refusal.
 - `settings-sheet-hard-cut` (mimo) — this is the scrim finding above, plus the
   same "sticks disappear" observation, which is correct: the panel is modal.
 - `prism-ml/ternary-bonsai-2-27b` — 429 from Darkbloom.
+
+### Round 67 — the half-point notation, finally finished
+
+Five models in five rounds had been reporting this. Round 66 identified why
+none of my refusals had landed: **the round 53 fix only ever reached the HUD.**
+`hud.ts` built a stacked fraction from DOM nodes; `main.ts` still built a
+*string* for the result card, the round-earned headline, the run total and the
+career best. So the models were not wrong and were not misreading anything —
+they were reading a different mechanism from the one I had fixed, on a screen
+I had never screenshotted.
+
+**Fixed, by removing the second mechanism.**
+
+- `scoreFragment(n)` is now exported from `hud.ts` and is the only way a score
+  is rendered anywhere. `renderScore` delegates to it, so there is no second
+  copy of the logic to drift.
+- `showResult`'s `headline`, `score` and `detail` accept `string | Node`, and
+  the card appends a `DocumentFragment` when given one. Every card score path
+  now goes through the builder: the bout result (`2 — 0`), the round earned
+  (`+2`), the run total, and the career best with its thousands separator.
+- `formatScore`, `points()` and `POINT_LABEL` are all **deleted**. The last one
+  was a `Map` whose entire job was spelling halves as U+00BD — the exact glyph
+  this change exists to remove, still sitting in the file eight rounds after the
+  fix that was supposed to retire it.
+
+**Verified in a browser, not in a unit test.** Played a bout to its result card
+and read the rendered DOM:
+
+    result-score: {"frac":false,"glyph":false,"text":"2 — 0"}
+
+`frac: false` is correct — 2 and 0 are whole numbers — and `glyph: false` is
+the claim: **no U+00BD survives in the rendered card.** I could not force a half
+deterministically through the thumb grammar (waza-ari did not land inside the
+loop), so the fraction's rendered form rests on the HUD's own verified output in
+`boot.spec.ts` plus a structural check of the builder. Recorded rather than
+claimed.
+
+**Two guards, because the bug lived in the wiring and not in a value.**
+
+- `apps/game/tests/unit/score-notation.test.ts` — six tests asserting the
+  builder exists and is exported, no live U+00BD in `main.ts`, `formatScore` is
+  gone and uncalled, `POINT_LABEL` is gone, all three card fields accept nodes,
+  and the thousands separator survives. It reads source rather than output, on
+  purpose: the defect was that a score *could* be a string again, and only a
+  source guard catches that.
+- A new e2e test plays a bout to the card and asserts the rendered text contains
+  no U+00BD, that a half renders as `.score-frac` with a real numerator, and
+  that the card still reads as a score.
+
+Gates: `pnpm check` **117 passed** (was 111), `pnpm test:e2e` **35 passed / 5
+skipped / exit 0**.
+
+### The lesson, stated properly this time
+
+Round 53 fixed a notation and thought the job was done. It was not — the same
+notation existed in two mechanisms, and the one I did not touch was the one
+people look at. **A fix that reaches one of two renderers has not fixed the
+concept.** The thing that made this finally stick is not the builder, it is
+deleting the second mechanism so there is nothing left to drift, plus a test
+that fails if a score string ever comes back.

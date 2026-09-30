@@ -24,7 +24,7 @@ import {
 import { Audio } from './audio.js';
 import { mountBootScreen, type BootScreen } from './bootScreen.js';
 import type { FighterView } from './fighterView.js';
-import { Hud } from './hud.js';
+import { Hud, scoreFragment } from './hud.js';
 import { PlayerInput } from './input/index.js';
 import { loadCareer, loadPlayerName, recordBoutResult, recordRun, savePlayerName } from './persist.js';
 import { Leaderboard } from './leaderboard.js';
@@ -396,7 +396,11 @@ async function boot(screen: BootScreen): Promise<void> {
     hud.showResult({
             headline: winner === null ? 'DRAW' : `${state.fighters[winner].spec.name} WINS`,
             tone: winner === null ? 'neutral' : 'full',
-            score: `${points(a.score)} — ${points(b.score)}`,
+            score: (() => {
+              const f = document.createDocumentFragment();
+              f.append(scoreFragment(a.score), document.createTextNode(' — '), scoreFragment(b.score));
+              return f;
+            })(),
             detail: `Bouts won ${record.boutsWon} / ${record.boutsPlayed} · best ${best}`,
             rematch: () => act(),
           });
@@ -410,32 +414,25 @@ async function boot(screen: BootScreen): Promise<void> {
   let lastStarted: { player: 0 | 1; moveId: string; tick: number } | null = null;
   const REMATCH_AFTER_MS = 8000;
   const ROUND_INTRO_MS = 4000;
-  const points = (n: number): string => (Number.isInteger(n) ? String(n) : n === 0.5 ? '½' : `${Math.floor(n)}½`);
   /**
-   * A score, for anywhere outside the HUD.
+   * Every score outside the in-match HUD goes through `scoreFragment`, the same
+   * builder the HUD's own `renderScore` uses.
    *
-   * The in-match score is `points()` — a half point is `2½`. The result card,
-   * the run total and the career best were all `toLocaleString()`, which renders
-   * the same value as `2.5`. So the product showed one notation for the whole
-   * bout and a different one the moment the bout ended, and `2.5` is a decimal
-   * that reads ambiguously at a glance — two-and-a-half, or a tally of two
-   * and a bit?
+   * This used to be a string formatter, and the loop paid for it twice. Round 36
+   * replaced a decimal `2.5` with a U+00BD glyph to fix the result card, which
+   * made that card *less* readable — the glyph renders slashed, so `2½` reads as
+   * `21/2`. Round 53 fixed it properly in the HUD by building the fraction from
+   * DOM nodes, and five models went on reporting the problem for five more
+   * rounds, because the card was still a string and the HUD fix had never
+   * reached it.
    *
-   * Six models across six rounds reported it without agreement on why: "cluttered
-   * fraction notation", "hard to parse quickly", "unclear half-point fraction
-   * with no explanation", "typographic clash", "hard to read". They were all
-   * looking at the result screen and all describing the same thing, which is the
-   * one place a score is shown in a notation the player has never seen before.
-   *
-   * Thousands separators are kept, so a four-figure career total still reads as
-   * one.
+   * So the lesson was not "use a stacked fraction." It was that two places
+   * rendering the same concept by two different mechanisms will drift, and the
+   * one that drifts is the one nobody screenshots. There is now one builder and
+   * no score string in this file.
    */
-  const formatScore = (n: number): string => {
-    if (n === 0.5) return '½'; // matches points(): half a point is not "0½"
-    const whole = Math.floor(n);
-    const grouped = whole.toLocaleString();
-    return n === whole ? grouped : `${grouped}½`;
-  };
+  const formatScoreNodes = (n: number): DocumentFragment => scoreFragment(n);
+
 
   // Every card ends in one pending action, fired by its button or by the
   // countdown, whichever comes first — never both.
@@ -564,9 +561,17 @@ async function boot(screen: BootScreen): Promise<void> {
     coach.dismiss();
     hud.showResult({
         kicker: `Round ${run.round + 1} cleared`,
-        headline: `+${formatScore(earned)}`,
+        headline: (() => {
+          const f = document.createDocumentFragment();
+          f.append(document.createTextNode('+'), scoreFragment(earned));
+          return f;
+        })(),
         tone: 'full',
-        score: `Run ${formatScore(run.score)}`,
+        score: (() => {
+          const f = document.createDocumentFragment();
+          f.append(document.createTextNode('Run '), scoreFragment(run.score));
+          return f;
+        })(),
         detail: `Next: the ${next.name}`,
         action: 'NEXT ROUND',
         rematch: () => act(),
@@ -585,10 +590,18 @@ async function boot(screen: BootScreen): Promise<void> {
       kicker: won ? 'Tournament complete' : `Out in the ${round.name}`,
       headline: won ? 'CHAMPION' : 'DEFEATED',
       tone: won ? 'full' : 'neutral',
-      score: formatScore(run.score),
+      score: formatScoreNodes(run.score),
       detail: newBest
         ? 'New best score'
-        : `Best ${formatScore(record.bestScore)} · titles ${record.championships}`,
+        : (() => {
+            const f = document.createDocumentFragment();
+            f.append(
+              document.createTextNode('Best '),
+              scoreFragment(record.bestScore),
+              document.createTextNode(` · titles ${record.championships}`),
+            );
+            return f;
+          })(),
       action: 'NEW TOURNAMENT',
       rematch: () => act(),
     });
