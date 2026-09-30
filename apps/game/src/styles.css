@@ -2629,14 +2629,32 @@ body.no-backdrop-filter .result-score,
    screen reads as one paragraph with a second thought rather than two competing
    headlines. */
 .result-notation {
-  /* Its own line. In the same run as the opponent's tell it read as one
-     paragraph — the card is uppercase, so a second sentence looks like a
-     continuation of the first rather than a different question. Block it, and
-     dim it, so the screen says "who am I fighting" and then "how does a move
-     work" as two things. */
+  /* Its own line, and NOT uppercase.
+   *
+   * In the same run as the opponent's tell it read as one paragraph — the card
+   * is uppercase, so a second sentence looked like a continuation of the first
+   * rather than a different question. Block it, and dim it, so the screen says
+   * "who am I fighting" and then "how does a move work" as two things.
+   *
+   * And the casing was reversed for it in round 129. `.result-detail` is
+   * uppercase because the opponent's tell is six words of UI voice — deliberate,
+   * and it gives the card its character. This line is forty-five characters of
+   * *prose*, and six words of shouty styling plus forty-five characters of shouty
+   * styling is not a style, it is a card that has stopped distinguishing what it
+   * is saying. `openai/gpt-6.1-sol` (via codex) called it "briefing copy all
+   * caps" and it is the first finding in a long while that no fence could catch,
+   * because nothing disagrees with anything else — one surface is simply harder
+   * to read than it needs to be, and only a reader notices.
+   *
+   * Sentence case, the tell's normal tracking, and a small size drop so a
+   * sentence is not set at label scale. */
   display: block;
   margin-block-start: var(--space-1);
   color: var(--text-faint);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-normal);
+  text-transform: none;
+  line-height: 1.45;
 }
 
 body.no-backdrop-filter .result-detail {

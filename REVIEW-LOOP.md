@@ -5711,3 +5711,42 @@ result rather than a confident claim in a log.
 
 Gates, read before acting: `pnpm check` 140 passed, `pnpm test:e2e` 35 passed /
 5 skipped / exit 0.
+
+### Round 129 — the casing, and a category the loop had not seen in a long time
+
+`briefing-copy-all-caps`, recorded and deferred last round. Taken.
+
+    .result-notation  text-transform: none
+                      letter-spacing: var(--track-normal)
+                      font-size: var(--text-xs)
+                      line-height: 1.45
+
+The card now has two voices, and that is the point:
+
+    PATIENT. HE WAITS FOR YOUR WIND-UP, THEN MAKES YOU PAY.   <- uppercase, UI voice
+    A move = a technique input + a stance input, or leave
+    the stance centred.                                       <- sentence case, prose
+
+**`.result-detail` is uppercase because the opponent's tell is six words and that
+is a deliberate style** — it gives the card its character, and rounds 118–122
+have been building around it. The notation line is forty-five characters of
+prose, and **six words of shouty styling plus forty-five characters of shouty
+styling is not a style, it is a card that has stopped distinguishing what it is
+saying.**
+
+**This is a category the fences cannot catch, and naming that is the useful part
+of the round.** Every assertion in `glyph-vocabulary.test.ts` compares two
+surfaces. Every one of the last forty findings was a *disagreement* — the coach
+and the sheet, the sheet and the rows, the card and the data. This one is a
+single surface being harder to read than it needs to be, with nothing to compare
+it against. The whole instrumentation strategy this loop built — mutation-tested
+fences, cross-surface assertions, published anchors — is blind to it by
+construction, because **a fence needs two things to compare.**
+
+So the honest statement of the loop's coverage after a hundred and twenty-nine
+rounds: it is very good at *disagreement*, it has instruments for *numbers*, and
+it catches *readability* only when a model happens to comment. That is a real
+limit and it is better to state it than to let the passing fences imply coverage
+they do not have.
+
+Gates: `pnpm check` 140 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
