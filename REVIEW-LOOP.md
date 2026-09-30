@@ -4999,3 +4999,44 @@ sheet carries a real key), and it is a judgement about what a first-run player
 needs rather than a defect.
 
 Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 116 — the check round 115 named, run
+
+Round 115 ended with the finding **mitigated and not confirmed closed**, and
+named the check that would close it: a scrolled-to-bottom frame with a pixel
+measurement on the last row. Here it is.
+
+    scrollTop 618 of scrollHeight 1393, clientHeight 775
+    last row occupies y 717-756 in a body ending at 844
+    last row glyph rgb(246,239,230) on plate rgb(19,13,10)
+    contrast 16.89:1
+
+**Closed.** The last row clears the 3rem fade with 88px to spare and renders at
+16.89:1, against roughly 1.2:1 where the fade had it. The scrolled capture shows
+all twenty rows at full contrast, Back Kick included, and the fade reduced to
+the hint it was always meant to be.
+
+**So the two-round arc is the whole shape of this loop in miniature, and it is
+worth writing down as a unit:**
+
+    r114  I added one line of notation above the rows
+    r115  that line pushed the last row under a 3rem scroll fade, and I
+          recorded the finding as mitigated-not-closed because I had not proved it
+    r116  I ran the check I had named, and it passed
+
+The middle round is the one that matters. The temptation there was to write "the
+padding now lets the last row scroll clear" and mark it done, which would have
+been **true and unverified** — the CSS said so, the gates said so, and a reviewer
+reading the resting frame would still have photographed a dimmed row and filed
+the same finding next round. The only thing that distinguishes the two is
+scrolling the element and measuring a pixel, which costs about a minute and is
+the difference between a claim and a result.
+
+This is round 98's lesson again — publish the number from the place that
+produces it — applied to a scroll position rather than an impact anchor. **The
+class of defect is always the same: a thing that is correct at rest and
+unverified in the state a user actually reaches.** Rounds 90, 93, 95, 106 and 110
+are all the same mistake in different clothes, and rounds 63, 98, 111 and 116 are
+the instrument that catches it.
+
+Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
