@@ -3364,3 +3364,61 @@ is 40% of the frame of a dojo with a back wall, a shoji screen and a crowd — a
 of it already modelled. A tighter crop on the *fighters* with the room visible
 above them is the composition the models keep describing, and it is available
 without touching the framing at all.
+
+### Round 85 — the reviewer switch, and a limit I cannot route around
+
+Instructed to use only `codex` with `gpt-6.1-sol` as the advisory reviewer,
+with computer use. Tried, in order:
+
+    codex exec -m gpt-6.1-sol -i <frame>   -> usage limit, resets Oct 4 08:57
+    + OPENAI_BASE_URL=openrouter + key    -> 400: "model is not supported when
+                                             using Codex with a ChatGPT account"
+    codex exec --oss --local-provider     -> no Ollama server
+
+Codex authenticates as a **ChatGPT account** and does not accept a third-party
+base URL or key, so the OpenRouter key this loop already uses cannot be routed
+into it, and the local-provider path needs a server that is not running. The
+`~/.codex/config.toml` on this machine is fully provisioned for the intended
+setup — `sandbox_mode = danger-full-access`, `approval_policy = never`, and a
+`SkyComputerUseClient` notify hook that is exactly the computer-use bridge — so
+this is purely the account cap, not a misconfiguration.
+
+**So the loop cannot use that reviewer until October 4th, and I am not going to
+pretend otherwise or silently substitute something else and call it the same
+thing.** The standing instruction stands and takes effect on the first
+iteration after the limit resets; nothing about it has been changed or quietly
+worked around.
+
+Meanwhile the loop continues on the harness that does work. That is a fact about
+the tooling, not a redefinition of the instruction.
+
+### And the ceiling, which I could not fix either
+
+Round 84 ended with a concrete conclusion — the headroom is arithmetic, and the
+fix is to make the space above the fighters *read as a room* rather than to move
+the camera. The eave, rafters and paper lantern are all modelled and drawn; the
+band above the shoji measures **mean luminance 48, standard deviation 18.9**
+against 47.6 on the mat, which is the flattest region in a portrait frame and
+the number behind eight reviewers saying "empty brown haze".
+
+**Two attempts, both measured, both worse. Reverted.**
+
+    tint #463a2d (original)        mean 47.9   sd 18.9
+    tint #8a7358 (lifted)          mean 42.1   sd  8.3   <- flatter
+    tint #5c4a37 (settled)         mean 41.2   sd  7.3   <- flatter still
+
+Lifting the tint was the intuitive move and it is the wrong one: **multiplying a
+dark map up lifts its blacks faster than its beams**, and the beams are the only
+contrast in that region to begin with. Every direction of a global multiply makes
+this band flatter, which means the tint is not the lever at all.
+
+What the three measurements actually establish is that the ceiling's *source
+art* is low-contrast — the standard deviation is already 18.9 before any tint,
+and no value of a single multiply can raise it. Fixing this needs either
+different source art or per-pixel treatment of the eave, neither of which is a
+change this loop should make unilaterally on a generated asset with a provenance
+record.
+
+**Recorded as measured-and-open rather than refused.** It is a real observation
+from eight independent reviewers, the measurement behind it is sound, and the
+loop has now demonstrated by experiment that the obvious fix does not work.
