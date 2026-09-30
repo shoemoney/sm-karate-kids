@@ -3537,3 +3537,46 @@ a frame where the kick is thrown into open space, with no contact and no
 overlap, would settle it for good.
 
 Recorded as a capture gap, queued, and refused as a defect.
+
+### Round 88 — the frame that ends a six-round argument
+
+`21-phone-kick-open`. A front kick thrown into open space, opponent out of
+reach, nothing overlapping the striking leg.
+
+**The first attempt failed and the way it failed is the useful part.** I drove the
+stance stick right ten times to open a gap, which does not work: the camera
+re-frames to hold both fighters in shot, so the pair stays in contact range and
+the foot still lands on the opponent's hip. The capture did what it was asked and
+produced the same ambiguous frame for the seventh time. There is a `spacing` URL
+parameter in dojo mode — the e2e suite already uses it — and that is the control
+that actually sets the start separation.
+
+    ?mode=dojo&spacing=5.6
+
+Now the whole kick is visible against the mat: thigh raised, shin angled
+down-right, **foot clearly pointing right with the toes drawn**, both feet of the
+supporting leg planted, no impact effect, no body behind it, nothing to confuse
+the reading.
+
+**Six reviews in six rounds, four models, one sprite — and the sprite was never
+wrong.** Every one of them was looking at a landing kick: the foot on the
+opponent's body, both fighters overlapping, the impact sparks drawn over the
+ankle. Round 87 worked out why and this frame is the answer to it. A reviewer
+cannot judge a limb's direction when the limb is on top of another character and
+under a bright effect, and no amount of my inspecting that same frame at higher
+zoom was ever going to change what the reviewer was looking at.
+
+**The set is now 22 frames, and the difference between the two kick frames is the
+whole lesson of this loop in one comparison:**
+
+    18-phone-kick        a kick landing on a body, under an effect, overlapping
+    21-phone-kick-open   a kick in air, unobstructed, against the mat
+
+Same sprite, same pose, same model family. One produced six defect reports and
+one produces none. The product did not change between them. **The frame did.**
+
+Every major finding in this log has the same shape, and it is worth stating one
+last time now that it has produced a closure rather than just a correction: the
+game is far more correct than the review of it has been, because reviewing a
+thing is mostly a question of *what you put in front of the reviewer*. Six models
+were right about what they saw and wrong six times about what they were seeing.

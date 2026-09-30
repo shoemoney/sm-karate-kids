@@ -678,6 +678,63 @@ await capture('20-phone-call', phone, async (page) => {
   console.warn('20-phone-call: no call observed, frame not written');
 });
 
+/* ---------- Round 88: a kick into open space ---------- */
+
+/* Six reviews in six rounds have reported the front kick as amputated,
+ * truncated, or pointing the wrong way, and the loop has refused all six — each
+ * time correctly. The frame is the reason: a kick that LANDS puts the foot on the
+ * defender's body, under an impact effect, with both fighters overlapping. So
+ * the thing the reviewer is asked to judge (which way does the foot point, is the
+ * leg whole) is the thing the capture deliberately obscures.
+ *
+ * This one is thrown into air with the opponent out of reach: the whole kick,
+ * end to end, against the mat. It is the frame that settles the family. */
+await capture('21-phone-kick-open', phone, async (page) => {
+  // `spacing` sets the start separation in dojo mode. Stepping the stance stick
+  // right does NOT open the gap — the camera re-frames to hold both fighters,
+  // so they stay in contact range and the foot still lands on the opponent,
+  // which is the whole thing this frame exists to avoid.
+  await page.goto(`${BASE}/?mode=dojo&spacing=5.6`, { waitUntil: 'networkidle' });
+  await waitFight(page);
+  const anchor = async (sel) => {
+    const box = await page.locator(sel).boundingBox();
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  };
+  const L = await anchor('#zone-left');
+  const R = await anchor('#zone-right');
+  const cdp = await page.context().newCDPSession(page);
+  const pts = new Map();
+  const send = (type) =>
+    cdp.send('Input.dispatchTouchEvent', {
+      type,
+      touchPoints: [...pts].map(([id, q]) => ({ x: Math.round(q.x), y: Math.round(q.y), id })),
+    });
+  await page.waitForTimeout(400);
+
+  // Kick, and shoot on the frame the move is actually active.
+  pts.clear();
+  pts.set(1, { x: L.x, y: L.y });
+  await send('touchStart');
+  pts.set(2, { x: R.x, y: R.y });
+  await send('touchStart');
+  pts.set(2, { x: R.x, y: R.y - 58 });  // up = front_kick
+  await send('touchMove');
+  await send('touchEnd');
+  pts.clear();
+
+  let caught = false;
+  for (let i = 0; i < 24; i += 1) {
+    const s = await page.evaluate(() => globalThis.__smkk?.state?.() ?? null);
+    if (s?.p1Phase === 'active' && String(s?.p1Move ?? '').includes('kick')) {
+      await page.screenshot({ path: `${OUT}/21-phone-kick-open.png` });
+      caught = true;
+      break;
+    }
+    await page.waitForTimeout(20);
+  }
+  if (!caught) console.warn('21-phone-kick-open: no active kick observed, frame not written');
+});
+
 await browser.close();
 console.log(`shots in ${OUT}`);
 if (errors.length) console.log('console errors:\n' + [...new Set(errors)].join('\n'));
