@@ -4700,3 +4700,60 @@ stance-directions half if it had read `coach.ts`, and the `+` placement is
 exactly the kind of layout assertion a screenshot cannot make.
 
 Gates: `pnpm check` 132 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 110 — I shipped a gate that could not fail, and proved it could not fail
+
+Round 109 ended by noting that the round-105 fence would have caught half of it
+if it had read `coach.ts`. Fair, and wrong, because a fence that catches nothing
+is worse than no fence — it is read as evidence.
+
+**The mutation test is the only thing that distinguishes them, and I skipped it
+on the first version.** The assertion compared the two alphabetically-first
+caption words. On healthy code `['back','crouch','in','jump']` differ. On the
+broken code `['crouch','jump','step','step']` they also differ. So it passed on
+the exact defect it was written for, and I only found out because I reverted the
+fix and re-ran:
+
+    cp coach.ts /tmp/coach.bak
+    sed -i "s/'◀ back', '▲ jump', '▶ in'/'◀ step', '▲ jump', '▶ step'/"
+    pnpm vitest run .../glyph-vocabulary.test.ts
+      Tests  7 passed (7)          <-- on the broken code
+
+**Seven passed, on code that contains the r109 defect verbatim.** A gate that
+cannot fail is worse than no gate, because it is read as evidence — and this
+loop has written that sentence about models for a hundred rounds without
+applying it to the thing I had just written.
+
+The rewrite reads the pairs in DOM order and compares the two *arrowed*
+horizontal captions, and it is now verified in both directions:
+
+    on the broken code   ×  stance left is "step" and stance right is "step"
+                            — expected 'step' not to be 'step'
+    on the fixed code    7 passed
+
+**That asymmetry is the whole discipline, and it costs one command.** Copy the
+file, break it on purpose, run the gate, confirm it goes red, put it back. Every
+gate in this repo that claims to protect something should be able to show its own
+teeth, and round 78's guard is the standing reminder of what happens when one
+never does — it froze a bug and failed when the bug was fixed, which is a more
+expensive outcome than never having written it.
+
+### Also this round
+
+The `+`-placement assertion is the one genuinely new thing, and it is a layout
+claim rather than a wording one:
+
+    .tech-key > .tech-plus { grid-column: 1 / -1; justify-self: center; }
+
+Round 109's `+` regression was invisible in every screenshot taken for three
+rounds, because a centred dot beside the last item of a list *looks* like a
+divider. The assertion asks the mechanism instead: does the separator span the
+row, or did it become a cell? That is the shape of the round-105 dead-CSS catch
+too — both are "the render is right and the intent is not", and both are
+invisible to anything that only looks at pictures.
+
+Fence is now seven assertions, was five, and **one of them has been proven able
+to fail**, which is worth more than the other six.
+
+Gates: `pnpm check` 134 passed (was 132), `pnpm test:e2e` 35 passed / 5
+skipped / exit 0.

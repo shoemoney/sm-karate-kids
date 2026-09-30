@@ -70,4 +70,47 @@ describe('the glyph vocabulary is decided once', () => {
       expect(coach, `coach does not label the ${word} technique`).toContain(word);
     }
   });
+
+  test('the two horizontal stance directions are named differently', () => {
+    // r109: the coach said `◀ step` and `▶ step` while the technique stick said
+    // `back` and `forward`, so the sheet taught a distinction the coach did not
+    // make and a player could not tell which way "step" went.
+    //
+    // The first version of this assertion compared the two *alphabetically
+    // first* caption words, which differ on healthy code AND on the broken code
+    // — it passed on `['◀ step','▲ jump','▶ step','▼ crouch']`, the exact defect
+    // it was written to catch. Verified by reverting the fix and re-running:
+    // 7 passed. A gate that cannot fail is worse than no gate, because it is
+    // read as evidence.
+    //
+    // So this reads the pairs in DOM order and compares the two *arrowed*
+    // horizontal ones, which is the pair that has to differ.
+    const line = coach.match(/title:\s*'Stance',\s*pairs:\s*\[([^\]]*)\]/);
+    expect(line, "no `title: 'Stance', pairs: [...]` row in coach.ts").not.toBeNull();
+    const pairs = [...((line?.[1] ?? '').matchAll(/'([^']+)'/g) ?? [])].map(
+      (m) => m[1] as string,
+    );
+    expect(pairs.length, `read ${pairs.length} stance captions`).toBe(4);
+    const byArrow = (arrow: string): string => {
+      const hit = pairs.find((c) => c.startsWith(arrow));
+      expect(hit, `no stance caption for ${arrow}`).toBeDefined();
+      return (hit ?? '').replace(/^\S+\s*/, '').trim();
+    };
+    const left = byArrow('◀');
+    const right = byArrow('▶');
+    expect(
+      left,
+      `stance left is "${left}" and stance right is "${right}" — if these match, the player cannot tell which way to step, which is the r109 defect`,
+    ).not.toBe(right);
+  });
+
+  test('the + between the two legend halves spans the full row', () => {
+    // r109: the two-column layout made the `+` a grid item, so it landed in
+    // column two of the STANCE list's last row — inside one of the two lists it
+    // was meant to separate. It looked like a divider in every screenshot taken
+    // for three rounds, which is the same failure as the dead rule r105 found:
+    // the render is right and the intent is not.
+    const css = read('../../src/styles.css');
+    expect(css).toMatch(/\.tech-key > \.tech-plus \{[^}]*grid-column:\s*1 \/ -1/);
+  });
 });
