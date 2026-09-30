@@ -4813,3 +4813,55 @@ the part worth keeping: not nine assertions, but five demonstrations.
 
 Gates: `pnpm check` 136 passed (was 134), `pnpm test:e2e` 35 passed / 5
 skipped / exit 0.
+
+### Round 112 — the techniques sheet goes quiet, and a record's clock gets named
+
+    pre-fight-input-guide
+    record-clock-label            <- fixed
+    result-pose-separation
+    desktop-keyboard-discovery
+    metadata-size-unverified
+
+**The techniques sheet has not appeared in the findings for a single round.**
+That surface carried rounds 100, 101, 102, 103, 104, 107, 109 and 111 — eight
+rounds, six fixes, two regressions caused by the fixes for the previous one, a
+five-assertion fence, a nine-assertion fence, and five mutation tests. It is now
+the only part of the game no reviewer is reporting on, and it is the part that
+took the most work.
+
+That is worth stating as a result rather than as an absence. **The loop's yield
+on a single surface was near zero for most of its life and then went negative
+twice before it went quiet** — the defects were real, but the fixes were
+generating new defects faster than the review was finding old ones, and the only
+thing that ever stopped it was fencing the surface and mutation-testing the
+fence. The sheet is not fixed because the reviewer stopped caring. It is fixed
+because there is now a gate that fires when it stops being true.
+
+### `record-clock-label`, and the reviewer's own instruction followed
+
+*"displays 29s on the round timer and FASTEST WIN 6.1S without identifying the
+record's time basis"* — and its suggested fix was **"verify which clock supplies
+the record, then explicitly label it."**
+
+So I verified rather than guessed, and the answer is that there is no second
+clock:
+
+    recordBoutResult(won, winTicks)   ->  bestWinTicks = min(existing, winTicks)
+    winTicks is state.tick at the winning contact
+    timerTicks counts down from 1800 on that same tick
+
+**The record and the round timer share an origin and a length.** "Fastest win" was
+*accurate* and still read as a separate statistic sitting next to a 29-second
+round, which is exactly how a player ends up wondering what it is out of. It is a
+round time, so it now says so:
+
+    BOUTS WON 1 / 1 · FASTEST ROUND 6.4S
+
+**And the reviewer's phrasing is the part worth carrying.** It did not say "add
+a label" — it said *verify which clock supplies the record*, and it explicitly
+warned against changing either value on the strength of a still. That is a
+reviewer distinguishing a labelling problem from a data problem, and it is a
+sharper instruction than most of the fixes this loop has shipped, because it
+told me what to go and look at rather than what to go and do.
+
+Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.

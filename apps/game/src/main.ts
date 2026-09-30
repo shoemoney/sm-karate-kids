@@ -421,7 +421,14 @@ async function boot(screen: BootScreen): Promise<void> {
           const best =
             record.bestWinTicks === null
               ? 'no win yet'
-              : `fastest win ${(record.bestWinTicks / 60).toFixed(1)}s`;
+              // Verified rather than guessed, which is what the reviewer's own
+              // fix asked for: `recordBoutResult` stores `state.tick` at the
+              // winning contact, and `timerTicks` counts down from 1800 on that
+              // same clock — so the record and the round timer beside it share an
+              // origin and a length. "fastest win" was accurate but read as a
+              // separate statistic next to a 29s round, which is how a player
+              // ends up wondering what it is out of. It is a round time.
+              : `fastest round ${(record.bestWinTicks / 60).toFixed(1)}s`;
           // The lesson belongs to a live bout. See clearBoutUi.
         coach.dismiss();
         // The lesson belongs to a live bout. See clearBoutUi.
