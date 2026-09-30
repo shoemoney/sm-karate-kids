@@ -2582,3 +2582,67 @@ takes. If 0.5 is in that set, the capture is a timing problem. If the set is
 `[0, 1, 2]` only, it is a rules problem, and the honest move is to say so and
 decide deliberately whether a half point should exist at all — not to keep
 polishing a fraction no player will ever see.
+
+### Round 72 — both of round 71's readings were wrong, and the sim says why
+
+Round 71 left two readings of "`lunge_punch` is a half point but no half ever
+appears" and refused to choose. The 60Hz trace came back:
+
+    distinct score states: [0,0]  [1,0]  [2,0]
+    a half was on the board: false
+    HUD showed a fraction : false
+
+Every animation frame of a 30-strike bout. No half. On that evidence reading (2)
+looked right: the board only holds integers, the stacked fraction renders on
+paths the game never reaches, and five models reported an artefact of reading the
+source rather than the game.
+
+**It is not that. The half point is real, and it is being awarded.** From
+`packages/sim/src/match.ts`:
+
+    const base: CallValue = move !== null && move.value === 'full' ? 'full' : 'half';
+    return { value: counter ? 'full' : base, counter };
+    const pointsOf = (value: CallValue) => (value === 'full' ? 1 : 0.5);
+    state.fighters[call.scorer].score += pointsOf(call.value);
+
+So a `value: 'half'` move scores **0.5**, and it becomes 1 only when it lands
+**as a counter** — `defender.phase === 'startup'`, the counter comment above it
+explaining that punishing a whiff used to make four calls in five an ippon and
+left the half point vestigial.
+
+**My probe drove twenty or thirty lunges in a row against an opponent who was
+almost never winding up, so nearly every call resolved as a counter and every
+half was promoted to a full point before the next sample.** The half exists, the
+notation exists, and the fraction renders — in the window where a half-point
+call has landed and the referee has not yet been answered.
+
+**The finding is real. The fix in round 67 is real. Five models were right, and
+I was one 60Hz trace away from overruling all of them.**
+
+### The lesson, and it is the sharpest one in this log
+
+Round 63 taught: *before building an instrument, check whether the question has a
+number in it.* This is the other half of that lesson and it is the more dangerous
+half.
+
+**A number you sampled wrong is worse than no number at all.** The trace was
+executed properly — every animation frame, the right surface, the right value —
+and it still said "no half exists", because the thing being measured was a state
+that lasts a few hundred milliseconds and my driving pattern skipped it. The
+instrument was sound and the question was wrong.
+
+I was also close to compounding it. The clean result `[0,0] [1,0] [2,0]` is
+exactly the shape of a decisive refutation, and I had already written the
+surrounding text for "the finding is about dead code". Had I not opened
+`match.ts` before committing that, the loop would have recorded a 31-round true
+finding as dismissed, with a measurement to back it, and the measurement would
+have been the mistake.
+
+**Round 63's number settled a question because I had reduced it to "is this pixel
+red." This number nearly overturned a question because it looked just as
+settled. The difference is not the instrument — both were correct instruments.
+The difference is whether the thing measured is the thing asked about.**
+
+Before accepting a clean refutation of a finding that several independent
+reviewers have reported, read the code that produces the value. A result that
+confirms what you wanted is the cheapest thing in the world to obtain.
