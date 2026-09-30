@@ -4017,3 +4017,46 @@ rounds on defects.
 
 Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0 —
 both run with the corrected PATH and both reported with their own exit codes.
+
+### Round 97 — the queued instrumentation, attempted, and the honest reason it did not land
+
+Round 96 queued one line: read the `y` passed into `juice.impact` on the frame
+in question and compare it against the sprite's own contact point, both in world
+units, with no image processing in the path. That is the right instrument and I
+tried to build it.
+
+**It does not work with the debug surface this game has.** `__smkk.state()`
+exposes `p1Move` as a *string id* and the move table is a private `Map` on the
+match state — so at runtime I can read that `spinning_back_kick` is active and
+that its data row says `height: "high"`, but I cannot read the value the effect
+was *given*, because the anchor is computed in a closure in `main.ts` and never
+published. Round 93 and 96 both had to work this out from pixels as a result,
+which is the thing the instrumentation was supposed to avoid.
+
+**And the other half is not reachable either.** The comparison needs the sprite's
+own contact height — where the foot in the `front_kick` / `spinning_back_kick`
+atlas cell actually is, in world units. That is derivable from the manifest's
+`baseline`, `cell.h` and `metresPerCell`, but only by measuring the cell, and a
+measurement I cannot finish and verify is not a measurement.
+
+**So the finding stays exactly where round 96 left it, and I want to be precise
+about why it is still open rather than merely undone:**
+
+    known:  the impact effect's vertical anchor does not match where the
+            striking limb visibly meets the defender
+    known:  it is now too LOW, which is the opposite of the pre-round-80
+            symptom, so the round-80 fix moved it the right way
+    unknown: by how much — my pixel measurement says ~92px, the reviewer says
+            ~50px, and the two disagree by ~2x
+    blocked on: publishing the anchor from the effect's own call site, and
+            measuring the atlas cell's contact height
+
+**Three times now this constant has been implicated and twice changed. The third
+change will not be made on a number that disagrees with itself.** The loop's
+whole record on this is that a plausible-looking adjustment with an unverifiable
+measurement behind it is worse than a documented gap — round 90's shadow was a
+no-op that a 0.06 metric insisted had worked, and round 95 reported a gate that
+had exited 127. Both shipped as confident, both were caught by looking rather
+than by reasoning, and both cost more to unpick than to have left open.
+
+Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
