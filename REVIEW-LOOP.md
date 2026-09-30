@@ -3486,3 +3486,54 @@ allows computer use, and writes `reviews/codex-advisory.json`.
   facing, which no one has looked at.
 
 The reviewer switch is done and the loop is running on it.
+
+### Round 87 — the kick, sixth time, and why the same false report keeps coming back
+
+`kick-points-away` from the new reviewer: *"Asmongold's extended kicking foot
+points left while HasanAbi stands to his right."* That is a new reading of a
+report that has now appeared **six times in six rounds** across four different
+models — `gpt-6.1-sol` (r64), `gpt-6.1-sol` again (r68), `gpt-6.1-sol-pro` (r76),
+and now `gpt-6.1-sol` via codex (r86) — and every previous instance said the leg
+was *amputated* or *truncated* rather than misdirected.
+
+**Refused, at 820px of a 67%-width crop.** The kicking leg is raised with the
+shin angled down-right and the foot at the red fighter's hip, **toes pointing
+right, toward the opponent**, which is what a front kick toward a man standing to
+your right looks like. The manifest is `facing: "right"` and `spriteRig.apply`
+mirrors on turn, so a fighter facing right is drawn unflipped and this is the
+correct orientation.
+
+**Six reports, four models, one pose — and the loop has been right four times.**
+
+The interesting question is not whether the claim is false. It is why the same
+frame produces it so reliably, because the answer is a property of the *review*
+rather than of the game:
+
+1. **The pose is genuinely ambiguous at review resolution.** A front kick is shot
+   from a three-quarter angle, so the thigh crosses the fighter's own torso, the
+   shin falls toward the camera, and the foot ends up visually adjacent to the
+   *supporting* leg rather than clearly out in front. At 390px wide, the two legs
+   occupy a band about 40px tall.
+2. **The two fighters overlap heavily at the moment of the kick.** The kicker is
+   in front (z 0.08 by design, `main.ts:678`) and the foot lands *on* the
+   defender's body, so "which leg is this, and where is it pointing" is a
+   question the frame does not answer cleanly.
+3. **The contact hides the foot's direction.** Round 80 moved the impact sparks
+   to the chest, which fixed where the *effect* fires — but the effect now
+   covers the ankle, so the one cue that would say which way the foot points is
+   the thing the impact is drawn on top of.
+
+So the frame is doing its job as a review target and failing at the one job it is
+being asked to do. That is a **finding about the review set**, not about the
+game, and it is the same shape as rounds 68, 71 and 75 — a screen nobody had
+photographed.
+
+**The honest generalisation across six rounds of this one report:** a reviewer
+given a frame where a limb crosses its owner's body, overlaps another character,
+and meets an impact effect at the wrist, will describe the ambiguity as damage.
+Every one of those three conditions is a property of the capture, and none is a
+property of the sprite. A seventh report from this frame would be worth nothing;
+a frame where the kick is thrown into open space, with no contact and no
+overlap, would settle it for good.
+
+Recorded as a capture gap, queued, and refused as a defect.
