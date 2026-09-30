@@ -469,7 +469,26 @@ async function boot(screen: BootScreen): Promise<void> {
    */
   let lastImpact: { moveId: string; x: number; y: number; facing: number; low: boolean } | null = null;
   const REMATCH_AFTER_MS = 8000;
-  const ROUND_INTRO_MS = 4000;
+  /**
+   * How long the pre-bout card holds before the clock starts.
+   *
+   * It was 4000ms, which was right for a card carrying one sentence — the
+   * opponent's tell. Round 118 added the notation line to the same card, and
+   * measured the result: 144 characters, five rendered lines on a 390px sheet,
+   * about 8.6 seconds to read at a normal 200 wpm. **The card was showing its
+   * briefing at roughly half the speed anyone reads.**
+   *
+   * 7200ms is the fix the round-118 note named: a longer hold rather than a
+   * smaller font. Shrinking type on a briefing that a player reads once, in
+   * four seconds, before their first bout, is the wrong direction — the card is
+   * the only place the game explains how a move is input, and the answer to
+   * "there is too much to read" is "give it longer", not "make it smaller".
+   *
+   * Only the pre-bout card uses this; post-bout rematch is REMATCH_AFTER_MS and
+   * is deliberately unchanged, because a result card is a score and a next
+   * action, not something to be read.
+   */
+  const ROUND_INTRO_MS = 7200;
   /**
    * Every score outside the in-match HUD goes through `scoreFragment`, the same
    * builder the HUD's own `renderScore` uses.

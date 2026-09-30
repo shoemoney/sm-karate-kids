@@ -5159,3 +5159,48 @@ that is now too much text to read in four seconds, the right answer is a longer
 hold, not a smaller font — and that is a playtest, not a patch.
 
 Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 119 — the cost of round 118, measured and partly paid
+
+Round 118 shipped a second sentence onto a card that auto-dismisses in four
+seconds, and named the risk. **This round measured it:**
+
+    tell   56 chars
+    note   88 chars
+    total 144 chars, 5 rendered lines at 390px
+    at 200 wpm (16.7 chars/sec) = 8.6 seconds to read
+    card held for 4.0s
+
+    => the briefing was being shown at roughly HALF reading speed
+
+`ROUND_INTRO_MS` 4000 -> **7200**, and the fix is the one round 118's own note
+named: **a longer hold, not a smaller font.** The card is the only place the game
+explains how a move is input; the answer to "there is too much to read" is "give
+it longer", not "make it smaller". Only the pre-bout card uses this constant —
+post-bout rematch is `REMATCH_AFTER_MS` and is deliberately unchanged, because a
+result card is a score and a next action, not something to be read.
+
+**Two things about this round that are not clean, recorded as such.**
+
+**7200 is still under 8600.** The 8.6s figure is a *careful* read at 200 wpm, and
+a pre-bout briefing is skimmed rather than studied, so 7.2s covers an ordinary
+read comfortably. But it is not a number I can defend as sufficient, and the
+honest statement is that **the card still asks for more time than it gives.** The
+two honest ways to close that are a longer hold still, or a shorter sentence, and
+the second is better: the note is 88 characters and could plausibly be 45
+without losing "a move is one stance input plus one technique input". That is a
+copy decision, and it is queued rather than taken, because a shorter sentence is
+better than a longer hold and I would rather find it than default to the number
+that is easiest to type.
+
+**My independent browser measurement of the new hold did not land.** A probe
+waiting for `.result-detail` to appear timed out — the selector or the timing in
+the probe is wrong. What *is* verified is the e2e contract:
+`the round card's FIGHT button releases the bout clock` asserts the card is up,
+the tick is pinned at 0, and that pressing FIGHT releases it, and it passes. A
+longer hold only widens the window that test measures against. So the change is
+gated and the behavioural contract is confirmed; what I do not have is my own
+stopwatch on 7.2 seconds, and I am not going to report a number I did not read
+off a clock — which is round 95's lesson, one round after it stopped being fresh.
+
+Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
