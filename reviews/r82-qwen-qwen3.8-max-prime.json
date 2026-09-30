@@ -1,0 +1,89 @@
+{
+  "model": "qwen/qwen3.8-max-prime",
+  "elapsed_s": 180.7,
+  "usage": {
+    "prompt_tokens": 15905,
+    "completion_tokens": 10212,
+    "total_tokens": 26117,
+    "cost": 0.186164,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.186164,
+      "upstream_inference_prompt_cost": 0.06362,
+      "upstream_inference_completions_cost": 0.122544
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 8741,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "portrait-camera-dead-headroom",
+      "title": "Tighten the portrait fight camera: half the combat viewport is empty wall above the fighters",
+      "what": "In every neutral bout frame (e.g. the MOVES-button captures), the combat viewport runs from y\u2248100 to y\u22481140, but the fighters occupy only y\u2248630\u20131030. Above their heads, y\u2248100\u2013620 \u2014 roughly 50% of the viewport \u2014 is featureless dark plaster and ceiling with only faint bokeh particles; below their feet there is barely ~100px of mat. The two bodies read at about a quarter of screen height on a 390x844 phone.",
+      "why": "Point karate is entirely a read of ma-ai: the gap between two bodies decides every exchange. Wasting half the play area on empty wall shrinks the action band, makes distance and step-in timing harder to judge at arm's length, and makes the bout feel like watching from the balcony instead of being on the tatami.",
+      "how": "Reframe the portrait camera: drop the look-at target to chest height and dolly in (or narrow FOV) until a standing fighter spans ~65\u201375% of viewport height, leaving ~10% headroom so jump poses never crop. Reserve the freed upper band purely as overlay space for the IPPON/move callouts instead of showing it as lit geometry."
+    },
+    {
+      "id": "half-point-score-fraction",
+      "title": "Half points render as a dangling stacked fraction that misreads as extra digits",
+      "what": "On the 'HASANABI WINS' end screen the score line reads '0 \u2014 2' with a small '1' over '2' hanging below-right of the 2, so it parses as '0 \u2014 2 1 2'; the same HUD pill top-right crams '2' plus a two-line 1/2 beside the name. In the WAZA-ARI captures the left HUD score is a lone stacked 1/2, making that score column two lines tall against the opponent's one and shifting the row's alignment.",
+      "why": "Score is the single most important state in a first-to-2, half-point game. A fraction that looks like two stray digits \u2014 or that changes row height mid-bout \u2014 makes players misread the bout state at exactly the moment they are deciding whether to risk a wind-up.",
+      "how": "Render halves inline on one baseline: use the '\u00bd' glyph or a '.5' suffix at the same cap height as the digits (e.g. '2\u00bd'), with tabular figures so widths stay stable. Give each HUD score a fixed-width slot so integer and half scores occupy identical boxes, and reuse the same inline format on the end screen."
+    },
+    {
+      "id": "loading-progress-invisible",
+      "title": "Pre-boot progress bar shows no fill, percent, or motion while 'Downloading the game'",
+      "what": "On the ShoeMoney loading screen the progress element at y\u22481078 (x\u224848\u2013732) is a uniform brown pill: no brighter fill segment, no percentage, no spinner, no byte count. The only content is static text ('Downloading the game'), so nothing in the frame indicates the build is alive.",
+      "why": "WebGPU shader compilation plus asset download on a mobile network routinely takes several seconds. A bar that never visibly moves reads as a crashed tab; players swipe it away or background it before they ever see the dojo \u2014 churn at second zero.",
+      "how": "Bind the fill width to bytes received (warm tungsten fill over the existing dark track), add a right-aligned percent or MB label in the same monospace face as the status line, and switch to an indeterminate shimmer sweep during shader compile/scene build so the bar is always animating until the first rendered frame."
+    },
+    {
+      "id": "end-screen-empty-mat",
+      "title": "Bout-end screen strands the frozen finishing pose small while half the frame is empty floor",
+      "what": "On both result screens ('HASANABI WINS', 'ASMONGOLD WINS') the frozen finish pose sits mid-frame at y\u2248860\u20131170, y\u22481170\u20131450 is bare lit tatami with nothing on it, and the REMATCH pill plus 'STARTING IN 8' are pinned at the very bottom (y\u22481500\u20131630), far below the pose and the score line they relate to.",
+      "why": "The freeze pose is the payoff moment \u2014 the kick or punch that ended the bout \u2014 and it is framed at arm's length with half the screen as empty floor, while the auto-rematch countdown ticks in a corner of the thumb zone. Players leave this screen feeling flat instead of sharing or savouring the finish.",
+      "how": "On freeze, ease the camera to a close two-shot centred on the contact point so the pose fills ~60% of viewport width; move REMATCH and its countdown up into the empty mat band (y\u22481200\u20131350) as one cluster directly under the pose, and replace the 'STARTING IN n' text line with a shrinking ring around the button edge."
+    },
+    {
+      "id": "crowd-cutout-silhouettes",
+      "title": "Crowd reads as identical light-grey cardboard busts brighter than the wall behind them",
+      "what": "The spectator row at y\u2248780\u2013840 in neutral frames (clearest at the left edge of the FRONT KICK capture and behind the fighters in the IPPON capture) is a line of identical head-and-shoulder cutouts: same shape, same mid-grey value, evenly spaced, hard-edged, and visibly lighter than the dark dojo wall behind them.",
+      "why": "That row sits exactly at eye level behind the fighters for every second of every bout. Because the shapes are brighter than their background, the silhouette read inverts \u2014 they look like cardboard props standing in front of the wall, not a crowd seated in shadow \u2014 which punctures the cinematic night-dojo illusion the rest of the frame works hard to sell.",
+      "how": "Darken the crowd material so every instance sits below the wall's luminance (true silhouettes against the lit shoji), then jitter per-instance scale, spacing and heading and add two or three pose variants to break the repeating pattern; optionally trigger a subtle one-off sway/swell only on IPPON calls so the crowd reacts to scores instead of sitting static."
+    }
+  ],
+  "raw": null
+}

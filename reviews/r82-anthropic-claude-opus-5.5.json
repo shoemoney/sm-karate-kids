@@ -1,0 +1,89 @@
+{
+  "model": "anthropic/claude-opus-5.5",
+  "elapsed_s": 56.8,
+  "usage": {
+    "prompt_tokens": 22290,
+    "completion_tokens": 4152,
+    "total_tokens": 26442,
+    "cost": 0.1722,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.1722,
+      "upstream_inference_prompt_cost": 0.08916,
+      "upstream_inference_completions_cost": 0.08304
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1605,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fraction-score-rendering",
+      "title": "Half-point scores render as broken stacked fractions that read as '212'",
+      "what": "On the HASANABI WINS results screen the score reads '0 \u2014 2' followed by a tiny '1' and a '2' stacked below it, dropping about 40px under the baseline, so it reads as '0\u2014212'. In the top HUD the same '2\u00bd' becomes a large red '2' with a stacked 1/2 that overflows the pill vertically. The WAZA-ARI frames show a lone '\u00bd' for Asmongold at a different size and weight than the neighbouring '0'. The results screen is also missing the space that '2 \u2014 0' has on the win screen.",
+      "why": "The score is the single most important number in a point-karate game, and on the loss screen it is unreadable. A player who just lost cannot tell whether it was 0\u20132, 0\u20132.5, or 0\u2013212. That undercuts the half-point rule the MOVES screen spends a paragraph explaining. The overflowing HUD fraction also looks like a layout bug in every screenshot a streamer might share.",
+      "how": "Stop relying on the font's vulgar fraction or a CSS stacked fraction. Render half points as an inline superscript '\u00bd' glyph at about 55% of the digit size, top-aligned to the cap height, inside a fixed-width score box so the pill never grows. Apply the same component on the results screen, and make sure the em dash has equal spacing on both sides. Alternatively, switch to decimal '2.5' in tabular-nums. Test with 0, \u00bd, 1\u00bd, 2\u00bd on both HUD sides and the results card."
+    },
+    {
+      "id": "contact-interpenetration",
+      "title": "Fighters clip through each other on every scoring hit",
+      "what": "In the STEPPING LUNGE PUNCH IPPON frame, Asmongold's fist and forearm sink into Hasanabi's chest, and their front feet overlap on the same pixels at about y=800. In the FRONT KICK frame at 29s, the white fighter's knee and shin disappear inside the red fighter's thigh. In the WAZA-ARI frames the punch passes behind the red gi's lapel. The drop shadows also sit about 10\u201320px below the feet in the neutral frames, so the fighters look like they hover over the tatami.",
+      "why": "Contact is the payoff moment of a one-touch point game. When the sprites melt into each other, the hit reads as a rendering glitch rather than a crisp strike. The photoreal art makes the interpenetration more jarring than it would be with stylised art. Floating shadows break the grounded, cinematic look the lighting works hard to sell.",
+      "how": "Clamp the approach so the two fighters' root positions keep a minimum gap per technique, equal to reach minus about 10px. Freeze the attacker on the contact frame (hit-stop of 60\u201390ms) with the fist or foot tip exactly at the defender's silhouette edge. For kicks, order the draw so the striking limb renders in front of the defender. Anchor each shadow ellipse to the sprite's per-frame foot-contact point instead of a fixed offset, and lift it with the feet during jumps."
+    },
+    {
+      "id": "intro-card-covers-fighters",
+      "title": "Pre-bout FIGHT button sits on the fighters' feet and duplicates the auto-start",
+      "what": "On the QUALIFIER vs HasanAbi card, the gold FIGHT pill spans roughly y=780\u2013870 and covers both fighters' feet and lower shins. The 'STARTING IN 4/3/2' line sits under it on the mat. Above the fighters, the 'QUALIFIER' title, the 'vs HasanAbi' line and the two-line scouting tip stack over the shoji windows. The 'ROUND 1/5 \u00b7 QUALIFIER' chip repeats the word QUALIFIER a second time.",
+      "why": "This is the first gameplay frame every player sees. The hero art of the two fighters squaring off is chopped at the ankles by a button that does nothing the countdown will not do anyway. The duplicate labels plus the tip plus the countdown make the card feel cluttered rather than cinematic. The strategic tip ('he waits for your wind-up') is the useful part, and it gets lost among the rest.",
+      "how": "Move the FIGHT button down into the dimmed control zone, centred between the two sticks at about y=1000, or remove it and let a tap anywhere skip the countdown. Drop the redundant 'ROUND 1/5 \u00b7 QUALIFIER' chip while the card is up, or drop the large 'QUALIFIER' title. Turn the countdown into a large centred '3\u20262\u20261' over the mat between the fighters, clear of both bodies."
+    },
+    {
+      "id": "legend-panel-over-mat",
+      "title": "The stick legend panel eats the mat and never tells you what attacks do",
+      "what": "The 'STANCE \u25c0 step \u25b2 jump / \u25b6 step \u25bc crouch | TECHNIQUE \u25c0 back \u25b6 forward / \u25b2 up \u25bc down' panel sits at y=865\u2013950, directly on the tatami under the fighters. It stays up during live exchanges, including the Hasanabi IPPON frame. Its labels are ambiguous: both \u25c0 and \u25b6 say 'step', and the technique side only says 'back/forward/up/down', which is the direction and not the result. The actual moves (Lunge Punch, Back Kick, and so on) are only discoverable behind the MOVES button.",
+      "why": "It crowds the play area in a portrait layout where vertical space is already tight. It also fails its job: a new player learns that \u25b6 means 'forward' but not that \u25b6 throws a punch while \u25c0 throws a back technique. That is exactly the knowledge needed to score.",
+      "how": "Remove the floating panel. Print the labels on the stick rings themselves at the four compass points, in the existing 10\u201311px tracked caps: 'STEP / JUMP / STEP / CROUCH' and 'PUNCH / REVERSE / KICK / LOW' (or whatever each neutral-stance direction actually fires). Show them fully for the first bout, then fade them to 40% opacity after the player has scored once. Label the stance arrows 'IN' and 'OUT' instead of 'step' twice."
+    },
+    {
+      "id": "landscape-letterbox",
+      "title": "Landscape mode letterboxes the fight into a thin strip with tiny corner sticks",
+      "what": "In the 1280x800 landscape capture, the 3D scene occupies only about y=105\u2013570. A solid black band runs from y=570 to the bottom (about 230px) and another sits under the HUD. The sticks shrink to about 150px and float in the black band in the bottom corners, and their STANCE/TECHNIQUE labels are about 9px. The HUD scores ('0' beside tiny 'ASMONGOLD') are pushed to the far edges, about 1100px apart. The fighters occupy only about 30% of the screen width in the centre.",
+      "why": "Many phone players rotate to landscape for a fighting game, and there they get a smaller, less legible fight than in portrait, surrounded by dead black. At 150px, the sticks are small targets for fast directional input under a thumb. The split scores force a head turn to compare them.",
+      "how": "In landscape, let the canvas fill the full viewport and push the camera in so the fighters span about 50% of the width. Overlay the sticks semi-transparently on the lower mat corners, at the same physical size as in portrait (about 250px, or 45% of viewport height). Pull the HUD into a centred compact cluster, 'ASMONGOLD 0 \u00b7 30s \u00b7 0 HASANABI', about 500px wide. Keep MOVES and the settings gear top-right, but inside the safe area."
+    }
+  ],
+  "raw": null
+}

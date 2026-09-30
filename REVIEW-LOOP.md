@@ -3189,3 +3189,68 @@ invisible to me for the same reason it was invisible to the eye: a colour picked
 to *look* right satisfies the only test available at the time. Both of these
 needed a number taken from a rendered frame, and both needed a second thing in
 the frame to compare against.
+
+### Round 82 — "reads as 212", and the third time a crop lied to me
+
+`anthropic/claude-opus-5.5`, `anthropic/claude-sonnet-5.5`, `qwen/qwen3.8-max-prime`.
+
+Three models report the fraction again, and `claude-opus-5.5` is the most
+specific yet: **"render as broken stacked fractions that read as '212'."** That
+is a claim about a *reading*, which is the hardest kind to settle and the one
+most worth settling, so I went to look.
+
+**I got there wrong twice, and the second one is the eighth crop artifact in
+this loop.** My first crop missed the fraction entirely. My second caught the
+`1/2` and I concluded — with what felt like conviction — that **the denominator
+was being clipped by the scoreline plate's bottom edge**, and that this was the
+real defect behind every "212" report. I was about to write that up as a
+confirmed finding.
+
+**The geometry says otherwise**, measured on a live frame with a real half on the
+board:
+
+    plate   top  8.0   bottom 55.8   height 47.8
+    points  top 13.5   bottom 50.3
+    frac    top 24.4   bottom 50.3
+    clipped bottom: false     clipped top: false
+    bar rendered: true        bar height 1.89px
+
+The fraction sits inside the plate with 5.5px to spare and nothing is cut. What
+I read as a clipped `2` was the plate's **rounded bottom-left corner** falling
+inside my crop, and a 1.9px bright bar with dark pixels on either side of it
+reads exactly like a horizontal cut at a glance.
+
+**Refused — and refused on the instrument rather than on the opinion.** I did not
+keep looking at pictures until one agreed with me, which is what the last twenty
+minutes were, and which is precisely how rounds 64 and 70 went wrong. I wrote
+down what I believed, then asked a question that could come back "no", and it
+did.
+
+The `212` reading itself is not disproven — a human can still misread a stacked
+fraction, and three models saying so is worth something. But it is not a
+*clipping* defect, and it is not something more contrast would fix. It is the
+known cost of a stacked notation, traded deliberately against the slashed
+`2½` that round 67 removed, and it is the same trade every time: unambiguous
+and two characters wide, versus compact and one character wide.
+
+### The tally on crops, because it is the loop's most repeated lesson
+
+Round 64 — my crop cut a fighter's leg and I called a sprite amputated.
+Round 70 — my crop boundary made a leg look like it passed through a body.
+Round 82 — my crop caught a plate corner and I called a glyph clipped.
+
+Three times the same failure, sixty rounds apart, and each time I was **looking
+at a crop I had just made specifically to check a claim I already believed.**
+The crop is not a neutral instrument once you have a hypothesis; it is a
+generator of images that agree with you, because you chose its bounds.
+
+What actually works, every time it has worked: **state the claim, pick the
+measurement that could refute it, and refuse to conclude until it comes back.**
+Tonight that was a bounding-box comparison. In round 63 it was six screenshots
+and a line of arithmetic. In round 80 it was two elements in one frame. The
+common factor is that the instrument was chosen *before* the answer was known,
+and the discipline is not looking harder — it is being willing to be told you are
+wrong by something that is not a picture you cropped.
+
+Gates unchanged and green: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed /
+5 skipped / exit 0.

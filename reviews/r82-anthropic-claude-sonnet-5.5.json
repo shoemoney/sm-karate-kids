@@ -1,0 +1,89 @@
+{
+  "model": "anthropic/claude-sonnet-5.5",
+  "elapsed_s": 23.7,
+  "usage": {
+    "prompt_tokens": 22290,
+    "completion_tokens": 2319,
+    "total_tokens": 24609,
+    "cost": 0.06777,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.06777,
+      "upstream_inference_prompt_cost": 0.04458,
+      "upstream_inference_completions_cost": 0.02319
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighters-tiny-empty-stage",
+      "title": "Fighters occupy a small slice of the portrait frame; the stage is mostly dead space",
+      "what": "In the in-fight portrait screens, the two fighters span only about y=470\u2013780 of a 1280px frame. Above them is roughly 380px of dark, murky ceiling and shoji wall with nothing in it. Below them is a strip of empty tatami before the tip card and sticks. Each fighter is only ~300px tall and ~150px wide. In the front-kick and lunge-punch frames the technique names and hit feedback are small relative to the empty space.",
+      "why": "The fighters are the whole game, and here they read as small figures on a large empty stage. Hit contact, foot placement and limb extension are hard to read on a 390pt-wide phone. Screen real estate goes to backdrop instead of the action.",
+      "how": "Move the camera closer and lower for portrait: reduce FOV or dolly in so the fighters are about 45\u201350% of the viewport height. Anchor their feet near y\u2248790\u2013820 and crop the upper ceiling. Frame with an aspect-aware camera rig that fits the two fighters' bounding box, plus margin, to the width. Add a slight zoom-in punch on hit."
+    },
+    {
+      "id": "controls-legend-clutter",
+      "title": "The permanent control legend card sits between the arena and the sticks and competes with the fight",
+      "what": "In every active-fight portrait screen, the 'STANCE / TECHNIQUE \u2014 \u25c0 step \u25b2 jump\u2026' card (y\u2248865\u2013952) is always shown. It sits directly under the fighters' feet and duplicates the STANCE and TECHNIQUE labels beneath the sticks. The text is ~13px in low-contrast tan on brown. The card is dropped in the gameplay screenshot with no controls legend.",
+      "why": "It permanently eats vertical space and pulls the eye away from the action. At that size it is unreadable mid-fight, so it fails as a tutorial. The duplicated labels add noise. It is static, so it teaches nothing about the combinations that matter (the real move list needs stance + technique pairs).",
+      "how": "Show the legend only for the first bout or first ~5s, then fade it out. Alternatively fold it into the pre-fight overlay. Remove the duplicate STANCE/TECHNIQUE captions or the card. Reclaim that band for the arena. Surface the currently-active combo as a live name chip (already exists as 'FRONT KICK') and point to MOVES for the full list."
+    },
+    {
+      "id": "stick-feedback-weak",
+      "title": "Twin sticks give little visible feedback and no on-stick hint of which technique will fire",
+      "what": "The sticks are dark brown discs with thin tan rings on a near-black brown panel. At rest, the knob dot is tiny (a blue dot on the left, a hollow amber ring on the right). In the lunge-punch frame the right knob moves to the upper right with a gold ring, but only a faint amber highlight marks the '>' arrow. The other arrows are ~14px chevrons in dim tan, and the ring edge is low contrast against the panel.",
+      "why": "A thumb-driven game needs instantly legible input state. With 9 directions \u00d7 2 sticks \u00d7 15+ techniques, players can't tell what they're about to throw. Dim chevrons are hard to see under a thumb, and the stick base blends into the panel.",
+      "how": "Brighten the active direction: light the whole quadrant wedge and chevron in full gold and show the resolved move name on or above the stick as you drag. Raise the ring stroke contrast and add a subtle inner glow. Make the chevrons larger (\u226520px) with higher opacity. Give the stance stick a distinct cool hue and the technique stick a warm hue, and use these consistently in the legend and Moves screen."
+    },
+    {
+      "id": "result-and-callout-banners",
+      "title": "Full-width black banner behind IPPON/WAZA-ARI covers the fighters' backdrop and scores are awkward fractions",
+      "what": "In the IPPON and WAZA-ARI screens a hard-edged near-black band (y\u2248190\u2013440) with a rough top edge spans the full width behind the callout, cutting the dojo in two. The band nearly touches the fighters' heads. On the results screen, the score reads '0 \u2014 2\u00bd' with tiny stacked '1/2' fractions, and the header score shows '2' with a small stacked '1/2'. The fractions are ~20px and hard to parse. Against the timer chip, '1/2' in the HUD is tiny too.",
+      "why": "The banner reads as a rendering glitch rather than a designed stinger, and it eats a large area right above the hit. Half-point notation is unclear at a glance, and the mismatched fraction glyphs look broken next to the large numerals.",
+      "how": "Replace the hard rectangle with a soft radial or horizontal gradient vignette that fades at the top and bottom edges, or shrink it to a tight strip behind the text. Render half points as '\u00bd' in the same font/size as full digits, or as '0.5'. Keep the fractions vertically aligned with the numerals in the HUD and results."
+    },
+    {
+      "id": "menu-and-loader-polish",
+      "title": "Loading, Moves and Settings screens feel like unstyled utility panels next to the cinematic fight view",
+      "what": "The loader is a small logo and tiny grey 11\u201312px text ('ASMONGOLD VS HASANABI', 'A SHOEMONEY AI LABS GAME') on near-black. The progress bar is an empty brown track with no visible fill, and the bottom ~40% of the screen is blank. The Moves sheet is a dense list with tiny grey mid/high/Half point labels, small icon pairs, and a clipped last row. The Settings sheet is a flat panel. Its toggles have low-contrast off states, and the leftover strip of the arena below is dimmed, with nothing to show the sheet is modal. The performance HUD toggle is visible to all players.",
+      "why": "First impression and menus are where players judge quality. A loader with no visible progress feels stalled. Dense, low-contrast move text is hard to use on a phone, and the Moves list is the game's only teaching surface. Dev options like 'Show performance HUD' add clutter to the consumer settings.",
+      "how": "On the loader, show a visible gold progress fill with a percentage, and centre the block vertically with larger tagline and credit text (\u226513px, higher contrast). In Moves, group by stance + technique with bigger row height, brighter meta text, and a coloured full/half-point pill. Add a bottom fade to show scroll continues. In Settings, put a stronger scrim behind the sheet and increase the off-state toggle contrast. Hide the performance HUD toggle behind a debug flag."
+    }
+  ],
+  "raw": null
+}
