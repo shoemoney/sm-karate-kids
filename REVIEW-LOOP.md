@@ -5858,3 +5858,51 @@ Gates: `pnpm check` **141 passed** (was 140), `pnpm test:e2e` 35 passed /
 5 skipped / exit 0. Two 502s in the capture log on `01`, `10` and `13` are the
 known per-capture asset noise, and the dev server answered 200 immediately after
 — verified rather than assumed, following round 121's rule.
+
+### Round 132 — a live contradiction between two surfaces, on the same fact
+
+`neutral-stance-instructions-disagree`: *"Image #6 says every move requires
+holding a stance and then a technique, but its Lunge Punch row shows a centred
+stance plus forward technique, and Image #2 explicitly permits leaving the stance
+centred."*
+
+**All three halves are in that report and they are all true, which is what makes
+it the best finding of the round.** The card (r122) says *or leave the stance
+centred*. The sheet (r114) says *hold one, then the other*. **And the sheet's own
+Lunge Punch row shows a centred stance**, contradicting the sheet's own sentence
+on the same screen.
+
+**The sheet is the stale one, and it went stale for the same reason the coach did
+in round 124: I corrected one surface and left the other.** Round 122 fixed the
+card because the reviewer said the card was wrong. Nothing said the sheet was
+also wrong, because the sheet's sentence is internally plausible — it just
+contradicts the row printed directly beneath it. Both were correct at the moment
+each was written, which is the only way two surfaces can end up this confidently
+inconsistent.
+
+The sheet now reads the same claim as the card:
+
+    Each move = a technique input + a stance input, or leave the stance centred.
+
+**Deliberately not one shared string.** Rounds 102 and 124 were both about a
+fact being typed twice; the fix for that is a shared *claim*, not a shared
+literal, so the two sentences can read naturally in their own contexts and an
+assertion can hold them together.
+
+### And the assertion, mutation-tested
+
+    the card and the sheet agree about whether a stance is required
+
+It reads both sentences and requires each to permit the centred stance, because
+that is the thing that was wrong — not that they are byte-identical. Restoring
+the old sheet sentence fails it:
+
+    x the card and the sheet agree about whether a stance is required
+
+**That is the sixth appearance of this class** — r102, r105, r109, r122, r124,
+r132 — and the first one where the fence existed to catch it. It caught this one
+on the first run. The difference is r111's mutation discipline: an assertion that
+has been shown its teeth catches a real disagreement, and an assertion that has
+not is a comment.
+
+Gates: `pnpm check` 141 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.

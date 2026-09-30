@@ -640,7 +640,17 @@ export class Hud {
     // told what a row is once they are looking at rows.
     const notation = document.createElement('p');
     notation.className = 'tech-notation';
-    notation.textContent = 'Each move is a stance + a technique: hold one, then the other.';
+    // Must agree with the pre-bout card, which round 122 corrected to say the
+    // stance may be left centred. Round 132 caught this line still demanding
+    // both: "hold one, then the other" contradicts `or leave the stance
+    // centred` on the other screen, and the sheet's own Lunge Punch row shows
+    // a centred stance. `openai/gpt-6.1-sol` (via codex) named all three.
+    //
+    // Same meaning, same shape as the card's sentence — deliberately not one
+    // string in two places, because that was the defect in r102 and r124. The
+    // *claim* is shared; the wording is allowed to differ as long as it agrees.
+    notation.textContent =
+      'Each move = a technique input + a stance input, or leave the stance centred.';
     container.appendChild(notation);
 
     for (const family of FAMILIES) {

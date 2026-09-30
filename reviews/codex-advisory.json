@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-30T02:49:55",
+ "reviewed_at": "2026-09-30T14:23:11",
  "items": [
   {
-   "title": "kick-foot-not-visible",
-   "claim": "In Image #4, the raised leg under FRONT KICK ends at a trouser cuff with no visible foot, whereas Image #22 shows a bare foot during the same named technique.",
-   "reason": "The foot helps players read the strike\u2019s reach, but these stills cannot establish whether the difference comes from animation phase, artwork, or texture clipping.",
-   "suggest": "Capture the pose ID, animation phase, and atlas UVs matching Image #4; inspect that exact source cell and repair any confirmed foot clipping rather than changing the whole kick animation."
+   "title": "neutral-stance-instructions-disagree",
+   "claim": "Image #6 says every move requires holding a stance and then a technique, but its Lunge Punch row shows a centred stance plus forward technique, and Image #2 explicitly permits leaving the stance centred.",
+   "reason": "A new player receives conflicting instructions about whether the stance stick must be moved to attack.",
+   "suggest": "Replace the reference instruction with: \u201cChoose a stance or leave that stick centred, then push the technique stick.\u201d"
   },
   {
-   "title": "unmapped-stick-directions",
-   "claim": "In Image #15, both sticks show directional chevrons and STANCE or TECHNIQUE labels, but no visible direction-to-action mapping.",
-   "reason": "The control names alone do not tell a player which direction produces a punch, kick, jump, or crouch.",
-   "suggest": "Keep readable action labels beside the corresponding stick directions, using the mapping already displayed in Image #3 and adjusting layout rather than shrinking text."
+   "title": "mixed-score-outgrows-hud",
+   "claim": "In Image #8, HasanAbi\u2019s stacked half-point fraction extends below the neighbouring name plate and timer, unlike Asmongold\u2019s zero.",
+   "reason": "The mixed score becomes a vertically scattered element rather than an immediately readable score beside the fighter\u2019s name.",
+   "suggest": "Render mixed scores as a single horizontal unit with a compact \u00bd glyph, and verify the entire unit stays within the score container at 390\u00d7844."
   },
   {
-   "title": "opening-card-omits-goal",
-   "claim": "The opening card in Image #2 explains combining technique and stance inputs but does not state the first-to-two-points objective described in Image #6.",
-   "reason": "Players see how to issue a move before seeing what wins the round.",
-   "suggest": "Add a short rule beneath the input instruction: \u201cOne clean contact ends the exchange. First to 2 points wins.\u201d"
+   "title": "controls-lose-direction-labels",
+   "claim": "Image #15 shows directional markers on both sticks without the direction-to-action legend visible in Image #3.",
+   "reason": "The words \u201cSTANCE\u201d and \u201cTECHNIQUE\u201d alone do not tell an unfamiliar player which direction punches, kicks, jumps, or crouches.",
+   "suggest": "Keep a compact, readable action legend available beside the sticks, with an explicit player-controlled option to hide it."
   },
   {
-   "title": "score-call-needs-translation",
-   "claim": "Image #20 pairs a half-point scoreboard value with WAZA-ARI, but the callout does not explicitly say HALF POINT.",
-   "reason": "The scoreboard and callout agree, but players unfamiliar with the terminology must decode that relationship themselves.",
-   "suggest": "Add HALF POINT beneath WAZA-ARI and FULL POINT beneath IPPON while retaining the existing technique name."
+   "title": "reference-bottom-is-obscured",
+   "claim": "In Image #6, the Back Kick row at the bottom is visibly darkened by a fade while the preceding technique rows remain unobscured.",
+   "reason": "A player consulting the move list cannot read that visible row as clearly as the other entries.",
+   "suggest": "Remove the fade over readable list content and use a separate scroll cue outside the technique rows."
   },
   {
-   "title": "winner-heading-wrap-varies",
-   "claim": "ASMONGOLD WINS occupies two lines in Image #18, while HASANABI WINS occupies one line in Image #8.",
-   "reason": "The same result hierarchy changes with the winner\u2019s name, making the score\u2019s placement less consistent.",
-   "suggest": "Give both result headings the same two-line structure: fighter name first, WINS second, without reducing the font size."
+   "title": "kick-extension-unverified",
+   "claim": "Images #13, #19, and #22 label the move \u201cFRONT KICK\u201d while showing a bent attacking knee, but these stills do not establish whether the animation includes a fully extended kick.",
+   "reason": "The pictured pose alone cannot settle whether players receive a clear visual indication of the kick\u2019s reach or contact.",
+   "suggest": "Capture the complete Front Kick sequence with simulation phase and frame identifiers; change the active pose only if that evidence shows the extension is missing."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"kick-foot-not-visible\",\n    \"claim\": \"In Image #4, the raised leg under FRONT KICK ends at a trouser cuff with no visible foot, whereas Image #22 shows a bare foot during the same named technique.\",\n    \"reason\": \"The foot helps players read the strike\u2019s reach, but these stills cannot establish whether the difference comes from animation phase, artwork, or texture clipping.\",\n    \"suggest\": \"Capture the pose ID, animation phase, and atlas UVs matching Image #4; inspect that exact source cell and repair any confirmed foot clipping rather than changing the whole kick animation.\"\n  },\n  {\n    \"title\": \"unmapped-stick-directions\",\n    \"claim\": \"In Image #15, both sticks show directional chevrons and STANCE or TECHNIQUE labels, but no visible direction-to-action mapping.\",\n    \"reason\": \"The control names alone do not tell a player which direction produces a punch, kick, jump, or crouch.\",\n    \"suggest\": \"Keep readable action labels beside the corresponding stick directions, using the mapping already displayed in Image #3 and adjusting layout rather than shrinking text.\"\n  },\n  {\n    \"title\": \"opening-card-omits-goal\",\n    \"claim\": \"The opening card in Image #2 explains combining technique and stance inputs but does not state the first-to-two-points objective described in Image #6.\",\n    \"reason\": \"Players see how to issue a move before seeing what wins the round.\",\n    \"suggest\": \"Add a short rule beneath the input instruction: \u201cOne clean contact ends the exchange. First to 2 points wins.\u201d\"\n  },\n  {\n    \"title\": \"score-call-needs-translation\",\n    \"claim\": \"Image #20 pairs a half-point scoreboard value with WAZA-ARI, but the callout does not explicitly say HALF POINT.\",\n    \"reason\": \"The scoreboard and callout agree, but players unfamiliar with the terminology must decode that relationship themselves.\",\n    \"suggest\": \"Add HALF POINT beneath WAZA-ARI and FULL POINT beneath IPPON while retaining the existing technique name.\"\n  },\n  {\n    \"title\": \"winner-heading-wrap-varies\",\n    \"claim\": \"ASMONGOLD WINS occupies two lines in Image #18, while HASANABI WINS occupies one line in Image #8.\",\n    \"reason\": \"The same result hierarchy changes with the winner\u2019s name, making the score\u2019s placement less consistent.\",\n    \"suggest\": \"Give both result headings the same two-line structure: fighter name first, WINS second, without reducing the font size.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"neutral-stance-instructions-disagree\",\n    \"claim\": \"Image #6 says every move requires holding a stance and then a technique, but its Lunge Punch row shows a centred stance plus forward technique, and Image #2 explicitly permits leaving the stance centred.\",\n    \"reason\": \"A new player receives conflicting instructions about whether the stance stick must be moved to attack.\",\n    \"suggest\": \"Replace the reference instruction with: \u201cChoose a stance or leave that stick centred, then push the technique stick.\u201d\"\n  },\n  {\n    \"title\": \"mixed-score-outgrows-hud\",\n    \"claim\": \"In Image #8, HasanAbi\u2019s stacked half-point fraction extends below the neighbouring name plate and timer, unlike Asmongold\u2019s zero.\",\n    \"reason\": \"The mixed score becomes a vertically scattered element rather than an immediately readable score beside the fighter\u2019s name.\",\n    \"suggest\": \"Render mixed scores as a single horizontal unit with a compact \u00bd glyph, and verify the entire unit stays within the score container at 390\u00d7844.\"\n  },\n  {\n    \"title\": \"controls-lose-direction-labels\",\n    \"claim\": \"Image #15 shows directional markers on both sticks without the direction-to-action legend visible in Image #3.\",\n    \"reason\": \"The words \u201cSTANCE\u201d and \u201cTECHNIQUE\u201d alone do not tell an unfamiliar player which direction punches, kicks, jumps, or crouches.\",\n    \"suggest\": \"Keep a compact, readable action legend available beside the sticks, with an explicit player-controlled option to hide it.\"\n  },\n  {\n    \"title\": \"reference-bottom-is-obscured\",\n    \"claim\": \"In Image #6, the Back Kick row at the bottom is visibly darkened by a fade while the preceding technique rows remain unobscured.\",\n    \"reason\": \"A player consulting the move list cannot read that visible row as clearly as the other entries.\",\n    \"suggest\": \"Remove the fade over readable list content and use a separate scroll cue outside the technique rows.\"\n  },\n  {\n    \"title\": \"kick-extension-unverified\",\n    \"claim\": \"Images #13, #19, and #22 label the move \u201cFRONT KICK\u201d while showing a bent attacking knee, but these stills do not establish whether the animation includes a fully extended kick.\",\n    \"reason\": \"The pictured pose alone cannot settle whether players receive a clear visual indication of the kick\u2019s reach or contact.\",\n    \"suggest\": \"Capture the complete Front Kick sequence with simulation phase and frame identifiers; change the active pose only if that evidence shows the extension is missing.\"\n  }\n]"
 }

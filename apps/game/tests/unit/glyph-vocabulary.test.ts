@@ -122,6 +122,27 @@ describe('the pre-bout briefing is complete, not merely short', () => {
     expect((note?.[1] ?? '').toLowerCase()).toContain('technique');
   });
 
+  test('the card and the sheet agree about whether a stance is required', () => {
+    // Round 132. The pre-bout card said "or leave the stance centred" and the
+    // sheet said "hold one, then the other" — a live contradiction between two
+    // surfaces, on the same fact, with the sheet's own Lunge Punch row showing
+    // the centred case the sheet's sentence forbade.
+    //
+    // Not a shared string: a shared *claim*. The wording may differ, so the
+    // assertion is that both sides must permit the centred stance, which is the
+    // thing that was actually wrong.
+    const card = main.match(/createTextNode\(\s*'(A move[^']+)'\s*\)/)?.[1] ?? '';
+    const sheet = hud.match(/notation\.textContent =\s*'([^']+)'/)?.[1] ?? '';
+    expect(card, 'could not read the card sentence').not.toBe('');
+    expect(sheet, 'could not read the sheet sentence').not.toBe('');
+    for (const [name, text] of [['card', card], ['sheet', sheet]] as const) {
+      expect(
+        text.toLowerCase(),
+        `the ${name} sentence does not permit a centred stance, and the data says 13 of 20 moves use one`,
+      ).toMatch(/centred|centered/);
+    }
+  });
+
   test('the briefing states the objective, derived from the ruleset', () => {
     // Round 131. The card taught the notation and left "first to 2" on a screen
     // one tap away, so a first-time player was told the grammar of the game and
