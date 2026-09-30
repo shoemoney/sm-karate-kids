@@ -4914,3 +4914,41 @@ either. Queued with that narrowing, for a round with budget to playtest it.
 
 Gates unchanged: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5
 skipped / exit 0.
+
+### Round 114 — the playtest, choosing the option that costs one line
+
+Round 113 listed three options for the top-heavy sheet and declined to pick one
+at the end of a session. **This round playtested the cheapest of them**, because
+round 108 established that a playtest is what settles these and because one of
+the three is not a layout decision at all.
+
+    repeat the key per group   four more rows, four more things to read
+    make the key sticky        a fixed header on a scrolling sheet is its own
+                               component, and the sheet is a reference sheet
+    label the rows             one line
+
+The third is what shipped, and it is not a compromise — it is the correct amount
+of information at the correct place:
+
+    Each move is a stance + a technique: hold one, then the other.
+
+directly above the first group, so a player who scrolls to the rows is told what
+a row is *at the moment they are looking at a row*, which is the whole defect.
+The full legend is still at the top for anyone who wants the glyphs; the one-line
+reminder is for everyone who is already reading moves.
+
+**And it costs one line**, which was the constraint that made the other two
+worse. The sheet is measured against how much of it fits above the first move
+name on a 390px screen — round 100 pushed that boundary once already when nine
+stacked legend rows pushed the moves off it — and this adds a line of prose
+rather than a row of anything.
+
+**One option remains, deliberately not taken:** `duplicate-stick-headings`. The
+coach shows STANCE and TECHNIQUE above its instruction block and again below the
+sticks, reported by twelve-plus models across twenty rounds. Round 113 narrowed
+it — with a real key on the sheet, the *upper* pair is the redundant half rather
+than the lower — and that is still the right fix, but it is a judgement about
+what a first-run player needs to see and it deserves a playtest of its own rather
+than being bundled into a round about the sheet's layout.
+
+Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.

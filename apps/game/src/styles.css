@@ -2022,6 +2022,16 @@ body.high-contrast .setting-row input[type="checkbox"]:checked::before {
   color: var(--text-muted);
 }
 
+/* The one-line notation reminder, sitting directly above the move rows rather
+   than at the top of the sheet. Same colour as the rules paragraph so it reads
+   as prose and not as another key. */
+.tech-notation {
+  margin: 0 0 var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--text-2xs);
+  line-height: 1.5;
+}
+
 .tech-group {
   margin-bottom: var(--space-6);
 }

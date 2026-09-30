@@ -601,6 +601,22 @@ export class Hud {
         `First to ${pointsToWin} takes the round.`;
     container.append(rules);
 
+    // One line, directly above the rows, saying what a row *is*.
+    //
+    // Round 113's finding: the key that says which circle is the stance sits at
+    // the top of the sheet, and the rows — the only reason anyone opens it —
+    // are far below it. Round 92 fixed the order, round 100 added the key, and
+    // between them the notation is explained in one place and used in another.
+    //
+    // Of the three options (repeat the key per group, make it sticky, label the
+    // rows) this is the one that costs a single line of height, and it is
+    // enough: the player does not need the whole legend again, they need to be
+    // told what a row is once they are looking at rows.
+    const notation = document.createElement('p');
+    notation.className = 'tech-notation';
+    notation.textContent = 'Each move is a stance + a technique: hold one, then the other.';
+    container.appendChild(notation);
+
     for (const family of FAMILIES) {
       const group = document.createElement('section');
       group.className = 'tech-group';
