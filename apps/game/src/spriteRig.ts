@@ -122,7 +122,13 @@ interface Ghost {
  */
 const GHOST_TRAIL_MAX = 0.1;
 const clampTrail = (v: number): number => (v < -GHOST_TRAIL_MAX ? -GHOST_TRAIL_MAX : v > GHOST_TRAIL_MAX ? GHOST_TRAIL_MAX : v);
-const GHOST_PEAK_OPACITY = 0.17;
+// 0.17 was already a cut from an earlier 0.32, and at the sprite scale this
+// game renders it still reads as a second fighter rather than as speed:
+// `claude-opus-5.5` called it "a translucent duplicate fighter" and was right.
+// An afterimage only works when the eye reads motion and not a person, and at
+// this size a full-body copy offset by a body width is a person. The trail now
+// has to be a suggestion — visible as a smear at the strike, never as a figure.
+const GHOST_PEAK_OPACITY = 0.085;
 
 export class SpriteFighterView implements FighterView {
   readonly root = new Group();

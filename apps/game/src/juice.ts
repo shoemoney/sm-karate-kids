@@ -49,8 +49,14 @@ const DUST_POOL = 24;
 /** Enough for a flurry; a full-point hit reuses the oldest rather than waiting. */
 const FLASH_POOL = 4;
 const RING_POOL = 3;
-const SPARK = new Color('#fff1c9');
-const SPARK_HOT = new Color('#ffb347');
+// Additive light is only light if it outruns the surface it lands on. These
+// sit on a mid-warm-brown dojo backdrop, and `#fff1c9` added to that is
+// *pale tan* — which is why six rounds of tuning left the loop looking at thin
+// brown splinters and calling them sparks. The hot end is pushed towards white
+// so it wins against the backdrop instead of blending into it, and the cool end
+// keeps the warm cast so it still belongs to a tungsten-lit room.
+const SPARK = new Color('#fffaf0');
+const SPARK_HOT = new Color('#ffd9a0');
 const DUST = new Color('#c9a071');
 const BLOCK = new Color('#9fd3ff');
 
@@ -83,10 +89,15 @@ function sparkStreak(): CanvasTexture {
   const g = canvas.getContext('2d');
   if (g !== null) {
     const along = g.createLinearGradient(0, 0, w, 0);
+    // A compact hot core at the leading edge, then a long fade. The old ramp
+    // peaked at 0.9 and stayed bright to the very end, so the bright part WAS
+    // the whole bar — a uniformly lit stick. Concentrating the energy into the
+    // first fifth is what makes it read as something leaving the metal.
     along.addColorStop(0, 'rgba(255,255,255,0)');
-    along.addColorStop(0.55, 'rgba(255,255,255,0.35)');
-    along.addColorStop(0.9, 'rgba(255,255,255,1)');
-    along.addColorStop(1, 'rgba(255,255,255,0.9)');
+    along.addColorStop(0.55, 'rgba(255,255,255,0.10)');
+    along.addColorStop(0.82, 'rgba(255,255,255,0.62)');
+    along.addColorStop(0.96, 'rgba(255,255,255,1)');
+    along.addColorStop(1, 'rgba(255,255,255,0.55)');
     g.fillStyle = along;
     g.fillRect(0, 0, w, h);
     // Soften the long edges so the quad's own outline never shows.
@@ -327,7 +338,15 @@ export class Juice {
       p.vy = Math.sin(angle) * speed;
       p.gravity = 5.5;
       p.maxLife = 0.22 + Math.random() * 0.22;
-      p.mesh.scale.set(0.05 + Math.random() * 0.05, 0.012 + Math.random() * 0.012, 1);
+      // Length varies far more than width, and the shortest are genuinely short.
+    // Every spark being a similar 4:1 bar is what made the pool read as a
+    // handful of sticks rather than as a burst; a real spark field is mostly
+    // small and fast with a few long strays.
+    p.mesh.scale.set(
+      0.028 + Math.random() * Math.random() * 0.075,
+      0.011 + Math.random() * 0.009,
+      1,
+    );
     }
     p.spin = Math.atan2(p.vy, p.vx);
     p.life = p.maxLife;

@@ -2882,3 +2882,62 @@ Also new and unchecked this round: `callouts-desync-and-cover-the-hit`
 that it names the *wrong input* is checkable against the 18-phone-kick capture,
 where the banner read `FRONT KICK` and the move was `front_kick`. The "covers
 the hit" half is refuted by the 60px gap measured in round 75.
+
+### Round 77 — the impact stack, fixed against the question that actually mattered
+
+Two changes, both aimed at "reads as" rather than "measures as", and both
+verified by re-capturing the impact frame and comparing it to round 76's.
+
+**1. The brown sticks.** `#fff1c9` is a pale cream, and additive light over a
+mid-warm-brown dojo is *pale tan*. That is the whole bug: the spark colour was
+never wrong as a colour, it was wrong as a contrast against the surface it
+lands on. The hot end moves to `#fffaf0` so it outruns the backdrop, and the
+warm cast is kept at the cool end so it still belongs to the room.
+
+The shape was the other half. Every spark was a quad of
+`0.05–0.10 × 0.012–0.024` — a near-uniform **4:1 bar**, and a pool of identical
+bars reads as sticks no matter what colour they are. Length now varies by
+`Math.random() ** 2` so most sparks are small and a few are long, and the
+texture's energy is concentrated into the leading fifth instead of ramping
+bright across the whole bar. **A uniformly lit bar is a stick; a hot point with
+a fade is a spark.**
+
+**2. The translucent duplicate.** `GHOST_PEAK_OPACITY` 0.17 → **0.085**. The
+existing comment already recorded a cut from 0.32, so the trail had been
+"fixed" once by the same reasoning that failed: halve a number, look at it
+closer, move on. At this sprite scale a full-body copy offset by a body width is
+a person, and the eye reads a person regardless of opacity above the threshold
+where the shape resolves. An afterimage has to stay a smear.
+
+**Verified by comparison, not by assertion.** Re-captured
+`11-phone-impact` and looked at it against round 76's crop:
+
+- the four or five long tan segments radiating from the white fighter's head
+  and arm are gone; what remains is a scatter of small bright flecks around the
+  contact point, which is what an impact should throw
+- the pale offset copy around the white fighter's head and shoulders is gone
+
+Gates: `pnpm check` 120 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### The fourth time, and now it has a name
+
+Round 70, occlusion in code I was sure of. Round 74, a fraction too small in
+code I had just fixed. Round 76, an impact stack in code I had changed three
+times. This round, the *same* stack again.
+
+The pattern across all four is the same and it is worth stating once, plainly,
+because it is the most transferable thing this loop has produced:
+
+**Every one of them was a system I had already reached a conclusion about, and
+the conclusion was what prevented the look.** Not carelessness — I had run the
+gates on all of them, I had written comments explaining why they were correct,
+and in three cases I had fixed them once already. The confident, well-argued
+position is the failure mode. The loop's most reliable findings have all come
+from models reporting something I had already "handled", and the reason is not
+that models see better; it is that **I stopped looking at the moment I became
+able to explain it.**
+
+Which is also why the fix pattern that finally worked is the boring one: change
+a value, re-capture the frame, put the two crops side by side, and ask whether
+it reads as the thing. No reasoning, no comment, no test. A picture, next to the
+other picture.
