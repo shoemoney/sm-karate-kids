@@ -4865,3 +4865,52 @@ sharper instruction than most of the fixes this loop has shipped, because it
 told me what to go and look at rather than what to go and do.
 
 Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 113 — the sheet is quiet about defects and loud about its own fixes
+
+    unlabeled-command-columns     <- real, and caused by r100
+    duplicate-stick-headings      <- real, and reported 12+ times
+    result-pose-disconnect
+    text-size-unverified
+    boot-progress-unverified
+
+Two rounds ago I wrote that the techniques sheet had gone quiet and called it a
+result. **It went quiet about defects and immediately started reporting on the
+ones my fixes introduced**, which is the more honest reading and the one the
+numbers actually support.
+
+**`unlabeled-command-columns` is round 100's legend, seen from below.** A move
+row reads `● + ▶`, and the key that says which half is which sits at the *top of
+the sheet* while the rows sit below it. Round 92 fixed the order, round 100
+added the key, and neither put the label next to the thing being labelled — so a
+player who scrolls has a notation with no key in view, which is the same failure
+as the round-92 one with a different symptom.
+
+**The structural version of this is the real finding, and it has been in the log
+for four rounds without being drawn:** the sheet has a key at the top, a legend
+below it, nine rows of moves below that, and the rows are the only thing anyone
+opens it for. Everything the rows need to be readable is somewhere above them.
+Round 100 measured the cost of that once already — nine stacked rows pushing the
+first move name off a phone — and fixed it by making the legend two columns,
+which is treating the symptom of a top-heavy sheet rather than its cause.
+
+**Not actioned this round, and the reason is worth stating plainly: I am at the
+end of what I can verify carefully.** The fix is a layout decision — whether the
+key repeats per group, sits in a sticky header, or the rows carry their own
+label — and each option changes how much of the sheet fits above the first move
+on a 390px screen. That is a playtest, not a patch, and rounds 96, 97, 106 and
+108 are all the same decision: **when the answer depends on playtesting, the
+honest output is a recorded option list, not a change made at the end of a
+session by someone who cannot see the result properly.**
+
+**`duplicate-stick-headings` is the coach redundancy, at twelve-plus models
+across twenty rounds.** STANCE and TECHNIQUE appear above the coach's
+instruction block and again below the sticks. It has never been fixed because it
+is a genuine trade — the titles above group the instructions, the titles below
+label the pads, and removing either leaves something unlabelled. Now that the
+sheet carries a real key, the coach's *upper* titles are the redundant half
+rather than the lower ones, which is a narrower and cheaper fix than removing
+either. Queued with that narrowing, for a round with budget to playtest it.
+
+Gates unchanged: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5
+skipped / exit 0.

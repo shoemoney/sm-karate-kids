@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-30T00:29:35",
+ "reviewed_at": "2026-09-30T00:37:58",
  "items": [
   {
-   "title": "pre-fight-input-guide",
-   "claim": "The qualifier card shows STANCE and TECHNIQUE beneath directional chevrons, but omits the action guide visible in the fight frame.",
-   "reason": "The introduction is a useful place to explain what each direction does before the player needs it.",
-   "suggest": "Reuse the fight frame\u2019s directional action guide on the qualifier card, with readable labels and no overlap with the Fight button."
+   "title": "unlabeled-command-columns",
+   "claim": "In Image #6, move recipes contain two symbol circles separated by a plus sign, but the recipe columns themselves are not labeled Stance and Technique.",
+   "reason": "Players must connect each recipe back to the separate legend to identify which stick supplies each input.",
+   "suggest": "Add a Stance + Technique column header directly above the move recipes, aligned with their respective symbols."
   },
   {
-   "title": "record-clock-label",
-   "claim": "The Asmongold win-result frame displays 29s on the round timer and FASTEST WIN 6.1S without identifying the record\u2019s time basis.",
-   "reason": "These values are not necessarily contradictory, but players cannot tell whether the record includes introductions or referee pauses.",
-   "suggest": "Verify which clock supplies the record, then explicitly label it as elapsed time or fighting time; do not change either value based on this still."
+   "title": "duplicate-stick-headings",
+   "claim": "In Image #3, Stance and Technique each appear twice: above the directional instructions and below their respective sticks.",
+   "reason": "Repeated headings add visual clutter without teaching an additional action.",
+   "suggest": "Keep the labels beneath the sticks and remove the duplicate headings from the instruction panel, retaining its directional explanations."
   },
   {
-   "title": "result-pose-separation",
-   "claim": "Both pictured win-result screens show the declared winner striking an opponent who remains in a fighting stance.",
-   "reason": "At these captured moments, the character tableau still depicts contact rather than a distinct victory or defeat.",
-   "suggest": "Retain the scoring pose for the impact moment, then use a distinct victory-and-defeat or bow tableau alongside the result panel; verify the existing transition before changing it."
+   "title": "result-pose-disconnect",
+   "claim": "Image #18 announces Asmongold wins while Asmongold is shown in a kick pose and HasanAbi remains upright in guard.",
+   "reason": "The character poses do not reinforce the outcome announced by the text.",
+   "suggest": "Use distinct victory and defeat poses for the result display rather than retaining combat poses."
   },
   {
-   "title": "desktop-keyboard-discovery",
-   "claim": "The desktop fight frame displays two touch-stick controls but no visible keyboard bindings.",
-   "reason": "A desktop player cannot discover the keyboard mapping from this screen.",
-   "suggest": "Place a compact keyboard legend between the sticks, populated from the actual input bindings, while retaining the touch controls."
+   "title": "text-size-unverified",
+   "claim": "The point-value labels in Image #6 are visible, but this raster does not establish whether their rendered font sizes meet the required 18 CSS-pixel minimum.",
+   "reason": "Players need readable scoring information when choosing techniques, and an unsupported size estimate could prompt the wrong fix.",
+   "suggest": "Measure computed font sizes and effective scaling in the running panel at 390\u00d7844; enlarge and reflow any labels below 18 CSS pixels rather than shrinking surrounding content."
   },
   {
-   "title": "metadata-size-unverified",
-   "claim": "The techniques sheet renders scoring metadata visibly smaller than move names, but the raster image cannot establish its computed CSS font size.",
-   "reason": "Relative size alone does not prove a violation of the project\u2019s 18 CSS px readability minimum.",
-   "suggest": "Measure the metadata\u2019s computed font size at the supplied phone viewport; increase any text below 18 CSS px and wrap the rows rather than shrinking their contents."
+   "title": "boot-progress-unverified",
+   "claim": "Image #1 shows Downloading the game above a progress track with no distinguishable filled segment, but one still cannot establish whether progress advances.",
+   "reason": "Players need truthful loading feedback; treating an initial capture as a stall could lead to misleading artificial progress.",
+   "suggest": "Leave the loader unchanged until a throttled-network recording and timestamped completed-work counters establish its behavior; fix only a demonstrated disagreement between those counters and the displayed fill."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"pre-fight-input-guide\",\n    \"claim\": \"The qualifier card shows STANCE and TECHNIQUE beneath directional chevrons, but omits the action guide visible in the fight frame.\",\n    \"reason\": \"The introduction is a useful place to explain what each direction does before the player needs it.\",\n    \"suggest\": \"Reuse the fight frame\u2019s directional action guide on the qualifier card, with readable labels and no overlap with the Fight button.\"\n  },\n  {\n    \"title\": \"record-clock-label\",\n    \"claim\": \"The Asmongold win-result frame displays 29s on the round timer and FASTEST WIN 6.1S without identifying the record\u2019s time basis.\",\n    \"reason\": \"These values are not necessarily contradictory, but players cannot tell whether the record includes introductions or referee pauses.\",\n    \"suggest\": \"Verify which clock supplies the record, then explicitly label it as elapsed time or fighting time; do not change either value based on this still.\"\n  },\n  {\n    \"title\": \"result-pose-separation\",\n    \"claim\": \"Both pictured win-result screens show the declared winner striking an opponent who remains in a fighting stance.\",\n    \"reason\": \"At these captured moments, the character tableau still depicts contact rather than a distinct victory or defeat.\",\n    \"suggest\": \"Retain the scoring pose for the impact moment, then use a distinct victory-and-defeat or bow tableau alongside the result panel; verify the existing transition before changing it.\"\n  },\n  {\n    \"title\": \"desktop-keyboard-discovery\",\n    \"claim\": \"The desktop fight frame displays two touch-stick controls but no visible keyboard bindings.\",\n    \"reason\": \"A desktop player cannot discover the keyboard mapping from this screen.\",\n    \"suggest\": \"Place a compact keyboard legend between the sticks, populated from the actual input bindings, while retaining the touch controls.\"\n  },\n  {\n    \"title\": \"metadata-size-unverified\",\n    \"claim\": \"The techniques sheet renders scoring metadata visibly smaller than move names, but the raster image cannot establish its computed CSS font size.\",\n    \"reason\": \"Relative size alone does not prove a violation of the project\u2019s 18 CSS px readability minimum.\",\n    \"suggest\": \"Measure the metadata\u2019s computed font size at the supplied phone viewport; increase any text below 18 CSS px and wrap the rows rather than shrinking their contents.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"unlabeled-command-columns\",\n    \"claim\": \"In Image #6, move recipes contain two symbol circles separated by a plus sign, but the recipe columns themselves are not labeled Stance and Technique.\",\n    \"reason\": \"Players must connect each recipe back to the separate legend to identify which stick supplies each input.\",\n    \"suggest\": \"Add a Stance + Technique column header directly above the move recipes, aligned with their respective symbols.\"\n  },\n  {\n    \"title\": \"duplicate-stick-headings\",\n    \"claim\": \"In Image #3, Stance and Technique each appear twice: above the directional instructions and below their respective sticks.\",\n    \"reason\": \"Repeated headings add visual clutter without teaching an additional action.\",\n    \"suggest\": \"Keep the labels beneath the sticks and remove the duplicate headings from the instruction panel, retaining its directional explanations.\"\n  },\n  {\n    \"title\": \"result-pose-disconnect\",\n    \"claim\": \"Image #18 announces Asmongold wins while Asmongold is shown in a kick pose and HasanAbi remains upright in guard.\",\n    \"reason\": \"The character poses do not reinforce the outcome announced by the text.\",\n    \"suggest\": \"Use distinct victory and defeat poses for the result display rather than retaining combat poses.\"\n  },\n  {\n    \"title\": \"text-size-unverified\",\n    \"claim\": \"The point-value labels in Image #6 are visible, but this raster does not establish whether their rendered font sizes meet the required 18 CSS-pixel minimum.\",\n    \"reason\": \"Players need readable scoring information when choosing techniques, and an unsupported size estimate could prompt the wrong fix.\",\n    \"suggest\": \"Measure computed font sizes and effective scaling in the running panel at 390\u00d7844; enlarge and reflow any labels below 18 CSS pixels rather than shrinking surrounding content.\"\n  },\n  {\n    \"title\": \"boot-progress-unverified\",\n    \"claim\": \"Image #1 shows Downloading the game above a progress track with no distinguishable filled segment, but one still cannot establish whether progress advances.\",\n    \"reason\": \"Players need truthful loading feedback; treating an initial capture as a stall could lead to misleading artificial progress.\",\n    \"suggest\": \"Leave the loader unchanged until a throttled-network recording and timestamped completed-work counters establish its behavior; fix only a demonstrated disagreement between those counters and the displayed fill.\"\n  }\n]"
 }
