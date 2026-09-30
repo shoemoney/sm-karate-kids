@@ -2829,3 +2829,56 @@ confirmation (measured at 320px, measured at 390px, and now visible in a call).
 The set is 21 frames: boot, title, fight, kick, **call**, settings (x2),
 techniques, bracket, scored result, **half point**, desktop, high-contrast,
 tournament, impact, returning, landscape.
+
+### Round 76 — a confirmed defect in the exact code I had already "fixed"
+
+`openai/gpt-6.1-sol`, `x-ai/grok-4.7`, `anthropic/claude-opus-5.5` on the
+21-frame set.
+
+`claude-opus-5.5`: **"impact effects look like brown sticks and a translucent
+duplicate fighter."** Both halves are correct, and I looked at the impact frame
+to check.
+
+**The brown sticks are the sparks.** On `11-phone-impact` there are four or five
+thin tan/brown line segments radiating from the white fighter's head and arm,
+and more across his chest. They have hard ends and no glow. Against the dojo
+backdrop they read as splinters or straw, not as impact energy.
+
+**The translucent duplicate is the ghost trail** — the pale offset copy around
+the white fighter's head and shoulders, the afterimage added for motion.
+
+**Both are in code this loop already changed, and both survived my verification
+because I verified the wrong property.** Round 46 gave the sparks tapers, after
+round 26 found they were solid rectangles; the fix was real and I checked the
+right thing — *they are no longer rectangles* — which is not the same question as
+*do they read as sparks*. They are tapered and they read as sticks. And the
+ghost I never looked at at all, in any round, because no frame had ever caught it
+mid-trail and because "motion blur" sounds like a thing you have.
+
+So the honest accounting: the impact stack has been reported by six models across
+rounds 23, 26, 46, 49, 60, 65 and 73, this loop has made three changes to it, and
+it still does not look like an impact. Every previous change improved a
+measurable property and none of them changed whether the effect reads as the
+thing it is supposed to be.
+
+**This is the same class as the occlusion misread in round 70 and the
+half-point in round 74, one level up: a real defect next to code I was proud
+of, invisible to me because I had already agreed it was handled.** The
+distinguisher is not care — it is that all three times the defect sat in a
+system I had a *conclusion* about.
+
+**Queued as the top product fix, and the two questions it has to answer are
+both "reads as", not "measures as":**
+
+1. The sparks need a colour and a falloff that read as heat — a bright core
+   fading to nothing, not a uniform tan line. The taper was necessary and not
+   sufficient.
+2. The ghost needs to be either far subtler at this scale or dropped. A
+   translucent second silhouette on a fighter this size does not read as speed;
+   it reads as a rendering fault, which is what a reviewer called it.
+
+Also new and unchecked this round: `callouts-desync-and-cover-the-hit`
+(grok-4.7) — the technique banner names the move, fires early, and the claim
+that it names the *wrong input* is checkable against the 18-phone-kick capture,
+where the banner read `FRONT KICK` and the move was `front_kick`. The "covers
+the hit" half is refuted by the 60px gap measured in round 75.

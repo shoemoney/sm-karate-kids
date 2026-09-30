@@ -1,0 +1,89 @@
+{
+  "model": "anthropic/claude-opus-5.5",
+  "elapsed_s": 56.8,
+  "usage": {
+    "prompt_tokens": 22290,
+    "completion_tokens": 3842,
+    "total_tokens": 26132,
+    "cost": 0.166,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.166,
+      "upstream_inference_prompt_cost": 0.08916,
+      "upstream_inference_completions_cost": 0.07684
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1596,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fraction-score-glyphs",
+      "title": "Half-point scores render as broken stacked digits that read as '212'",
+      "what": "On the HASANABI WINS result screen, the big score reads '0 \u2014 2' followed by a small '1' and a '2' stacked vertically under it, with no fraction bar. The '2' sits below the baseline, so the score reads as '0 \u2014 212'. The top HUD has the same problem: Hasanabi's score shows as '2' with a tiny stacked '1/2' next to it. The Asmongold '\u00bd' during WAZA-ARI is a thin, narrow glyph that is much weaker than the bold white '0' opposite it.",
+      "why": "The score is the single most important number in a point-karate game, and half points are the core rule. On the defeat screen, the moment you most want clarity, the player cannot tell what the final score was. It looks like a rendering bug and undermines trust in the scoring.",
+      "how": "Stop building the fraction from positioned spans. Use the Unicode '\u00bd' (U+00BD) in the same bold numeric face as the integers, or a CSS stacked fraction with a visible 2px bar and both digits at 45% size vertically centred on the integer. Set font-variant-numeric: tabular-nums so '2\u00bd' and '0' share width in the HUD. Give the result screen the same treatment at 1:1 scale, and check it at 390px width."
+    },
+    {
+      "id": "hit-spark-and-ghost-artifacts",
+      "title": "Impact effects look like brown sticks and a translucent duplicate fighter",
+      "what": "In the 'IPPON / HASANABI / SPINNING BACK KICK' frame, a cluster of brown/orange rod-like shards sticks out of Asmongold's head and shoulder. It reads as twigs or a broken sprite, not a hit flash. In the second 'FRONT KICK' frame, a semi-transparent copy of Hasanabi's torso and legs overlaps the red fighter and Asmongold's leg, like a double exposure. In the close-contact frames, both sprites also interpenetrate, with a fist buried in a face and a foot through a shin.",
+      "why": "These are the payoff frames: the scoring hit, and a technique firing at point-blank range. Instead of a crisp 'clean contact' moment, the player sees visual garbage exactly where their eyes are. That makes the photoreal fighters look cheap and the hit hard to read.",
+      "how": "Replace the streak particles with a short (80\u2013120ms) additive radial flash plus 6\u201310 thin, bright, warm-white speed lines that fade to transparent. Tone-map them hot rather than saturated orange so bloom lifts them against the gi. Clamp the afterimage or trail alpha to 0 when the fighters are within about one body width, or only draw it behind the sprite's own layer. Add a minimum separation or push-back at contact so sprites stop sinking into each other."
+    },
+    {
+      "id": "reframe-empty-upper-third",
+      "title": "Fighters sit low while the top third of the arena is empty brown haze",
+      "what": "On the in-bout portrait screens, the play area runs from about y=83 to y=935 (in 1280-tall captures). From y=83 to roughly y=320 there is only a murky ceiling gradient with a few dust motes. The fighters' heads start around y=470 and their feet end around y=790. The hint panel then covers y=865\u2013950, so the fighters fill well under half of the view.",
+      "why": "On a phone, sprite size equals readability of the stance and attack you are reacting to. Wasting about 240px of prime vertical space on empty ceiling keeps the fighters smaller than they need to be. It makes telegraphs like the wind-up that the qualifier card warns about harder to read.",
+      "how": "In portrait, lower the camera's look-at target and tighten the FOV (about 10\u201315%) so the shoji window band sits near y=180 and the fighters' heads sit around y=320. Let the characters scale up until their feet land about 40px above the controls panel. Keep the night mood by letting the vignette carry the empty top edge, rather than leaving dead space."
+    },
+    {
+      "id": "loading-bar-feedback",
+      "title": "Loading screen shows an empty bar and mismatched monospace text",
+      "what": "On the ShoeMoney boot screen, the progress track under 'Downloading the game' is a dark brown pill with no visible fill. The status line and 'ASMONGOLD VS HASANABI' are set in a default-looking monospace. They sit directly under the bold letter-spaced 'SM KARATE KIDS' and above the letter-spaced sans 'A SHOEMONEY AI LABS GAME'.",
+      "why": "This is the very first thing every player sees, often on a slow mobile connection. An empty bar with no percentage looks frozen, which invites a back-swipe before the game ever loads. The system-mono text makes the branded screen feel unfinished next to the polished gold title.",
+      "how": "Fill the bar with the HUD gold gradient (#F2C46B\u2192#C8903A) plus a soft glow, driven by real bytes loaded. Give it a guaranteed visible minimum (about 4%) and an indeterminate shimmer when the size is unknown. Add a right-aligned '42%' in tabular numerals. Switch the status and subtitle lines to the same letter-spaced sans as the footer, with the status in sentence case at 70% opacity."
+    },
+    {
+      "id": "clarify-control-hint",
+      "title": "Control hint panel is ambiguous ('\u25c0 step \u25b6 step') and covers the mat",
+      "what": "The STANCE/TECHNIQUE hint box sits over the tatami at y\u2248865\u2013950, just above the sticks. Its Stance column reads '\u25c0 step \u25b2 jump / \u25b6 step \u25bc crouch', giving both horizontal directions the identical label. The Technique column says '\u25c0 back \u25b6 forward' with no hint that these combine with Stance, even though the Moves sheet shows moves are Stance+Technique pairs. It is set in small monospace. It is also inconsistent: it appears in some bout frames and not in others.",
+      "why": "A first-time player's whole understanding of the two-stick system comes from this panel in their first seconds of play. 'step / step' teaches nothing, and the combo nature of the controls is hidden. Players will mash the right stick and never discover the jumping, crouching or stepping variants.",
+      "how": "Relabel the Stance entries as '\u25c0 retreat \u25b6 advance \u25b2 jump \u25bc crouch'. Add one line: 'Hold a stance + flick a technique', with a live example ('\u25b2 + \u25b6 = Jumping Punch') that updates as the left stick is held. Use the HUD sans at 13px or larger. Show the panel at the start of the first three bouts and fade it after the first scored technique, instead of popping it in and out mid-bout."
+    }
+  ],
+  "raw": null
+}

@@ -1,0 +1,89 @@
+{
+  "model": "openai/gpt-6.1-sol",
+  "elapsed_s": 30.0,
+  "usage": {
+    "prompt_tokens": 19890,
+    "completion_tokens": 1196,
+    "total_tokens": 21086,
+    "cost": 0.0616835,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 19887,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0616835,
+      "upstream_inference_prompt_cost": 0.0497235,
+      "upstream_inference_completions_cost": 0.01196
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 267,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "teach-first-touch",
+      "title": "Teach a usable attack before the opening countdown",
+      "what": "On the QUALIFIER introduction screen, the bottom sticks show only arrows and STANCE / TECHNIQUE while 'STARTING IN 2\u20134' appears beneath FIGHT. In the gameplay help strip, technique directions are labeled merely 'back', 'forward', 'up', and 'down'; none names an attack or explains combining the sticks.",
+      "why": "The first bout asks a new phone player to act before the visible interface explains how to attack. The extensive TECHNIQUES sheet contains the missing information, but requires leaving the fight to decipher it.",
+      "how": "Before the first countdown, show a short interactive prompt directly above the sticks: 'Push the right stick \u2192 to punch'. Highlight that direction, require one practice input, then teach 'Left \u2192 + right \u2192 = stepping punch'. Start the first bout after a Ready tap; retain the compact direction strip afterward."
+    },
+    {
+      "id": "repair-kick-silhouette",
+      "title": "Fix the visibly truncated front-kick sprite",
+      "what": "In the 30-second FRONT KICK screenshot, Asmongold's raised white trouser leg ends abruptly around x267, y574\u2013613 in the supplied portrait capture. There is no visible lower leg or foot beyond the cut edge, making the pose look amputated rather than like a kick.",
+      "why": "The attacking limb is the essential visual explanation of reach and contact. A missing foot makes the player character look broken and leaves the attack's effective range unclear.",
+      "how": "Inspect that exact front-kick frame's source image, alpha mask, and atlas bounds. Restore the complete leg and foot, expand the frame bounds if necessary, and verify every kick frame at phone scale against the dark dojo background."
+    },
+    {
+      "id": "readable-half-scores",
+      "title": "Keep fractional scores on one readable baseline",
+      "what": "On HASANABI WINS, both the top-right score and the central '0 \u2014 2\u00bd' display stack the fraction's 1 and 2 vertically beside the whole number. The central denominator hangs well below the score line. The WAZA-ARI screenshots likewise show a tiny stacked fraction instead of a score matching the size of the normal integers.",
+      "why": "Players must understand the score instantly, especially in a first-to-two game. The current fraction layout resembles stray digits and makes half points disproportionately difficult to read.",
+      "how": "Render scores as single strings using '0.5', '1.5', and '2.5', or use a supported single-glyph '\u00bd'. Give each HUD score a fixed-width, single-line box with the same baseline and controlled font size; reuse that formatter on results screens."
+    },
+    {
+      "id": "visible-load-progress",
+      "title": "Make download progress visibly distinguishable from an empty track",
+      "what": "On the ShoeMoney pre-boot screen, the thin brown bar beneath 'Downloading the game' has no clearly distinguishable filled segment, percentage, or activity indicator. The screenshot provides no visible measure of progress.",
+      "why": "Before entering the game, a phone player cannot tell whether downloading has begun or the page is waiting indefinitely.",
+      "how": "Add a warm-gold progress fill and a compact percentage beside the status when total bytes are known. While progress is indeterminate, animate a short segment within the existing track and show a concrete phase such as 'Connecting' or 'Loading fighters'. Keep the dark branded background unchanged."
+    },
+    {
+      "id": "landscape-backdrop-edge",
+      "title": "Remove the exposed backdrop rectangle in landscape",
+      "what": "In the landscape gameplay screenshot, a large dark trapezoidal panel spans roughly x200\u20131085, y106\u2013205. Its hard lower edge cuts across the upper windows, exposing the backdrop as a separate flat surface inside the dojo.",
+      "why": "Rotating the phone reveals a conspicuous rendering seam directly above the fighters, breaking the otherwise continuous dojo setting.",
+      "how": "Resize and reposition the backdrop surface for the landscape camera frustum so its edges remain outside the viewport, or mask it behind actual roof geometry. Check the full visible frame at both portrait and landscape aspect ratios, particularly the window line."
+    }
+  ],
+  "raw": null
+}

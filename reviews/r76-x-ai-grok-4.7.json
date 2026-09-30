@@ -1,0 +1,89 @@
+{
+  "model": "x-ai/grok-4.7",
+  "elapsed_s": 159.4,
+  "usage": {
+    "prompt_tokens": 18685,
+    "completion_tokens": 10298,
+    "total_tokens": 28983,
+    "cost": 0.09743,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1152,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.09743,
+      "upstream_inference_prompt_cost": 0.035642,
+      "upstream_inference_completions_cost": 0.061788
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 9026,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "intro-chrome-buries-fighters",
+      "title": "Qualifier chrome and the control key bury the fighters",
+      "what": "On the qualifier screen (STARTING IN 4 / 3 / 2) the tell pill cuts through both heads, and the gold FIGHT button sits on top of both lead legs, while a second countdown under the button races the tap. In the bout the STANCE / TECHNIQUE key is a wide bar laid across the ankles and feet \u2014 the low line \u2014 including during the spinning-back-kick IPPON.",
+      "why": "The first five seconds of every match hide the stance you are about to fight, and you cannot tell whether to tap FIGHT or wait. Once the round starts, crouching punches and low kicks are scored on the exact pixels the legend covers, so a clean point and a whiff look the same.",
+      "how": "Move the title and the one-line tell into the band under the score pill and leave both fighters full-body on the mat. Keep one start affordance only \u2014 the button or the countdown, not both \u2014 and dim the sticks until the clock actually runs. Pin the control key into the existing labels under each pad, never across the tatami at foot height."
+    },
+    {
+      "id": "hit-sprites-break-on-contact",
+      "title": "Scoring contact blows up the fighter sprites",
+      "what": "On HasanAbi\u2019s spinning-back-kick IPPON, yellow-brown spikes explode out of Asmongold\u2019s head and face where the foot connects. On the front-kick exchange a second, translucent red Hasan is left standing inside the opaque one, and the white kick passes through that ghost. Both happen on the strike frame, with no impact mark at the contact point.",
+      "why": "The score call is the moment the player is watching. A broken head and a double body read as a crashed composite, and they hide whether the technique actually touched \u2014 the only thing point karate asks you to judge.",
+      "how": "Pull the contact frames for spinning back kick and front kick. Kill the spike layer on the white head (bad particle or hair card, not a hit spark) and delete the leftover translucent red mesh. Add a small warm flash at the foot or fist for one frame so the point reads even when the pose is held."
+    },
+    {
+      "id": "half-point-score-unreadable",
+      "title": "Half points are unreadable in the HUD and on the result",
+      "what": "A waza-ari draws as a stacked 1-over-2 crammed against the name: top-right of the loss screen is a red 2 with a tiny 1/2 colliding with HASANABI, and the result line is \u201c0 \u2014 2\u201d with the 1/2 dropped under the 2, off the baseline of the dash. In the bout the same stack sits beside ASMONGOLD at 27s and 28s, smaller than the integer and easy to miss as a score.",
+      "why": "First to 2 with half points means \u00bd is the score, not a decoration. On a 390-wide phone the player cannot tell in one glance whether they are up a half or one touch from losing, and the loss screen \u2014 the place the score has to be obvious \u2014 is the worst rendering of it.",
+      "how": "Draw halves on one baseline as \u201c2\u00bd\u201d or \u201c2.5\u201d inside the score pill, name outside the pill. On the results screen set a single line, one size, \u201c0 \u2013 2.5\u201d, and remove the in-round timer from that screen so it stops competing with the score."
+    },
+    {
+      "id": "callouts-desync-and-cover-the-hit",
+      "title": "Move banners fire early, name the wrong input, and eat the clock",
+      "what": "\u201cLUNGE PUNCH\u201d is on screen while both fighters are still in guard, and the technique nub is parked up-right inside a highlight ring \u2014 not on the right cardinal the move list calls forward. The WAZA-ARI plate is a full-width bar over both heads; the lunge-punch pose is identical at 28s and 27s while the clock keeps ticking. IPPON does the same, covering the kick it is naming.",
+      "why": "The opponent is built to punish your wind-up, so the telegraph is the game. A label that arrives before the body, and that doesn\u2019t match the stick, teaches the wrong timing. A plate that hides the strike and burns a second of a 30s round means you cannot answer the next exchange.",
+      "how": "Resolve stance plus technique first, then show a small tag on the attacking limb only on the strike frame \u2014 up-right must not announce Lunge Punch. Pause the round clock for the sting, keep WAZA-ARI / IPPON under half a second, and put the point in the HUD tick plus the contact flash instead of a screen-wide plate."
+    },
+    {
+      "id": "moves-list-clips-and-doesnt-map",
+      "title": "The techniques sheet clips, mirrors, and doesn\u2019t match the sticks",
+      "what": "The MOVES sheet ends mid-list: Rising Knee is the last full row and the next row is cut off, with a faded upside-down echo of that text along the bottom edge. Rows are a hollow circle plus a tiny triangle, not the pads the thumbs are on \u2014 a large ring, cyan nub on the left, gold nub on the right, cardinal chevrons.",
+      "why": "Fifteen hidden moves are the whole control scheme, and this is the only teacher. A player cannot rehearse a gesture from an icon that doesn\u2019t look like the stick, and the down-column looks broken rather than scrollable, so they close the sheet and guess.",
+      "how": "Redraw each row as the two real pads with the nub on the cardinal that throws that technique, cyan left and gold right, name and point value to the side. Fix the scroll mask so rows are clipped cleanly, not mirrored, and put a plain \u201cmore below\u201d hint under the last visible row."
+    }
+  ],
+  "raw": null
+}
