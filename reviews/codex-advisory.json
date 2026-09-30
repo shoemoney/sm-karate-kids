@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-29T23:34:06",
+ "reviewed_at": "2026-09-29T23:59:36",
  "items": [
   {
-   "title": "technique-hints-repeat-directions",
-   "claim": "In Image #3, STANCE maps directions to actions such as step, jump, and crouch, whereas TECHNIQUE labels directions only as back, forward, up, and down.",
-   "reason": "The player can learn movement from the hint but cannot identify which technique direction selects a punch or kick.",
-   "suggest": "Show the current stance\u2019s attack names beside the technique directions, using the same mappings displayed in the Techniques panel."
+   "title": "fight-button-overlaps-fighters",
+   "claim": "In Image #14, the FIGHT button overlaps the lower portions of both fighters\u2019 inward-facing legs.",
+   "reason": "The introduction obscures part of the fighters\u2019 silhouettes before the player begins.",
+   "suggest": "Place the FIGHT button within the introduction\u2019s text area, clear of both fighter silhouettes."
   },
   {
-   "title": "technique-legend-delays-move-list",
-   "claim": "In Image #6, five STANCE legend entries and four TECHNIQUE legend entries appear in vertically stacked sections before the first named attack.",
-   "reason": "The reference prioritizes notation over the attacks a player opened it to find.",
-   "suggest": "Arrange the two legends side by side, preserving readable text, and place the named attack groups immediately below the scoring explanation."
+   "title": "intro-controls-lack-instructions",
+   "claim": "Image #2 labels the sticks STANCE and TECHNIQUE but does not show the action mappings that are visible in Image #3.",
+   "reason": "The player sees the invitation to fight before seeing which directions perform which actions.",
+   "suggest": "Show the directional action legend during the qualifier introduction, not only in the fighting view."
   },
   {
-   "title": "keyboard-bindings-not-visible",
-   "claim": "In Image #9, the visible STANCE and TECHNIQUE controls contain directional marks but no keyboard-key labels.",
-   "reason": "A keyboard player cannot discover the corresponding keys from this screen.",
-   "suggest": "Add the actual keyboard bindings beside their corresponding stance and technique directions in the desktop control area."
+   "title": "direction-symbols-disagree",
+   "claim": "In Image #5, the stick sectors use chevrons while the instruction panel uses filled triangles for the corresponding directions.",
+   "reason": "Players must translate between two visual representations of the same inputs.",
+   "suggest": "Use matching direction words on the stick sectors and in the legend, with action-specific Font Awesome icons where useful."
   },
   {
-   "title": "briefing-shows-start-pressure",
-   "claim": "In Image #2, the opponent briefing remains visible while the FIGHT card also displays STARTING IN 2.",
-   "reason": "The countdown wording creates pressure to proceed while the player is reading, although this still cannot establish whether the bout actually starts automatically.",
-   "suggest": "Make the briefing player-paced: display 'Tap FIGHT when ready' and reserve a countdown for after the player confirms."
+   "title": "result-poses-lack-outcome-distinction",
+   "claim": "In Image #18, ASMONGOLD WINS appears above Asmongold in a kicking pose and HasanAbi in a guard pose rather than visually distinct outcome poses.",
+   "reason": "The text communicates victory, but the fighter presentation still resembles an exchange.",
+   "suggest": "Give the result presentation a winner salute and a distinct loser recovery pose; this frame alone does not establish whether either existing animation is frozen."
   },
   {
-   "title": "win-time-basis-unexplained",
-   "claim": "In Image #18, the HUD displays 29s and the record badge displays FASTEST WIN 6.4S, but the frame cannot establish whether those figures use the same timing basis.",
-   "reason": "The player has no explanation for how the remaining round time relates to the recorded win duration.",
-   "suggest": "Capture both clocks\u2019 start, pause, and stop timestamps for the same bout, then label the record as 'Elapsed win time' or 'Active fight time' according to its verified basis rather than assuming either calculation is wrong."
+   "title": "technique-text-size-unverified",
+   "claim": "In Image #6, the scoring metadata appears smaller than the technique names, but their exact CSS font sizes cannot be established from this screenshot.",
+   "reason": "Height and point value are essential information when choosing a technique, so their readability needs verification.",
+   "suggest": "Measure computed font sizes for the technique names, scoring metadata, and legends at 390\u00d7844; raise anything below 18 CSS px and stack metadata beneath names if necessary."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"technique-hints-repeat-directions\",\n    \"claim\": \"In Image #3, STANCE maps directions to actions such as step, jump, and crouch, whereas TECHNIQUE labels directions only as back, forward, up, and down.\",\n    \"reason\": \"The player can learn movement from the hint but cannot identify which technique direction selects a punch or kick.\",\n    \"suggest\": \"Show the current stance\u2019s attack names beside the technique directions, using the same mappings displayed in the Techniques panel.\"\n  },\n  {\n    \"title\": \"technique-legend-delays-move-list\",\n    \"claim\": \"In Image #6, five STANCE legend entries and four TECHNIQUE legend entries appear in vertically stacked sections before the first named attack.\",\n    \"reason\": \"The reference prioritizes notation over the attacks a player opened it to find.\",\n    \"suggest\": \"Arrange the two legends side by side, preserving readable text, and place the named attack groups immediately below the scoring explanation.\"\n  },\n  {\n    \"title\": \"keyboard-bindings-not-visible\",\n    \"claim\": \"In Image #9, the visible STANCE and TECHNIQUE controls contain directional marks but no keyboard-key labels.\",\n    \"reason\": \"A keyboard player cannot discover the corresponding keys from this screen.\",\n    \"suggest\": \"Add the actual keyboard bindings beside their corresponding stance and technique directions in the desktop control area.\"\n  },\n  {\n    \"title\": \"briefing-shows-start-pressure\",\n    \"claim\": \"In Image #2, the opponent briefing remains visible while the FIGHT card also displays STARTING IN 2.\",\n    \"reason\": \"The countdown wording creates pressure to proceed while the player is reading, although this still cannot establish whether the bout actually starts automatically.\",\n    \"suggest\": \"Make the briefing player-paced: display 'Tap FIGHT when ready' and reserve a countdown for after the player confirms.\"\n  },\n  {\n    \"title\": \"win-time-basis-unexplained\",\n    \"claim\": \"In Image #18, the HUD displays 29s and the record badge displays FASTEST WIN 6.4S, but the frame cannot establish whether those figures use the same timing basis.\",\n    \"reason\": \"The player has no explanation for how the remaining round time relates to the recorded win duration.\",\n    \"suggest\": \"Capture both clocks\u2019 start, pause, and stop timestamps for the same bout, then label the record as 'Elapsed win time' or 'Active fight time' according to its verified basis rather than assuming either calculation is wrong.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"fight-button-overlaps-fighters\",\n    \"claim\": \"In Image #14, the FIGHT button overlaps the lower portions of both fighters\u2019 inward-facing legs.\",\n    \"reason\": \"The introduction obscures part of the fighters\u2019 silhouettes before the player begins.\",\n    \"suggest\": \"Place the FIGHT button within the introduction\u2019s text area, clear of both fighter silhouettes.\"\n  },\n  {\n    \"title\": \"intro-controls-lack-instructions\",\n    \"claim\": \"Image #2 labels the sticks STANCE and TECHNIQUE but does not show the action mappings that are visible in Image #3.\",\n    \"reason\": \"The player sees the invitation to fight before seeing which directions perform which actions.\",\n    \"suggest\": \"Show the directional action legend during the qualifier introduction, not only in the fighting view.\"\n  },\n  {\n    \"title\": \"direction-symbols-disagree\",\n    \"claim\": \"In Image #5, the stick sectors use chevrons while the instruction panel uses filled triangles for the corresponding directions.\",\n    \"reason\": \"Players must translate between two visual representations of the same inputs.\",\n    \"suggest\": \"Use matching direction words on the stick sectors and in the legend, with action-specific Font Awesome icons where useful.\"\n  },\n  {\n    \"title\": \"result-poses-lack-outcome-distinction\",\n    \"claim\": \"In Image #18, ASMONGOLD WINS appears above Asmongold in a kicking pose and HasanAbi in a guard pose rather than visually distinct outcome poses.\",\n    \"reason\": \"The text communicates victory, but the fighter presentation still resembles an exchange.\",\n    \"suggest\": \"Give the result presentation a winner salute and a distinct loser recovery pose; this frame alone does not establish whether either existing animation is frozen.\"\n  },\n  {\n    \"title\": \"technique-text-size-unverified\",\n    \"claim\": \"In Image #6, the scoring metadata appears smaller than the technique names, but their exact CSS font sizes cannot be established from this screenshot.\",\n    \"reason\": \"Height and point value are essential information when choosing a technique, so their readability needs verification.\",\n    \"suggest\": \"Measure computed font sizes for the technique names, scoring metadata, and legends at 390\u00d7844; raise anything below 18 CSS px and stack metadata beneath names if necessary.\"\n  }\n]"
 }

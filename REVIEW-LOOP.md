@@ -4550,3 +4550,50 @@ ninety-six trustworthy. A loop that has to find something every iteration will
 find something every iteration, including in code that is already correct.
 
 Gates: `pnpm check` 132 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 107 — the glyph finding, one level outside the fence, and a trade-off rather than a defect
+
+`direction-symbols-disagree`: *"the stick sectors use chevrons while the
+instruction panel uses filled triangles for the corresponding directions."*
+
+**That is the same family as rounds 102–105 and it is outside the gate I wrote for
+them**, exactly as I said it would be when I described the fence as narrow. The
+round-105 assertions check the *words* the legend and the coach use; this is the
+*shape* the stick draws, and no assertion in that file can see it.
+
+**The finding is correct and the mechanism is a real inconsistency:**
+
+    stick   .glyph  font-size: 0, with a ::before bar rotated -45/45/135/-135
+            — a CSS-drawn chevron, and the real character hidden
+    legend  QUALIFIER_GLYPH / FAMILY_GLYPH — the characters ▲ ▼ ◀ ▶
+
+So the HTML already contains the correct character and the stylesheet hides it in
+favour of a drawn shape. The player's thumb finds a chevron; the sheet that
+teaches the notation shows a triangle; both mean "up".
+
+**And this is a judgement call, not a defect, so it is recorded rather than
+changed.** There are two ways to close it and they are not equivalent:
+
+- **Unify on the stick.** Drop `font-size: 0` and the `::before` rotation, let
+  the characters render. Touches the control surface — detent ring, marker
+  sizing, positioning inside a 170px ring — which this loop has verified
+  repeatedly and which the two-stick distinction in `75add44` and the up-chevron
+  affordance in `ee0b17a` both depend on.
+- **Unify on the sheet.** Redraw the legend and row glyphs as chevrons to match.
+  Leaves the control alone; costs a text-glyph-sized custom mark in a text row.
+
+**The first is the better product and the worse risk**, and the second is the
+worse product and the safe one. The loop's own evidence says the stick matters
+more: a dozen reviewers have reported on the sticks and a round of the seven
+coaches around the chevron affordance. Recommitting a control surface to fix a
+notation mismatch, at iteration 107, with no ability to playtest it properly, is
+the trade this loop has refused four times already.
+
+**Left open with both options and a recommendation**, which is the correct
+output when the answer depends on playtesting rather than on reading. The other
+two findings this run — the pre-fight card showing neither Moves nor Settings,
+and the result card not distinguishing win from loss by pose — are both real
+observations about *design* and are recorded the same way.
+
+Gates unchanged: `pnpm check` 132 passed, `pnpm test:e2e` 35 passed / 5
+skipped / exit 0.
