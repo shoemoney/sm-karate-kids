@@ -437,6 +437,55 @@ await capture('16-phone-in-play', phone, async (page) => {
   await page.screenshot({ path: `${OUT}/16-phone-in-play.png` });
 });
 
+/* ---------- Round 68: the scored result card, which the set never had ---------- */
+
+/* `07-phone-result` is a tournament bracket showing `BOUTS WON 0 / 1 · BEST —`.
+ * It is not the card that renders a score. So for thirty-one rounds this set
+ * contained no frame of the bout result at all — which is precisely why five
+ * models reported the half-point notation, why the round 53 fix reached only
+ * the HUD, and why nobody could see that it had been fixed. The instrument was
+ * missing the exact screen the finding was about.
+ *
+ * Played to, with the same thumb grammar the e2e suite uses, so the score on
+ * the card is a real one. */
+await capture('17-phone-scored-result', phone, async (page) => {
+  await page.goto(`${BASE}/?mode=dojo`, { waitUntil: 'networkidle' });
+  await waitFight(page);
+  const anchor = async (sel) => {
+    const box = await page.locator(sel).boundingBox();
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  };
+  const L = await anchor('#zone-left');
+  const R = await anchor('#zone-right');
+  const cdp = await page.context().newCDPSession(page);
+  const pts = new Map();
+  const send = (type) =>
+    cdp.send('Input.dispatchTouchEvent', {
+      type,
+      touchPoints: [...pts].map(([id, q]) => ({ x: Math.round(q.x), y: Math.round(q.y), id })),
+    });
+  const DIRS = { up: [0, -58], right: [58, 0], left: [-58, 0], down: [0, 58] };
+  const READS = ['up', 'right', 'left', 'down'];
+  for (let i = 0; i < 40; i += 1) {
+    if (await page.locator('.result-score').isVisible().catch(() => false)) break;
+    pts.clear();
+    pts.set(1, { x: L.x, y: L.y });
+    await send('touchStart');
+    pts.set(1, { x: L.x + 58, y: L.y });
+    await send('touchMove');
+    const dir = DIRS[READS[i % READS.length]];
+    pts.set(2, { x: R.x, y: R.y });
+    await send('touchStart');
+    pts.set(2, { x: R.x + dir[0], y: R.y + dir[1] });
+    await send('touchMove');
+    await page.waitForTimeout(190);
+    await send('touchEnd');
+    await page.waitForTimeout(190);
+  }
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `${OUT}/17-phone-scored-result.png` });
+});
+
 await browser.close();
 console.log(`shots in ${OUT}`);
 if (errors.length) console.log('console errors:\n' + [...new Set(errors)].join('\n'));

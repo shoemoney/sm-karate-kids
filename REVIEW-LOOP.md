@@ -2364,3 +2364,50 @@ people look at. **A fix that reaches one of two renderers has not fixed the
 concept.** The thing that made this finally stick is not the builder, it is
 deleting the second mechanism so there is nothing left to drift, plus a test
 that fails if a score string ever comes back.
+
+### Round 68 — the instrument was missing the exact screen the finding was about
+
+Last round fixed the score notation. Before moving on, the obvious question is
+whether the review set can now *see* that it is fixed. It cannot, and the reason
+is worth more than another fix.
+
+`07-phone-result` is captioned "result" and shows a **tournament bracket**:
+`BOUTS WON 0 / 1 · BEST —`. It is not the card that renders a score. So this set
+has never contained a frame of the bout result at all.
+
+That single omission explains a thirty-one-round failure end to end:
+
+- five models reported the half-point notation as cramped, ambiguous, or reading
+  as `21/2`, and every one of them was reasoning about a screen they could not
+  see, inferring it from the HUD
+- the round 53 fix reached the HUD and stopped, because the HUD was the only
+  score any reviewer had ever looked at
+- no amount of checking the code could have caught the gap, because the gap was
+  not in the code — it was in what the loop was looking at
+
+**Added `17-phone-scored-result`**, played to with the same thumb grammar the
+e2e suite uses, so the score on it is real:
+
+    2 — 0
+    BOUTS WON 1 / 1 · BEST 6.3S
+
+No glyph, one notation, and a career best with its thousands separator intact.
+The set is now 18 frames and the scored result is one of them.
+
+### The round's actual lesson
+
+This loop has now caught the same class of failure three times, and each time
+one level further from the pixels:
+
+1. a model misread a frame
+2. an instrument made a real defect invisible
+3. **an instrument omitted a screen, so a real defect could not be reported by
+   anyone, and the loop spent thirty-one rounds on it**
+
+The first two are about looking carefully. The third is not about looking at all
+— it is about what you decided to look at, and no amount of scrutiny of the
+thing you are looking at will ever find it. Every finding in this log that
+survived scrutiny was a finding about something someone chose to photograph.
+
+The generalisable form: **before trusting a review to be comprehensive, check
+that the thing you are reviewing is in the review.**
