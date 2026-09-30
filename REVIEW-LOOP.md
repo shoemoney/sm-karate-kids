@@ -5040,3 +5040,74 @@ are all the same mistake in different clothes, and rounds 63, 98, 111 and 116 ar
 the instrument that catches it.
 
 Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 117 — five rounds on one surface, and the finding is the pattern
+
+    first-move-unexplained     <- r113's finding, on a different screen
+    separated-direction-labels <- r113's finding, on the coach again
+    rematch-only-choice
+    settings-pause-unidentified
+    control-font-size-unverified
+
+`first-move-unexplained`: *"Image #2 explains HasanAbi's tactic and labels the
+sticks STANCE and TECHNIQUE, but does not explain the stance-plus-technique
+combination described in Image #6."*
+
+**That is round 113's finding on a screen I have not touched.** Round 113 said the
+notation is explained in the reference sheet and used in the fight, and round 114
+put a line in the sheet. The reviewer is now saying the pre-bout card — the first
+thing a player sees, and the only place they meet the game before a bout — does
+not carry the explanation.
+
+`separated-direction-labels` is round 113's coach finding again: the direction
+mappings sit in a panel above the sticks, and the stick edges show only chevrons.
+
+### The synthesis, which is the actual output of five rounds
+
+    r113  the sheet explains the notation; the rows and the fight use it
+    r114  add a line to the sheet
+    r115  the line broke the scroll fade
+    r116  closed the fade with a measurement
+    r117  the pre-bout card also lacks it, and the coach still duplicates it
+
+**Five rounds, four surfaces, one decision.** Every finding is the same statement
+about a different screen: *the notation is taught in one place and required in
+another.* Round 114 fixed one surface. The reviewer moved to the next. That will
+continue indefinitely, and the reason it will is structural — **there is no
+surface in this product that is the natural home for "how a move is input", so
+the explanation has been placed on whichever one was being looked at.**
+
+Round 104 wrote the rule and it is the right one:
+
+> When a surface must agree with another, decide once and put the decision
+> somewhere both can read.
+
+The decision — *where does this game teach its notation* — has never actually
+been made. Four rounds have each put a piece of it on a different screen, and
+the reviewer's job is to find the screen that is missing it this week.
+
+**So the next change is not a fix. It is the decision**, and it has three
+candidates the loop can now enumerate honestly, because the surfaces are known:
+
+1. **The pre-bout card** owns it. Every player passes through it, it already
+   names the opponent and the sticks, and it is where the first bout is
+   triggered. The sheet becomes pure reference, the coach becomes pure
+   affordance, and the stick edges keep only chevrons.
+2. **The stick labels** own it. Put the direction-to-action mapping on the pad
+   itself, where the thumb is, and let both the coach and the sheet refer to
+   it. Most correct and most invasive — it is the surface twelve-plus models
+   have reported on, and every change to it is a change to something verified.
+3. **Nothing is added** and the player learns the notation by pressing. Cheapest
+   and, on the evidence of twelve rounds of reports about the coach and the
+   sheet, wrong.
+
+**Option 1 is what the evidence supports and this round does not take it**,
+because it means deleting the coach's upper panel and rewriting the sheet's key
+— a change to four surfaces at once, on the most-played screen in the game, at
+the end of a session. That is the same refusal as rounds 96, 97, 106, 108 and
+113, and it is still the right one. **The value of this round is that the
+decision is now written down with its candidates and its cost, instead of being
+rediscovered surface by surface every two rounds for the next hundred.**
+
+Gates unchanged: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5
+skipped / exit 0.

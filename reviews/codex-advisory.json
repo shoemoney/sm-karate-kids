@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-30T00:46:48",
+ "reviewed_at": "2026-09-30T00:57:10",
  "items": [
   {
-   "title": "technique-row-obscured",
-   "claim": "In Image #6, the bottom fade darkens the visible Back Kick row while the preceding technique rows remain clearly readable.",
-   "reason": "The presentation obscures information the player is trying to learn.",
-   "suggest": "Remove the gradient over the technique text and place a separate 'Scroll for more techniques' cue outside the scrolling list."
+   "title": "first-move-unexplained",
+   "claim": "Image #2 explains HasanAbi\u2019s tactic and labels the sticks STANCE and TECHNIQUE, but does not explain the stance-plus-technique combination described in Image #6.",
+   "reason": "A new player sees FIGHT before receiving the instruction needed to perform a deliberate move.",
+   "suggest": "Add \u201cHold a stance, then add a technique\u201d directly above FIGHT, using the same terminology as the technique reference."
   },
   {
-   "title": "duplicate-control-headings",
-   "claim": "In Image #3, both 'STANCE' and 'TECHNIQUE' appear twice: above the directional instructions and beneath their respective sticks.",
-   "reason": "Repeated headings consume space without adding guidance.",
-   "suggest": "Consolidate each stick's name and directional instructions into one legend, preserving readable text sizes."
+   "title": "separated-direction-labels",
+   "claim": "Image #3 places direction-to-action mappings in a separate panel above the sticks, while the corresponding stick edges show only chevrons.",
+   "reason": "Players must visually connect each legend entry to a different location while learning the controls.",
+   "suggest": "Place each action label beside its corresponding stick direction, keeping the drag areas unobstructed and all labels at least 18 CSS px."
   },
   {
-   "title": "player-side-unidentified",
-   "claim": "In Image #3, the HUD names Asmongold and HasanAbi but does not visibly identify which fighter the player controls.",
-   "reason": "A first-time player must connect the controls to a fighter without an explicit assignment.",
-   "suggest": "Add a persistent 'You' label to the player-controlled fighter's nameplate."
+   "title": "rematch-only-choice",
+   "claim": "Image #18 shows REMATCH and STARTING IN 8, but no visible control for declining another bout or ending the session.",
+   "reason": "The result screen presents replay as the only explicit choice.",
+   "suggest": "Add an \u201cEnd session\u201d button alongside REMATCH that cancels the pending start and returns to the pre-fight screen."
   },
   {
-   "title": "countdown-without-opt-out",
-   "claim": "In Image #18, the result screen displays 'REMATCH' and 'STARTING IN 8' without a visible control to decline that advertised countdown.",
-   "reason": "A player who wants to study the result cannot see how to remain on that screen.",
-   "suggest": "Add a 'Stay on results' button that cancels the countdown, alongside the existing rematch action."
+   "title": "settings-pause-unidentified",
+   "claim": "Image #7 shows settings over the visible arena without a PAUSED indicator, and the still cannot establish whether the bout is suspended.",
+   "reason": "Players need to know whether they can safely adjust settings without the opponent continuing to fight.",
+   "suggest": "Check simulation ticks and the round timer while settings are open; if suspended, show \u201cBout paused,\u201d and if not, implement suspension before displaying that label."
   },
   {
-   "title": "round-clock-meaning-unverified",
-   "claim": "Image #18 shows 29s on the HUD and 'FASTEST ROUND 6.4S' in the result summary, but the still cannot establish whether these readouts use the same clock.",
-   "reason": "The player cannot tell whether round duration includes introductions, referee calls, or other pauses; this is not evidence that either value is incorrect.",
-   "suggest": "Compare timestamped bout boundaries, simulation ticks, and referee pauses, then label the record explicitly as 'Active fight time' or 'Total round time' according to the verified calculation."
+   "title": "control-font-size-unverified",
+   "claim": "The action labels in Image #3 are visible, but their compliance with the 18 CSS px minimum cannot be determined from this screenshot alone.",
+   "reason": "These labels carry essential instructions, and screenshot dimensions are not computed CSS font measurements.",
+   "suggest": "Measure the labels\u2019 computed font sizes at 390\u00d7844 and desktop widths; increase any below 18 CSS px and adjust wrapping or spacing rather than shrinking text."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"technique-row-obscured\",\n    \"claim\": \"In Image #6, the bottom fade darkens the visible Back Kick row while the preceding technique rows remain clearly readable.\",\n    \"reason\": \"The presentation obscures information the player is trying to learn.\",\n    \"suggest\": \"Remove the gradient over the technique text and place a separate 'Scroll for more techniques' cue outside the scrolling list.\"\n  },\n  {\n    \"title\": \"duplicate-control-headings\",\n    \"claim\": \"In Image #3, both 'STANCE' and 'TECHNIQUE' appear twice: above the directional instructions and beneath their respective sticks.\",\n    \"reason\": \"Repeated headings consume space without adding guidance.\",\n    \"suggest\": \"Consolidate each stick's name and directional instructions into one legend, preserving readable text sizes.\"\n  },\n  {\n    \"title\": \"player-side-unidentified\",\n    \"claim\": \"In Image #3, the HUD names Asmongold and HasanAbi but does not visibly identify which fighter the player controls.\",\n    \"reason\": \"A first-time player must connect the controls to a fighter without an explicit assignment.\",\n    \"suggest\": \"Add a persistent 'You' label to the player-controlled fighter's nameplate.\"\n  },\n  {\n    \"title\": \"countdown-without-opt-out\",\n    \"claim\": \"In Image #18, the result screen displays 'REMATCH' and 'STARTING IN 8' without a visible control to decline that advertised countdown.\",\n    \"reason\": \"A player who wants to study the result cannot see how to remain on that screen.\",\n    \"suggest\": \"Add a 'Stay on results' button that cancels the countdown, alongside the existing rematch action.\"\n  },\n  {\n    \"title\": \"round-clock-meaning-unverified\",\n    \"claim\": \"Image #18 shows 29s on the HUD and 'FASTEST ROUND 6.4S' in the result summary, but the still cannot establish whether these readouts use the same clock.\",\n    \"reason\": \"The player cannot tell whether round duration includes introductions, referee calls, or other pauses; this is not evidence that either value is incorrect.\",\n    \"suggest\": \"Compare timestamped bout boundaries, simulation ticks, and referee pauses, then label the record explicitly as 'Active fight time' or 'Total round time' according to the verified calculation.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"first-move-unexplained\",\n    \"claim\": \"Image #2 explains HasanAbi\u2019s tactic and labels the sticks STANCE and TECHNIQUE, but does not explain the stance-plus-technique combination described in Image #6.\",\n    \"reason\": \"A new player sees FIGHT before receiving the instruction needed to perform a deliberate move.\",\n    \"suggest\": \"Add \u201cHold a stance, then add a technique\u201d directly above FIGHT, using the same terminology as the technique reference.\"\n  },\n  {\n    \"title\": \"separated-direction-labels\",\n    \"claim\": \"Image #3 places direction-to-action mappings in a separate panel above the sticks, while the corresponding stick edges show only chevrons.\",\n    \"reason\": \"Players must visually connect each legend entry to a different location while learning the controls.\",\n    \"suggest\": \"Place each action label beside its corresponding stick direction, keeping the drag areas unobstructed and all labels at least 18 CSS px.\"\n  },\n  {\n    \"title\": \"rematch-only-choice\",\n    \"claim\": \"Image #18 shows REMATCH and STARTING IN 8, but no visible control for declining another bout or ending the session.\",\n    \"reason\": \"The result screen presents replay as the only explicit choice.\",\n    \"suggest\": \"Add an \u201cEnd session\u201d button alongside REMATCH that cancels the pending start and returns to the pre-fight screen.\"\n  },\n  {\n    \"title\": \"settings-pause-unidentified\",\n    \"claim\": \"Image #7 shows settings over the visible arena without a PAUSED indicator, and the still cannot establish whether the bout is suspended.\",\n    \"reason\": \"Players need to know whether they can safely adjust settings without the opponent continuing to fight.\",\n    \"suggest\": \"Check simulation ticks and the round timer while settings are open; if suspended, show \u201cBout paused,\u201d and if not, implement suspension before displaying that label.\"\n  },\n  {\n    \"title\": \"control-font-size-unverified\",\n    \"claim\": \"The action labels in Image #3 are visible, but their compliance with the 18 CSS px minimum cannot be determined from this screenshot alone.\",\n    \"reason\": \"These labels carry essential instructions, and screenshot dimensions are not computed CSS font measurements.\",\n    \"suggest\": \"Measure the labels\u2019 computed font sizes at 390\u00d7844 and desktop widths; increase any below 18 CSS px and adjust wrapping or spacing rather than shrinking text.\"\n  }\n]"
 }
