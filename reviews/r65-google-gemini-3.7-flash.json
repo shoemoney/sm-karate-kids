@@ -1,0 +1,85 @@
+{
+  "model": "google/gemini-3.7-flash",
+  "elapsed_s": 25.3,
+  "usage": {
+    "prompt_tokens": 18782,
+    "completion_tokens": 2806,
+    "total_tokens": 21588,
+    "cost": 0.024609,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.024609,
+      "upstream_inference_prompt_cost": 0.0140865,
+      "upstream_inference_completions_cost": 0.0105225
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1931,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fade-persistent-stance-technique-card",
+      "title": "Fade the persistent control legend card during active combat",
+      "what": "In gameplay screens (e.g., screenshots 3, 4, 8, 10, 12), a dark brown rounded card containing text descriptions for Stance and Technique inputs sits permanently between the fighters' feet and the virtual sticks.",
+      "why": "It consumes approximately 80px of vertical viewport on a 390x844 frame, compresses the combat area, and clutters the cinematic mat view once the player understands the controls.",
+      "how": "Fade out the card after the first 3 seconds of Round 1, or remove it entirely from combat and keep it exclusively inside the top-right 'MOVES' modal sheet."
+    },
+    {
+      "id": "increase-red-corner-hud-contrast",
+      "title": "Brighten red fighter name and score for contrast",
+      "what": "In the top HUD bar across all fight screens (screenshots 2, 3, 4, 8, 9, 10, 12), the right-side text 'HASANABI' and its score value use a dark, muted brick red against the dark charcoal-brown header background.",
+      "why": "The text fails glanceable readability on mobile screens under real lighting conditions, making it hard to track opponent points during fast-paced exchanges.",
+      "how": "Shift the red corner palette from deep crimson to a luminous vermilion or warm coral (e.g., #FF4D3D) to match the luminance level of the white text on the left."
+    },
+    {
+      "id": "add-sharp-foot-contact-shadows",
+      "title": "Add tight contact shadows beneath fighter feet",
+      "what": "Across all match screenshots (notably 3, 4, 10, and 12), fighter feet rest on a very soft, diffuse golden glow with no dark ambient occlusion directly under the soles.",
+      "why": "Without tight contact shadows, the photoreal fighter sprites appear to hover slightly above the 3D tatami floor rather than planting firmly onto the mat.",
+      "how": "Render a dark, tight contact shadow ellipse (alpha ~0.7, dark umber #0D0704) directly beneath each grounded foot bone, tracking foot position."
+    },
+    {
+      "id": "full-screen-scrim-on-drawers",
+      "title": "Apply full-screen dimming behind Settings and Moves sheets",
+      "what": "In the Settings and Techniques overlays (screenshots 5, 6, 11), the menu container cuts off at the lower third, leaving the frozen lower torso and legs of both fighters fully visible at the bottom.",
+      "why": "The cutoff feels like an unrendered modal bug, drawing visual attention away from the menu text to headless, static character legs.",
+      "how": "Extend a full-viewport translucent scrim (`rgba(15, 10, 6, 0.85)` with a light CSS backdrop blur) across the entire screen behind the modal card."
+    },
+    {
+      "id": "unify-splash-logo-color-palette",
+      "title": "Harmonize pre-boot logo with warm tungsten theme",
+      "what": "On the pre-boot splash screen (screenshot 1), the ShoeMoney emblem uses a bright, glossy corporate cyan-and-royal-blue gradient with chrome bevels, surrounded by gold typography.",
+      "why": "The vibrant blue 2000s-style gloss clashes immediately with the warm tungsten, gold, and tatami art direction established everywhere else.",
+      "how": "Recolor the logo emblem into a warm metallic brass, gold, or desaturated cream monochrome finish to match the 'SM KARATE KIDS' title treatment."
+    }
+  ],
+  "raw": null
+}

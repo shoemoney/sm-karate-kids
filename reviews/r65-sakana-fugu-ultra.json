@@ -1,0 +1,85 @@
+{
+  "model": "sakana/fugu-ultra",
+  "elapsed_s": 156.1,
+  "usage": {
+    "prompt_tokens": 63828,
+    "completion_tokens": 13965,
+    "total_tokens": 77793,
+    "cost": 0.73809,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.73809,
+      "upstream_inference_prompt_cost": 0.31914,
+      "upstream_inference_completions_cost": 0.41895
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 3624,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-progress-invisible",
+      "title": "Make the pre-boot loading progress unmistakable",
+      "what": "On the ShoeMoney pre-boot loading screen, the progress bar under \u201cDownloading the game\u201d is only a very thin brown hairline near the lower-middle of the screen, with no visible filled segment against the dark brown background.",
+      "why": "This is the first product moment; if the bar looks empty or static, a mobile player can read the game as frozen before reaching the bout.",
+      "how": "Increase the track to about 6\u20138 px high, add a warm gold filled segment with a minimum visible width, and include either a percentage label or a subtle animated sweep while assets load."
+    },
+    {
+      "id": "fight-countdown-conflict",
+      "title": "Remove the ambiguity between the Fight button and auto-start",
+      "what": "On the Qualifier intro screen, the large gold \u201cFIGHT\u201d button sits in the lower center while a separate \u201cSTARTING IN 2/3/4\u201d countdown appears directly beneath it.",
+      "why": "A touch-first player cannot tell whether they should tap the button or wait for the countdown, creating hesitation at the exact moment the first interaction should feel clear.",
+      "how": "If tapping skips the countdown, label the button \u201cSTART NOW\u201d and change the subtext to \u201cAuto-starts in 3.\u201d If the match always auto-starts, remove the button styling and make one combined countdown control that reads \u201cFIGHT IN 3.\u201d"
+    },
+    {
+      "id": "portrait-fighters-too-small",
+      "title": "Tighten the portrait combat framing around the fighters",
+      "what": "On the live portrait gameplay screens, the fighters\u2019 readable bodies occupy roughly the middle band of the screen, with a large mostly empty smoky dojo/window area above them and the touch controls starting below them.",
+      "why": "The player needs to read hands, feet, contact distance, and hit timing on a 390 px-wide phone; the current framing gives too much vertical space to non-interactive background and makes the bout harder to parse.",
+      "how": "Add a portrait camera preset that scales the fighters up about 10\u201315%, lowers the visible background crop, and keeps both fighters\u2019 feet safely above the joystick panel."
+    },
+    {
+      "id": "stance-step-labels-duplicate",
+      "title": "Differentiate the left and right stance-stick labels",
+      "what": "In the live gameplay move helper strip above the joysticks, the STANCE column labels both horizontal inputs as \u201cstep\u201d: \u201c\u25c0 step\u201d and \u201c\u25b6 step.\u201d",
+      "why": "The on-screen tutorial does not teach the difference between moving toward the opponent and moving away, so the core left-stick vocabulary is unclear during the player\u2019s first bout.",
+      "how": "Rename the horizontal stance labels to distinct player-relative actions such as \u201caway\u201d and \u201ctoward,\u201d or \u201cback step\u201d and \u201cforward step,\u201d and mirror the wording correctly if the player side changes."
+    },
+    {
+      "id": "half-point-score-cramped",
+      "title": "Make half-point scores legible in the top HUD",
+      "what": "On the result/win screen, HasanAbi\u2019s top-right HUD score shows a large red \u201c2\u201d with a tiny stacked \u201c1/2\u201d squeezed beside it, while the main result below reads more clearly as \u201c0 \u2013 2\u00bd.\u201d",
+      "why": "Half-points are core scoring information, and the cramped fraction can be missed or misread at a glance during a fast point-karate exchange.",
+      "how": "Render fractional scores as a single consistent token, such as \u201c2.5\u201d or a custom \u201c2\u00bd\u201d glyph at the same visual height as the integer score, with fixed-width score slots so the HUD does not reflow."
+    }
+  ],
+  "raw": null
+}

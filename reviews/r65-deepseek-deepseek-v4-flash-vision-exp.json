@@ -1,0 +1,85 @@
+{
+  "model": "deepseek/deepseek-v4-flash-vision-exp",
+  "elapsed_s": 68.1,
+  "usage": {
+    "prompt_tokens": 9090,
+    "completion_tokens": 10536,
+    "total_tokens": 19626,
+    "cost": 0.01790712,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.01790712,
+      "upstream_inference_prompt_cost": 0.0039996,
+      "upstream_inference_completions_cost": 0.01390752
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 8933,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "boot-loading-bar-no-progress",
+      "title": "Pre-boot progress bar never shows progress, so the download reads as frozen",
+      "what": "On the ShoeMoney splash (390x844), the full-width rule under 'Downloading the game' at y\u2248760 is a flat, uniform tan/brown line \u2014 no filled segment, no percentage, no motion cue, no determinate vs indeterminate distinction. Everything above it (logo, 'SM KARATE KIDS', 'ASMONGOLD VS HASANABI') is static against near-black, so nothing on screen moves.",
+      "why": "First load is the heaviest moment in a WebGPU title and the one place a player decides whether the game is alive. A bar that looks identical at 5% and 95% is read as a hang, and players abandon before they ever see the dojo, the fighters, or the bloom pass they're being asked to wait for.",
+      "how": "Drive a filled track from the asset manager's real byte progress: gold fill (#c9a227-ish) on a darker warm track, 0\u2013100%, with 'NN%' set beside 'Downloading the game'. Add a slow specular sweep across the fill so the bar animates even while one large asset is in flight, and if no bytes arrive for 3s, switch to an explicit 'still loading' pulse rather than leaving a dead bar."
+    },
+    {
+      "id": "fight-framing-dead-thirds",
+      "title": "Fighters are squeezed into the middle third by dead wall above and controls below",
+      "what": "In every 390x844 fight frame (e.g. the '30s' frames), the two fighters span roughly y=300 to y=560 \u2014 about 31% of the screen height \u2014 and their heads sit at y\u2248300. y=0\u2013250 is a near-black upper wall with two faint bloom lamps and no readable content, and y=560\u2013844 is the legend card plus both stick rings. The camera is a flat, symmetric, eye-level wide shot, so the fighters read as small figures on a big empty stage.",
+      "why": "Point karate is entirely about reading the opponent's wind-up \u2014 the round-one taunt literally says 'he waits for your wind-up'. At this scale the opponent's lead hand is only ~25px tall on a phone and the tells that decide the round are unreadable, while roughly 40% of the frame carries no gameplay information at all.",
+      "how": "Tighten the fight camera by ~20% (or raise the fighters' world scale) and pitch down slightly so the fighters' head line lands just under the HUD at y\u2248200 with feet at y\u2248560. Keep the lens, the tungsten key and the existing lighting \u2014 only change framing, so the shoji wall band fills the space behind their heads instead of empty ceiling."
+    },
+    {
+      "id": "tatami-hard-edge-planes",
+      "title": "Hard-edged bright rectangle on the tatami breaks the photoreal floor",
+      "what": "In the fight frames the mat brightens inside a distinctly rectangular region: the top edge is a straight horizontal line running through/just behind the fighters' ankles, and the left and right edges cut straight through the tatami weave instead of falling off (clearest in the 30s frames and the LUNGE PUNCH frame). The sprite feet also plant on soft dark blobs that don't sit under the same light as the floor pool.",
+      "why": "The entire pitch is a photoreal dojo lit with volumetric warm light; a visible plane/decal edge is the single artefact that screams 'rendered game' and it happens at the exact pixel the player is staring at \u2014 the point of contact between two fighters. It cheapens the one asset the game is selling.",
+      "how": "Replace the light-pool / shadow-catcher rectangle with a feathered decal (radial gradient or noise-masked alpha with \u226515% of its radius as falloff) so no straight edge is visible anywhere on the mat. Then place a small elliptical contact shadow under each individual foot, sized to the sprite's actual stance width, instead of one soft blob under the pair."
+    },
+    {
+      "id": "control-legend-microtext",
+      "title": "The only explanation of the sticks is ~9px text that says what the sticks already say",
+      "what": "The in-fight card above the stick rings ('STANCE \u25c0 step \u25b2 jump / \u25b6 step \u25bc crouch' and 'TECHNIQUE \u25c0 back \u25b6 forward / \u25b2 up \u25bc down') is set at roughly 9px cap height with wide tracking on a 390px-wide screen, with ~8px arrow glyphs. It sits directly above chevrons that show the same directions and above the permanent 'STANCE' / 'TECHNIQUE' labels \u2014 three layers saying one thing \u2014 and it consumes ~90px of the tightest vertical band in the frame.",
+      "why": "Both sticks use the same four chevrons for different verbs (step/jump/crouch vs back/forward/up/down), so this card is the only place the mapping exists. At arm's length on a phone it cannot be read mid-round, which means new players mash the technique stick, mistime a lunge punch and lose the round before they've learned the system that is the whole game.",
+      "how": "Remove the card during normal play and show the mapping once as a first-fight coach overlay in \u226514px type. Permanently, micro-label the directions inside each ring next to their chevron ('step', 'jump', 'crouch' on the stance ring; 'back', 'fwd', 'up', 'down' on the technique ring) at \u226511px, and spend the reclaimed ~90px on tightening the fight camera."
+    },
+    {
+      "id": "techniques-list-scan-and-clip",
+      "title": "Techniques sheet is clipped mid-row and encodes inputs as abstract glyphs",
+      "what": "In the TECHNIQUES sheet, rows run ~40px tall with ~13px labels, each prefixed by a 20px circle-plus-triangle glyph cluster ('\u25cb \u25b6 + Lunge Punch') that has to be decoded rather than read. The reward column ('mid \u00b7 Half point') is the smallest and lowest-contrast text on the row, and the list ends cut through a row at the bottom screen edge with no scrollbar, no fade and no safe-area padding, while the close X sits up in the status-bar zone.",
+      "why": "This sheet is the entire control vocabulary for a twelve-technique game and the moment a new player either learns the system or bounces. A list that looks chopped off reads as broken, the glyph notation turns a two-second lookup into a decoding puzzle, and the point values \u2014 the actual decision-relevant information (half vs full point) \u2014 are the hardest thing on the row to read.",
+      "how": "Set rows to \u226556px with dividers; replace each glyph cluster with a compact 4-chevron mini-pad showing the exact hold direction (with the relevant chevron highlighted); move 'mid \u00b7 Half point' to a right-aligned pill at \u226512px with the point value bolded and the height tag in a fixed column; add bottom safe-area inset plus a gradient fade and visible scroll indicator; pin the header and close button below the status bar."
+    }
+  ],
+  "raw": null
+}

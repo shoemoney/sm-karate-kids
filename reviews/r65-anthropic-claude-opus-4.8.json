@@ -1,0 +1,85 @@
+{
+  "model": "anthropic/claude-opus-4.8",
+  "elapsed_s": 33.7,
+  "usage": {
+    "prompt_tokens": 18228,
+    "completion_tokens": 1842,
+    "total_tokens": 20070,
+    "cost": 0.13719,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.13719,
+      "upstream_inference_prompt_cost": 0.09114,
+      "upstream_inference_completions_cost": 0.04605
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighter-scale-mismatch",
+      "title": "Fighters are pasted-on cutouts that don't share the mat's ground plane",
+      "what": "In the combat screens (3rd, 4th, 12th shots) both fighters have hard, uniform sprite edges with no contact shadow where their bare feet meet the tatami. They float on the mat rather than stand on it, and their feet sit at a flatter perspective than the receding tatami lines behind them. In the landscape shot the effect is worse \u2014 the two figures sit dead-center on a mat that tilts away underneath their heels.",
+      "why": "This is the first thing a player sees for the entire match, and it reads as 'stickers on a photo' instead of a fight in a room. It undercuts the whole photoreal-in-a-3D-dojo premise the product is selling in the first 5 seconds.",
+      "how": "Add a soft, grounded contact shadow ellipse under each fighter (dark, blurred, ~30% opacity, keyed to the warm ambient) that anchors the feet, and drop the fighters ~15-20px lower so their soles align with the tatami vanishing lines. A subtle rim/edge darkening on the sprite silhouette will kill the cut-out halo."
+    },
+    {
+      "id": "empty-dead-center-composition",
+      "title": "Combat frame wastes the top 40% on empty backdrop while fighters idle centered and static",
+      "what": "In every idle combat shot (3rd, 4th, 12th, 14th) the two fighters occupy a narrow horizontal band in the vertical middle, with a large empty stretch of upper wall/window and a wide empty mat gap between them. The IPPON shots (10th, 15th) are far more dynamic because the fighters actually collide and fill the frame.",
+      "why": "During the 30-second timer the screen is mostly dead air \u2014 no crowd motion, no camera life. On a phone held close, static negative space makes the fight feel low-stakes and cheap between exchanges.",
+      "how": "Tighten the default framing: crop/zoom the camera ~15% so the fighters read larger and the empty upper band shrinks. Add slow parallax drift or a faint breathing idle sway to the crowd silhouettes so the dead time between exchanges has motion."
+    },
+    {
+      "id": "control-labels-legend-redundancy",
+      "title": "The STANCE/TECHNIQUE legend panel duplicates the sticks and eats prime thumb real estate",
+      "what": "In the live-fight shots (3rd, 4th, 12th, 14th) a full text legend ('\u25c4 step \u25b2 jump / \u25ba step \u25bc crouch' etc.) sits permanently between the fighters and the two sticks. It repeats information the arrow glyphs on the sticks already imply, and pushes the sticks to the very bottom edge.",
+      "why": "It's a wall of tiny text a player stops reading after fight one, yet it permanently steals ~120px of vertical space that could go to the fighters or larger touch targets. It also visually clutters the clean warm HUD.",
+      "how": "Move the legend into the MOVES/Techniques modal (which already exists) and show it inline only for the first bout or when 'Large controls' is off. Reclaim that band to raise the sticks slightly and enlarge the fighters."
+    },
+    {
+      "id": "landscape-layout-broken",
+      "title": "Landscape layout strands the sticks in far corners and squashes the arena into a letterbox",
+      "what": "The wide (1280x720) shot shows the stance/technique sticks shoved into the extreme bottom-left and bottom-right corners with a huge empty black bar between them, while the dojo is crammed into a shallow horizontal strip and the crowd silhouettes sit at an awkwardly low, cramped baseline.",
+      "why": "On a landscape phone the sticks are now a full hand-span apart at the far corners \u2014 reachable but uncomfortable \u2014 and the giant black center gap looks like an unfinished layout rather than a designed one. This is a first-5-seconds credibility hit for anyone who rotates.",
+      "how": "In landscape, pull both sticks inward and up toward the natural thumb arc, and fill the center gap with the fighters framed larger (they should dominate the frame in landscape, not sit small in a letterbox). Keep the HUD bar but let the arena occupy the full height."
+    },
+    {
+      "id": "ippon-attribution-clarity",
+      "title": "IPPON callout doesn't make it instantly obvious WHO scored",
+      "what": "On the IPPON screens (10th shows HASANABI/Spinning Back Kick, 15th shows ASMONGOLD/Stepping Lunge Punch) the winner's name is in white directly under 'IPPON' with no color tie to that fighter's side. The only other cue is the small score number changing in the top bar. The scoring fighter isn't highlighted in the frame.",
+      "why": "In a point-karate game where a single clean contact decides the exchange, the player must instantly know if that point was theirs or the opponent's. Right now it takes a beat of reading to parse, which is a bad moment at the highest-tension instant of the loop.",
+      "how": "Tint the winner's name and a brief flash/glow to that fighter's side color (blue for Asmongold, red for Hasanabi), and add a quick highlight ring or pop-scale on the scoring fighter's sprite plus a matching pulse on that side's score counter in the top bar."
+    }
+  ],
+  "raw": null
+}

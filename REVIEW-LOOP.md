@@ -2213,3 +2213,48 @@ gets quietly wrong, and it was wrong in the flattering direction.
 
 Fix: derive the remaining list from the `model` field in `reviews/*.json`, never
 from filenames, and re-check it whenever a count is quoted.
+
+### Round 65 — four models, twenty findings, one new claim, refused
+
+`sakana/fugu-ultra`, `deepseek/deepseek-v4-flash-vision-exp`,
+`anthropic/claude-opus-4.8`, `google/gemini-3.7-flash`.
+
+- `tatami-hard-edge-planes: "hard-edged bright rectangle on the tatami breaks
+  the photoreal floor"` (deepseek-v4-flash-vision-exp) — **the most specific
+  new claim this round, and the only one worth an instrument.** Specific visual
+  claims are cheap to test and this loop has been burned by vague ones.
+
+  **Refused, by looking at the mat at 2.3x.** The tatami is a continuous woven
+  texture under a smooth perspective gradient, darkening toward the camera. No
+  rectangle, no seam, no hard edge. The only hard horizontal edges in that
+  region belong to the coach card, which is a panel by design.
+
+- While looking at the same crop I checked the coach card's own top edge, which
+  reads as a near-straight line at this width. It is `--radius-md` on a 1px
+  border with a blur and a shadow, sitting over the mat deliberately — the
+  reason is written out in full at `styles.css:1496-1508` (it used to cover the
+  up-chevron, the affordance it exists to teach). **Not changed.** A rounded
+  panel is supposed to have an edge, and inventing a defect because a crop
+  happened to frame one line is the exact failure mode this loop keeps
+  catching in models and keeps nearly catching in itself.
+
+- Confirmed working while I was there: the stance stick's centre pip is **blue
+  and filled**, the technique stick's is **amber and hollow**. `75add44` reads
+  correctly at a glance, which was the whole point of it.
+
+### The rest
+
+Fifteen more repeats. The boot-progress bar is now up to **four models** saying
+it is invisible — the single most persistent false alarm in this loop, refuted
+by contrast measurement (4.94:1 on the quiet token) and by the fact that the bar
+tracks real weighted units. The coach strip reached **twelve models**. Portrait
+scale is the camera trade, refused three times with numbers. The scrim behind
+the drawers shipped in `217a165` and keeps being reported as missing, which
+suggests the *review frames* still show the un-scrimmed variant rather than the
+game being wrong — worth checking which frame each of those models was looking
+at before the next round rather than answering it a fourteenth time.
+
+New but not actionable yet: `ippon-attribution-clarity` (whose score it was),
+`control-legend-microtext` (legend text size), `unify-splash-logo-color-palette`
+(would recolour the protected brand mark — **refused on sight**, that logo is
+carved out of the repo's MIT grant and is not ours to restyle).
