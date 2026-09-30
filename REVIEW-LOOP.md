@@ -5111,3 +5111,51 @@ rediscovered surface by surface every two rounds for the next hundred.**
 
 Gates unchanged: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5
 skipped / exit 0.
+
+### Round 118 — the decision, taken
+
+Round 117 wrote the rule and declined to execute it at the end of a session. This
+is a session with budget, so:
+
+> **The pre-bout card owns the notation.** Every player passes through it, it
+> already names the opponent and their tell, and it is the last thing read
+> before the sticks are touched. The sheet is reference, the coach is
+> affordance.
+
+    PATIENT. HE WAITS FOR YOUR WIND-UP — THEN MAKES YOU PAY.
+    A move is one stance input plus one technique input — the sheet lists
+    every combination.
+
+**The screenshot caught something the reasoning did not.** The first version
+appended the sentence to the tell, and the card is uppercase — so it rendered as
+one paragraph and read as a continuation of the opponent's description rather
+than a different question. `display: block` plus a dimmer colour makes the card
+say "who am I fighting" and then "how does a move work" as two things, which is
+what it was always trying to do.
+
+**That is the second time in three rounds a change was right in substance and
+wrong in execution, and both times a crop caught it** — round 114's line landing
+in the scroll fade, and this one landing in the same paragraph as the tell. Both
+were invisible to reasoning and obvious to looking, which is the whole finding of
+this loop compressed into two examples.
+
+### What this closes, and what it does not
+
+**Closes:** the r113/r114/r117 finding. The notation is no longer taught only on
+a screen the player must go and find. It is on the last card before the sticks,
+which is the one place every player is guaranteed to read.
+
+**Does not close:** `duplicate-control-headings`. The coach still shows STANCE
+and TECHNIQUE above its instructions and again below the sticks, reported by
+twelve-plus models across twenty rounds. With the pre-bout card now owning the
+explanation, the narrowing from r113 is *more* true than it was — the coach's
+upper panel is redundant with the card, not with the sheet — but removing it
+means touching the most-played surface in the game on the strength of a
+judgement about first-run players, and that still deserves its own playtest.
+
+**And the honest cost of this decision:** the pre-bout card now carries two
+sentences where it carried one, and it auto-dismisses after four seconds. If
+that is now too much text to read in four seconds, the right answer is a longer
+hold, not a smaller font — and that is a playtest, not a patch.
+
+Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.

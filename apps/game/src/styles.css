@@ -2623,6 +2623,22 @@ body.reduced-motion .boot[data-measuring='true'] .boot-bar::after {
 
 body.no-backdrop-filter .result-title,
 body.no-backdrop-filter .result-score,
+/* The notation sentence on the pre-bout card. Set apart from the opponent's
+   tell above it, because they answer different questions: that one is "who am I
+   fighting", this one is "how does a move work". Same size, dimmer, so the
+   screen reads as one paragraph with a second thought rather than two competing
+   headlines. */
+.result-notation {
+  /* Its own line. In the same run as the opponent's tell it read as one
+     paragraph — the card is uppercase, so a second sentence looks like a
+     continuation of the first rather than a different question. Block it, and
+     dim it, so the screen says "who am I fighting" and then "how does a move
+     work" as two things. */
+  display: block;
+  margin-block-start: var(--space-1);
+  color: var(--text-faint);
+}
+
 body.no-backdrop-filter .result-detail {
   background: var(--result-plate-solid);
 }
