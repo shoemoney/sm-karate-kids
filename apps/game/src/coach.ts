@@ -58,7 +58,18 @@ const LESSONS: ReadonlyArray<{
   // claude-opus-5.5 called it "the on-screen stick legend is ambiguous and
   // conflicts with the Moves list", and they are right — the sheet is what
   // people actually go and look things up in, so the coach follows it.
-  { zone: 'zone-right', title: 'Technique', pairs: ['◀ back', '▶ forward', '▲ up', '▼ down'] },
+  // The actions are back, because round 104 changed the SHEET to say
+  // "up · kick" and left the coach saying "up" — and rounds 102-105, 109 and
+  // 124 are all this one disagreement reappearing. Round 103 made the coach
+  // match the sheet; round 104 then moved the sheet and the coach was left
+  // behind. `openai/gpt-6.1-sol` (via codex) named it exactly: "Image #3 labels
+  // the technique directions as back, forward, up, and down, whereas Image #6
+  // explains those directions as reverse, punch, kick, and sweep."
+  //
+  // Both halves, same order as the sheet's legend, because the coach and the
+  // sheet are read side by side and a player matching a move from one to the
+  // other should not have to translate.
+  { zone: 'zone-right', title: 'Technique', pairs: ['◀ back · reverse', '▶ forward · punch', '▲ up · kick', '▼ down · sweep'] },
 ];
 
 export function createControlCoach(): ControlCoach {

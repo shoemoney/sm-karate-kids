@@ -5400,3 +5400,69 @@ a round to build the fence that would have caught it.**
 
 Gates: `pnpm check` 139 passed (was 136), `pnpm test:e2e` unchanged at 35 passed /
 5 skipped.
+
+### Round 124 — the same disagreement, fifth appearance, and now it fails the build
+
+`technique-labels-hide-actions`: *"Image #3 labels the technique directions as
+back, forward, up, and down, whereas Image #6 explains those directions as
+reverse, punch, kick, and sweep."*
+
+**This is the r102/r105/r109/r122 disagreement, and its history is the whole
+story in four lines:**
+
+    r102  the sheet's row ordering was wrong                     -> fixed
+    r103  the coach said "up", the sheet said "kick"            -> coach changed
+    r104  the sheet was made "up · kick"                        -> SHEET changed
+    ...   the coach was now out of date again
+    r124  `openai/gpt-6.1-sol` names the split, five rounds later
+
+**Each fix was correct and each one moved a different surface.** Round 103 made
+the coach match the sheet. Round 104 then improved the sheet — legitimately, by
+adding the action alongside the direction — and left the coach describing the
+old version of the same fact. Neither was wrong when written. **A surface
+changed in isolation is a surface that has just gone stale, and nothing in this
+repo could see it, because both surfaces were individually correct.**
+
+The coach now carries both halves, same order as the sheet's legend:
+
+    ◀ back · reverse      ▶ forward · punch
+    ▲ up · kick           ▼ down · sweep
+
+### The assertion, and the bug I wrote while writing it
+
+The new test compares the two surfaces directly — read the four actions out of
+the sheet's `TECHNIQUE_ACTION` map, assert each appears in the coach's caption
+list. That is the *pairing* being compared, which is the thing that drifts.
+
+**It failed on the correct code first**, and the reason was mine: inside the loop
+I wrote `coach?.[1]`, which re-resolved the regexp against a different value and
+compared against a stray `*`. `expected '*' to contain 'punch'`. A test failing
+for the wrong reason is worse than no test, because the next round spends itself
+on the test. Both sides are now read into plain strings before the loop.
+
+Mutation-tested, because round 110 established that is not optional:
+
+    revert the r124 fix    x the coach and the sheet name the same four
+                             technique actions
+    restored               140 passed
+
+**Five appearances of one disagreement, and it now fails the build.** The first
+four cost a round each. This one costs a second.
+
+### `winning-threshold-copy`, recorded rather than changed
+
+*"Image #6 says 'First to 2 takes the round,' while Image #8 displays HasanAbi
+winning with 2½ points."*
+
+The reviewer's framing implies a contradiction. **There isn't one:** "first to 2"
+means *reaching* 2 wins, and a player who scores 2½ has passed 2 — the scoreboard
+simply shows the total rather than clamping it. Clamping the display would be the
+worse product, because a player who scored two clean points and a half would see
+their bonus erased.
+
+**Not changed, and the copy stays.** Recorded because a reviewer naming a
+contradiction that is not one is worth an answer in the log, and because the
+alternative — silencing it by making the display round down — would be a real
+regression made to avoid a non-finding.
+
+Gates: `pnpm check` 140 passed (was 139), `pnpm test:e2e` 35 passed / 5 skipped.

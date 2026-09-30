@@ -146,6 +146,33 @@ describe('the glyph vocabulary is decided once', () => {
     expect(key?.[1] ?? "").toMatch(/grid-template-columns/);
   });
 
+  test('the coach and the sheet name the same four technique actions', () => {
+    // The disagreement that has reappeared five times in this log — r102, r105,
+    // r109, r122 and now r124. Every instance is the same: the sheet's legend
+    // and the coach's strip are changed on one side and not the other, and
+    // because each is individually correct nothing in the repo notices.
+    //
+    // So compare them directly. The pairing is the thing that drifts, which is
+    // exactly what round 110 found when the hand-written list shipped the same
+    // word under two glyphs.
+    const coachPairs = coach.match(/pairs:\s*\[([^\]]*sweep[^\]]*)\]/);
+    expect(coachPairs, 'could not read the technique caption list from coach.ts').not.toBeNull();
+    const legend = hud.match(/TECHNIQUE_ACTION: Record<AttackFamily, string> = \{([\s\S]*?)\};/);
+    expect(legend, 'no TECHNIQUE_ACTION map in hud.ts').not.toBeNull();
+    // Read BOTH sides into plain strings first. Writing `coach?.[1]` inside the
+    // loop silently re-resolved the regexp against the wrong value and compared
+    // against a stray `*` — which is a test that fails for the wrong reason and
+    // would have been a waste of a round to diagnose later.
+    const coachText = coachPairs?.[1] ?? '';
+    const legendText = legend?.[1] ?? '';
+    const actions = [...legendText.matchAll(/:\s*'([a-z]+)'/g)].map((m) => m[1] as string);
+    expect(actions.length, 'could not read the sheet action map').toBe(4);
+    for (const action of actions) {
+      expect(coachText, `coach strip is missing the action "${action}" the sheet uses`)
+        .toContain(action);
+    }
+  });
+
   test('the coach strip labels the same four technique directions the glyph map uses', () => {
     // The other half of the round-102 defect. The coach is the surface the
     // player's thumb is actually on, so it is the one that gets to be right

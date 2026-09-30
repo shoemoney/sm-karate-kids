@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-30T01:33:03",
+ "reviewed_at": "2026-09-30T01:46:56",
  "items": [
   {
-   "title": "neutral-stance-not-explained",
-   "claim": "Image #2 asks for one stance input plus one technique input, while Image #6 shows Lunge Punch using the standing dot plus forward without explicitly saying to leave the stance stick centered.",
-   "reason": "A newcomer could interpret the opening instruction as requiring both sticks to be pushed.",
-   "suggest": "Change the instruction to: 'Choose a stance\u2014leave STANCE centered for standing\u2014then push TECHNIQUE.'"
+   "title": "front-kick-foot-visibility",
+   "claim": "In Images #13 and #22, no foot is discernible beyond Asmongold\u2019s raised trouser cuff, while his planted foot is clearly visible.",
+   "reason": "The kicking silhouette makes the striking surface difficult to identify; this alone does not establish a missing limb or an atlas defect.",
+   "suggest": "Inspect the full-resolution pose and its sampled atlas crop, then correct the crop or use a pose that visibly exposes the kicking foot, depending on what that inspection establishes."
   },
   {
-   "title": "countdown-competes-with-instructions",
-   "claim": "Image #2 displays 'STARTING IN 5' beneath FIGHT while the opponent description and control instructions remain visible.",
-   "reason": "This communicates a deadline for reading; the still cannot establish whether the fight actually starts automatically.",
-   "suggest": "Replace the introductory countdown with 'Start when ready'; verify its behavior and require an explicit FIGHT action on this instructional card."
+   "title": "technique-labels-hide-actions",
+   "claim": "Image #3 labels the technique directions as back, forward, up, and down, whereas Image #6 explains those directions as reverse, punch, kick, and sweep.",
+   "reason": "The in-fight reference repeats directions instead of providing the action meanings a new player needs.",
+   "suggest": "Label the technique-side hints Reverse, Punch, Kick, and Sweep in their corresponding positions, preserving the existing input mapping."
   },
   {
-   "title": "score-calls-need-plain-language",
-   "claim": "Images #17 and #20 display IPPON and WAZA-ARI respectively, but neither call banner includes 'full point' or 'half point'.",
-   "reason": "Players unfamiliar with karate terminology must interpret the HUD score instead of learning the award directly from the prominent announcement.",
-   "suggest": "Keep the karate terms and add 'Full point' beneath IPPON and 'Half point' beneath WAZA-ARI."
+   "title": "technique-list-continuation",
+   "claim": "Image #6 ends partway through the Back Kick row, with additional reference content outside the visible frame and no explicit scroll instruction.",
+   "reason": "Players cannot see the complete move reference in this view and may overlook its continuation.",
+   "suggest": "Add an 18px-or-larger 'Scroll for more techniques' cue above the list; verify that the final technique is reachable before making any claim about broken scrolling."
   },
   {
-   "title": "desktop-bindings-not-visible",
-   "claim": "Image #9 labels the two desktop joysticks STANCE and TECHNIQUE but shows no keyboard key bindings for either.",
-   "reason": "A keyboard player cannot discover the corresponding keys from the visible play screen.",
-   "suggest": "Display the actual configured keyboard bindings beside each joystick label on desktop, without displacing the primary touch controls."
+   "title": "winning-threshold-copy",
+   "claim": "Image #6 says 'First to 2 takes the round,' while Image #8 displays HasanAbi winning with 2\u00bd points.",
+   "reason": "These can agree when an award crosses the winning threshold, but the visible explanation leaves that possibility unstated.",
+   "suggest": "Change the rule summary to 'Reach 2 points or more to win the round,' retaining the actual final score rather than treating this screenshot as evidence of a scoring bug."
   },
   {
-   "title": "fighter-label-size-unverified",
-   "claim": "I cannot determine whether the visible fighter-name labels in Images #3 and #9 satisfy the required 18 CSS px minimum from these raster frames.",
-   "reason": "Those names identify the competitors, and screenshot pixels alone do not establish their rendered CSS sizing.",
-   "suggest": "Measure their computed font sizes and applied scaling at the phone and desktop viewports; enlarge any verified undersized labels and reflow the scoreboard rather than shrinking the text."
+   "title": "desktop-type-needs-measurement",
+   "claim": "Image #9 shows fighter-name and STANCE/TECHNIQUE labels, but their computed CSS font sizes cannot be established from the supplied raster.",
+   "reason": "These labels need to satisfy the required readability minimum, and estimating CSS pixels from this screenshot would not verify compliance.",
+   "suggest": "Measure computed font sizes and check ancestor scaling at the original desktop viewport and 390\u00d7844, increasing only labels verified below 18 CSS px and adjusting layout rather than shrinking text."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"neutral-stance-not-explained\",\n    \"claim\": \"Image #2 asks for one stance input plus one technique input, while Image #6 shows Lunge Punch using the standing dot plus forward without explicitly saying to leave the stance stick centered.\",\n    \"reason\": \"A newcomer could interpret the opening instruction as requiring both sticks to be pushed.\",\n    \"suggest\": \"Change the instruction to: 'Choose a stance\u2014leave STANCE centered for standing\u2014then push TECHNIQUE.'\"\n  },\n  {\n    \"title\": \"countdown-competes-with-instructions\",\n    \"claim\": \"Image #2 displays 'STARTING IN 5' beneath FIGHT while the opponent description and control instructions remain visible.\",\n    \"reason\": \"This communicates a deadline for reading; the still cannot establish whether the fight actually starts automatically.\",\n    \"suggest\": \"Replace the introductory countdown with 'Start when ready'; verify its behavior and require an explicit FIGHT action on this instructional card.\"\n  },\n  {\n    \"title\": \"score-calls-need-plain-language\",\n    \"claim\": \"Images #17 and #20 display IPPON and WAZA-ARI respectively, but neither call banner includes 'full point' or 'half point'.\",\n    \"reason\": \"Players unfamiliar with karate terminology must interpret the HUD score instead of learning the award directly from the prominent announcement.\",\n    \"suggest\": \"Keep the karate terms and add 'Full point' beneath IPPON and 'Half point' beneath WAZA-ARI.\"\n  },\n  {\n    \"title\": \"desktop-bindings-not-visible\",\n    \"claim\": \"Image #9 labels the two desktop joysticks STANCE and TECHNIQUE but shows no keyboard key bindings for either.\",\n    \"reason\": \"A keyboard player cannot discover the corresponding keys from the visible play screen.\",\n    \"suggest\": \"Display the actual configured keyboard bindings beside each joystick label on desktop, without displacing the primary touch controls.\"\n  },\n  {\n    \"title\": \"fighter-label-size-unverified\",\n    \"claim\": \"I cannot determine whether the visible fighter-name labels in Images #3 and #9 satisfy the required 18 CSS px minimum from these raster frames.\",\n    \"reason\": \"Those names identify the competitors, and screenshot pixels alone do not establish their rendered CSS sizing.\",\n    \"suggest\": \"Measure their computed font sizes and applied scaling at the phone and desktop viewports; enlarge any verified undersized labels and reflow the scoreboard rather than shrinking the text.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"front-kick-foot-visibility\",\n    \"claim\": \"In Images #13 and #22, no foot is discernible beyond Asmongold\u2019s raised trouser cuff, while his planted foot is clearly visible.\",\n    \"reason\": \"The kicking silhouette makes the striking surface difficult to identify; this alone does not establish a missing limb or an atlas defect.\",\n    \"suggest\": \"Inspect the full-resolution pose and its sampled atlas crop, then correct the crop or use a pose that visibly exposes the kicking foot, depending on what that inspection establishes.\"\n  },\n  {\n    \"title\": \"technique-labels-hide-actions\",\n    \"claim\": \"Image #3 labels the technique directions as back, forward, up, and down, whereas Image #6 explains those directions as reverse, punch, kick, and sweep.\",\n    \"reason\": \"The in-fight reference repeats directions instead of providing the action meanings a new player needs.\",\n    \"suggest\": \"Label the technique-side hints Reverse, Punch, Kick, and Sweep in their corresponding positions, preserving the existing input mapping.\"\n  },\n  {\n    \"title\": \"technique-list-continuation\",\n    \"claim\": \"Image #6 ends partway through the Back Kick row, with additional reference content outside the visible frame and no explicit scroll instruction.\",\n    \"reason\": \"Players cannot see the complete move reference in this view and may overlook its continuation.\",\n    \"suggest\": \"Add an 18px-or-larger 'Scroll for more techniques' cue above the list; verify that the final technique is reachable before making any claim about broken scrolling.\"\n  },\n  {\n    \"title\": \"winning-threshold-copy\",\n    \"claim\": \"Image #6 says 'First to 2 takes the round,' while Image #8 displays HasanAbi winning with 2\u00bd points.\",\n    \"reason\": \"These can agree when an award crosses the winning threshold, but the visible explanation leaves that possibility unstated.\",\n    \"suggest\": \"Change the rule summary to 'Reach 2 points or more to win the round,' retaining the actual final score rather than treating this screenshot as evidence of a scoring bug.\"\n  },\n  {\n    \"title\": \"desktop-type-needs-measurement\",\n    \"claim\": \"Image #9 shows fighter-name and STANCE/TECHNIQUE labels, but their computed CSS font sizes cannot be established from the supplied raster.\",\n    \"reason\": \"These labels need to satisfy the required readability minimum, and estimating CSS pixels from this screenshot would not verify compliance.\",\n    \"suggest\": \"Measure computed font sizes and check ancestor scaling at the original desktop viewport and 390\u00d7844, increasing only labels verified below 18 CSS px and adjusting layout rather than shrinking text.\"\n  }\n]"
 }
