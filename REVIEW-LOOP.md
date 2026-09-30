@@ -4105,3 +4105,58 @@ lines and no cleverness.
 Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
 `BAND_HEIGHT` is unchanged and now defended by a measurement rather than an
 argument.
+
+### Round 99 — the largest single change to the loop was a sentence in the prompt
+
+Round 98's lesson was that a number from a different place settles a question
+that a photograph cannot. The obvious next move is to give the *reviewer* that
+property, and the standing reviewer had been producing false findings at a steady
+rate for eight rounds while doing it.
+
+So the prompt now says, in as many words, that:
+
+- almost every false report in this project's history was a **correct reading of
+  a frame that could not answer the question asked of it**
+- the reviewer is being shown photographs, not the simulation, layout metrics or
+  code
+- when a claim depends on something a still cannot show, **name what you would
+  need** rather than estimating
+- *"I cannot tell from this frame, and here is the measurement that would
+  settle it"* is a better finding than a confident inferred number, because **a
+  wrong number costs more than no number — it will be believed**
+
+**The result, one run later, is the clearest signal in this log.**
+
+    before:  unreadable-kick-foot — "extends his kicking foot left while
+             HasanAbi stands to his right"          (asserted, wrong, 8 times)
+
+    after:   front-kick-endpoint-unresolved — "the raised leg's endpoint does
+             not show a clearly distinguishable bare-foot silhouette
+             comparable to the planted foot, but the still cannot establish
+             whether the foot is clipped or simply obscured by the pose."
+
+That is the same observation, correctly bounded. It says what it can see, says
+what it cannot, and does not manufacture a cause. And it independently
+reproduces round 89's finding — the foot does not read — **without asserting a
+defect that does not exist**, because the reviewer now knows it is looking at a
+photograph.
+
+**Every other finding changed character too**, and not one of them is a claim
+this loop has to spend a round disproving:
+
+- `competing-start-cues` — the FIGHT button and STARTING IN 2, which is a
+  documented design tension with the reasoning already written down
+- `result-combat-poses` — the result card keeps the combat pose, which is
+  deliberate: it is the frame the bout ended on
+- `empty-desktop-control-band`, `input-badges-lack-local-labels` — real
+  observations about the desktop chrome
+
+**Nothing here is a crisp bug, and that is the point.** Ninety-nine rounds of
+this loop produced a great deal of product and a great deal of archaeology in
+its own false alarms. This sentence changes the ratio — it does not make the
+reviewer more agreeable, it makes the reviewer **honest about the shape of its
+own evidence**, which is the only thing that was ever missing.
+
+The generalisable form, and it is worth more than any single fix in this log:
+**a reviewer that is told what its instrument cannot show will say so. A reviewer
+that is only told what to look for will invent the rest.**

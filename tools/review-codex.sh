@@ -77,7 +77,22 @@ fi
 
 PROMPT=$(cat <<'EOF'
 You are the advisory reviewer for a browser point-karate game. You are looking at
-21 frames of the SAME game, captured at 390x844 unless the name says otherwise.
+the SAME game's frames, captured at 390x844 unless the name says otherwise.
+
+**A caution earned over ninety-eight rounds, and it applies to you.** Almost every
+false report in this project's history — a loading bar that was working, fourteen
+detached limbs that were a sprite-atlas bug in a different system, a kick "pointing
+the wrong way" that pointed the right way, a fraction that read as "212" and did
+not — was a *correct reading of a frame that could not answer the question being
+asked of it*. You are being shown photographs. You are not being shown the
+simulation, the layout metrics, or the code.
+
+So when a claim depends on something a still cannot show — an exact size, a
+baseline, whether two things are the same colour, whether a limb is moving — say
+so and name what you would need, rather than estimating. "I cannot tell from this
+frame, and here is the measurement that would settle it" is a better finding than
+a confident number you inferred. A wrong number costs more than no number,
+because it will be believed.
 
 Give exactly five findings. For each:
   - title: short kebab-case slug

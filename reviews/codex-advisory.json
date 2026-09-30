@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-29T22:37:03",
+ "reviewed_at": "2026-09-29T22:47:36",
  "items": [
   {
-   "title": "half-point-baseline",
-   "claim": "In Image #8, the denominator of the result\u2019s '2\u00bd' drops onto a separate line below '0 \u2014 2', and the HUD fraction also extends below its adjacent whole number.",
-   "reason": "The total looks like disconnected numbers rather than one score.",
-   "suggest": "Render each score as a non-wrapping inline group with a compact fraction vertically centered beside the whole number."
+   "title": "competing-start-cues",
+   "claim": "Image 2 displays both a FIGHT button and STARTING IN 2, giving the player simultaneous manual-start and countdown cues.",
+   "reason": "A newcomer may feel rushed before understanding the controls.",
+   "suggest": "Make the introduction wait for FIGHT; reserve countdowns for transitions after the player has explicitly started."
   },
   {
-   "title": "impact-contact-offset",
-   "claim": "In Image #12, bright impact streaks appear around Asmongold\u2019s belt while HasanAbi\u2019s extended foot meets his shoulder or neck, roughly 50 CSS pixels higher.",
-   "reason": "The effect and attacking foot disagree about where contact occurs.",
-   "suggest": "Anchor the concentrated impact burst to the attacking limb\u2019s visible contact point instead of the defender\u2019s torso center."
+   "title": "result-combat-poses",
+   "claim": "Image 18 announces ASMONGOLD WINS while Asmongold is shown kicking and HasanAbi remains in a standing guard pose.",
+   "reason": "The fighter presentation does not reinforce the outcome as clearly as the headline does.",
+   "suggest": "Use distinct winner-celebration and loser-defeat poses on the result screen, without changing the scored exchange."
   },
   {
-   "title": "indistinct-kicking-foot",
-   "claim": "In Image #13, I cannot distinguish a foot beyond the raised trouser cuff, although the supporting foot is clearly visible.",
-   "reason": "The kick\u2019s striking endpoint and reach are difficult to read.",
-   "suggest": "Revise that kick pose so the ankle and foot have a complete, clearly separated silhouette, preserving its existing ground anchor."
+   "title": "empty-desktop-control-band",
+   "claim": "Image 9 places the two sticks at opposite ends of a full-width dark band with an empty center beneath the arena.",
+   "reason": "The desktop composition gives substantial visual space to an otherwise empty control area.",
+   "suggest": "Use compact bottom-corner control panels on desktop and extend the arena into the released space, preserving the portrait-phone layout."
   },
   {
-   "title": "undersized-fighter-names",
-   "claim": "In Image #3, the HUD fighter names have approximately 10 CSS pixels of visible capital-letter height at the stated 390-pixel viewport width.",
-   "reason": "Players must read tiny, widely spaced lettering to associate each score with its fighter.",
-   "suggest": "Use at least 18px computed text for fighter names, reduce letter spacing, and place each name above its score if necessary."
+   "title": "input-badges-lack-local-labels",
+   "claim": "Image 6 identifies STANCE and TECHNIQUE in the top legend, but the individual move rows contain two input badges without those labels.",
+   "reason": "Players must remember the legend's ordering while decoding each move.",
+   "suggest": "Add labelled STANCE and TECHNIQUE columns within each technique group, keeping the input badges aligned beneath their respective labels."
   },
   {
-   "title": "desktop-bindings-not-shown",
-   "claim": "Image #9 shows pads labeled 'STANCE' and 'TECHNIQUE' but no visible keyboard bindings for either control.",
-   "reason": "A desktop player cannot determine the keyboard controls from this screen.",
-   "suggest": "Display the actual mapped keyboard keys beside each pad\u2019s directions on desktop, while retaining the touch layout on phones."
+   "title": "front-kick-endpoint-unresolved",
+   "claim": "In Image 13, the raised leg's endpoint does not show a clearly distinguishable bare-foot silhouette comparable to the planted foot, but the still cannot establish whether the foot is clipped or simply obscured by the pose.",
+   "reason": "The striking limb needs a readable silhouette, but an unsupported anatomy correction could damage a valid sprite.",
+   "suggest": "Inspect the unscaled source pose, atlas crop boundaries, and a short kick sequence before editing; expand the affected crop only if clipping is confirmed."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"half-point-baseline\",\n    \"claim\": \"In Image #8, the denominator of the result\u2019s '2\u00bd' drops onto a separate line below '0 \u2014 2', and the HUD fraction also extends below its adjacent whole number.\",\n    \"reason\": \"The total looks like disconnected numbers rather than one score.\",\n    \"suggest\": \"Render each score as a non-wrapping inline group with a compact fraction vertically centered beside the whole number.\"\n  },\n  {\n    \"title\": \"impact-contact-offset\",\n    \"claim\": \"In Image #12, bright impact streaks appear around Asmongold\u2019s belt while HasanAbi\u2019s extended foot meets his shoulder or neck, roughly 50 CSS pixels higher.\",\n    \"reason\": \"The effect and attacking foot disagree about where contact occurs.\",\n    \"suggest\": \"Anchor the concentrated impact burst to the attacking limb\u2019s visible contact point instead of the defender\u2019s torso center.\"\n  },\n  {\n    \"title\": \"indistinct-kicking-foot\",\n    \"claim\": \"In Image #13, I cannot distinguish a foot beyond the raised trouser cuff, although the supporting foot is clearly visible.\",\n    \"reason\": \"The kick\u2019s striking endpoint and reach are difficult to read.\",\n    \"suggest\": \"Revise that kick pose so the ankle and foot have a complete, clearly separated silhouette, preserving its existing ground anchor.\"\n  },\n  {\n    \"title\": \"undersized-fighter-names\",\n    \"claim\": \"In Image #3, the HUD fighter names have approximately 10 CSS pixels of visible capital-letter height at the stated 390-pixel viewport width.\",\n    \"reason\": \"Players must read tiny, widely spaced lettering to associate each score with its fighter.\",\n    \"suggest\": \"Use at least 18px computed text for fighter names, reduce letter spacing, and place each name above its score if necessary.\"\n  },\n  {\n    \"title\": \"desktop-bindings-not-shown\",\n    \"claim\": \"Image #9 shows pads labeled 'STANCE' and 'TECHNIQUE' but no visible keyboard bindings for either control.\",\n    \"reason\": \"A desktop player cannot determine the keyboard controls from this screen.\",\n    \"suggest\": \"Display the actual mapped keyboard keys beside each pad\u2019s directions on desktop, while retaining the touch layout on phones.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"competing-start-cues\",\n    \"claim\": \"Image 2 displays both a FIGHT button and STARTING IN 2, giving the player simultaneous manual-start and countdown cues.\",\n    \"reason\": \"A newcomer may feel rushed before understanding the controls.\",\n    \"suggest\": \"Make the introduction wait for FIGHT; reserve countdowns for transitions after the player has explicitly started.\"\n  },\n  {\n    \"title\": \"result-combat-poses\",\n    \"claim\": \"Image 18 announces ASMONGOLD WINS while Asmongold is shown kicking and HasanAbi remains in a standing guard pose.\",\n    \"reason\": \"The fighter presentation does not reinforce the outcome as clearly as the headline does.\",\n    \"suggest\": \"Use distinct winner-celebration and loser-defeat poses on the result screen, without changing the scored exchange.\"\n  },\n  {\n    \"title\": \"empty-desktop-control-band\",\n    \"claim\": \"Image 9 places the two sticks at opposite ends of a full-width dark band with an empty center beneath the arena.\",\n    \"reason\": \"The desktop composition gives substantial visual space to an otherwise empty control area.\",\n    \"suggest\": \"Use compact bottom-corner control panels on desktop and extend the arena into the released space, preserving the portrait-phone layout.\"\n  },\n  {\n    \"title\": \"input-badges-lack-local-labels\",\n    \"claim\": \"Image 6 identifies STANCE and TECHNIQUE in the top legend, but the individual move rows contain two input badges without those labels.\",\n    \"reason\": \"Players must remember the legend's ordering while decoding each move.\",\n    \"suggest\": \"Add labelled STANCE and TECHNIQUE columns within each technique group, keeping the input badges aligned beneath their respective labels.\"\n  },\n  {\n    \"title\": \"front-kick-endpoint-unresolved\",\n    \"claim\": \"In Image 13, the raised leg's endpoint does not show a clearly distinguishable bare-foot silhouette comparable to the planted foot, but the still cannot establish whether the foot is clipped or simply obscured by the pose.\",\n    \"reason\": \"The striking limb needs a readable silhouette, but an unsupported anatomy correction could damage a valid sprite.\",\n    \"suggest\": \"Inspect the unscaled source pose, atlas crop boundaries, and a short kick sequence before editing; expand the affected crop only if clipping is confirmed.\"\n  }\n]"
 }
