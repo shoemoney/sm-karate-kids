@@ -5466,3 +5466,54 @@ alternative — silencing it by making the display round down — would be a rea
 regression made to avoid a non-finding.
 
 Gates: `pnpm check` 140 passed (was 139), `pnpm test:e2e` 35 passed / 5 skipped.
+
+### Round 125 — a finding I caused by fixing a finding
+
+`countdown-reading-pressure`: *"Image #2 displays STARTING IN 7 beneath Fight
+while presenting instructions."*
+
+**Round 122 raised the pre-bout hold from 7.2s to 9s to give the briefing time to
+be read, and this is what that did.** The card now counts down from 7 while a
+first-time player is still on the first sentence of it. The longer hold bought
+reading time and spent it as pressure, because the countdown text is a claim that
+the content is not worth your full attention.
+
+**That is the sharpest trade in the loop so far and it is worth stating plainly:
+I extended the clock to fix a timing problem and created a psychology problem,
+and neither is visible in the diff.** `ROUND_INTRO_MS = 9000` looks like a
+strictly-better number than 7200. It is not, because the number is also a
+message.
+
+The reviewer's own fix is careful and correct in a way most suggestions in this
+log are not — *"first capture countdown expiry to determine whether this requires
+a logic change."* It is separating the question of what the countdown should say
+from the question of whether the card should auto-dismiss at all, and asking for
+the measurement before touching the second one.
+
+**Three options, and this round does not take any of them**, which is the same
+refusal as rounds 96, 97, 106, 108, 113 and 117:
+
+1. **Remove the countdown, keep the auto-start.** The card no longer says when it
+   will dismiss, so nothing pressures and nothing changes logically. The cost is
+   that a player who does not notice the FIGHT button waits for a dismissal
+   nobody told them about.
+2. **Remove both, make it player-paced.** The strongest answer to the pressure,
+   and a real logic change: no `schedule(beginBout, ...)`, the bout starts on the
+   press. The e2e contract `the round card's FIGHT button releases the bout
+   clock` already asserts exactly this shape — the tick pinned at 0 while the
+   card is up, released by the press — so the suite is already written for it.
+   The cost is a player who never presses.
+3. **Revert to 7200 and shorten the sentence again.** Undoes round 122's fix and
+   lands back on the r120 bug the sentence was lengthened to stop.
+
+**Option 2 is the one the evidence supports and it is a logic change to the most
+visible flow in the game.** It should be taken in a round that can playtest a
+bout from the first screen with no timer on it, which is a judgement about feel
+and not a patch. What is written down here is the option and the reason, so the
+next round starts from the decision rather than from the finding.
+
+`prefight-reference-access` is also recorded — the pre-bout card has no way to
+open the Techniques sheet it now points at, which is the mirror image of round
+118's decision and worth fixing with it rather than before it.
+
+Gates unchanged: `pnpm check` 140 passed, `pnpm test:e2e` 35 passed / 5 skipped.

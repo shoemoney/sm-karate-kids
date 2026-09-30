@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-30T01:46:56",
+ "reviewed_at": "2026-09-30T01:58:09",
  "items": [
   {
-   "title": "front-kick-foot-visibility",
-   "claim": "In Images #13 and #22, no foot is discernible beyond Asmongold\u2019s raised trouser cuff, while his planted foot is clearly visible.",
-   "reason": "The kicking silhouette makes the striking surface difficult to identify; this alone does not establish a missing limb or an atlas defect.",
-   "suggest": "Inspect the full-resolution pose and its sampled atlas crop, then correct the crop or use a pose that visibly exposes the kicking foot, depending on what that inspection establishes."
+   "title": "prefight-reference-access",
+   "claim": "Image #2 shows the qualifier instructions and Fight button without a visible Moves control, whereas Image #3 includes Moves.",
+   "reason": "New players need the command reference alongside the introductory instructions.",
+   "suggest": "Add a Techniques button beside Fight that opens the existing reference screen."
   },
   {
-   "title": "technique-labels-hide-actions",
-   "claim": "Image #3 labels the technique directions as back, forward, up, and down, whereas Image #6 explains those directions as reverse, punch, kick, and sweep.",
-   "reason": "The in-fight reference repeats directions instead of providing the action meanings a new player needs.",
-   "suggest": "Label the technique-side hints Reverse, Punch, Kick, and Sweep in their corresponding positions, preserving the existing input mapping."
+   "title": "countdown-reading-pressure",
+   "claim": "Image #2 displays STARTING IN 7 beneath Fight while presenting instructions, and Image #8 displays STARTING IN 8 beneath Rematch.",
+   "reason": "The wording signals a deadline for reading instructions or reviewing results; these stills cannot establish what happens when the countdown expires.",
+   "suggest": "Make these decision screens player-paced and remove the countdown text; first capture countdown expiry to determine whether this requires a logic change or only a copy change."
   },
   {
-   "title": "technique-list-continuation",
-   "claim": "Image #6 ends partway through the Back Kick row, with additional reference content outside the visible frame and no explicit scroll instruction.",
-   "reason": "Players cannot see the complete move reference in this view and may overlook its continuation.",
-   "suggest": "Add an 18px-or-larger 'Scroll for more techniques' cue above the list; verify that the final technique is reachable before making any claim about broken scrolling."
+   "title": "technique-hint-mapping",
+   "claim": "Image #3 labels the technique directions back, forward, up and down, while Image #6 additionally identifies their meanings as reverse, punch, kick and sweep.",
+   "reason": "The in-fight hint omits the action mapping that the reference provides, making beginners memorize it.",
+   "suggest": "Use Forward: punch, Back: reverse, Up: kick and Down: sweep in the technique hint, wrapping the labels rather than shrinking them."
   },
   {
-   "title": "winning-threshold-copy",
-   "claim": "Image #6 says 'First to 2 takes the round,' while Image #8 displays HasanAbi winning with 2\u00bd points.",
-   "reason": "These can agree when an award crosses the winning threshold, but the visible explanation leaves that possibility unstated.",
-   "suggest": "Change the rule summary to 'Reach 2 points or more to win the round,' retaining the actual final score rather than treating this screenshot as evidence of a scoring bug."
+   "title": "point-call-explanation",
+   "claim": "The IPPON banner in Image #17 and WAZA-ARI banner in Image #20 identify the fighter and technique but do not explicitly state the awarded point value.",
+   "reason": "Players unfamiliar with the terminology must consult the scoreboard or reference to understand the call.",
+   "suggest": "Add Full point or Half point to the banner, derived from the actual scoring event, while retaining the Japanese call."
   },
   {
-   "title": "desktop-type-needs-measurement",
-   "claim": "Image #9 shows fighter-name and STANCE/TECHNIQUE labels, but their computed CSS font sizes cannot be established from the supplied raster.",
-   "reason": "These labels need to satisfy the required readability minimum, and estimating CSS pixels from this screenshot would not verify compliance.",
-   "suggest": "Measure computed font sizes and check ancestor scaling at the original desktop viewport and 390\u00d7844, increasing only labels verified below 18 CSS px and adjusting layout rather than shrinking text."
+   "title": "settings-backdrop-cutoff",
+   "claim": "In Images #7 and #16, the opaque settings surface ends partway down the screen, hiding the fighters' upper bodies while leaving their lower bodies visible beneath it.",
+   "reason": "The abrupt partial reveal distracts from the settings and makes the overlay feel visually unfinished.",
+   "suggest": "Extend the opaque settings surface to the full viewport height, with scrollable content and a persistently available Close control."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"front-kick-foot-visibility\",\n    \"claim\": \"In Images #13 and #22, no foot is discernible beyond Asmongold\u2019s raised trouser cuff, while his planted foot is clearly visible.\",\n    \"reason\": \"The kicking silhouette makes the striking surface difficult to identify; this alone does not establish a missing limb or an atlas defect.\",\n    \"suggest\": \"Inspect the full-resolution pose and its sampled atlas crop, then correct the crop or use a pose that visibly exposes the kicking foot, depending on what that inspection establishes.\"\n  },\n  {\n    \"title\": \"technique-labels-hide-actions\",\n    \"claim\": \"Image #3 labels the technique directions as back, forward, up, and down, whereas Image #6 explains those directions as reverse, punch, kick, and sweep.\",\n    \"reason\": \"The in-fight reference repeats directions instead of providing the action meanings a new player needs.\",\n    \"suggest\": \"Label the technique-side hints Reverse, Punch, Kick, and Sweep in their corresponding positions, preserving the existing input mapping.\"\n  },\n  {\n    \"title\": \"technique-list-continuation\",\n    \"claim\": \"Image #6 ends partway through the Back Kick row, with additional reference content outside the visible frame and no explicit scroll instruction.\",\n    \"reason\": \"Players cannot see the complete move reference in this view and may overlook its continuation.\",\n    \"suggest\": \"Add an 18px-or-larger 'Scroll for more techniques' cue above the list; verify that the final technique is reachable before making any claim about broken scrolling.\"\n  },\n  {\n    \"title\": \"winning-threshold-copy\",\n    \"claim\": \"Image #6 says 'First to 2 takes the round,' while Image #8 displays HasanAbi winning with 2\u00bd points.\",\n    \"reason\": \"These can agree when an award crosses the winning threshold, but the visible explanation leaves that possibility unstated.\",\n    \"suggest\": \"Change the rule summary to 'Reach 2 points or more to win the round,' retaining the actual final score rather than treating this screenshot as evidence of a scoring bug.\"\n  },\n  {\n    \"title\": \"desktop-type-needs-measurement\",\n    \"claim\": \"Image #9 shows fighter-name and STANCE/TECHNIQUE labels, but their computed CSS font sizes cannot be established from the supplied raster.\",\n    \"reason\": \"These labels need to satisfy the required readability minimum, and estimating CSS pixels from this screenshot would not verify compliance.\",\n    \"suggest\": \"Measure computed font sizes and check ancestor scaling at the original desktop viewport and 390\u00d7844, increasing only labels verified below 18 CSS px and adjusting layout rather than shrinking text.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"prefight-reference-access\",\n    \"claim\": \"Image #2 shows the qualifier instructions and Fight button without a visible Moves control, whereas Image #3 includes Moves.\",\n    \"reason\": \"New players need the command reference alongside the introductory instructions.\",\n    \"suggest\": \"Add a Techniques button beside Fight that opens the existing reference screen.\"\n  },\n  {\n    \"title\": \"countdown-reading-pressure\",\n    \"claim\": \"Image #2 displays STARTING IN 7 beneath Fight while presenting instructions, and Image #8 displays STARTING IN 8 beneath Rematch.\",\n    \"reason\": \"The wording signals a deadline for reading instructions or reviewing results; these stills cannot establish what happens when the countdown expires.\",\n    \"suggest\": \"Make these decision screens player-paced and remove the countdown text; first capture countdown expiry to determine whether this requires a logic change or only a copy change.\"\n  },\n  {\n    \"title\": \"technique-hint-mapping\",\n    \"claim\": \"Image #3 labels the technique directions back, forward, up and down, while Image #6 additionally identifies their meanings as reverse, punch, kick and sweep.\",\n    \"reason\": \"The in-fight hint omits the action mapping that the reference provides, making beginners memorize it.\",\n    \"suggest\": \"Use Forward: punch, Back: reverse, Up: kick and Down: sweep in the technique hint, wrapping the labels rather than shrinking them.\"\n  },\n  {\n    \"title\": \"point-call-explanation\",\n    \"claim\": \"The IPPON banner in Image #17 and WAZA-ARI banner in Image #20 identify the fighter and technique but do not explicitly state the awarded point value.\",\n    \"reason\": \"Players unfamiliar with the terminology must consult the scoreboard or reference to understand the call.\",\n    \"suggest\": \"Add Full point or Half point to the banner, derived from the actual scoring event, while retaining the Japanese call.\"\n  },\n  {\n    \"title\": \"settings-backdrop-cutoff\",\n    \"claim\": \"In Images #7 and #16, the opaque settings surface ends partway down the screen, hiding the fighters' upper bodies while leaving their lower bodies visible beneath it.\",\n    \"reason\": \"The abrupt partial reveal distracts from the settings and makes the overlay feel visually unfinished.\",\n    \"suggest\": \"Extend the opaque settings surface to the full viewport height, with scrollable content and a persistently available Close control.\"\n  }\n]"
 }
