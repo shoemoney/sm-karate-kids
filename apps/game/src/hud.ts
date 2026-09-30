@@ -529,18 +529,27 @@ export class Hud {
         const spoken = `${QUALIFIER_GLYPH[qualifier]} stance plus ${FAMILY_GLYPH[family]} technique`;
         combo.setAttribute('aria-label', spoken);
         combo.setAttribute('role', 'img');
-        for (const glyph of [QUALIFIER_GLYPH[qualifier], FAMILY_GLYPH[family]]) {
+        // Stance THEN plus THEN technique, matching the key at the top of this
+        // same sheet. It used to append both pips and then the '+', so every
+        // row read "◀ ▲ +" while the heading directly above it read
+        // "STANCE + TECHNIQUE" — the one line that defines the notation
+        // disagreeing with every example of it, on the same screen.
+        // `openai/gpt-6.1-sol` (via codex) caught it as "inconsistent
+        // combination notation"; it is the cheapest real defect in this log and
+        // it took ninety-two rounds to find, because it is invisible unless the
+        // key and a row are read together.
+        const pipFor = (glyph: string): HTMLSpanElement => {
           const pip = document.createElement('span');
           pip.className = 'tech-pip';
           pip.setAttribute('aria-hidden', 'true');
           pip.textContent = glyph;
-          combo.appendChild(pip);
-        }
+          return pip;
+        };
         const plus = document.createElement('span');
         plus.className = 'tech-plus';
         plus.setAttribute('aria-hidden', 'true');
         plus.textContent = '+';
-        combo.appendChild(plus);
+        combo.append(pipFor(QUALIFIER_GLYPH[qualifier]), plus, pipFor(FAMILY_GLYPH[family]));
 
         const name = document.createElement('span');
         name.className = 'tech-name';

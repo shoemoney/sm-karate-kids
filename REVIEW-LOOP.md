@@ -3730,3 +3730,49 @@ right every time. The cheapest honest fixes remain the two art ones this loop
 should not make alone — a rim light on the foot, or lifting its value in the
 atlas so it clears 4.5:1 against the mat — and both are one value in a
 provenance-tracked asset.
+
+### Round 92 — the cheapest real defect in the log, found on iteration ninety-two
+
+`openai/gpt-6.1-sol` via codex, on the 22-frame set:
+
+    misaligned-half-points
+    displaced-impact-streak
+    small-phone-labels
+    inconsistent-combination-notation     <- fixed this round
+    controls-outsize-fighters
+
+**The kick finding is gone from the list for the first time in seven rounds.**
+Not because anything about the sprite changed — the foot work of rounds 90 and
+91 was reverted — but because `21-phone-kick-open` is in the set. That is the
+cleanest possible confirmation of what round 88 predicted: the seventh identical
+report was going to come from a frame that obscured the thing, and removing the
+obscuration removed the report.
+
+**`inconsistent-combination-notation` is fixed, and it is the smallest real
+defect this loop has ever found.**
+
+    before:  the sheet's key read        STANCE + TECHNIQUE
+             every move row read          ◀  ▲  +
+
+    after:   ● + ▶   Lunge Punch
+             ▲ + ▶   Jumping Punch
+
+`hud.ts` appended both glyph pips and *then* the `+`, so the one line on the
+screen that defines the notation disagreed with every example of it, directly
+beneath it. It survived ninety-two rounds because it is invisible unless you read
+the key and a row **together** — which is the review class round 80 identified
+and the one this set had only just gained the ability to produce.
+
+It is also the first defect in this log found by the standing reviewer on its
+**second** run, and the first one where the reviewer's suggested fix and the right
+fix were the same thing, which is a small piece of evidence that the prompt's
+"compare two elements in one frame" instruction is doing what it says.
+
+**`displaced-impact-streak` is the interesting remaining one.** The reviewer:
+*"white particles extend from above Asmongold's head to his belt, while HasanAbi's
+kicking foot meets his neck and shoulder."* That is two measurements agreeing
+with each other and disagreeing with the effect — the contact is at the
+neck/shoulder line, and the burst spans the whole torso and head. Round 80 fixed
+where the burst *centres*; this is about how far it *spreads*, which is a
+different number in `juice.emit` and has never been measured. Queued, open, and
+the next thing to look at.
