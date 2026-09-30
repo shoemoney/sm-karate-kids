@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-29T21:37:42",
+ "reviewed_at": "2026-09-29T21:48:55",
  "items": [
   {
-   "title": "misaligned-half-points",
-   "claim": "In Image #8, HasanAbi\u2019s stacked half-point fraction extends well below the whole-number baseline in both the scoreboard and the central result.",
-   "reason": "The staggered digits make the score harder to read at a glance.",
-   "suggest": "Render the half point as an inline \u00bd glyph vertically centered beside the whole number."
+   "title": "missing-kick-foot",
+   "claim": "In Image #13, Asmongold\u2019s extended kicking leg ends at an open trouser cuff with no visible foot, while HasanAbi stands clear of it.",
+   "reason": "The incomplete silhouette makes the kick\u2019s reach difficult to judge.",
+   "suggest": "Repair the extended front-kick sprite to include the bare foot and a complete ankle-to-toe silhouette."
   },
   {
-   "title": "small-stick-captions",
-   "claim": "In Image #3, the STANCE and TECHNIQUE caption letters are approximately 10 pixels tall at the stated 390-pixel viewport width.",
-   "reason": "These essential control labels are difficult to read on a phone.",
-   "suggest": "Set the captions to at least 18 CSS px and adjust their spacing to accommodate the larger text."
+   "title": "fraction-baseline-mismatch",
+   "claim": "In Image #8, the denominator of HasanAbi\u2019s 2\u00bd HUD score drops below both the whole number and fighter name, and the result banner repeats this oversized stacked fraction.",
+   "reason": "Players must decipher a vertically broken score instead of reading it immediately.",
+   "suggest": "Render the half point with a baseline-aligned \u00bd glyph on the same line as the whole number in both locations."
   },
   {
-   "title": "duplicated-control-labels",
-   "claim": "In Image #3, STANCE and TECHNIQUE appear both in the instruction strip and beneath the sticks, with the combined control area occupying approximately the bottom 274 pixels.",
-   "reason": "Repeated labels consume space that could give the fighters more room.",
-   "suggest": "Keep one label per stick and replace the separate instruction strip with concise instructions inside the control area."
+   "title": "block-effect-below-contact",
+   "claim": "In Image #12, the blue block particles cluster around HasanAbi\u2019s belt and legs while Asmongold\u2019s extended kick meets his upper torso.",
+   "reason": "The effect identifies a different contact location from the fighters\u2019 visible pose.",
+   "suggest": "Anchor the initial block burst where the kicking limb meets the defender, then let trailing particles fall from that point."
   },
   {
-   "title": "button-covers-foot",
-   "claim": "In Image #2, the FIGHT button hides Asmongold\u2019s forward foot while his rear foot remains visible.",
-   "reason": "The opening composition obscures the fighter\u2019s stance and connection to the floor.",
-   "suggest": "Reserve a clear action row below the fighters and move their presentation upward enough to prevent overlap."
+   "title": "tiny-phone-labels",
+   "claim": "In Image #3, the fighter-name and joystick-caption capital letters are approximately 8 CSS px tall at the stated 390px viewport scale.",
+   "reason": "These labels are difficult to read during play on a phone.",
+   "suggest": "Set their font size to at least 18 CSS px, reduce letter spacing, and adjust HUD wrapping to accommodate the larger text."
   },
   {
-   "title": "kick-points-away",
-   "claim": "In Image #18, Asmongold\u2019s extended kicking foot points left while HasanAbi stands to his right.",
-   "reason": "The winner\u2019s displayed strike points away from the opponent, making the result pose visually confusing.",
-   "suggest": "Replace the frozen kick on this result screen with a victory pose facing HasanAbi."
+   "title": "small-fighters-at-distance",
+   "claim": "The fighters are approximately 130 CSS px tall in Image #22 versus approximately 200 CSS px in Image #3, despite the matching phone viewport and joystick layout.",
+   "reason": "The smaller presentation makes attack poses and spacing harder to distinguish.",
+   "suggest": "Raise the minimum portrait fighter height to approximately 160 CSS px and tighten camera framing around both fighters."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"misaligned-half-points\",\n    \"claim\": \"In Image #8, HasanAbi\u2019s stacked half-point fraction extends well below the whole-number baseline in both the scoreboard and the central result.\",\n    \"reason\": \"The staggered digits make the score harder to read at a glance.\",\n    \"suggest\": \"Render the half point as an inline \u00bd glyph vertically centered beside the whole number.\"\n  },\n  {\n    \"title\": \"small-stick-captions\",\n    \"claim\": \"In Image #3, the STANCE and TECHNIQUE caption letters are approximately 10 pixels tall at the stated 390-pixel viewport width.\",\n    \"reason\": \"These essential control labels are difficult to read on a phone.\",\n    \"suggest\": \"Set the captions to at least 18 CSS px and adjust their spacing to accommodate the larger text.\"\n  },\n  {\n    \"title\": \"duplicated-control-labels\",\n    \"claim\": \"In Image #3, STANCE and TECHNIQUE appear both in the instruction strip and beneath the sticks, with the combined control area occupying approximately the bottom 274 pixels.\",\n    \"reason\": \"Repeated labels consume space that could give the fighters more room.\",\n    \"suggest\": \"Keep one label per stick and replace the separate instruction strip with concise instructions inside the control area.\"\n  },\n  {\n    \"title\": \"button-covers-foot\",\n    \"claim\": \"In Image #2, the FIGHT button hides Asmongold\u2019s forward foot while his rear foot remains visible.\",\n    \"reason\": \"The opening composition obscures the fighter\u2019s stance and connection to the floor.\",\n    \"suggest\": \"Reserve a clear action row below the fighters and move their presentation upward enough to prevent overlap.\"\n  },\n  {\n    \"title\": \"kick-points-away\",\n    \"claim\": \"In Image #18, Asmongold\u2019s extended kicking foot points left while HasanAbi stands to his right.\",\n    \"reason\": \"The winner\u2019s displayed strike points away from the opponent, making the result pose visually confusing.\",\n    \"suggest\": \"Replace the frozen kick on this result screen with a victory pose facing HasanAbi.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"missing-kick-foot\",\n    \"claim\": \"In Image #13, Asmongold\u2019s extended kicking leg ends at an open trouser cuff with no visible foot, while HasanAbi stands clear of it.\",\n    \"reason\": \"The incomplete silhouette makes the kick\u2019s reach difficult to judge.\",\n    \"suggest\": \"Repair the extended front-kick sprite to include the bare foot and a complete ankle-to-toe silhouette.\"\n  },\n  {\n    \"title\": \"fraction-baseline-mismatch\",\n    \"claim\": \"In Image #8, the denominator of HasanAbi\u2019s 2\u00bd HUD score drops below both the whole number and fighter name, and the result banner repeats this oversized stacked fraction.\",\n    \"reason\": \"Players must decipher a vertically broken score instead of reading it immediately.\",\n    \"suggest\": \"Render the half point with a baseline-aligned \u00bd glyph on the same line as the whole number in both locations.\"\n  },\n  {\n    \"title\": \"block-effect-below-contact\",\n    \"claim\": \"In Image #12, the blue block particles cluster around HasanAbi\u2019s belt and legs while Asmongold\u2019s extended kick meets his upper torso.\",\n    \"reason\": \"The effect identifies a different contact location from the fighters\u2019 visible pose.\",\n    \"suggest\": \"Anchor the initial block burst where the kicking limb meets the defender, then let trailing particles fall from that point.\"\n  },\n  {\n    \"title\": \"tiny-phone-labels\",\n    \"claim\": \"In Image #3, the fighter-name and joystick-caption capital letters are approximately 8 CSS px tall at the stated 390px viewport scale.\",\n    \"reason\": \"These labels are difficult to read during play on a phone.\",\n    \"suggest\": \"Set their font size to at least 18 CSS px, reduce letter spacing, and adjust HUD wrapping to accommodate the larger text.\"\n  },\n  {\n    \"title\": \"small-fighters-at-distance\",\n    \"claim\": \"The fighters are approximately 130 CSS px tall in Image #22 versus approximately 200 CSS px in Image #3, despite the matching phone viewport and joystick layout.\",\n    \"reason\": \"The smaller presentation makes attack poses and spacing harder to distinguish.\",\n    \"suggest\": \"Raise the minimum portrait fighter height to approximately 160 CSS px and tighten camera framing around both fighters.\"\n  }\n]"
 }

@@ -3580,3 +3580,60 @@ last time now that it has produced a closure rather than just a correction: the
 game is far more correct than the review of it has been, because reviewing a
 thing is mostly a question of *what you put in front of the reviewer*. Six models
 were right about what they saw and wrong six times about what they were seeing.
+
+### Round 89 — the seventh kick report, and the first one that explains the other six
+
+The new reviewer, on a set that now contains the unobstructed kick, reports
+`missing-kick-foot` again: *"the extended kicking leg ends at an open trouser
+cuff with no visible foot, while HasanAbi stands clear of it."*
+
+**The description is specific enough to be right or wrong, so I checked it at
+880px — and the foot is there.** Ankle, instep, five toes, pointing right and
+down, bare, emerging from the cuff. Complete.
+
+**So round 88's claim that this frame would end the family was wrong**, and
+worth being precise about how: the frame *is* a better frame and it did not help,
+because the problem was never ambiguity. Six refusals, four models, six rounds —
+and every one of them was describing something real that I kept explaining away.
+
+Measured on the unobstructed frame:
+
+    foot  rgb(229,189,159)   against   mat  rgb(139,103,54)
+    contrast 2.96:1
+    foot width  ~11px at a 390px viewport
+
+**That is the whole thing. The foot is skin-coloured, on a warm brown mat, at
+about eleven pixels wide.** It is a low-contrast, small, warm object on a warm
+background — which is precisely the condition under which a viewer reports an
+object as absent. Not because it is missing, but because at that size and
+contrast **it does not read as a foot**, and a reviewer describing what they can
+see is doing something correct.
+
+Six of my refusals were correct on the facts and useless to the person making
+them, and the difference between those two things is a measurement I could have
+taken in round 64 instead of round 89.
+
+**This is the first finding in this loop that is about perception rather than
+pixels, and it is not a smaller class of finding — it is a different one.** Every
+other category the loop has worked has been "this thing is wrong": a number in
+the wrong place, a colour in the wrong token, a glyph that renders ambiguously.
+This one is "this thing is correct and cannot be seen", which no amount of
+correctness fixes, and which is invisible to me precisely because when I look at
+it at high zoom I can see it perfectly.
+
+**What would actually fix it is not a sprite repair** — which is what seven
+reviews have asked for, and which would achieve nothing, because there is nothing
+to repair. It is one of:
+
+- a rim light or contact shadow on the striker's foot at the moment of extension,
+  so the silhouette separates from the mat
+- a floor shadow under the kicking foot during the active window
+- bumping the foot's value in the atlas so it is not within 3:1 of the mat
+
+All three are art-direction changes to a generated asset with a provenance
+record, and none of them should be made unilaterally by a review loop. **So this
+is recorded as a confirmed, measured, real finding with a named cause and three
+candidate fixes, and it is the strongest candidate in this log for a human to
+overrule.** The reviewers were not hallucinating a missing limb for six rounds;
+they were accurately reporting that at the size a player actually sees it, the
+foot is not there.
