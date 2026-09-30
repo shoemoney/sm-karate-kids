@@ -5517,3 +5517,48 @@ open the Techniques sheet it now points at, which is the mirror image of round
 118's decision and worth fixing with it rather than before it.
 
 Gates unchanged: `pnpm check` 140 passed, `pnpm test:e2e` 35 passed / 5 skipped.
+
+### Round 126 — the countdown, removed from the one screen where it was costing something
+
+Round 125 named three options and said option 2 was what the evidence supports
+but that it needed a playtest. **This round took the part of it that is not a
+logic change, and kept the auto-dismiss.**
+
+`setRematchCountdown` now returns early when `data-phase === 'prefight'`, so the
+pre-bout card's button reads `FIGHT` and its count caption stays empty. The
+timer still runs and still fires `beginBout`. **Result and rematch cards keep
+theirs**, where it does real work: it tells the player how long they have to
+decide whether to run it back, and there is nothing on those screens to read.
+
+Verified in a browser on the tournament route, where the card actually lives:
+
+    pre-bout card: {btn: "FIGHT", count: "", phase: "prefight", tick: 0}
+    after press  : {phase: "fight", tick: 85}
+
+Clean label, no badge, **clock pinned at 0 and released by the press** — which is
+the e2e contract `the round card's FIGHT button releases the bout clock`, passing
+for the same reason.
+
+**And a probe failure worth recording, because it is the third in three rounds
+and the pattern is now obvious.** My first check timed out, and the second timed
+out, both pointed at `?mode=dojo`. That route has **no pre-bout card at all** —
+dojo goes straight to a fight, and the card is a tournament-ladder thing. I had
+written the probe against a URL I had never verified had the thing I was
+measuring, and read two timeouts as "the change didn't work" before checking the
+route.
+
+Round 121: a preview server that was not running. Round 122: a dev server that
+was not running. Round 126: **a probe pointed at the wrong route.** All three
+present as "everything failed at once, instantly", and all three are the
+environment, not the product. **The reflex is now: when a probe times out
+immediately, verify the probe before touching the code.** That is three for
+three, and the cost of learning it once per category rather than once per
+incident is a round each.
+
+Option 2 from round 125 — removing the auto-dismiss entirely and making the card
+player-paced — **is still open**, and this round deliberately did not take it.
+Keeping the timer silent is a real improvement with no logic change; removing it
+is a judgement about whether anyone should be stranded, and that is a different
+kind of decision.
+
+Gates: `pnpm check` 140 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.

@@ -331,8 +331,34 @@ export class Hud {
 
   private resultAction = 'REMATCH';
 
+  /**
+   * The auto-dismiss countdown, which is also the button's own label.
+   *
+   * **Suppressed on the pre-bout card.** Round 122 raised that card's hold from
+   * 7.2s to 9s to give the briefing time to be read, and round 125 found what
+   * that bought: `STARTING IN 7` under a player who is still on the first
+   * sentence. A longer hold that counts down is not a longer hold — it is the
+   * same time with the pressure of a stopwatch laid on top, and the number is
+   * also a message whether or not it was meant as one.
+   *
+   * The auto-dismiss itself stays. Removing it would be a logic change to the
+   * most visible flow in the game and would strand anyone who does not find the
+   * FIGHT button; keeping it silent removes the pressure and costs nothing,
+   * because the button is right there and it is the only thing on the card that
+   * does anything.
+   *
+   * Result and rematch cards keep their countdown, where it is doing real work —
+   * it tells the player how long they have to decide whether to run it back, and
+   * there is nothing on those screens to read.
+   */
   setRematchCountdown(seconds: number): void {
     if (this.resultButton === null) return;
+    if (this.result?.dataset['phase'] === 'prefight') {
+      this.resultButton.textContent = this.resultAction;
+      this.resultButton.setAttribute('aria-label', this.resultAction);
+      if (this.resultCount !== null) this.resultCount.textContent = '';
+      return;
+    }
     // Zero means no countdown is running: the caption goes away entirely and
     // the button is just its own label.
     if (seconds <= 0) {
