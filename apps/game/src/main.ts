@@ -370,6 +370,7 @@ async function boot(screen: BootScreen): Promise<void> {
         audio.play('strike');
       } else if (event.type === 'contact') {
         const at = impactAt(event.player, event.moveId);
+        lastImpact = { moveId: event.moveId, x: at.x, y: at.y, facing: at.facing, low: at.low };
         juice.impact({
           x: at.x, y: at.y, facing: at.facing,
           kind: at.low ? 'sweep' : 'strike',
@@ -440,6 +441,22 @@ async function boot(screen: BootScreen): Promise<void> {
   };
 
   let lastStarted: { player: 0 | 1; moveId: string; tick: number } | null = null;
+
+  /**
+   * The anchor the last impact effect was actually handed, in world units.
+   *
+   * Published rather than recomputed because `BAND_HEIGHT` has now been
+   * implicated three times and changed twice on evidence that disagreed with
+   * itself: round 93 argued it from v^2/2g, round 96 measured ~92px of offset
+   * against a reviewer's ~50px, and both were working from pixels. The effect's
+   * own call site is the one place the number is authoritative, and it was in a
+   * closure nothing could read.
+   *
+   * The point is not to make the number convenient — it is that a reviewer can
+   * now compare this against the sprite's contact height in the same units
+   * instead of inferring it from a crop. See REVIEW-LOOP rounds 93, 96 and 97.
+   */
+  let lastImpact: { moveId: string; x: number; y: number; facing: number; low: boolean } | null = null;
   const REMATCH_AFTER_MS = 8000;
   const ROUND_INTRO_MS = 4000;
   /**
@@ -771,6 +788,8 @@ async function boot(screen: BootScreen): Promise<void> {
           p1Phase: state.fighters[0].phase,
           p2Move: state.fighters[1].move?.id ?? null,
           p2Phase: state.fighters[1].phase,
+          /** The anchor the last impact effect was given. See `lastImpact`. */
+          lastImpact,
         }),
         /**
          * The atlas cell each fighter last drew, with the pose it came from and

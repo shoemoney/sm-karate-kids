@@ -4060,3 +4060,48 @@ had exited 127. Both shipped as confident, both were caught by looking rather
 than by reasoning, and both cost more to unpick than to have left open.
 
 Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 98 — the instrument is built, and it exonerates the constant
+
+Round 97's blocker was concrete: the anchor is computed in a closure in
+`main.ts` and nothing can read it, so both the loop and the reviewer were
+arguing from crops. **Fixed at the source.** `lastImpact` now records the anchor
+at the call site — move id, x, y, facing, low — and `__smkk.state()` publishes
+it. Not a debug UI, not a rendered marker: a number, in world units, from the
+one place the number is authoritative.
+
+**What it says:**
+
+    front_kick (mid)   x = 0.75   y = 0.95      == BAND_HEIGHT.mid, exactly
+    BAND_HEIGHT.high   = 1.24  =  73% of a 1.7-unit fighter
+
+**73% of a fighter's height is the upper chest and the shoulder line**, which is
+where a high kick lands. That is what round 80 argued from anatomy, and the
+instrument now confirms it from the effect's own call site rather than from a
+picture.
+
+**So the disputed constant is right, and rounds 96 and 97 were both wrong to
+leave it in play.** Two rounds of "known wrong, direction known, magnitude
+unknown" was a state I was uncomfortable with, and it turns out to have been
+unnecessary — the honest answer was sitting behind a closure.
+
+**Which puts the weight back on the two pixel measurements, and they were both
+bad.** My "~92px" and the reviewer's "~50px" were computed from colour thresholds
+over a crop containing the white gi, skin, the painted burst sprite and the dust
+pool. A spark and a highlight on a white sleeve are the same colour at 390px. The
+reviewer was reading the defender's belt; I was reading whatever else was bright.
+Neither was measuring the effect, and I let two disagreeing numbers keep a correct
+constant under suspicion for two rounds because neither of them wanted to be the
+one to say "I cannot see this."
+
+**The transferable part, and it is the whole loop in one line:** when a number
+you cannot trust is keeping a correct thing in doubt, the answer is not a better
+number, it is **a number from a different place.** Every confident false report
+in this log — the boot bar, the fourteen detached limbs, the kick pointing the
+wrong way, the amber lichen, the fraction at "212" — was a reading of the wrong
+surface. This one was a reading of the wrong *pixels*, and the fix took eleven
+lines and no cleverness.
+
+Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+`BAND_HEIGHT` is unchanged and now defended by a measurement rather than an
+argument.
