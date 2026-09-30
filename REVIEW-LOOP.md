@@ -4223,3 +4223,50 @@ last two rounds produced no dramatic fix; they produced a reviewer that says
 "this frame cannot answer that," and then a real bug that the same reviewer found
 *because* it was being honest about its own limits. The instrument got better
 before the game did, and that was overdue.
+
+### Round 101 — the rules paragraph was not ambiguous, it was inverted
+
+`ambiguous-point-values`, carried from round 100: *"the paragraph associates
+half points with partial contact, while individual move rows list Half point or
+Full point without identifying those values as fixed awards or maximum awards."*
+
+The reviewer was right that the two disagreed, and it guessed at which was wrong.
+**The paragraph was.**
+
+    before:  "a half point is awarded for a technique that lands only partway"
+    after:   "Each move lists what it scores: half or full. A half-point move is
+              promoted to a full point when it lands as a counter — while your
+              opponent is still winding up."
+
+The old sentence describes a *landing*. The half is a property of the **move** —
+`value: 'half'` in `packages/content/data/moves.json`, ten of the twenty — and
+what actually varies is whether the referee promotes it. From `match.ts:218`:
+
+    const base = move.value === 'full' ? 'full' : 'half';
+    return { value: counter ? 'full' : base, counter };
+
+So a half-point move scores a half *unless* it lands as a counter, at which point
+it becomes a full point. The paragraph told the player the opposite causal
+direction — that a good landing halves a point, when in fact a good landing is
+what **raises** one — and the rows, which are generated from the data and are
+therefore correct, were contradicting the prose directly above them on the same
+screen.
+
+**That is three findings in three rounds from the same reviewer, and all three
+were the sheet contradicting itself:** the key rendering two identical dots
+(round 100), the rows ordering the `+` wrongly (round 92), and now the prose
+inverting the rule the rows are generated from. The techniques sheet is the most
+self-referential surface in the game — a key, a notation, a legend and a rules
+paragraph, all describing the same five glyphs and the same scoring rule — and it
+is the one that has needed the most correction, for the structural reason that
+**anything described twice in one screen will eventually disagree with itself.**
+
+The general form is the same as the impact anchor from round 98 and the notation
+from round 92, and it is the most repeated shape in this log: a human-authored
+sentence or key that is supposed to describe something the code already knows
+exactly. The fix is never to write the sentence more carefully. It is to
+**generate it from the thing it describes**, which is what the round-100 legend
+now does with the glyphs, and what this paragraph should have done with the
+scoring rule all along.
+
+Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.

@@ -546,8 +546,19 @@ export class Hud {
     const rules = document.createElement('p');
     rules.className = 'tech-rules';
     rules.textContent =
+      // This was not merely ambiguous, it was inverted. It said "a half point is
+      // awarded for a technique that lands only partway", which describes a
+      // landing, but the half is a property of the MOVE — `value: 'half'` in the
+      // content data — and what varies is whether the referee promotes it. A
+      // half-point technique is promoted to a full point when it lands as a
+      // counter, i.e. while the opponent is still winding up; otherwise it
+      // scores the half it is listed as. `openai/gpt-6.1-sol` (via codex) caught
+      // it as "rows list Half point or Full point without identifying those
+      // values as fixed awards or maximum awards" — the rows are right and the
+      // paragraph was the thing telling the player otherwise.
       'Point karate. One clean contact ends the exchange — no health bars, no damage. ' +
-      'IPPON scores a full point; a half point is awarded for a technique that lands only partway. ' +
+      'Each move lists what it scores: half or full. A half-point move is promoted to a ' +
+      'full point when it lands as a counter — while your opponent is still winding up. ' +
       'First to 2 takes the round.';
     container.append(rules);
 
@@ -610,7 +621,7 @@ export class Hud {
 
         const meta = document.createElement('span');
         meta.className = 'tech-meta';
-        meta.textContent = `${move.height} · ${move.value === 'full' ? 'Full point' : 'Half point'}`;
+        meta.textContent = `${move.height} · ${move.value === 'full' ? 'full point' : 'half point'}`;
 
         item.append(combo, name, meta);
         list.appendChild(item);
