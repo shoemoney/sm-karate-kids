@@ -2114,3 +2114,42 @@ found — the player's fighter changing identity four times inside a third of a
 second. If it is my crop, it is the sixth false alarm and costs nothing. The
 difference is one careful look, and it needs a session that can afford it
 rather than the last few percent of one.
+
+### Round 63 — the flicker is not there, and one measurement settled it
+
+Round 62 left two readings on the table for the jump strip: either a severe
+identity flicker, or my crop showing two different fighters at two different
+screen positions. The cost of being wrong was very high and the cost of
+checking was one pixel band, so: check the pixel band.
+
+Sampling a fixed 110x120 region over the player's torso from real screenshots,
+because `getContext('webgl2')` returns null on this renderer and there was no
+reason to fight the canvas to get the same number.
+
+    IDLE  101,59,19  101,59,19  101,59,19  101,59,19  101,59,19  101,59,19
+    JUMP  106,64,23  110,68,28  106,62,21  111,70,31  101,59,19  111,70,31
+                                                        ^^^^^^^^
+
+**Every sample is red-family. Not one is white.** A white gi reads around
+230,230,230 and there is no value in either series within eighty of that. The
+player never changes identity; the idle baseline reappearing mid-jump is the
+sprite bobbing and the shadow passing under it, and the 101→111 spread is the
+jump arc lifting the figure out of the darker floor tone.
+
+**The red/white alternation in round 62's strip was my crop**, which spanned
+the full viewport and so caught whichever fighter happened to be prominent —
+confirming the benign half of the two readings, and killing the alarming half
+before it cost anything.
+
+### Why this is the sixth false alarm and the cheapest one
+
+The other five each took a full instrument to disprove: a stylesheet, a
+diagnostic build, a focus fix, a driven frame, a state-versus-effect probe.
+This one took **six screenshots and a line of arithmetic**, because the claim
+was falsifiable in a single number and I had already reduced it to "is this
+pixel red."
+
+That is the transferable lesson, and it is the last one this project has to
+teach: **before building an instrument to settle a question, check whether the
+question has a number in it.** A colour, a coordinate, a clock reading, a count.
+When it does, the answer is cheaper than the argument.
