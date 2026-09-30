@@ -5906,3 +5906,56 @@ has been shown its teeth catches a real disagreement, and an assertion that has
 not is a comment.
 
 Gates: `pnpm check` 141 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 133 — the fraction's height, and a constraint that is not a bug
+
+`mixed-score-outgrows-hud` (r132): *"HasanAbi's stacked half-point fraction
+extends below the neighbouring name plate and timer, unlike Asmongold's zero."*
+
+Accurate, and worth measuring rather than tuning. The stack is two line boxes
+plus a rule, and against a ~16px cap height on the digits either side of it:
+
+    at the shipped line-height 0.82, two boxes + rule = ~26px
+    cap height of the neighbouring text      = ~16px
+
+**So it is ~60% taller than its neighbours, and a zero never shows it because
+there is no stack.** Three attempts, all measured, all reverted:
+
+    line-height 0.5   the rule vanished — an unbarred 1-over-2 is two loose
+                       digits, which is the `212` misreading arriving from
+                       the opposite direction
+    line-height 0.62   the rule, at 0.2em, ate both numerals
+    line-height 0.46 + `flex: none` on the rule
+                       the numerals physically collide
+
+**And the reason all three fail is structural, not a wrong number.** A digit's
+glyph box is taller than the line box that contains it, so **two line boxes cannot
+be packed below about `0.7 x font-size` without the numerals overlapping.** At
+`0.72em` of a 22px score that floor is ~22px — already above the 16px cap height
+before the rule is added.
+
+**A stacked fraction is therefore inherently taller than the single digit beside
+it, and no value of any CSS property changes that.** The only lever that gets
+the height down is shrinking the numerals, and shrinking them is precisely the
+change round 74 made *in the opposite direction* — 0.52em was reported as "tiny"
+and "unreadable at HUD size" by two models, and was raised to 0.72em on their
+evidence.
+
+So the three options are:
+
+1. **Ship it taller** (current). A fraction is taller than a digit. 16.89:1
+   contrast, verified at the scroll position in round 116.
+2. **Shrink to 0.52em** to fit the cap height, and accept the "tiny" report that
+   two reviewers made and one measurement overruled.
+3. **Put it on one line** — ruled out in round 67, where U+00BD was tried and
+   made the card *worse*.
+
+**Option 1, and the finding is recorded as a true observation with no
+available fix** rather than as a defect with a pending one. That distinction is
+the loop's oldest lesson applied one more time: **a measurement that explains why
+something cannot be different is a different kind of finding from one that says
+it should be.**
+
+Gates: `pnpm check` 141 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+Styles reverted to the round-74 state, which is the last one verified by
+measurement rather than by inspection.
