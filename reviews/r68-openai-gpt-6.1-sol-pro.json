@@ -1,0 +1,86 @@
+{
+  "model": "openai/gpt-6.1-sol-pro",
+  "elapsed_s": 31.2,
+  "usage": {
+    "prompt_tokens": 38423,
+    "completion_tokens": 2302,
+    "total_tokens": 40725,
+    "cost": 0.0758588,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 17148,
+      "cache_write_tokens": 17148,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0758588,
+      "upstream_inference_prompt_cost": 0.0528388,
+      "upstream_inference_completions_cost": 0.02302
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 406,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "teach-stick-actions",
+      "title": "Show what the technique stick actually does",
+      "what": "On the portrait gameplay screen, the bottom-right stick has four anonymous chevrons. The instruction strip above it says only 'back', 'forward', 'up', and 'down'; unlike the stance instructions, these do not name actions. At the 390px baseline, the strip's small text is roughly 10px tall. Actual move names are buried in the separate Techniques screen.",
+      "why": "A first-time player can see where to drag but cannot tell which direction punches or kicks without leaving the bout to study a long list.",
+      "how": "Label the technique sectors with their neutral-stance moves: Lunge Punch, Reverse Punch, Front Kick, and the actual down-direction move. Update those labels when the stance changes. Before the first bout, show a short interactive prompt that asks the player to drag one stick and then combine both sticks."
+    },
+    {
+      "id": "explicit-bout-start",
+      "title": "Let players choose when to fight and rematch",
+      "what": "The Qualifier introduction shows a large 'FIGHT' button with 'STARTING IN 2' or 'STARTING IN 4' directly underneath. Both results screens likewise show 'REMATCH' with 'STARTING IN 8'. The visual presentation offers a button while simultaneously announcing an impending automatic transition.",
+      "why": "New players are given a countdown while still reading the opponent description and examining unfamiliar controls. On results, the same pattern makes it unclear whether they can stay and review their score.",
+      "how": "Keep the first introduction on screen until FIGHT is tapped, then display a distinct 3\u20132\u20131 countdown. Keep results visible until REMATCH is tapped. If automatic rematches are retained, make them opt-in and provide a visible cancel control beside the countdown."
+    },
+    {
+      "id": "repair-front-kick-sprite",
+      "title": "Fix the visibly amputated front-kick pose",
+      "what": "In the 'FRONT KICK' gameplay screenshot, Asmongold's raised white trouser leg ends abruptly at approximately x=268, y=574\u2013608 in the 591\u00d71280 capture. There is no visible lower leg or foot beyond that straight cutoff, despite open space between the fighters.",
+      "why": "The attack reads as a missing limb rather than a karate technique. It also removes the foot players need to judge reach and contact.",
+      "how": "Inspect the front-kick source frame and its atlas crop. Replace an incomplete source pose or expand the frame bounds if the limb was cropped. Verify the alpha silhouette includes the full shin and foot, then capture every kick pose against the mat before shipping the corrected asset."
+    },
+    {
+      "id": "compact-half-point-score",
+      "title": "Keep fractional scores inside their score line",
+      "what": "On the 'HASANABI WINS' screen, the HUD score displays a red 2 with a tiny stacked 1 and 2 extending downward toward the bottom of the top bar. The central '0 \u2014 2\u00bd' result repeats this problem: the fraction hangs below the main numeral instead of reading as one aligned score.",
+      "why": "The final score is harder to read at phone size, and its broken alignment makes an important result look like a rendering defect.",
+      "how": "Render half points as '2.5' in both the HUD and result, using a single baseline and tabular numerals. Alternatively, use a single \u00bd glyph with controlled sizing and alignment. Reserve enough score-column width and test 0.5, 1.5, and 2.5 at 390px."
+    },
+    {
+      "id": "visible-download-progress",
+      "title": "Make loading progress unmistakable",
+      "what": "On the ShoeMoney pre-boot screen, the thin brown track beneath 'Downloading the game' has no distinguishable completed segment, percentage, or activity marker. In the supplied capture, it reads as an empty decorative rule rather than a useful progress indicator.",
+      "why": "Before reaching the game, players have no visible indication of how far the download has progressed or whether it is active.",
+      "how": "Add a clearly differentiated warm-gold fill and a percentage when download totals are available. When totals are unavailable, animate a short segment within the track and show a concrete stage such as 'Downloading assets' or 'Preparing dojo'. Preserve the existing dark background and branding."
+    }
+  ],
+  "raw": null
+}

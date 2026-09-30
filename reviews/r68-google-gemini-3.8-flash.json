@@ -1,0 +1,86 @@
+{
+  "model": "google/gemini-3.8-flash",
+  "elapsed_s": 32.2,
+  "usage": {
+    "prompt_tokens": 19860,
+    "completion_tokens": 3436,
+    "total_tokens": 23296,
+    "cost": 0.02778,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.02778,
+      "upstream_inference_prompt_cost": 0.014895,
+      "upstream_inference_completions_cost": 0.012885
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 2325,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighter-framing-scale",
+      "title": "Fighters are framed too small in portrait view with wasted upper vertical space",
+      "what": "In gameplay screens (Screenshots 3, 4, 5, 9, 12), the two fighters occupy only about 20% of the screen height in the vertical center. Roughly 220px of empty shoji window and ceiling lanterns sit above them, while an expansive empty mat stretches beneath their feet.",
+      "why": "Point karate hinges on fast reads of micro-spacing, leg lifts, and punch windups. On a 390px wide mobile screen, the fighters' limbs and hit frames are rendered too small to react to quickly, while static architectural background dominates the viewport.",
+      "how": "Dolly the Three.js camera closer to the combat plane and drop its vertical target slightly so the fighters occupy 30\u201335% of the portrait viewport, cropping the upper shoji lattice just below the upper lintel."
+    },
+    {
+      "id": "redundant-control-legend",
+      "title": "Persistent on-screen control cheat sheet clutters active combat area",
+      "what": "In Screenshots 3, 4, 5, 9, 12, a brown rounded HUD box reading 'STANCE / \u25c4 step \u25b2 jump \u25ba step \u25bc crouch | TECHNIQUE / \u25c4 back \u25ba forward \u25b2 up \u25bc down' sits permanently directly below the fighters' feet.",
+      "why": "It eats approximately 80px of vertical fighting space, breaks visual immersion in the cinematic dojo, and clutters the floor. Because directional arrows are already printed directly around the virtual sticks and a dedicated 'MOVES' modal button exists at top right, this panel is redundant after the first few seconds.",
+      "how": "Fade this helper panel out completely after 3 seconds of Round 1, or remove it from the live play mat entirely and rely on the dedicated 'MOVES' drawer."
+    },
+    {
+      "id": "thumbstick-bottom-edge-clipping",
+      "title": "Twin-stick controls sit flush against the bottom bezel without safe-area padding",
+      "what": "In Screenshots 3, 4, 5, 9, 10, 11, the base outer rings of the 'STANCE' and 'TECHNIQUE' thumbsticks touch the bottom boundary of the 844px frame with zero margin, and have barely 16px of horizontal separation in the center.",
+      "why": "On modern iOS and Android devices, thumbs placed this low collide directly with the operating system home indicator bar, causing accidental app switches. In addition, the tight spacing between discs causes thumb collisions during fast inward inputs.",
+      "how": "Add `env(safe-area-inset-bottom, 24px)` bottom padding to elevate both thumbsticks, and shift their horizontal centers 10\u201312px further outward toward the bottom-left and bottom-right corners."
+    },
+    {
+      "id": "intro-overlay-conflicting-cta",
+      "title": "Round intro card mixes auto-countdown with a fake action button over live sticks",
+      "what": "In Screenshots 2, 10, and 11, the pre-bout card renders a prominent gold 'FIGHT' button directly above 'STARTING IN 4' / 'STARTING IN 2', while fully opaque thumbsticks remain visible and active-looking in the background.",
+      "why": "The styling of 'FIGHT' suggests a mandatory manual tap to begin, conflicting with the passive auto-countdown timer. Meanwhile, showing fully interactive-looking control sticks behind a modal blocker confuses touch readiness.",
+      "how": "Dim the thumbsticks to 30% opacity during intro overlays, and change the button into an explicit tap-to-skip control (e.g., label it 'TAP TO START' and sync the countdown ring into the button border)."
+    },
+    {
+      "id": "fractional-score-typography",
+      "title": "Half-point fraction typography is cramped and misaligned in HUD and match results",
+      "what": "In Screenshot 7 (top score bar) and Screenshot 14 (victory score), the half-point score '2 1/2' renders the '1/2' as an undersized, vertically compressed fractional glyph shoved against the whole digit '2', with the red score text encroaching on the opponent's nameplate.",
+      "why": "At match speed, the fractional glyph looks like a rendering artifact or font baseline glitch rather than a clear Waza-ari score. Quick score recognition is critical in point karate where matches end on 2 full points.",
+      "how": "Replace composite text fractions with clean decimal notation (e.g., '2.5') or represent points visually using karate score pips (e.g., two distinct indicator dots: solid for Ippon, half-filled for Waza-ari) directly under each fighter name."
+    }
+  ],
+  "raw": null
+}

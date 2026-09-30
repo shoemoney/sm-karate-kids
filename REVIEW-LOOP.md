@@ -2411,3 +2411,51 @@ survived scrutiny was a finding about something someone chose to photograph.
 
 The generalisable form: **before trusting a review to be comprehensive, check
 that the thing you are reviewing is in the review.**
+
+### Round 68 — the first reviews that can see the card, and what they say instead
+
+`x-ai/grok-4.7`, `google/gemini-3.8-flash`, `openai/gpt-6.1-sol-pro`, now
+reviewing 18 frames including `17-phone-scored-result`.
+
+**The half-point finding changed shape, and that is the signal that the
+instrument is working.** Before the card existed, models said the notation was
+ambiguous, cramped, or read as `21/2`. Now that they can actually see it:
+
+- `grok-4.7`: "half-point scores render as a **colliding** stacked fraction"
+- `gemini-3.8-flash`: "fractional-score typography is **cramped and misaligned
+  in HUD and match results**"
+
+A more specific complaint about a specific mechanism, replacing a vague one about
+a glyph nobody could see. That is what adding the screen bought. The claim is
+now falsifiable and the next round settles it — the set still shows no half, so
+it may be another inference, and it is recorded open rather than fixed or
+refused.
+
+**And a second model reported the amputated front kick, which I refused in round
+64. So I looked again, with no arbitrary crop this time.**
+
+`03-phone-strike` shows **a guard stance.** Both fighters have their hands up,
+both feet planted, both legs complete and ending in full feet — verified across
+the full frame width rather than the 15–85% window I used last time.
+
+**The set contains no kick.** A frame named "strike" that shows a neutral guard
+is a frame every reviewer will read as "a fight is happening", and a fight
+implies a strike implies a kick implies an amputated leg. Two models have now
+reported it and neither was looking at a kick, because there isn't one to look
+at.
+
+This is the **same failure as the missing result card**, one round later and in
+the opposite direction: not "the screen the finding is about is absent" but "the
+frame is named for something it does not show". `03-phone-strike` has been in
+the set since round 1 and has never contained a strike.
+
+**Next instrument work, in order:**
+
+1. A real kick frame — drive `technique → forward` and capture mid-extension.
+   The kick has the longest reach in the game, it is the only move the camera
+   pulls back for, and it is the frame two models have been hallucinating.
+2. A frame with a half point actually on the board, so the stacked fraction can
+   be judged rather than inferred.
+
+Both are captures, not product changes, and both are cheap now that
+`17-phone-scored-result` proved the thumb grammar reaches a real result.

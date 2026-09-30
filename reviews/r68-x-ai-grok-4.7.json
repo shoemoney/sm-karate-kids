@@ -1,0 +1,86 @@
+{
+  "model": "x-ai/grok-4.7",
+  "elapsed_s": 122.1,
+  "usage": {
+    "prompt_tokens": 16288,
+    "completion_tokens": 8976,
+    "total_tokens": 25264,
+    "cost": 0.084704,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1152,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.084704,
+      "upstream_inference_prompt_cost": 0.030848,
+      "upstream_inference_completions_cost": 0.053856
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7943,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "portrait-fight-band-crushed",
+      "title": "Sticks and the stance legend shrink the fight to a thin band",
+      "what": "In portrait play the two sticks are each about a third of the 390px width and, with the STANCE/TECHNIQUE legend bar, eat the bottom two-fifths of the screen. The fighters sit in a short strip: empty dojo windows above them, feet jammed against the legend (gameplay shots with the legend up) or floating over a dead mat (shots without it).",
+      "why": "Point karate is one clean contact at high, mid, or low. That read is happening in the smallest region of the phone, partly under the thumbs, so hits, whiffs, and the opponent's wind-up are hard to see.",
+      "how": "Hide the legend after the first bout (the sticks are already labeled). Shrink each stick to about 112px and pin them to the lower corners. Bias the camera down so heads sit just under the score bar and a full step of mat shows above the sticks."
+    },
+    {
+      "id": "ippon-callout-covers-hit",
+      "title": "The IPPON banner covers the technique that scored",
+      "what": "On HasanAbi's spinning back kick and Asmongold's stepping lunge punch, three stacked gold lines (IPPON, the name, the technique) sit on both fighters' heads and on the striking limb. The same overlay scale covers the bodies on the results screens.",
+      "why": "The scoring contact is the only feedback the game has \u2014 no health bar, no damage. If the banner hides the limb, the player cannot tell what landed or why the point was full rather than half.",
+      "how": "Move the callout into the gap under the score bar, one line: \"IPPON \u00b7 Spinning Back Kick\". Keep a clear gap above the heads. Leave the results title, but don't let it cover the replayed strike."
+    },
+    {
+      "id": "half-point-score-illegible",
+      "title": "Half-point scores render as a colliding stacked fraction",
+      "what": "On the HasanAbi results screen the header shows a red 2 with a tiny 1/2 jammed against HASANABI, and the hero score \"0 \u2014 2\" has the same 1/2 tucked under the 2, colliding with the dash. Full-point results (\"2 \u2014 0\") render cleanly, so this is the half-point layout.",
+      "why": "The score is the match. At phone size 2, 2\u00bd, and a broken glyph look the same, so a loss (and a shared screenshot) reads as a bug.",
+      "how": "Draw half points as \"2.5\" in the same cap height as full points. Reserve a fixed slot in the header pill so the value never overlaps the name. Check 0, 0.5, 1, 1.5, and 2 in both the header and the results lockup."
+    },
+    {
+      "id": "fight-button-races-countdown",
+      "title": "FIGHT looks tappable while the bout auto-starts in 2 seconds",
+      "what": "Qualifier intros show a large gold FIGHT button over the fighters' legs and \"STARTING IN 2\" (also 4) beneath it. The only opponent read \u2014 \"PATIENT. HE WAITS FOR YOUR WIND-UP \u2014 THEN MAKES YOU PAY.\" \u2014 is a small line, and the title covers their heads. REMATCH repeats it with \"STARTING IN 8\".",
+      "why": "The player either taps a button that isn't the timer or waits and misses the tell. Control goes live before they know this opponent punishes a wind-up, which is the whole qualifier.",
+      "how": "Don't auto-start. Keep the tell and the fighters unobstructed until FIGHT is tapped, then count 3-2-1. On the results screen, leave REMATCH as a tap with no countdown."
+    },
+    {
+      "id": "sticks-sit-in-home-indicator",
+      "title": "Stick labels and down-flicks sit on the bottom edge",
+      "what": "In every portrait gameplay shot, STANCE and TECHNIQUE sit on the bottom edge of the 844px frame, and each stick's down-chevron is only a few pixels above that label. There is no bottom safe-area inset.",
+      "why": "390x844 is an iPhone with a home indicator. Down on the stance stick is crouch and down on the technique stick is a low attack; those flicks land in the system gesture zone, so low techniques get eaten or trigger the app switcher. The labels are unreadable under the indicator.",
+      "how": "Pad the control dock with env(safe-area-inset-bottom) plus 12px, and shift both sticks up with it. Keep down-inputs inside the stick, above the indicator, not on the screen edge."
+    }
+  ],
+  "raw": null
+}
