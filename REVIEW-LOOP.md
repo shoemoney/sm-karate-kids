@@ -3254,3 +3254,57 @@ wrong by something that is not a picture you cropped.
 
 Gates unchanged and green: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed /
 5 skipped / exit 0.
+
+### Round 83 — moved to the arcade, and the portrait scale finally measured
+
+**Hosting correction.** Deployed to the ShoeMoney arcade at
+`https://arcade.shoemoney.ai/smkk/` as a cabinet in the deck rather than a
+standalone hostname. `base: './'` in the Vite config means the build is already
+path-independent, the arcade root serves game subdirectories through
+`try_files`, and it proxies `/api/` to `arcade-api` on 8091 — so the leaderboard
+path works from the subdirectory with no extra wiring. Added a `GAMES` entry and
+a footer link so the cabinet is reachable with or without the deck script.
+
+Verified from the deployed subpath, not from localhost: the card renders with a
+`Play ▶` affordance, the thumb 200s, and a real bout plays to a **half point on
+the board** with no page errors and no failed requests.
+
+**And the measurement the loop has refused eight times without ever taking.**
+
+`fighters-too-small`, `portrait-camera-dead-headroom`, `empty-third-of-the-frame`,
+`fighters-are-tiny`, `reframe-empty-upper-third`, `dead-mat-space-lower-third` —
+eight models across six rounds, and this loop has refused it every time **by
+reasoning about the camera trade rather than by measuring the thing being
+complained about.** The "instrument before the answer" rule from round 82 applied
+to myself: this is the most-repeated claim in the log and the only one I had
+never put a number on.
+
+Segmented the two gi colours out of a live 390x844 frame and measured the
+fighters against the play area:
+
+    fighters occupy      53.0% of play height
+                          85.4% of play width
+    empty ABOVE fighters  39.7% of play area
+    empty BELOW fighters   7.4% of play area
+
+**The complaints are half right, and being half right is why they survived.**
+Nobody is claiming the fighters are small and the measurement agrees: they span
+85% of the play width. What eight models independently keep pointing at is the
+**39.7% of dead dojo above them** — and that is real, and it is the largest single
+region of empty space anywhere in the frame. The models have been describing it
+as "the fighters are too small" because a fighter with 40% of the screen above
+his head *reads* as small, and the diagnosis is imprecise while the observation
+is accurate.
+
+**The fix is not the camera.** Pulling the camera in to fill that space makes
+the fighters bigger, and round 80's reason for the current framing still holds:
+these are long-reach kicks and the frame has to hold both of them plus the
+landing space. What the number actually says is that the *composition* is wrong
+— the fighters sit low with the mat's empty upper half carrying nothing, which is
+a framing choice about where in the frame to put the pair, not how far away to
+stand. Those are different problems and this loop has been refusing the wrong one
+for six rounds because the reports arrive phrased as the other.
+
+Recorded as a real, measured, still-open composition finding rather than a
+refusal — which is the first time this claim has been given a number, and the
+first time the number has contradicted the loop's own reasoning.
