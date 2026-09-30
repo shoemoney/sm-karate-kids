@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-30T02:13:18",
+ "reviewed_at": "2026-09-30T02:32:50",
  "items": [
   {
-   "title": "countdown-competes-with-reading",
-   "claim": "Image #2 presents strategy and control instructions alongside \u201cSTARTING IN 7,\u201d without a visible option to defer the start.",
-   "reason": "A new player is being asked to understand the controls while the screen communicates a deadline.",
-   "suggest": "Keep the introduction open until the player selects Fight; reserve countdowns for an explicitly confirmed start."
+   "title": "pre-fight-help-not-visible",
+   "claim": "The qualifier card in Image #2 shows FIGHT and both sticks, but neither the Techniques nor Settings control visible in Image #3.",
+   "reason": "A new player needs access to instructions and accessibility options before starting the fight.",
+   "suggest": "Expose the existing Techniques and Settings actions on the qualifier card alongside FIGHT."
   },
   {
-   "title": "stick-meanings-separated",
-   "claim": "Image #3 places direction meanings in a separate strip above chevron-only stick sectors, while image #15 shows those sectors without the explanatory strip.",
-   "reason": "The player must look elsewhere\u2014or remember the mapping\u2014to identify what each thumb direction means.",
-   "suggest": "Put persistent action labels directly around the corresponding stick sectors, replacing the chevrons and reflowing the controls rather than shrinking the labels."
+   "title": "stick-actions-separated-from-controls",
+   "claim": "In Image #3, the stick rims contain only directional chevrons, while their action mappings appear in a separate strip above them.",
+   "reason": "The player must translate between the legend and the thumb position rather than read the action at its input location.",
+   "suggest": "Replace the rim chevrons with the corresponding action labels, preserving the centered stick position and an 18 CSS px text minimum."
   },
   {
-   "title": "reference-name-mismatch",
-   "claim": "The reference button reads \u201cMOVES\u201d in image #3, but its displayed reference sheet is titled \u201cTECHNIQUES\u201d in image #6.",
-   "reason": "Different names for the same reference add avoidable terminology to an already unfamiliar control system.",
-   "suggest": "Rename the button \u201cTechniques\u201d to match the sheet and the technique stick."
+   "title": "desktop-key-legend-absent",
+   "claim": "Image #9 shows STANCE and TECHNIQUE beneath the desktop sticks without any visible keyboard key mappings.",
+   "reason": "The displayed controls do not tell a keyboard player which keys to use.",
+   "suggest": "Show the actual configured stance and technique keys in the unused space between the desktop sticks."
   },
   {
-   "title": "opening-example-missing",
-   "claim": "Image #2 explains the input combination abstractly without a named example, whereas image #6 explicitly pairs Lunge Punch with centered stance and forward technique.",
-   "reason": "One immediately usable move gives a beginner a clearer starting point than the combination rule alone.",
-   "suggest": "Add \u201cTry Lunge Punch: stance centered + technique forward\u201d to the introduction, using the same labeled input notation as the reference sheet."
+   "title": "briefing-copy-all-caps",
+   "claim": "Image #2 renders both the opponent briefing and the multi-line move instruction in widely spaced uppercase text.",
+   "reason": "The explanatory copy competes with the round heading instead of providing an easily scanned introduction.",
+   "suggest": "Keep the heading uppercase, but render the briefing and instructions in sentence case with left alignment and normal letter spacing."
   },
   {
-   "title": "text-size-unverified",
-   "claim": "The HUD names and stick captions in image #3 are visibly smaller than the settings labels in image #7, but these raster frames cannot establish their CSS font sizes.",
-   "reason": "Visual comparison alone cannot verify compliance with the required 18 CSS px minimum.",
-   "suggest": "Measure computed font sizes at 390\u00d7844 and desktop for HUD names, timer suffixes, stick captions, countdowns, and technique metadata; raise any below 18px and adjust layout instead of scaling text."
+   "title": "kick-silhouette-unresolved",
+   "claim": "Images #13 and #22 both display FRONT KICK, but the lifted foot is not clearly separable in #13 as it is in #22; this difference alone does not establish sprite clipping.",
+   "reason": "A readable attack silhouette matters, but a normal pose or foreshortened limb must not be mistaken for missing artwork.",
+   "suggest": "Make no sprite correction yet; capture the exact pose identifier and atlas rectangle for #13, then compare the rendered silhouette with the source cell's alpha bounds and consecutive frames."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"countdown-competes-with-reading\",\n    \"claim\": \"Image #2 presents strategy and control instructions alongside \u201cSTARTING IN 7,\u201d without a visible option to defer the start.\",\n    \"reason\": \"A new player is being asked to understand the controls while the screen communicates a deadline.\",\n    \"suggest\": \"Keep the introduction open until the player selects Fight; reserve countdowns for an explicitly confirmed start.\"\n  },\n  {\n    \"title\": \"stick-meanings-separated\",\n    \"claim\": \"Image #3 places direction meanings in a separate strip above chevron-only stick sectors, while image #15 shows those sectors without the explanatory strip.\",\n    \"reason\": \"The player must look elsewhere\u2014or remember the mapping\u2014to identify what each thumb direction means.\",\n    \"suggest\": \"Put persistent action labels directly around the corresponding stick sectors, replacing the chevrons and reflowing the controls rather than shrinking the labels.\"\n  },\n  {\n    \"title\": \"reference-name-mismatch\",\n    \"claim\": \"The reference button reads \u201cMOVES\u201d in image #3, but its displayed reference sheet is titled \u201cTECHNIQUES\u201d in image #6.\",\n    \"reason\": \"Different names for the same reference add avoidable terminology to an already unfamiliar control system.\",\n    \"suggest\": \"Rename the button \u201cTechniques\u201d to match the sheet and the technique stick.\"\n  },\n  {\n    \"title\": \"opening-example-missing\",\n    \"claim\": \"Image #2 explains the input combination abstractly without a named example, whereas image #6 explicitly pairs Lunge Punch with centered stance and forward technique.\",\n    \"reason\": \"One immediately usable move gives a beginner a clearer starting point than the combination rule alone.\",\n    \"suggest\": \"Add \u201cTry Lunge Punch: stance centered + technique forward\u201d to the introduction, using the same labeled input notation as the reference sheet.\"\n  },\n  {\n    \"title\": \"text-size-unverified\",\n    \"claim\": \"The HUD names and stick captions in image #3 are visibly smaller than the settings labels in image #7, but these raster frames cannot establish their CSS font sizes.\",\n    \"reason\": \"Visual comparison alone cannot verify compliance with the required 18 CSS px minimum.\",\n    \"suggest\": \"Measure computed font sizes at 390\u00d7844 and desktop for HUD names, timer suffixes, stick captions, countdowns, and technique metadata; raise any below 18px and adjust layout instead of scaling text.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"pre-fight-help-not-visible\",\n    \"claim\": \"The qualifier card in Image #2 shows FIGHT and both sticks, but neither the Techniques nor Settings control visible in Image #3.\",\n    \"reason\": \"A new player needs access to instructions and accessibility options before starting the fight.\",\n    \"suggest\": \"Expose the existing Techniques and Settings actions on the qualifier card alongside FIGHT.\"\n  },\n  {\n    \"title\": \"stick-actions-separated-from-controls\",\n    \"claim\": \"In Image #3, the stick rims contain only directional chevrons, while their action mappings appear in a separate strip above them.\",\n    \"reason\": \"The player must translate between the legend and the thumb position rather than read the action at its input location.\",\n    \"suggest\": \"Replace the rim chevrons with the corresponding action labels, preserving the centered stick position and an 18 CSS px text minimum.\"\n  },\n  {\n    \"title\": \"desktop-key-legend-absent\",\n    \"claim\": \"Image #9 shows STANCE and TECHNIQUE beneath the desktop sticks without any visible keyboard key mappings.\",\n    \"reason\": \"The displayed controls do not tell a keyboard player which keys to use.\",\n    \"suggest\": \"Show the actual configured stance and technique keys in the unused space between the desktop sticks.\"\n  },\n  {\n    \"title\": \"briefing-copy-all-caps\",\n    \"claim\": \"Image #2 renders both the opponent briefing and the multi-line move instruction in widely spaced uppercase text.\",\n    \"reason\": \"The explanatory copy competes with the round heading instead of providing an easily scanned introduction.\",\n    \"suggest\": \"Keep the heading uppercase, but render the briefing and instructions in sentence case with left alignment and normal letter spacing.\"\n  },\n  {\n    \"title\": \"kick-silhouette-unresolved\",\n    \"claim\": \"Images #13 and #22 both display FRONT KICK, but the lifted foot is not clearly separable in #13 as it is in #22; this difference alone does not establish sprite clipping.\",\n    \"reason\": \"A readable attack silhouette matters, but a normal pose or foreshortened limb must not be mistaken for missing artwork.\",\n    \"suggest\": \"Make no sprite correction yet; capture the exact pose identifier and atlas rectangle for #13, then compare the rendered silhouette with the source cell's alpha bounds and consecutive frames.\"\n  }\n]"
 }

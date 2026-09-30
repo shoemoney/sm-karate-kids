@@ -5655,3 +5655,59 @@ feeling that the output was fine.
 
 Gates, properly read: `pnpm check` 140 passed, `pnpm test:e2e` **35 passed / 5
 skipped / exit 0** on the re-run, with the single red recorded above.
+
+### Round 128 — the round-127 rule, followed, and the first fix the reviewer confirmed
+
+Round 127 wrote three rules about the instruments lying. This round followed the
+third one literally: frames regenerated and timestamp-checked **before** the
+reviewer ran, not after.
+
+    dev 5173        200
+    frames written  22 of 22, zero "not written"
+    02-phone-fight  02:28 — current
+
+**And `countdown-competes-with-reading` is gone.** That finding had survived three
+rounds — introduced by r122's longer hold, reported in r125, re-reported in r127
+on stale frames. r126 fixed it. **This is the first fix in this log that the
+reviewer confirmed rather than I did**, and it took three rounds of it being
+reported for the confirmation to arrive, which is the honest cost of verifying
+with the instrument that asked the question.
+
+Every other fix in this loop has been confirmed by a gate, a measurement, or me.
+One confirmed by the reviewer, on a frame regenerated inside the same round, is
+the whole loop working as designed — and it was only visible because r127 caught
+the loop reviewing its own stale output.
+
+### What is left, and it is a short list
+
+    pre-fight-help-not-visible     the card that points at the Techniques sheet
+                                   has no way to open it (r125, still open)
+    stick-actions-separated-from-controls
+                                   the coach's action labels sit in a panel
+                                   above the sticks, not on them (r113, r124)
+    desktop-key-legend-absent      keyboard bindings are supported and invisible
+                                   (r96, r98, recorded as a feature)
+    briefing-copy-all-caps         the briefing is set uppercase; caps are hard
+                                   to read at 45 characters
+    kick-silhouette-unresolved     correctly bounded — the foot at 11px and
+                                   2.96:1, which is r89's open measurement
+
+**`briefing-copy-all-caps` is the interesting one**, because it is a consequence
+rather than a disagreement: the card is `text-transform: uppercase` because the
+headline and opponent name are, and rounds 118–122 have been adding sentences to
+it for five rounds without anyone asking whether the casing suits prose. Six words
+of uppercase UI copy is a deliberate style; **forty-five characters of uppercase
+prose is not**, and the two are on the same element now.
+
+That is a real finding and it is small: make the notation line sentence case, and
+leave the tell uppercase so the card still has a voice. One CSS rule, no layout
+change, and it is the kind of thing the fence cannot catch because no two
+surfaces disagree — it is one surface being wrong in a way only a reader notices.
+
+**Recorded rather than taken this round**, for the same reason as rounds 96, 97,
+106, 108, 113, 117 and 125: I am at the end of what I can verify carefully, and
+a casing change on the most-read card in the game deserves a look at the rendered
+result rather than a confident claim in a log.
+
+Gates, read before acting: `pnpm check` 140 passed, `pnpm test:e2e` 35 passed /
+5 skipped / exit 0.
