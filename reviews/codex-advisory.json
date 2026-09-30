@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-30T00:57:10",
+ "reviewed_at": "2026-09-30T01:33:03",
  "items": [
   {
-   "title": "first-move-unexplained",
-   "claim": "Image #2 explains HasanAbi\u2019s tactic and labels the sticks STANCE and TECHNIQUE, but does not explain the stance-plus-technique combination described in Image #6.",
-   "reason": "A new player sees FIGHT before receiving the instruction needed to perform a deliberate move.",
-   "suggest": "Add \u201cHold a stance, then add a technique\u201d directly above FIGHT, using the same terminology as the technique reference."
+   "title": "neutral-stance-not-explained",
+   "claim": "Image #2 asks for one stance input plus one technique input, while Image #6 shows Lunge Punch using the standing dot plus forward without explicitly saying to leave the stance stick centered.",
+   "reason": "A newcomer could interpret the opening instruction as requiring both sticks to be pushed.",
+   "suggest": "Change the instruction to: 'Choose a stance\u2014leave STANCE centered for standing\u2014then push TECHNIQUE.'"
   },
   {
-   "title": "separated-direction-labels",
-   "claim": "Image #3 places direction-to-action mappings in a separate panel above the sticks, while the corresponding stick edges show only chevrons.",
-   "reason": "Players must visually connect each legend entry to a different location while learning the controls.",
-   "suggest": "Place each action label beside its corresponding stick direction, keeping the drag areas unobstructed and all labels at least 18 CSS px."
+   "title": "countdown-competes-with-instructions",
+   "claim": "Image #2 displays 'STARTING IN 5' beneath FIGHT while the opponent description and control instructions remain visible.",
+   "reason": "This communicates a deadline for reading; the still cannot establish whether the fight actually starts automatically.",
+   "suggest": "Replace the introductory countdown with 'Start when ready'; verify its behavior and require an explicit FIGHT action on this instructional card."
   },
   {
-   "title": "rematch-only-choice",
-   "claim": "Image #18 shows REMATCH and STARTING IN 8, but no visible control for declining another bout or ending the session.",
-   "reason": "The result screen presents replay as the only explicit choice.",
-   "suggest": "Add an \u201cEnd session\u201d button alongside REMATCH that cancels the pending start and returns to the pre-fight screen."
+   "title": "score-calls-need-plain-language",
+   "claim": "Images #17 and #20 display IPPON and WAZA-ARI respectively, but neither call banner includes 'full point' or 'half point'.",
+   "reason": "Players unfamiliar with karate terminology must interpret the HUD score instead of learning the award directly from the prominent announcement.",
+   "suggest": "Keep the karate terms and add 'Full point' beneath IPPON and 'Half point' beneath WAZA-ARI."
   },
   {
-   "title": "settings-pause-unidentified",
-   "claim": "Image #7 shows settings over the visible arena without a PAUSED indicator, and the still cannot establish whether the bout is suspended.",
-   "reason": "Players need to know whether they can safely adjust settings without the opponent continuing to fight.",
-   "suggest": "Check simulation ticks and the round timer while settings are open; if suspended, show \u201cBout paused,\u201d and if not, implement suspension before displaying that label."
+   "title": "desktop-bindings-not-visible",
+   "claim": "Image #9 labels the two desktop joysticks STANCE and TECHNIQUE but shows no keyboard key bindings for either.",
+   "reason": "A keyboard player cannot discover the corresponding keys from the visible play screen.",
+   "suggest": "Display the actual configured keyboard bindings beside each joystick label on desktop, without displacing the primary touch controls."
   },
   {
-   "title": "control-font-size-unverified",
-   "claim": "The action labels in Image #3 are visible, but their compliance with the 18 CSS px minimum cannot be determined from this screenshot alone.",
-   "reason": "These labels carry essential instructions, and screenshot dimensions are not computed CSS font measurements.",
-   "suggest": "Measure the labels\u2019 computed font sizes at 390\u00d7844 and desktop widths; increase any below 18 CSS px and adjust wrapping or spacing rather than shrinking text."
+   "title": "fighter-label-size-unverified",
+   "claim": "I cannot determine whether the visible fighter-name labels in Images #3 and #9 satisfy the required 18 CSS px minimum from these raster frames.",
+   "reason": "Those names identify the competitors, and screenshot pixels alone do not establish their rendered CSS sizing.",
+   "suggest": "Measure their computed font sizes and applied scaling at the phone and desktop viewports; enlarge any verified undersized labels and reflow the scoreboard rather than shrinking the text."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"first-move-unexplained\",\n    \"claim\": \"Image #2 explains HasanAbi\u2019s tactic and labels the sticks STANCE and TECHNIQUE, but does not explain the stance-plus-technique combination described in Image #6.\",\n    \"reason\": \"A new player sees FIGHT before receiving the instruction needed to perform a deliberate move.\",\n    \"suggest\": \"Add \u201cHold a stance, then add a technique\u201d directly above FIGHT, using the same terminology as the technique reference.\"\n  },\n  {\n    \"title\": \"separated-direction-labels\",\n    \"claim\": \"Image #3 places direction-to-action mappings in a separate panel above the sticks, while the corresponding stick edges show only chevrons.\",\n    \"reason\": \"Players must visually connect each legend entry to a different location while learning the controls.\",\n    \"suggest\": \"Place each action label beside its corresponding stick direction, keeping the drag areas unobstructed and all labels at least 18 CSS px.\"\n  },\n  {\n    \"title\": \"rematch-only-choice\",\n    \"claim\": \"Image #18 shows REMATCH and STARTING IN 8, but no visible control for declining another bout or ending the session.\",\n    \"reason\": \"The result screen presents replay as the only explicit choice.\",\n    \"suggest\": \"Add an \u201cEnd session\u201d button alongside REMATCH that cancels the pending start and returns to the pre-fight screen.\"\n  },\n  {\n    \"title\": \"settings-pause-unidentified\",\n    \"claim\": \"Image #7 shows settings over the visible arena without a PAUSED indicator, and the still cannot establish whether the bout is suspended.\",\n    \"reason\": \"Players need to know whether they can safely adjust settings without the opponent continuing to fight.\",\n    \"suggest\": \"Check simulation ticks and the round timer while settings are open; if suspended, show \u201cBout paused,\u201d and if not, implement suspension before displaying that label.\"\n  },\n  {\n    \"title\": \"control-font-size-unverified\",\n    \"claim\": \"The action labels in Image #3 are visible, but their compliance with the 18 CSS px minimum cannot be determined from this screenshot alone.\",\n    \"reason\": \"These labels carry essential instructions, and screenshot dimensions are not computed CSS font measurements.\",\n    \"suggest\": \"Measure the labels\u2019 computed font sizes at 390\u00d7844 and desktop widths; increase any below 18 CSS px and adjust wrapping or spacing rather than shrinking text.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"neutral-stance-not-explained\",\n    \"claim\": \"Image #2 asks for one stance input plus one technique input, while Image #6 shows Lunge Punch using the standing dot plus forward without explicitly saying to leave the stance stick centered.\",\n    \"reason\": \"A newcomer could interpret the opening instruction as requiring both sticks to be pushed.\",\n    \"suggest\": \"Change the instruction to: 'Choose a stance\u2014leave STANCE centered for standing\u2014then push TECHNIQUE.'\"\n  },\n  {\n    \"title\": \"countdown-competes-with-instructions\",\n    \"claim\": \"Image #2 displays 'STARTING IN 5' beneath FIGHT while the opponent description and control instructions remain visible.\",\n    \"reason\": \"This communicates a deadline for reading; the still cannot establish whether the fight actually starts automatically.\",\n    \"suggest\": \"Replace the introductory countdown with 'Start when ready'; verify its behavior and require an explicit FIGHT action on this instructional card.\"\n  },\n  {\n    \"title\": \"score-calls-need-plain-language\",\n    \"claim\": \"Images #17 and #20 display IPPON and WAZA-ARI respectively, but neither call banner includes 'full point' or 'half point'.\",\n    \"reason\": \"Players unfamiliar with karate terminology must interpret the HUD score instead of learning the award directly from the prominent announcement.\",\n    \"suggest\": \"Keep the karate terms and add 'Full point' beneath IPPON and 'Half point' beneath WAZA-ARI.\"\n  },\n  {\n    \"title\": \"desktop-bindings-not-visible\",\n    \"claim\": \"Image #9 labels the two desktop joysticks STANCE and TECHNIQUE but shows no keyboard key bindings for either.\",\n    \"reason\": \"A keyboard player cannot discover the corresponding keys from the visible play screen.\",\n    \"suggest\": \"Display the actual configured keyboard bindings beside each joystick label on desktop, without displacing the primary touch controls.\"\n  },\n  {\n    \"title\": \"fighter-label-size-unverified\",\n    \"claim\": \"I cannot determine whether the visible fighter-name labels in Images #3 and #9 satisfy the required 18 CSS px minimum from these raster frames.\",\n    \"reason\": \"Those names identify the competitors, and screenshot pixels alone do not establish their rendered CSS sizing.\",\n    \"suggest\": \"Measure their computed font sizes and applied scaling at the phone and desktop viewports; enlarge any verified undersized labels and reflow the scoreboard rather than shrinking the text.\"\n  }\n]"
 }

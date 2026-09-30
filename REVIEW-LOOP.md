@@ -5294,3 +5294,57 @@ heading, and the error text says so unambiguously. Re-running was the second
 step, not the first.
 
 Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 122 — round 120's shortening had dropped something load-bearing
+
+`neutral-stance-not-explained`: *"Image #2 asks for one stance input plus one
+technique input, while Image #6 shows Lunge Punch using the standing dot plus
+forward without explicitly saying to leave the stance stick centered."*
+
+**The reviewer is right, and the bug is mine, from two rounds ago.** Round 118
+added the notation line. Round 120 shortened it to fit the hold:
+
+    A move = one stance input + one technique input.
+
+That says both sticks must be touched. **Thirteen of the twenty moves are
+`posture: 'stand'`** — the neutral stance — and for those the stance stick stays
+*centred*. The sheet's rows show it correctly as `•` with the legend word
+STANDING, so the notation was never wrong; the sentence I wrote was, and I
+shortened it past the point where it told the truth.
+
+**Which is the sharpest instance of a loop's oldest mistake: optimising a string
+until it measured well, without asking what it had stopped saying.** Round 120
+had a number — 1.15× margin — and the number was the goal. It never occurred to
+me that a shorter sentence is only better if the longer one was complete.
+
+    A move = a technique input + a stance input,
+    or leave the stance centred.                          73 chars
+
+And the hold, which round 119 and 120 both reasoned about and neither measured:
+
+    4000   one sentence, the tell. Correct.
+    7200   r119, after the line made it 144 chars — right diagnosis, wrong lever
+    7200   r120, after cutting to 45 chars — margin restored
+    9000   r122, at 128 chars and 7.7s to read
+
+**9000 is a decision and not a derivation, and that is the honest framing.** The
+card is the only screen that explains how a move is input, it is read once per
+bout, and a player who dismisses it early has not had the explanation. Nine
+seconds covers both sentences with room to look at the fighters behind them.
+
+### Two environment failures in one round, and the second one is worth noting
+
+`pnpm test:e2e` had not been run in this session and the captures came back
+empty: every frame failed on `navigating to "http://127.0.0.1:5173/"`, and
+`curl` on the dev server returned **000**. Same signature as round 121's 4173
+refusals — a server that is not running, not a product failure. `pnpm dev` brought
+it back to 200 and the 22 frames rebuilt clean.
+
+**That is twice in two rounds, and the pattern is a real one worth recording:**
+this loop's harness assumes a dev server and a preview server are already up, and
+when they are not every test fails identically and looks like a catastrophic
+regression. Neither time was a product defect. The discipline that catches it
+is boring and unglamorous — **when everything fails at once and instantly, read
+the error before the diff** — and it is now the reflex after round 121.
+
+Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.

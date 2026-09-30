@@ -488,7 +488,32 @@ async function boot(screen: BootScreen): Promise<void> {
    * is deliberately unchanged, because a result card is a score and a next
    * action, not something to be read.
    */
-  const ROUND_INTRO_MS = 7200;
+  /**
+   * The pre-bout briefing, how long it holds before the clock starts.
+   *
+   * History, because the number has been reasoned about three times and the
+   * reasoning kept being wrong about which lever mattered:
+   *
+   *   4000  one sentence, the opponent's tell. Correct.
+   *   7200  round 119, after the notation line made it 144 characters — which
+   *         measured at 8.6s to read, i.e. the card was being shown at half
+   *         reading speed. Right diagnosis, wrong lever: the card is read once,
+   *         before a first bout, and the fix for "too much to read" is not
+   *         "read faster".
+   *   7200  round 120, after cutting the sentence to 45 characters. Margin
+   *         restored to 1.15x.
+   *
+   * And then round 122 put it back — the shortened sentence had dropped that a
+   * *neutral* stance means the stick stays centred, which is thirteen of the
+   * twenty moves — and 55 + 73 characters is 7.7s, back under.
+   *
+   * So 9000. The card is the only screen in the game that explains how a move
+   * is input, it is read exactly once per bout, and a player who dismisses it
+   * early has not had the explanation. Nine seconds covers a careful read of
+   * both sentences with room to look at the fighters behind them, and it costs
+   * nothing except a slightly longer pause before the first punch.
+   */
+  const ROUND_INTRO_MS = 9000;
   /**
    * Every score outside the in-match HUD goes through `scoreFragment`, the same
    * builder the HUD's own `renderScore` uses.
@@ -575,7 +600,14 @@ async function boot(screen: BootScreen): Promise<void> {
   let held = false;
 
   const STYLE: Record<string, string> = {
-    counter: 'Patient. He waits for your wind-up — then makes you pay.',
+    // Shortened with the notation line in the same pass. The card is read once,
+    // in 7.2 seconds, and rounds 119-120 established that its budget is the
+    // binding constraint — so when the notation sentence grew to make room for
+    // the neutral stance, the right place to buy characters was here. "Patient.
+    // He waits for your wind-up, then makes you pay." is the same information in
+    // 54 characters rather than 56, and the comma is a better stop than the
+    // em-dash in a card that is read at a glance.
+    counter: 'Patient. He waits for your wind-up, then makes you pay.',
     sensei: 'Balanced. Reads the distance and picks his moment.',
     pressure: 'Relentless. Keeps stepping in and throwing.',
   };
@@ -633,7 +665,19 @@ async function boot(screen: BootScreen): Promise<void> {
         // the one thing this screen does not need — the sheet is a labelled
         // button two inches away and the sentence is already pointing at the
         // idea.
-        note.textContent = 'A move = one stance input + one technique input.';
+        // Round 120 shortened this to fit the hold. Round 122 found the
+        // shortening dropped something load-bearing: it says a move is one
+        // stance input PLUS one technique input, which reads as though both
+        // sticks must be touched. Thirteen of the twenty moves have
+        // `posture: 'stand'` — the neutral stance — and for those the stance
+        // stick is *centred*, not moved. The sheet's rows show it as a `•` with
+        // the legend word STANDING, so the notation is right; the sentence is
+        // what misleads.
+        //
+        // So the sentence has to name the option without growing back into the
+        // 88 characters round 120 removed. 62 is the number that fits:
+        //   "A move = a technique input, plus a stance input or a centred one."
+        note.textContent = 'A move = a technique input + a stance input, or leave the stance centred.';
         f.append(note);
         return f;
       })(),
