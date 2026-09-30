@@ -569,6 +569,67 @@ await capture('18-phone-kick', phone, async (page) => {
   if (!caught) console.warn('18-phone-kick: no active kick observed, frame not written');
 });
 
+/* ---------- Round 73: a half point, on the board, in the review set ---------- */
+
+/* This is the frame the loop spent thirty-one rounds trying to see.
+ *
+ * A half point is only awarded when the defender is NOT winding up —
+ * `match.ts` promotes the call to a full point when `defender.phase ===
+ * 'startup'`, which is what every earlier probe did by accident, thirty lunges
+ * in a row, and why two rounds of "there is no half point" measurements came
+ * back clean. The stance stick is held NEUTRAL here for exactly that reason.
+ *
+ * Five models reported this notation as ambiguous, cramped, or reading as
+ * `21/2`. It is none of those, and this frame is what settles it for a reviewer
+ * rather than leaving them to infer it from the source. */
+await capture('19-phone-half-point', phone, async (page) => {
+  await page.goto(`${BASE}/?mode=dojo`, { waitUntil: 'networkidle' });
+  await waitFight(page);
+  const anchor = async (sel) => {
+    const box = await page.locator(sel).boundingBox();
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  };
+  const L = await anchor('#zone-left');
+  const R = await anchor('#zone-right');
+  const cdp = await page.context().newCDPSession(page);
+  const pts = new Map();
+  const send = (type) =>
+    cdp.send('Input.dispatchTouchEvent', {
+      type,
+      touchPoints: [...pts].map(([id, q]) => ({ x: Math.round(q.x), y: Math.round(q.y), id })),
+    });
+  // Watched from inside the page, on every frame, because the state this needs
+  // to catch is shorter than one round trip to the driver.
+  await page.evaluate(() => {
+    globalThis.__half = false;
+    const watch = () => {
+      if (document.querySelector('.points .score-frac')) globalThis.__half = true;
+      requestAnimationFrame(watch);
+    };
+    requestAnimationFrame(watch);
+  });
+
+  for (let i = 0; i < 34; i += 1) {
+    if (await page.evaluate(() => globalThis.__half === true)) {
+      await page.screenshot({ path: `${OUT}/19-phone-half-point.png` });
+      return;
+    }
+    if (await page.locator('.result-score').isVisible().catch(() => false)) break;
+    pts.clear();
+    pts.set(1, { x: L.x, y: L.y });
+    await send('touchStart');            // stance neutral: no step, so no counter
+    pts.set(2, { x: R.x, y: R.y });
+    await send('touchStart');
+    pts.set(2, { x: R.x + 58, y: R.y }); // forward = lunge_punch = a half
+    await send('touchMove');
+    await page.waitForTimeout(240);
+    pts.clear();
+    await send('touchEnd');
+    await page.waitForTimeout(180);
+  }
+  console.warn('19-phone-half-point: no half landed, frame not written');
+});
+
 await browser.close();
 console.log(`shots in ${OUT}`);
 if (errors.length) console.log('console errors:\n' + [...new Set(errors)].join('\n'));

@@ -2646,3 +2646,42 @@ The difference is whether the thing measured is the thing asked about.**
 Before accepting a clean refutation of a finding that several independent
 reviewers have reported, read the code that produces the value. A result that
 confirms what you wanted is the cheapest thing in the world to obtain.
+
+### Round 73 — the half point, on the board, in the review set
+
+Round 72 said what to do: a half is only awarded when the defender is **not**
+winding up, because `match.ts` promotes the call to a full point when
+`defender.phase === 'startup'`. Every earlier probe stepped forward while it
+threw, so it was countering itself, so every call became a full point, so two
+rounds of "there is no half" came back clean.
+
+**The stance stick is held neutral.** That is the entire difference between the
+two failed measurements and this one. Six lunges in, the board reads:
+
+    ⌐ 1/2 ⌐      (1 over a rule over 2, the stacked fraction)
+    28s          (clock)
+    0            (opponent)
+
+Added as `19-phone-half-point`, watched from inside the page on every animation
+frame because the state is shorter than one round trip to the driver — the same
+lesson as round 72, applied this time instead of rediscovered.
+
+**So: the finding five models reported over five rounds is real, round 67's fix
+is real, and it now has a frame in the set that shows it.** No reviewer has to
+infer the notation from the source, and the next one to report "half-point
+scores read as 21/2" is looking at a stacked fraction that does not.
+
+**Thirty-three rounds, and the shape of them is worth one last note.**
+
+The defect was real from round 36. It survived thirty-one rounds because nobody
+had ever seen a half point, so every fix was reasoned about rather than
+observed, and the round 53 fix was applied to the one surface that happened to
+be in the photographs. It was finally closed by the product code confirming the
+value (`match.ts`), the reading logic sampling the right state (round 72), and
+the driving pattern holding the stick still (this round) — three rounds in a row
+each getting closer, and every one of them looking like a small correction to
+the previous one.
+
+**A finding cannot be closed by reasoning about it, and it cannot be closed by a
+clean measurement either. It closes when a frame exists that shows the thing, and
+everything before that is inference with better manners.**
