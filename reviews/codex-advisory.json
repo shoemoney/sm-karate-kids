@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-29T23:59:36",
+ "reviewed_at": "2026-09-30T00:08:33",
  "items": [
   {
-   "title": "fight-button-overlaps-fighters",
-   "claim": "In Image #14, the FIGHT button overlaps the lower portions of both fighters\u2019 inward-facing legs.",
-   "reason": "The introduction obscures part of the fighters\u2019 silhouettes before the player begins.",
-   "suggest": "Place the FIGHT button within the introduction\u2019s text area, clear of both fighter silhouettes."
+   "title": "indistinct-stance-directions",
+   "claim": "In image #3, both horizontal STANCE hints say 'step', while the neighboring TECHNIQUE hints distinguish 'back' from 'forward'.",
+   "reason": "The stance hints do not explain which direction closes distance and which creates space.",
+   "suggest": "Use 'back step' and 'forward step' for the pictured facing, keeping those labels synchronized with the fighter's facing."
   },
   {
-   "title": "intro-controls-lack-instructions",
-   "claim": "Image #2 labels the sticks STANCE and TECHNIQUE but does not show the action mappings that are visible in Image #3.",
-   "reason": "The player sees the invitation to fight before seeing which directions perform which actions.",
-   "suggest": "Show the directional action legend during the qualifier introduction, not only in the fighting view."
+   "title": "misplaced-combination-symbol",
+   "claim": "In image #6, the '+' occupies an otherwise unlabeled cell beside RETREATING within the STANCE legend rather than separating the STANCE and TECHNIQUE groups.",
+   "reason": "Its placement makes the instruction to combine the two sticks harder to understand.",
+   "suggest": "Place 'One stance + one technique' in a dedicated full-width instruction between the two groups."
   },
   {
-   "title": "direction-symbols-disagree",
-   "claim": "In Image #5, the stick sectors use chevrons while the instruction panel uses filled triangles for the corresponding directions.",
-   "reason": "Players must translate between two visual representations of the same inputs.",
-   "suggest": "Use matching direction words on the stick sectors and in the legend, with action-specific Font Awesome icons where useful."
+   "title": "ambiguous-technique-dimming",
+   "claim": "In image #6, the Spinning Back Kick row is visibly dimmer than the preceding rows, without a visible label explaining its status.",
+   "reason": "A player could mistake a scroll-edge treatment for an unavailable technique; the still cannot establish which causes the dimming.",
+   "suggest": "Keep readable technique rows undimmed and confine any scroll-edge fade to a gutter that does not cover their text or input symbols."
   },
   {
-   "title": "result-poses-lack-outcome-distinction",
-   "claim": "In Image #18, ASMONGOLD WINS appears above Asmongold in a kicking pose and HasanAbi in a guard pose rather than visually distinct outcome poses.",
-   "reason": "The text communicates victory, but the fighter presentation still resembles an exchange.",
-   "suggest": "Give the result presentation a winner salute and a distinct loser recovery pose; this frame alone does not establish whether either existing animation is frozen."
+   "title": "missing-desktop-key-legends",
+   "claim": "In desktop image #9, the two sticks show direction marks and STANCE/TECHNIQUE labels, but no keyboard bindings are visible.",
+   "reason": "A keyboard player cannot discover the corresponding keys from this screen.",
+   "suggest": "Add compact legends beside each stick using the actual configured keyboard bindings, while retaining the touch controls."
   },
   {
-   "title": "technique-text-size-unverified",
-   "claim": "In Image #6, the scoring metadata appears smaller than the technique names, but their exact CSS font sizes cannot be established from this screenshot.",
-   "reason": "Height and point value are essential information when choosing a technique, so their readability needs verification.",
-   "suggest": "Measure computed font sizes for the technique names, scoring metadata, and legends at 390\u00d7844; raise anything below 18 CSS px and stack metadata beneath names if necessary."
+   "title": "result-countdown-without-cancel",
+   "claim": "In images #8 and #18, REMATCH appears above 'STARTING IN 8', with no visible control to cancel the indicated start.",
+   "reason": "A player reviewing the result has no visible way to request more time.",
+   "suggest": "Keep REMATCH as the primary action and add a clearly labeled 'Stay on results' control that cancels the countdown."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"fight-button-overlaps-fighters\",\n    \"claim\": \"In Image #14, the FIGHT button overlaps the lower portions of both fighters\u2019 inward-facing legs.\",\n    \"reason\": \"The introduction obscures part of the fighters\u2019 silhouettes before the player begins.\",\n    \"suggest\": \"Place the FIGHT button within the introduction\u2019s text area, clear of both fighter silhouettes.\"\n  },\n  {\n    \"title\": \"intro-controls-lack-instructions\",\n    \"claim\": \"Image #2 labels the sticks STANCE and TECHNIQUE but does not show the action mappings that are visible in Image #3.\",\n    \"reason\": \"The player sees the invitation to fight before seeing which directions perform which actions.\",\n    \"suggest\": \"Show the directional action legend during the qualifier introduction, not only in the fighting view.\"\n  },\n  {\n    \"title\": \"direction-symbols-disagree\",\n    \"claim\": \"In Image #5, the stick sectors use chevrons while the instruction panel uses filled triangles for the corresponding directions.\",\n    \"reason\": \"Players must translate between two visual representations of the same inputs.\",\n    \"suggest\": \"Use matching direction words on the stick sectors and in the legend, with action-specific Font Awesome icons where useful.\"\n  },\n  {\n    \"title\": \"result-poses-lack-outcome-distinction\",\n    \"claim\": \"In Image #18, ASMONGOLD WINS appears above Asmongold in a kicking pose and HasanAbi in a guard pose rather than visually distinct outcome poses.\",\n    \"reason\": \"The text communicates victory, but the fighter presentation still resembles an exchange.\",\n    \"suggest\": \"Give the result presentation a winner salute and a distinct loser recovery pose; this frame alone does not establish whether either existing animation is frozen.\"\n  },\n  {\n    \"title\": \"technique-text-size-unverified\",\n    \"claim\": \"In Image #6, the scoring metadata appears smaller than the technique names, but their exact CSS font sizes cannot be established from this screenshot.\",\n    \"reason\": \"Height and point value are essential information when choosing a technique, so their readability needs verification.\",\n    \"suggest\": \"Measure computed font sizes for the technique names, scoring metadata, and legends at 390\u00d7844; raise anything below 18 CSS px and stack metadata beneath names if necessary.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"indistinct-stance-directions\",\n    \"claim\": \"In image #3, both horizontal STANCE hints say 'step', while the neighboring TECHNIQUE hints distinguish 'back' from 'forward'.\",\n    \"reason\": \"The stance hints do not explain which direction closes distance and which creates space.\",\n    \"suggest\": \"Use 'back step' and 'forward step' for the pictured facing, keeping those labels synchronized with the fighter's facing.\"\n  },\n  {\n    \"title\": \"misplaced-combination-symbol\",\n    \"claim\": \"In image #6, the '+' occupies an otherwise unlabeled cell beside RETREATING within the STANCE legend rather than separating the STANCE and TECHNIQUE groups.\",\n    \"reason\": \"Its placement makes the instruction to combine the two sticks harder to understand.\",\n    \"suggest\": \"Place 'One stance + one technique' in a dedicated full-width instruction between the two groups.\"\n  },\n  {\n    \"title\": \"ambiguous-technique-dimming\",\n    \"claim\": \"In image #6, the Spinning Back Kick row is visibly dimmer than the preceding rows, without a visible label explaining its status.\",\n    \"reason\": \"A player could mistake a scroll-edge treatment for an unavailable technique; the still cannot establish which causes the dimming.\",\n    \"suggest\": \"Keep readable technique rows undimmed and confine any scroll-edge fade to a gutter that does not cover their text or input symbols.\"\n  },\n  {\n    \"title\": \"missing-desktop-key-legends\",\n    \"claim\": \"In desktop image #9, the two sticks show direction marks and STANCE/TECHNIQUE labels, but no keyboard bindings are visible.\",\n    \"reason\": \"A keyboard player cannot discover the corresponding keys from this screen.\",\n    \"suggest\": \"Add compact legends beside each stick using the actual configured keyboard bindings, while retaining the touch controls.\"\n  },\n  {\n    \"title\": \"result-countdown-without-cancel\",\n    \"claim\": \"In images #8 and #18, REMATCH appears above 'STARTING IN 8', with no visible control to cancel the indicated start.\",\n    \"reason\": \"A player reviewing the result has no visible way to request more time.\",\n    \"suggest\": \"Keep REMATCH as the primary action and add a clearly labeled 'Stay on results' control that cancels the countdown.\"\n  }\n]"
 }

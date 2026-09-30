@@ -2070,6 +2070,18 @@ body.high-contrast .setting-row input[type="checkbox"]:checked::before {
   gap: var(--space-1);
 }
 
+/* The `+` between the two halves. It has to SEPARATE the lists, and in a
+   two-column grid it did not — it became a grid item and landed in the next free
+   cell, which is column two of the STANCE list's last row. So the symbol that
+   means "these two lists combine" was sitting inside one of the lists, beside
+   RETREATING. Caught by `openai/gpt-6.1-sol` (via codex) as "misplaced
+   combination symbol"; caused by round 104's two-column layout. */
+.tech-key > .tech-plus {
+  grid-column: 1 / -1;
+  justify-self: center;
+  padding-block: var(--space-1);
+}
+
 .tech-key-word {
   color: var(--text-muted);
 }

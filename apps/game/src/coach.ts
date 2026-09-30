@@ -42,7 +42,15 @@ const LESSONS: ReadonlyArray<{
   title: string;
   pairs: readonly string[];
 }> = [
-  { zone: 'zone-left', title: 'Stance', pairs: ['◀ step', '▲ jump', '▶ step', '▼ crouch'] },
+  // The two horizontal directions were both labelled "step", while the technique
+  // stick's are "back" and "forward". So the sheet taught a distinction the
+  // coach did not make, and a player comparing the two could not tell which way
+  // "step" went. `openai/gpt-6.1-sol` (via codex) put it as "both horizontal
+  // STANCE hints say 'step', while the neighbouring TECHNIQUE hints distinguish
+  // 'back' from 'forward'" — the same class as rounds 102-105, a decision made
+  // in one surface and not the other. The words now match the sheet's legend:
+  // retreating and lunging.
+  { zone: 'zone-left', title: 'Stance', pairs: ['◀ back', '▲ jump', '▶ in', '▼ crouch'] },
   // The Moves sheet groups every technique under RIGHT STICK FORWARD / BACK /
   // UP / DOWN. The legend used to say reverse/forward/high/low for the same
   // four directions, so a player who learned the controls from the coach and

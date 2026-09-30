@@ -4642,3 +4642,61 @@ wording and stays as it is; the shape difference is deliberate and is now writte
 down as deliberate rather than as a known gap.
 
 Gates: `pnpm check` 132 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 109 — two real ones, and the first is a regression from two rounds ago
+
+    indistinct-stance-directions     <- real
+    misplaced-combination-symbol     <- real, caused by round 104
+    ambiguous-technique-dimming
+    missing-desktop-key-legends
+    result-countdown-without-cancel
+
+**`misplaced-combination-symbol` is round 104's two-column layout, caught three
+rounds later.** The reviewer put it precisely: *"the '+' occupies an otherwise
+unlabeled cell beside RETREATING within the STANCE legend rather than separating
+the STANCE and TECHNIQUE groups."*
+
+The `+` is a **separator between two lists**. In a two-column grid it stopped
+being a separator and became a grid item, so it took the next free cell — column
+two of the STANCE list's last row. A symbol meaning *these two lists combine* was
+sitting inside one of them. I looked at that exact screenshot in round 104 and
+read the floating `+` as a divider, which is precisely what it looked like.
+
+**And it is the same shape as the round-105 dead-CSS bug, which means the fix
+route is known.** There, a duplicate rule was silently overridden while the render
+looked right. Here, a changed layout rule moved an element while the render
+looked right. Both are cases where **the picture is correct and the intent is
+not**, and neither a reviewer nor a screenshot can see them — the question has
+to be asked of the mechanism.
+
+    .tech-key > .tech-plus { grid-column: 1 / -1; justify-self: center; }
+
+**`indistinct-stance-directions` is the round-102 family again, on the coach.** Both
+horizontal stance hints read `◀ step` and `▶ step`, while the technique stick
+distinguishes `back` and `forward`. So the sheet teaches a distinction the coach
+does not make, and a player comparing them cannot tell which way "step" goes.
+That is a decision made in one surface and not the other — the sixth round in a
+row on this. Now `◀ back` / `▶ in`, matching the legend's RETREATING and LUNGING.
+
+### The run so far, since the reviewer started being honest
+
+    r100  key rendered two identical dots        fixed
+    r101  prose inverted the scoring rule        fixed
+    r102  the paragraph computed from the data   done
+    r103  legend contradicted the stick           fixed — over-corrected
+    r104  legend redundant; 2-col layout         fixed — caused r109
+    r105  gate added; caught dead CSS            fixed
+    r107  stick chevrons vs sheet triangles      playtested r108, refused
+    r109  + misplaced by the 2-col layout        fixed
+          stance directions not distinguished   fixed
+
+**Eight rounds, six fixes, one playtested refusal, and the recurrence is the
+finding.** Every item in that list is a surface being described twice, and the
+loop's own conclusion from round 104 — decide once, then check both — is the
+only thing that has ever worked. Two of the eight were caused by fixes for the
+previous one, which is the cost of changing a surface in isolation, and it is
+also the argument for the fence: the round-105 gate would have caught r109's
+stance-directions half if it had read `coach.ts`, and the `+` placement is
+exactly the kind of layout assertion a screenshot cannot make.
+
+Gates: `pnpm check` 132 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
