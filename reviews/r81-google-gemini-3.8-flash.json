@@ -1,0 +1,89 @@
+{
+  "model": "google/gemini-3.8-flash",
+  "elapsed_s": 36.1,
+  "usage": {
+    "prompt_tokens": 23094,
+    "completion_tokens": 4018,
+    "total_tokens": 27112,
+    "cost": 0.032388,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.032388,
+      "upstream_inference_prompt_cost": 0.0173205,
+      "upstream_inference_completions_cost": 0.0150675
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 3053,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "remove-persistent-controls-legend",
+      "title": "Remove or collapse the in-bout stance/technique cheat sheet card",
+      "what": "In gameplay screens (Screenshots 3, 4, 5, 9, 11, 14, 15), a rounded card containing 6 lines of control instructions ('STANCE \u25c4 step \u25b2 jump... TECHNIQUE \u25c4 back \u25ba forward...') is permanently anchored in the lower midground between the tatami mat and the virtual sticks.",
+      "why": "It eats ~100px of vertical space in a portrait layout, forces the fighters to appear smaller, and clutters the combat zone during live play even though a dedicated 'MOVES' modal button already exists in the top right.",
+      "how": "Hide this card during active combat after the first tutorial round, or collapse it into a subtle toggle tab, allowing the camera to frame down closer to the fighters for better action readability."
+    },
+    {
+      "id": "fighter-foot-contact-shadows",
+      "title": "Add contact occlusion shadows beneath fighter feet",
+      "what": "Across all fighting frames (e.g., Screenshots 3, 5, 9, 11, 14), the fighters' feet touch the tatami texture with only a diffuse, soft spotlight blob centered beneath their pelvis, leaving the bare feet without local ground shadows.",
+      "why": "The crisp cutout contours of the feet lack depth anchoring, making the photoreal sprites look like flat stickers floating across the 3D mat.",
+      "how": "Project tight, high-opacity contact ambient-occlusion shadows directly under each foot mesh/sprite bone that scale with vertical movement, anchoring them firmly to the mat surface."
+    },
+    {
+      "id": "fix-p2-hud-name-contrast",
+      "title": "Increase contrast and luminance for Player 2 name in the top HUD",
+      "what": "On the top scoreboard bar across fight screens (Screenshots 2, 3, 5, 6, 8, 10, 13, 14), 'HASANABI' is rendered in a deep muted burgundy-red on a near-black header bar.",
+      "why": "The contrast ratio against the dark background fails legibility on mobile screens under normal ambient lighting, appearing almost unreadable compared to Asmongold's crisp white text.",
+      "how": "Shift P2's font color from deep maroon to a high-luminance vermilion/coral (e.g., #FF6358) with a soft dark text drop-shadow to maintain team identity while guaranteeing WCAG AA contrast."
+    },
+    {
+      "id": "format-fractional-score-typography",
+      "title": "Properly format half-point score fraction alignment",
+      "what": "In Screenshots 6 and 13 ('HASANABI WINS 0 - 2 1/2') and the top HUD in Screenshots 13 and 14 ('1/2'), half-points are rendered as unaligned stacked fractions where the denominator drops below the font baseline and collides with spacing margins.",
+      "why": "The misaligned fraction numbers look like an unformatted layout glitch rather than an intentional martial arts tournament score.",
+      "how": "Replace ad-hoc stacked numbers with a dedicated typographic Unicode fraction glyph ('\u00bd') aligned to the uppercase font cap-height, or represent half-points as round pip indicators (e.g., Waza-ari dots) beside the main numeral."
+    },
+    {
+      "id": "cardinal-gate-visual-feedback-on-sticks",
+      "title": "Add cardinal gate detents to the virtual thumbsticks",
+      "what": "In Screenshots 3, 4, and 9, the virtual thumbsticks are rendered as continuous 360-degree smooth spherical dials (deflecting freely diagonally as in Screenshot 4), while the game's mechanics rely purely on 4 discrete cardinal inputs.",
+      "why": "On a touch glass surface with no physical feedback, free-floating analog travel leads to frequent dropped inputs and diagonal ambiguity during fast combat execution.",
+      "how": "Overlay subtle 4-way crosshair detent grooves or illuminate the cardinal arrow chevrons when the stick enters their respective directional actuation cones."
+    }
+  ],
+  "raw": null
+}

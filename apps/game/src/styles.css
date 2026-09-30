@@ -80,7 +80,14 @@
     score measured 4.15:1 against the scoreline, less than half the 15.46:1
     of the player score, and it is the number you read to know you are losing. */
   --aka-bright: #ff8f84;
-  --aka-dim: #c07068;
+  /* Lifted from #c07068. The name plates use the `-dim` variants, and the red
+     one was carrying far less luminance than the white one while looking about
+     the same: measured off `19-phone-half-point`, HASANABI sat at 4.74:1 against
+     its plate where ASMONGOLD sat at 7.03:1. Red is nearly absent from the
+     relative-luminance weights, so a red that *looks* as bright as a cream is
+     not. `gemini-3.8-flash` asked for luminance on the P2 name and was right.
+     This is a HUD-label token — the gi itself is `--aka` and is untouched. */
+  --aka-dim: #ff9d92;
 
   --shiro: #f2f2ef; /* the white gi */
   --shiro-dim: #a9a59d;
@@ -713,6 +720,8 @@ body.show-perf #backend {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+
 
 /* A 320px phone is still a phone. At that width the scoreline's three columns
    do not leave room for two full names at the tracked-out size, and both were

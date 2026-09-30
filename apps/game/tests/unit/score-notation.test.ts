@@ -147,3 +147,68 @@ describe("the referee's call is legible over the shoji", () => {
     ).toBeLessThanOrEqual(0.03);
   });
 });
+
+
+/**
+ * The two name plates are not symmetric, because red is not.
+ *
+ * Relative luminance weights green and blue heavily and red barely, so a red
+ * that *looks* as bright as a cream carries far less measurable contrast. The
+ * name plates use the fighters' `-dim` tokens, and the red one was 2.3:1 weaker
+ * than the white one — 4.74:1 against its plate where the white sat at 7.03:1.
+ * `gemini-3.8-flash` asked for luminance on the P2 name; the fix is on the
+ * `--aka-dim` HUD token, never on `--aka`, which is the gi.
+ *
+ * Asserted as a computed property so the next colour tweak cannot quietly
+ * reintroduce the asymmetry by eye, which is how it arrived: both names looked
+ * fine, and one of them was measurably worse.
+ */
+describe('both name plates carry their own contrast', () => {
+  const css = read('../../src/styles.css');
+  const lum = (hex: string): number => {
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    const f = (v: number) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+  };
+  const token = (name: string): number => {
+    const m = css.match(new RegExp(`--${name}:\\s*(#[0-9a-fA-F]{6});`));
+    expect(m, `no --${name} token`).not.toBeNull();
+    return Number(`0x${(m![1] ?? '').slice(1)}`);
+  };
+  /** WCAG contrast of `hex` on the HUD plate behind the name. */
+  const onPlate = (hex: string): number => {
+    // The scoreline plate, measured off `19-phone-half-point` — the modal pixel
+    // in the name band, which is the plate showing between the glyphs. It is a
+    // real sample rather than a chosen colour because this test exists because
+    // two colours that *looked* equal were 2.3:1 apart, and a guessed plate
+    // reproduces exactly that kind of confident wrong answer.
+    const plate = 0.0108; // relative luminance of #221913
+    const l = lum(hex);   // lum() expects the leading '#' and slices from it
+    return (Math.max(l, plate) + 0.05) / (Math.min(l, plate) + 0.05);
+  };
+
+  test('the red name plate clears the large-text threshold on its own', () => {
+    const hex = `#${token('aka-dim').toString(16).padStart(6, '0')}`;
+    expect(
+      onPlate(hex),
+      `${hex} is the P2 name colour and must clear 4.5:1 unaided — the whole point of the token`,
+    ).toBeGreaterThanOrEqual(4.5);
+  });
+
+  test('the two name plates are within 2:1 of each other', () => {
+    const a = onPlate(`#${token('aka-dim').toString(16).padStart(6, '0')}`);
+    const b = onPlate(`#${token('shiro-dim').toString(16).padStart(6, '0')}`);
+    expect(
+      Math.max(a, b) / Math.min(a, b),
+      'one fighter name being measurably weaker than the other is the defect this guards',
+    ).toBeLessThanOrEqual(2);
+  });
+
+  test('the HUD token is not the gi colour', () => {
+    // --aka is the red gi and is art direction; brightening it would change the
+    // fighter to fix a label. They must stay distinct.
+    expect(token('aka-dim')).not.toBe(token('aka'));
+  });
+});

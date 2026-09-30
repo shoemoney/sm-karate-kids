@@ -3114,3 +3114,78 @@ legible, and only recently has it been able to catch anything that depends on
 two elements agreeing with each other. Those are different failure modes, they
 need different instruments, and a review set of isolated elements will keep
 finding the first and never the second.
+
+### Round 81 — red is not white, and both name plates were never equal
+
+`deepseek/deepseek-v4.1-flash`, `x-ai/grok-4.5`, `google/gemini-3.8-flash`.
+
+`gemini-3.8-flash`: **"increase contrast and luminance for Player 2 name in the
+top HUD."** Measured off `19-phone-half-point`, the modal plate colour behind the
+names and the brightest glyph pixel in each band:
+
+    ASMONGOLD   #a9a59d   7.03:1
+    HASANABI    #c07068   4.74:1
+
+**The claim is real, and the mechanism is the interesting part.** `--aka-dim` and
+`--shiro-dim` were *chosen* to look equivalent — both are muted, both sit on the
+same plate — and they are not equivalent in measurement, because relative
+luminance weights green and blue heavily and red barely. A red that looks about
+as bright as a cream carries roughly half the contrast. **The defect was created
+by a colour being picked by eye, and it is invisible by eye**, which is why it
+survived eighty rounds and why a reviewer's "it looks dim to me" was the only
+instrument that would ever have caught it.
+
+`--aka-dim: #c07068 -> #ff9d92`. The gi is untouched: `--aka` is art direction
+and it is on the sprite, so brightening it to fix a HUD label would have changed
+the fighter. `--aka-dim` is a HUD token and appears nowhere else.
+
+    HASANABI   4.74:1 -> 8.62:1     (now above ASMONGOLD's 7.03:1)
+    ratio between the two plates: 1.23:1
+
+Verified by re-capture, and checked that it still reads as red rather than
+washing out to pink.
+
+### My own test was wrong for four iterations, and the wrongness was the point
+
+Writing the guard, I computed the ratio between the two plates and got **3.93:1
+— a failure.** The tokens in the file are 1.23:1 apart. So the test was wrong,
+not the CSS, and it was wrong in a way worth recording:
+
+    const l = lum(hex.slice(1));   // strips the '#'
+    // lum() then does parseInt(hex.slice(1, 3)) — which now reads the *digits*
+    // as if they were the colour, silently, with no error.
+
+A helper that indexes a hex string from offset 1 and a caller that hands it an
+offset-0 string do not fail loudly. They produce a plausible number, and the
+number is 3.9 instead of 1.2, and the assertion is a clean red. **It took four
+iterations and a manual recomputation in Python to find, and the only reason I
+recomputed at all is that the failure contradicted a measurement I had already
+taken from a screenshot.**
+
+The same shape as round 72's clean score trace and round 78's frozen wrong
+value: an instrument that is confidently wrong is worse than a broken one,
+because it argues with you using numbers.
+
+I also guessed the plate colour as `#222019` before measuring it as `#221913` —
+a small error, but the *guess* is the habit. The test now uses the sampled
+plate, with a comment saying why, because this file exists precisely because two
+colours that looked equal were not.
+
+Gates: `pnpm check` **127 passed** (was 124), `pnpm test:e2e` 35 passed / 5
+skipped / exit 0. Three guards added: the red plate clears 4.5:1, the two plates
+stay within 2:1, and `--aka-dim` never equals `--aka`.
+
+### The category is worth naming, because it is not rare
+
+This is the first **equivalence** defect the loop has found: not "X is wrong" but
+"X and Y are supposed to be the same thing and are not." The review set is full
+of pairs — two name plates, two stick pips, two halves of a scoreline, two
+fighters, the striker and the impact, the announcement and the hit. Round 80
+found one (`BAND_HEIGHT` putting impacts at head height for every high move).
+Round 81 found another.
+
+**A defect of this kind is invisible to any reviewer looking at one thing**, and
+invisible to me for the same reason it was invisible to the eye: a colour picked
+to *look* right satisfies the only test available at the time. Both of these
+needed a number taken from a rendered frame, and both needed a second thing in
+the frame to compare against.

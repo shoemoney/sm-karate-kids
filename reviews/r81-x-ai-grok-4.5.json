@@ -1,0 +1,89 @@
+{
+  "model": "x-ai/grok-4.5",
+  "elapsed_s": 24.7,
+  "usage": {
+    "prompt_tokens": 17649,
+    "completion_tokens": 1053,
+    "total_tokens": 18702,
+    "cost": 0.041616,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.041616,
+      "upstream_inference_prompt_cost": 0.035298,
+      "upstream_inference_completions_cost": 0.006318
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "pre-fight-overlay-clutter",
+      "title": "Qualifier intro buries the fighters under stacked UI",
+      "what": "On the QUALIFIER vs HasanAbi pre-fight screen, ROUND 1/5 pill, giant QUALIFIER title, vs line, flavor-text bar, gold FIGHT button, and STARTING IN n countdown all stack over the upper/mid frame while the two fighters are pushed into the lower third with their feet cropped by the stance/technique sticks.",
+      "why": "First-time players cannot read body language or spacing before the bout; the cinematic dojo and character art\u2014the game's hook\u2014are hidden behind chrome in the most important 5 seconds.",
+      "how": "Collapse to one top pill (ROUND 1/5 \u00b7 QUALIFIER), one centered title block that fades on FIGHT, and move the flavor line into a single thin subtitle. Raise the fighter root so stances sit fully above the stick bank; hide sticks until the countdown reaches 1."
+    },
+    {
+      "id": "stick-labels-vs-glyphs",
+      "title": "Stance/Technique sticks show conflicting legends",
+      "what": "During live bouts a semi-transparent bar directly above the twin sticks lists '\u25c4 step \u25b2 jump \u25ba step \u25bc crouch' and '\u25c4 back \u25ba forward \u25b2 up \u25bc down', while the sticks themselves already have arrow glyphs on the rings. The bar collides with the fighters' feet and duplicates the same information.",
+      "why": "On a 390px-wide phone the extra bar steals vertical space from the 3D stage, creates visual noise under the characters, and teaches nothing the glyphs don't already teach\u2014hurting readability mid-combo.",
+      "how": "Delete the floating STANCE/TECHNIQUE text bar entirely. Keep only the ring arrow glyphs; on first run show a one-time 2-second coach mark that calls out 'Left stick = stance \u00b7 Right stick = technique' then never repeat."
+    },
+    {
+      "id": "ippon-banner-hides-contact",
+      "title": "IPPON / WAZA-ARI banners obscure the scoring hit",
+      "what": "When a point lands (Spinning Back Kick IPPON, Stepping Lunge Punch IPPON, Lunge Punch WAZA-ARI) a massive centered title card covers the exact moment of contact and both fighters' torsos for over a second while the scoreboard only ticks after the banner.",
+      "why": "Point karate is about seeing the clean hit. Covering the contact frame removes the satisfaction and the learning signal of why the point was awarded\u2014especially punishing on half-point vs full-point distinctions.",
+      "how": "Shrink the announcement to a top-third lockup (scoreboard-adjacent) that doesn't cover the fighters; trigger a 6\u20138 frame freeze on the contact pose plus a brief limb highlight; let the full-screen card appear only for match-point or bout-win."
+    },
+    {
+      "id": "touch-targets-and-safe-area",
+      "title": "Twin sticks sit on the bottom edge with no safe-area padding",
+      "what": "In every in-fight screenshot the STANCE and TECHNIQUE dual-zone sticks are flush with the physical bottom of the 390\u00d7844 frame; the home-indicator / gesture zone overlaps the lower arrow segments and the stick labels.",
+      "why": "Players will fat-finger stance changes or accidentally swipe-to-home mid-exchange. Unreliable input is the fastest way to quit a twin-stick fighter.",
+      "how": "Add a permanent bottom safe-area inset (\u226534px) and lift the entire stick bank above it. Increase the active knob hit diameter to \u226556px and keep a dead-zone gutter between the two sticks so thumbs don't cross-talk."
+    },
+    {
+      "id": "result-screen-feedback",
+      "title": "Win/loss results feel static and slow to rematch",
+      "what": "HASANABI WINS / ASMONGOLD WINS screens show a single frozen kick pose, large score, and a REMATCH button with an 8-second 'STARTING IN' timer; the defeated fighter just stands in the last frame with no reaction or camera change.",
+      "why": "After a tense point bout the celebration/defeat beat is the emotional payoff. A static pose plus forced 8s wait makes victories feel hollow and losses feel like a UI stall, killing the 'one more run' impulse.",
+      "how": "Play a short win/lose camera push and a one-time fighter reaction (arms-up or knee-drop). Make REMATCH immediately tappable; drop the auto-start countdown to 3s or replace it with a silent fill bar so players who want to queue can skip."
+    }
+  ],
+  "raw": null
+}

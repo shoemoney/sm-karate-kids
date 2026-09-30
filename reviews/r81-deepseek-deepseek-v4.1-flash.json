@@ -1,0 +1,89 @@
+{
+  "model": "deepseek/deepseek-v4.1-flash",
+  "elapsed_s": 127.0,
+  "usage": {
+    "prompt_tokens": 11086,
+    "completion_tokens": 9985,
+    "total_tokens": 21071,
+    "cost": 0.004936614,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.004936614,
+      "upstream_inference_prompt_cost": 0.000543214,
+      "upstream_inference_completions_cost": 0.0043934
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 8616,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-progress-feedback",
+      "title": "The pre-boot screen gives no sign that anything is loading",
+      "what": "On the ShoeMoney loading screen, the only progress affordance is one hairline rule under 'Downloading the game' at roughly y=790/1266. It has no fill state, no percentage, no spinner and no motion, so against the near-black field it reads as a divider between the title block and the 'A SHOEMONEY AI LABS GAME' footer rather than a loading bar.",
+      "why": "This is the first five seconds of the product and the only moment a WebGPU bundle can fail silently on a phone. A static black screen with a dead bar reads as a hung download, so the player backs out before the dojo ever renders.",
+      "how": "Drive that bar from real loader progress (file count or bytes), print a live percentage in the same letter-spaced gold caps as the title, and give the bar a looping sheen so it moves even at 0%. If progress is unavailable, show an indeterminate sweep plus rotating flavour text that changes every 1.5s."
+    },
+    {
+      "id": "bottom-control-band",
+      "title": "Instruction chrome plus stick captions consume the bottom third of the phone frame",
+      "what": "In every in-fight capture, the bottom of the 390x844 layout stacks three things: an info card ('STANCE \u2014 \u25c0 step \u25b2 jump / \u25b6 step \u25bc crouch \u00b7 TECHNIQUE \u2014 \u25c0 back \u25b6 forward / \u25b2 up \u25bc down') in ~9px gold-on-charcoal, then two ~150px joystick rings, then the 'STANCE' / 'TECHNIQUE' captions at about y=807pt, which lands inside the phone's home-indicator/gesture strip.",
+      "why": "Roughly a third of the screen height is spent on instructions that duplicate the rings' own captions, which shrinks the arena where the distance duel actually happens. The only text explaining an unusual twin-stick scheme is the smallest, lowest-contrast type on the device, and the captions can be swiped away by the OS gesture bar mid-round.",
+      "how": "Show the legend card only as a coach overlay that fades on the first stick input (and never again after fight 1); shrink the rings ~10% and re-anchor them and their captions above env(safe-area-inset-bottom); and drop the eight directional verbs in favour of the ring's own label plus one line of rules text."
+    },
+    {
+      "id": "moves-sheet-legibility",
+      "title": "The TECHNIQUES reference is a wall of micro-type with a clipped final row",
+      "what": "The full-screen MOVES/TECHNIQUES sheet renders 15+ moves as ~11px white names with a small ring-glyph pair at the left and a right-aligned 'mid \u00b7 Half point' tag, and the list is sliced mid-row at the bottom edge (the entry after 'Rising Knee' is cut by the screen boundary) with no scrollbar, fade or 'more' chevron.",
+      "why": "This sheet is the only place the game teaches a three-stance, three-direction, double-tap move set nobody has seen before. At phone size it cannot be scanned between exchanges, and the clipped bottom row makes the sheet look broken, which pushes players straight back to mashing.",
+      "how": "Convert it to a four-row drill-down (TECHNIQUE FORWARD / BACK / UP / DOWN) with 18-20px row names and one large gesture illustration each; tapping a row expands its four variants. Add a bottom gradient fade and a scroll chevron so continuation is obvious, and pin the close X so it is never scrolled away."
+    },
+    {
+      "id": "matchup-tip-timing",
+      "title": "The opponent's tell is the smallest text on the intro and expires while you read it",
+      "what": "On the 'QUALIFIER / vs HasanAbi' intro, the behavioural tip 'PATIENT. HE WAITS FOR YOUR WIND-UP \u2014 THEN MAKES YOU PAY.' sits at roughly 10px all-caps white inside the dark oval, dwarfed by the 30px+ gold 'QUALIFIER' above it and by the giant gold FIGHT pill below it, while 'STARTING IN 4 / 3 / 2' under the button is already counting down.",
+      "why": "A point-karate round is won by reading the opponent's habit, and this sentence is the only place that habit is stated. Burying it in the smallest type on screen and auto-starting the countdown means the player spends round 1 discovering something the game already told them and hid.",
+      "how": "Promote the tell to the second-largest type on the intro, freeze the 'STARTING IN' number until the player first touches the screen or the tip has been on screen 4s, and carry the tip forward as a small persistent chip under the scoreboard for the whole of round 1."
+    },
+    {
+      "id": "half-point-score-glyph",
+      "title": "The stacked \u00bd glyph destabilises the scoreboard's numerals",
+      "what": "When a waza-ari lands, the top-bar score slot renders a vertically stacked 1-over-2 in a narrow column \u2014 as in 'ASMONGOLD \u00bd \u00b7 28s \u00b7 0 HASANABI' \u2014 and the results card shows '0 \u2014 2' with the fraction stacked beside a much larger numeral, so the two sides of the dash no longer share size or baseline.",
+      "why": "In this game the score is the entire match state: no health bars, no damage, one number. The single figure a player glances at mid-exchange is typographically the least stable element on the HUD, and 'is that 2 or 2\u00bd' costs a beat at exactly the wrong moment.",
+      "how": "Render the fraction inline at numeral size ('2\u00bd' as one glyph, or '2.5') in both the top bar and the results card, give each side a fixed-width score cell so 0 / \u00bd / 1 / 2 never reflow the player names, and set both players' numerals to the same size and weight."
+    }
+  ],
+  "raw": null
+}
