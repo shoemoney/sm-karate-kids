@@ -2106,7 +2106,13 @@ body.high-contrast .setting-row input[type="checkbox"]:checked::before {
    apart from the glyph+word pairs that follow it, so nine items in a row still
    read as two lists rather than one long strip. */
 .tech-key-label {
+  /* One block, not two. Round 104 added `grid-column: 1 / -1` in a separate
+     rule, which is legal CSS and was correct — but it is the same mistake as
+     the dead `.tech-key` that round 105 caught, one level quieter: the
+     declaration lives far from the declarations it belongs with, and the only
+     way to know which one wins is to know the order. */
   display: block;
+  grid-column: 1 / -1;
   inline-size: 100%;
   margin-block-end: var(--space-1);
   color: var(--gold-bright);
@@ -2119,10 +2125,6 @@ body.high-contrast .setting-row input[type="checkbox"]:checked::before {
 
 /* The heading spans both columns so each list still reads as its own list
    rather than as one interleaved strip. */
-.tech-key-label {
-  grid-column: 1 / -1;
-}
-
 .tech-pip {
   display: inline-grid;
   place-items: center;

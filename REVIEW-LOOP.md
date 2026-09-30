@@ -4499,3 +4499,54 @@ disagreement that is not about a glyph, and it should not be described as if it
 would. Round 78's guard and round 90's 0.06 metric were both over-claims about
 what a test could see, and the honest description of this file is the narrow one:
 **a fence around a three-round failure, written by the loop that had it.**
+
+### Round 106 — looking for more round-105 bugs, and the honest answer is there are none
+
+Round 105 found a dead CSS rule that had been silently overridden while the
+rendered result looked correct. That is a real class of bug and it is worth
+knowing whether this stylesheet has more, so I wrote a detector for it: every
+selector declared more than once, outside any media query, in source order.
+
+    14 duplicate selectors in total
+     9 of them inside @media blocks        (legitimate responsive overrides)
+     5 declared twice at top level
+
+    #backend            669, 874     #pad                 1087, 1520
+    .tech-key-label     2108, 2122   .result-detail       2560, 2645
+    .result-headline    2582, 2605
+
+**All five are complementary, not conflicting.** The cascade merges them
+correctly in every case:
+
+    #backend        display:none + position  |  typography
+    #pad            flex + grid + padding    |  position:relative (documented)
+    .result-detail  padding + contrast note  |  typography
+    .result-headline margin-block-start      |  full type scale
+
+There is no bug here. **The detector's real finding is that the one case round
+105 caught was the only case**, and that the remaining four are the ordinary way
+a large stylesheet accumulates — a rule is extended months later, near the
+concern that prompted the change, rather than at the original block.
+
+The one that *was* mine is merged: `.tech-key-label` had its `grid-column` in a
+separate block from its type, added in round 104. Legal CSS, correct rendering,
+and the same mistake as the dead rule round 105 caught, one level quieter — the
+declaration lives far from the declarations it belongs with and the only way to
+know which wins is to know the order.
+
+### The result worth recording is the negative one
+
+I went looking for a class of bug with a detector, and the answer was "one, and
+I already fixed it." That is a boring round and it is the correct outcome, and I
+am writing it down rather than rounding it up to a finding, because the last
+three times this loop produced a number or a count that was more interesting
+than the truth — round 90's 0.06, round 78's guard, round 95's exit code.
+
+The general point, which cost two attempts to learn: **a detector that finds
+nothing is a result, and the discipline is to report it as one.** The temptation
+in a hundred-round loop is to treat every round as obliged to produce a change,
+and the rounds that resist that — 96, 97, 106 — are the ones that keep the other
+ninety-six trustworthy. A loop that has to find something every iteration will
+find something every iteration, including in code that is already correct.
+
+Gates: `pnpm check` 132 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
