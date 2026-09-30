@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-29T22:51:15",
+ "reviewed_at": "2026-09-29T23:25:59",
  "items": [
   {
-   "title": "fight-button-overlaps-feet",
-   "claim": "In 01-phone-title, the FIGHT button obscures the fighters\u2019 forward-foot area, whereas 02-phone-fight shows those feet unobstructed.",
-   "reason": "The opening composition hides part of the fighting stances directly behind its primary action.",
-   "suggest": "Reserve an unobstructed band for FIGHT below the fighters, adjusting the opening composition rather than shrinking the button."
+   "title": "technique-helper-vocabulary",
+   "claim": "Image #3\u2019s stance helper names actions such as jump and crouch, while its technique helper names only directions, although Image #6 associates those directions with punch, reverse, kick, and sweep.",
+   "reason": "Players can see what the stance stick does without opening the guide, but cannot get equivalent information for the technique stick.",
+   "suggest": "Label the technique helper 'Forward: punch', 'Back: reverse', 'Up: kick', and 'Down: sweep', wrapping the text rather than shrinking it."
   },
   {
-   "title": "undefined-neutral-symbol",
-   "claim": "The visible portion of 05-phone-techref uses a dot for Lunge Punch\u2019s stance input without explaining what that dot means.",
-   "reason": "A beginner cannot distinguish an instruction to center the stick from an instruction to press or touch its center.",
-   "suggest": "Add a plain-language definition beside the top input legend that states the dot\u2019s verified input meaning."
+   "title": "pre-fight-help-not-visible",
+   "claim": "Image #2 shows Fight and 'Starting in 2' without visible Moves or Settings buttons, whereas both buttons are visible in Image #3.",
+   "reason": "The introduction presents starting the fight before presenting an on-screen way to learn the controls.",
+   "suggest": "Add a clearly labeled Learn moves button to the introduction and suspend its starting countdown while the guide is open."
   },
   {
-   "title": "ambiguous-point-values",
-   "claim": "In 05-phone-techref, the paragraph associates half points with partial contact, while individual move rows list Half point or Full point without identifying those values as fixed awards or maximum awards.",
-   "reason": "These adjacent explanations leave unclear whether scoring depends on the selected technique, contact quality, or both.",
-   "suggest": "Identify the row values explicitly as fixed or maximum awards after checking the scoring rule, and revise the paragraph to explain that same relationship."
+   "title": "impact-location-needs-verification",
+   "claim": "Image #12 shows pale impact flecks around Asmongold\u2019s hair above HasanAbi\u2019s foot overlapping his upper torso, but the still cannot establish whether their separation reflects particle dispersion or an offset emitter.",
+   "reason": "If the initial effect is misplaced, it could communicate a different contact location from the visible strike.",
+   "suggest": "Capture the first contact frame with rendered contact and emitter-origin markers; align the emitter with the visible contact only if that comparison confirms an offset."
   },
   {
-   "title": "missing-desktop-key-legend",
-   "claim": "08-desktop-fight shows STANCE and TECHNIQUE stick graphics but no visible keyboard bindings.",
-   "reason": "A desktop player cannot learn the supported keyboard controls from this screen.",
-   "suggest": "Display the verified stance and technique key bindings in the unused lower-center area when keyboard input is selected."
+   "title": "settings-dismiss-placement",
+   "claim": "Image #7\u2019s visible Settings dismissal button is at the top-right, with no second dismissal button beneath the settings content.",
+   "reason": "A lower dismissal option would let players resume nearer the bottom-positioned game controls.",
+   "suggest": "Add a Back to fight button beneath the record text, retaining the existing top-right close button."
   },
   {
-   "title": "text-size-unverified",
-   "claim": "The HUD names, stick captions, and technique award labels are visible, but these screenshots cannot establish their computed CSS font sizes.",
-   "reason": "Raster display scaling is not evidence that the required 18 CSS px minimum either passes or fails.",
-   "suggest": "Measure computed font sizes and ancestor scaling at 390\u00d7844 and desktop width; enlarge any text below 18 CSS px and reflow its surrounding layout rather than compressing it."
+   "title": "boot-progress-not-verifiable",
+   "claim": "Image #1 shows 'Downloading the game' and a progress track without a visibly distinct filled segment or textual progress value, so this still cannot establish whether loading is advancing.",
+   "reason": "The visible state gives a waiting player little evidence for distinguishing initial loading from a stall.",
+   "suggest": "Add a textual completed-work value driven by real boot milestones, and verify its updates against the bar in a cold-load recording rather than introducing timer-based progress."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"fight-button-overlaps-feet\",\n    \"claim\": \"In 01-phone-title, the FIGHT button obscures the fighters\u2019 forward-foot area, whereas 02-phone-fight shows those feet unobstructed.\",\n    \"reason\": \"The opening composition hides part of the fighting stances directly behind its primary action.\",\n    \"suggest\": \"Reserve an unobstructed band for FIGHT below the fighters, adjusting the opening composition rather than shrinking the button.\"\n  },\n  {\n    \"title\": \"undefined-neutral-symbol\",\n    \"claim\": \"The visible portion of 05-phone-techref uses a dot for Lunge Punch\u2019s stance input without explaining what that dot means.\",\n    \"reason\": \"A beginner cannot distinguish an instruction to center the stick from an instruction to press or touch its center.\",\n    \"suggest\": \"Add a plain-language definition beside the top input legend that states the dot\u2019s verified input meaning.\"\n  },\n  {\n    \"title\": \"ambiguous-point-values\",\n    \"claim\": \"In 05-phone-techref, the paragraph associates half points with partial contact, while individual move rows list Half point or Full point without identifying those values as fixed awards or maximum awards.\",\n    \"reason\": \"These adjacent explanations leave unclear whether scoring depends on the selected technique, contact quality, or both.\",\n    \"suggest\": \"Identify the row values explicitly as fixed or maximum awards after checking the scoring rule, and revise the paragraph to explain that same relationship.\"\n  },\n  {\n    \"title\": \"missing-desktop-key-legend\",\n    \"claim\": \"08-desktop-fight shows STANCE and TECHNIQUE stick graphics but no visible keyboard bindings.\",\n    \"reason\": \"A desktop player cannot learn the supported keyboard controls from this screen.\",\n    \"suggest\": \"Display the verified stance and technique key bindings in the unused lower-center area when keyboard input is selected.\"\n  },\n  {\n    \"title\": \"text-size-unverified\",\n    \"claim\": \"The HUD names, stick captions, and technique award labels are visible, but these screenshots cannot establish their computed CSS font sizes.\",\n    \"reason\": \"Raster display scaling is not evidence that the required 18 CSS px minimum either passes or fails.\",\n    \"suggest\": \"Measure computed font sizes and ancestor scaling at 390\u00d7844 and desktop width; enlarge any text below 18 CSS px and reflow its surrounding layout rather than compressing it.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"technique-helper-vocabulary\",\n    \"claim\": \"Image #3\u2019s stance helper names actions such as jump and crouch, while its technique helper names only directions, although Image #6 associates those directions with punch, reverse, kick, and sweep.\",\n    \"reason\": \"Players can see what the stance stick does without opening the guide, but cannot get equivalent information for the technique stick.\",\n    \"suggest\": \"Label the technique helper 'Forward: punch', 'Back: reverse', 'Up: kick', and 'Down: sweep', wrapping the text rather than shrinking it.\"\n  },\n  {\n    \"title\": \"pre-fight-help-not-visible\",\n    \"claim\": \"Image #2 shows Fight and 'Starting in 2' without visible Moves or Settings buttons, whereas both buttons are visible in Image #3.\",\n    \"reason\": \"The introduction presents starting the fight before presenting an on-screen way to learn the controls.\",\n    \"suggest\": \"Add a clearly labeled Learn moves button to the introduction and suspend its starting countdown while the guide is open.\"\n  },\n  {\n    \"title\": \"impact-location-needs-verification\",\n    \"claim\": \"Image #12 shows pale impact flecks around Asmongold\u2019s hair above HasanAbi\u2019s foot overlapping his upper torso, but the still cannot establish whether their separation reflects particle dispersion or an offset emitter.\",\n    \"reason\": \"If the initial effect is misplaced, it could communicate a different contact location from the visible strike.\",\n    \"suggest\": \"Capture the first contact frame with rendered contact and emitter-origin markers; align the emitter with the visible contact only if that comparison confirms an offset.\"\n  },\n  {\n    \"title\": \"settings-dismiss-placement\",\n    \"claim\": \"Image #7\u2019s visible Settings dismissal button is at the top-right, with no second dismissal button beneath the settings content.\",\n    \"reason\": \"A lower dismissal option would let players resume nearer the bottom-positioned game controls.\",\n    \"suggest\": \"Add a Back to fight button beneath the record text, retaining the existing top-right close button.\"\n  },\n  {\n    \"title\": \"boot-progress-not-verifiable\",\n    \"claim\": \"Image #1 shows 'Downloading the game' and a progress track without a visibly distinct filled segment or textual progress value, so this still cannot establish whether loading is advancing.\",\n    \"reason\": \"The visible state gives a waiting player little evidence for distinguishing initial loading from a stall.\",\n    \"suggest\": \"Add a textual completed-work value driven by real boot milestones, and verify its updates against the bar in a cold-load recording rather than introducing timer-based progress.\"\n  }\n]"
 }

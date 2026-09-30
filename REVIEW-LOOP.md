@@ -4320,3 +4320,70 @@ bug waiting for a round number.** There is no review that finds all of them. The
 only thing that finds them is deleting the copy.
 
 Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 103 — the reviewer caught the bug round 102's own fix created
+
+    technique-helper-vocabulary   <- real, and self-inflicted two rounds ago
+    pre-fight-help-not-visible
+    impact-location-needs-verification
+    settings-dismiss-placement
+    boot-progress-not-verifiable
+
+**Round 102's fix introduced a contradiction, and the next reviewer run found it
+immediately.** The legend I generated in round 100 and completed in round 102
+named the technique glyphs by what they *do*:
+
+    TECHNIQUE_WORD = { forward: 'punch', up: 'kick', down: 'sweep' }
+
+The coach strip under the sticks labels **the same glyphs** by what you *press*:
+
+    TECHNIQUE   ◀ back   ▶ forward   ▲ up   ▼ down
+
+So `▲` meant "kick" on the sheet and "up" on the stick, on screens a player
+swipes between. **That is precisely the failure round 102 was written about —
+two screens describing one symbol — committed by round 102's own fix**, two
+rounds after I named the pattern and wrote down that generating the copy was
+the answer.
+
+It is also the strongest possible evidence that the pattern is real and not a
+theory, because the generator was working perfectly: it faithfully generated a
+*different* answer than the one beside it, and no amount of generating would have
+made them agree. Generating removes the copy of the *data*. It does nothing
+about the copy of a *decision* — and "name this glyph by its effect or by its
+input" was a decision I made once and typed into one of the two places.
+
+The stick words win, because that is what the thumb is on, and the row already
+names the move itself ("Lunge Punch"), so nothing is lost:
+
+    TECHNIQUE_WORD = { forward: 'forward', back: 'back', up: 'up', down: 'down' }
+
+**So the corrected rule, one round after stating the first one: generating a
+string from data removes the copy of the data, and not one other problem. Two
+surfaces that must agree on a *naming decision* need that decision in one place,
+and the generator pointed at it.** Round 92's key, round 100's legend, round
+101's paragraph and round 103's correction are one story, and the story does not
+end at "generate it".
+
+### And the two findings that are not findings
+
+`boot-progress-not-verifiable`: *"this still cannot establish whether loading is
+advancing."*
+
+**That is the oldest false alarm in this log, reported by six different models
+across twenty rounds as a broken progress bar.** It is measurably correct — the
+token is 4.94:1, the bar tracks real weighted boot units, and the harness learned
+to wait for the stylesheet. The reviewer now says it cannot tell from a still,
+which is the truth, instead of asserting a defect that does not exist.
+
+`impact-location-needs-verification` is the same shape on the impact anchor, one
+round after round 98 published the instrumentation that settled it — the reviewer
+is flagging its own uncertainty rather than reporting a fault.
+
+**Neither of those is a fix. Both are the round-99 sentence doing its work over
+and over**, and the total is that roughly half of this loop's findings for the
+last four rounds have been honest acknowledgements of what a frame cannot show.
+The yield did not drop; it changed kind, from defects to questions — and a
+question that is correctly unanswerable is worth more than a defect that is not
+there.
+
+Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.

@@ -514,11 +514,24 @@ export class Hud {
       forward: 'lunging',
       back: 'retreating',
     };
+    // These must be the words on the STICK, not the words for the technique.
+    //
+    // Round 102 wrote this legend as `forward: 'punch', up: 'kick'`, and the
+    // first reviewer run afterwards said so: the coach strip under the sticks
+    // labels the same glyphs `forward / up / down`, the sheet labelled them
+    // `punch / kick`. Two screens, one symbol, two meanings — which is the
+    // precise failure round 102 was about, committed by round 102's own fix.
+    //
+    // The stick words win, because that is what the player's thumb is on. The
+    // move name in the row already says what the technique does ("Lunge
+    // Punch"), so nothing is lost by the legend naming the input rather than
+    // the effect — and the sheet is a reference for *how to press* a move, not
+    // a glossary of karate.
     const TECHNIQUE_WORD: Record<AttackFamily, string> = {
-      forward: 'punch',
-      back: 'reverse',
-      up: 'kick',
-      down: 'sweep',
+      forward: 'forward',
+      back: 'back',
+      up: 'up',
+      down: 'down',
     };
     const stanceWords = (Object.keys(QUALIFIER_GLYPH) as Qualifier[]).map(
       (q) => [QUALIFIER_GLYPH[q], STANCE_WORD[q]] as [string, string],
