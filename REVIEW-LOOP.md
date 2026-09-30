@@ -4597,3 +4597,48 @@ observations about *design* and are recorded the same way.
 
 Gates unchanged: `pnpm check` 132 passed, `pnpm test:e2e` 35 passed / 5
 skipped / exit 0.
+
+### Round 108 — the playtest, and the deferral turns out to be correct
+
+Round 107 said the answer depends on playtesting rather than reading. **This
+round played it.** The change under test is the recommended one: unify on the
+stick, drop the `font-size: 0` and the `::before` rotation so the real
+characters render.
+
+    .glyph          font-size: 0 -> 0.62rem
+    .glyph-up::before      rotate(-45deg)  -> none
+    .glyph-down::before    rotate(135deg)  -> none
+    .glyph-left::before    rotate(-135deg) -> none
+    .glyph-right::before   rotate(45deg)   -> none
+
+**It is worse, and visibly so.** The capture shows every detent marker rendering
+as a triangle pointing the wrong way — up showing up-left, right showing
+up-right — because the `::before` bar and the newly-visible character are both
+drawn, superimposed and unrotated, inside a `--detent` ring of 0.9rem that was
+sized for one mark and not two.
+
+**So the round-107 judgement was right, and it is now evidence rather than
+caution.** That is the difference worth recording: a deferral justified by
+"this touches a verified control surface" is an opinion, and a deferral
+justified by "I tried it and here is what it looked like" is a measurement. The
+loop has spent a hundred rounds learning the second kind is worth more, and this
+is the first time one of them has settled an open question rather than corrected
+a closed one.
+
+Reverted, and the restored capture confirms the chevrons are intact: an open
+two-stroke marker reading as a *direction to flick*, which is what a detent on a
+virtual stick is. A filled triangle is a button.
+
+**Which is also the better design answer, and it is not the one I proposed last
+round.** The right resolution is not to make one surface imitate the other. It is
+that the two marks are doing different jobs: the stick's chevron is a spatial
+affordance inside a ring, and the legend's glyph is notation in a text row.
+A keyboard key and a keyboard label do not use the same drawing either, and
+nobody has ever filed that as a bug.
+
+So `direction-symbols-disagree` moves from "open, needs a decision" to
+**"refused, and the disagreement is the point."** The round-105 gate covers the
+wording and stays as it is; the shape difference is deliberate and is now written
+down as deliberate rather than as a known gap.
+
+Gates: `pnpm check` 132 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
