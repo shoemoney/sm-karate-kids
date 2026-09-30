@@ -18,9 +18,32 @@
 set -uo pipefail
 
 REPO="/Users/shoemoney/Projects/sm-karate-kids"
+
+# `pnpm` is an nvm binary, not a system one, and this harness has been invoked
+# from shells whose PATH did not include it. On round 95 `pnpm test:e2e` exited
+# 127 — command not found — and the `Tests 127 passed` line read out of the
+# *unit* log was reported as the e2e result. A gate that did not run was
+# reported as a gate that passed, which is the failure this whole script's
+# fail-closed design exists to prevent, applied to the wrong command.
+#
+# So: resolve pnpm absolutely, and never trust a log file without its exit code
+# from the same invocation.
+export PATH="$HOME/.nvm/versions/node/v22.22.3/bin:$PATH"
 SHOTS="${1:-/tmp/smkk-loop}"
 OUT="${2:-$REPO/reviews/codex-advisory.json}"
-CODEX="/opt/homebrew/bin/codex"
+# Resolved, not hardcoded. The `codex` on PATH is a cmux shim that drops
+# --skip-git-repo-check, -C and -m, so it cannot be used — but hardcoding
+# /opt/homebrew/bin/codex broke the moment the npm install moved it to
+# ~/.local/bin. So: check the known-good locations, and only fall back to
+# PATH *if* it is not a cmux shim.
+CODEX=""
+for candidate in "$HOME/.local/bin/codex" /opt/homebrew/bin/codex; do
+  if [[ -x "$candidate" ]]; then CODEX="$candidate"; break; fi
+done
+if [[ -z "$CODEX" ]]; then
+  onpath="$(command -v codex 2>/dev/null || true)"
+  if [[ -n "$onpath" && "$onpath" != *cmux-cli-shims* ]]; then CODEX="$onpath"; fi
+fi
 # OpenRouter's own slug for this model. Codex resolves `-m` through whichever
 # provider is selected, so this is the OpenRouter name, not the bare one.
 MODEL="openai/gpt-6.1-sol"
@@ -43,7 +66,7 @@ PROVIDER_ARGS=(
   -c 'model_providers.openrouter.wire_api="responses"'
 )
 
-[[ -x "$CODEX" ]] || { echo "codex: real binary missing at $CODEX" >&2; exit 3; }
+[[ -n "$CODEX" && -x "$CODEX" ]] || { echo "codex: no usable binary (looked in ~/.local/bin, /opt/homebrew/bin, PATH)" >&2; exit 3; }
 
 # Fail closed. An empty bearer produces a 401 that reads exactly like a routing
 # failure, and the trap is spending a round diagnosing the wrong layer.

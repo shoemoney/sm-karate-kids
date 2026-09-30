@@ -3955,3 +3955,65 @@ that prevents it is trivial and I did not do it: echo the exit code, in the same
 line, from the same command — which is exactly what the `codex-exec-harness-traps`
 skill says about codex logs, and which I wrote into `review-codex.sh` myself, and
 which I then failed to apply to my own gate for the length of one round.
+
+### Round 96 — two infrastructure fixes, and a finding I am not going to act on yet
+
+**First, the round 95 failure cannot recur.** `pnpm` is an nvm binary, and this
+harness gets invoked from shells whose PATH does not include it. `tools/review-codex.sh`
+now resolves and exports it at the top, for the same reason the script already
+echoes exit codes: *a gate that did not run must never be readable as a gate that
+passed.*
+
+**Second, the codex binary moved.** `/opt/homebrew/bin/codex` no longer exists —
+the npm install put it at `~/.local/bin/codex`, and the hardcoded path I had been
+using since round 86 simply vanished between iterations. The script now resolves
+it across `~/.local/bin`, `/opt/homebrew/bin`, and `PATH` — with an explicit
+refusal to fall back to the `codex` on PATH, which is the cmux shim that drops
+`--skip-git-repo-check`, `-C` and `-m`. A hardcoded absolute path is a claim about
+the machine that expires without warning.
+
+Standing reviewer, and two new findings:
+
+    half-point-baseline
+    impact-contact-offset          <- real, precise, and NOT acted on
+    indistinct-kicking-foot
+    undersized-fighter-names
+    desktop-bindings-not-shown
+
+**`impact-contact-offset`: "bright impact streaks appear around Asmongold's belt
+while HasanAbi's extended foot meets his shoulder or neck, roughly 50 CSS pixels
+higher."**
+
+This is the third time `BAND_HEIGHT.high` has been implicated, and the second
+time a fix has been incomplete. Round 80 moved it 1.5 → 1.24 on the reasoning that
+a high kick targets the jaw line and not the crown of the head. The reviewer says
+the contact is higher still.
+
+**I am not changing it again, and the reason is the discipline this loop has been
+beaten by twice.** My own measurement puts the gap at **~92px**, the reviewer
+says ~50px. We agree on the direction — the sparks sit *below* the contact, not
+above it, which is the opposite of the pre-round-80 symptom and confirms the
+round-80 fix did move it the right way — but the two numbers disagree by nearly
+a factor of two, and my detector is a colour threshold over a crop that contains
+the white gi, skin, the burst sprite and the dust pool.
+
+Making a third change to one constant on the strength of a measurement that
+disagrees with itself by 2x is precisely the round-90 move: the code compiles,
+the number moves, and nobody knows why. **The honest state is that the vertical
+anchor of the impact effect is known to be wrong, is known to be wrong in a
+specific direction, and has not been pinned down well enough to move again.**
+
+What would settle it: sample the effect's own anchor rather than its rendered
+pixels — read the `y` passed into `juice.impact` on the frame in question and
+compare it against the sprite's own contact point, both in world units, with no
+image processing in the path at all. That is a one-line instrumentation change
+and it is queued.
+
+**`desktop-bindings-not-shown`** is a fair gap and a real feature request: the
+desktop frame shows pads labelled STANCE and TECHNIQUE with no indication of the
+WASD/arrow keys that drive them. The game supports them; nothing on screen says
+so. Recorded, not started — it is a feature, and this loop has spent ninety-six
+rounds on defects.
+
+Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0 —
+both run with the corrected PATH and both reported with their own exit codes.
