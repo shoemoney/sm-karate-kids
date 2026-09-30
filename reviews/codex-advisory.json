@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-29T23:25:59",
+ "reviewed_at": "2026-09-29T23:34:06",
  "items": [
   {
-   "title": "technique-helper-vocabulary",
-   "claim": "Image #3\u2019s stance helper names actions such as jump and crouch, while its technique helper names only directions, although Image #6 associates those directions with punch, reverse, kick, and sweep.",
-   "reason": "Players can see what the stance stick does without opening the guide, but cannot get equivalent information for the technique stick.",
-   "suggest": "Label the technique helper 'Forward: punch', 'Back: reverse', 'Up: kick', and 'Down: sweep', wrapping the text rather than shrinking it."
+   "title": "technique-hints-repeat-directions",
+   "claim": "In Image #3, STANCE maps directions to actions such as step, jump, and crouch, whereas TECHNIQUE labels directions only as back, forward, up, and down.",
+   "reason": "The player can learn movement from the hint but cannot identify which technique direction selects a punch or kick.",
+   "suggest": "Show the current stance\u2019s attack names beside the technique directions, using the same mappings displayed in the Techniques panel."
   },
   {
-   "title": "pre-fight-help-not-visible",
-   "claim": "Image #2 shows Fight and 'Starting in 2' without visible Moves or Settings buttons, whereas both buttons are visible in Image #3.",
-   "reason": "The introduction presents starting the fight before presenting an on-screen way to learn the controls.",
-   "suggest": "Add a clearly labeled Learn moves button to the introduction and suspend its starting countdown while the guide is open."
+   "title": "technique-legend-delays-move-list",
+   "claim": "In Image #6, five STANCE legend entries and four TECHNIQUE legend entries appear in vertically stacked sections before the first named attack.",
+   "reason": "The reference prioritizes notation over the attacks a player opened it to find.",
+   "suggest": "Arrange the two legends side by side, preserving readable text, and place the named attack groups immediately below the scoring explanation."
   },
   {
-   "title": "impact-location-needs-verification",
-   "claim": "Image #12 shows pale impact flecks around Asmongold\u2019s hair above HasanAbi\u2019s foot overlapping his upper torso, but the still cannot establish whether their separation reflects particle dispersion or an offset emitter.",
-   "reason": "If the initial effect is misplaced, it could communicate a different contact location from the visible strike.",
-   "suggest": "Capture the first contact frame with rendered contact and emitter-origin markers; align the emitter with the visible contact only if that comparison confirms an offset."
+   "title": "keyboard-bindings-not-visible",
+   "claim": "In Image #9, the visible STANCE and TECHNIQUE controls contain directional marks but no keyboard-key labels.",
+   "reason": "A keyboard player cannot discover the corresponding keys from this screen.",
+   "suggest": "Add the actual keyboard bindings beside their corresponding stance and technique directions in the desktop control area."
   },
   {
-   "title": "settings-dismiss-placement",
-   "claim": "Image #7\u2019s visible Settings dismissal button is at the top-right, with no second dismissal button beneath the settings content.",
-   "reason": "A lower dismissal option would let players resume nearer the bottom-positioned game controls.",
-   "suggest": "Add a Back to fight button beneath the record text, retaining the existing top-right close button."
+   "title": "briefing-shows-start-pressure",
+   "claim": "In Image #2, the opponent briefing remains visible while the FIGHT card also displays STARTING IN 2.",
+   "reason": "The countdown wording creates pressure to proceed while the player is reading, although this still cannot establish whether the bout actually starts automatically.",
+   "suggest": "Make the briefing player-paced: display 'Tap FIGHT when ready' and reserve a countdown for after the player confirms."
   },
   {
-   "title": "boot-progress-not-verifiable",
-   "claim": "Image #1 shows 'Downloading the game' and a progress track without a visibly distinct filled segment or textual progress value, so this still cannot establish whether loading is advancing.",
-   "reason": "The visible state gives a waiting player little evidence for distinguishing initial loading from a stall.",
-   "suggest": "Add a textual completed-work value driven by real boot milestones, and verify its updates against the bar in a cold-load recording rather than introducing timer-based progress."
+   "title": "win-time-basis-unexplained",
+   "claim": "In Image #18, the HUD displays 29s and the record badge displays FASTEST WIN 6.4S, but the frame cannot establish whether those figures use the same timing basis.",
+   "reason": "The player has no explanation for how the remaining round time relates to the recorded win duration.",
+   "suggest": "Capture both clocks\u2019 start, pause, and stop timestamps for the same bout, then label the record as 'Elapsed win time' or 'Active fight time' according to its verified basis rather than assuming either calculation is wrong."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"technique-helper-vocabulary\",\n    \"claim\": \"Image #3\u2019s stance helper names actions such as jump and crouch, while its technique helper names only directions, although Image #6 associates those directions with punch, reverse, kick, and sweep.\",\n    \"reason\": \"Players can see what the stance stick does without opening the guide, but cannot get equivalent information for the technique stick.\",\n    \"suggest\": \"Label the technique helper 'Forward: punch', 'Back: reverse', 'Up: kick', and 'Down: sweep', wrapping the text rather than shrinking it.\"\n  },\n  {\n    \"title\": \"pre-fight-help-not-visible\",\n    \"claim\": \"Image #2 shows Fight and 'Starting in 2' without visible Moves or Settings buttons, whereas both buttons are visible in Image #3.\",\n    \"reason\": \"The introduction presents starting the fight before presenting an on-screen way to learn the controls.\",\n    \"suggest\": \"Add a clearly labeled Learn moves button to the introduction and suspend its starting countdown while the guide is open.\"\n  },\n  {\n    \"title\": \"impact-location-needs-verification\",\n    \"claim\": \"Image #12 shows pale impact flecks around Asmongold\u2019s hair above HasanAbi\u2019s foot overlapping his upper torso, but the still cannot establish whether their separation reflects particle dispersion or an offset emitter.\",\n    \"reason\": \"If the initial effect is misplaced, it could communicate a different contact location from the visible strike.\",\n    \"suggest\": \"Capture the first contact frame with rendered contact and emitter-origin markers; align the emitter with the visible contact only if that comparison confirms an offset.\"\n  },\n  {\n    \"title\": \"settings-dismiss-placement\",\n    \"claim\": \"Image #7\u2019s visible Settings dismissal button is at the top-right, with no second dismissal button beneath the settings content.\",\n    \"reason\": \"A lower dismissal option would let players resume nearer the bottom-positioned game controls.\",\n    \"suggest\": \"Add a Back to fight button beneath the record text, retaining the existing top-right close button.\"\n  },\n  {\n    \"title\": \"boot-progress-not-verifiable\",\n    \"claim\": \"Image #1 shows 'Downloading the game' and a progress track without a visibly distinct filled segment or textual progress value, so this still cannot establish whether loading is advancing.\",\n    \"reason\": \"The visible state gives a waiting player little evidence for distinguishing initial loading from a stall.\",\n    \"suggest\": \"Add a textual completed-work value driven by real boot milestones, and verify its updates against the bar in a cold-load recording rather than introducing timer-based progress.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"technique-hints-repeat-directions\",\n    \"claim\": \"In Image #3, STANCE maps directions to actions such as step, jump, and crouch, whereas TECHNIQUE labels directions only as back, forward, up, and down.\",\n    \"reason\": \"The player can learn movement from the hint but cannot identify which technique direction selects a punch or kick.\",\n    \"suggest\": \"Show the current stance\u2019s attack names beside the technique directions, using the same mappings displayed in the Techniques panel.\"\n  },\n  {\n    \"title\": \"technique-legend-delays-move-list\",\n    \"claim\": \"In Image #6, five STANCE legend entries and four TECHNIQUE legend entries appear in vertically stacked sections before the first named attack.\",\n    \"reason\": \"The reference prioritizes notation over the attacks a player opened it to find.\",\n    \"suggest\": \"Arrange the two legends side by side, preserving readable text, and place the named attack groups immediately below the scoring explanation.\"\n  },\n  {\n    \"title\": \"keyboard-bindings-not-visible\",\n    \"claim\": \"In Image #9, the visible STANCE and TECHNIQUE controls contain directional marks but no keyboard-key labels.\",\n    \"reason\": \"A keyboard player cannot discover the corresponding keys from this screen.\",\n    \"suggest\": \"Add the actual keyboard bindings beside their corresponding stance and technique directions in the desktop control area.\"\n  },\n  {\n    \"title\": \"briefing-shows-start-pressure\",\n    \"claim\": \"In Image #2, the opponent briefing remains visible while the FIGHT card also displays STARTING IN 2.\",\n    \"reason\": \"The countdown wording creates pressure to proceed while the player is reading, although this still cannot establish whether the bout actually starts automatically.\",\n    \"suggest\": \"Make the briefing player-paced: display 'Tap FIGHT when ready' and reserve a countdown for after the player confirms.\"\n  },\n  {\n    \"title\": \"win-time-basis-unexplained\",\n    \"claim\": \"In Image #18, the HUD displays 29s and the record badge displays FASTEST WIN 6.4S, but the frame cannot establish whether those figures use the same timing basis.\",\n    \"reason\": \"The player has no explanation for how the remaining round time relates to the recorded win duration.\",\n    \"suggest\": \"Capture both clocks\u2019 start, pause, and stop timestamps for the same bout, then label the record as 'Elapsed win time' or 'Active fight time' according to its verified basis rather than assuming either calculation is wrong.\"\n  }\n]"
 }

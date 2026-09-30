@@ -527,12 +527,28 @@ export class Hud {
     // Punch"), so nothing is lost by the legend naming the input rather than
     // the effect — and the sheet is a reference for *how to press* a move, not
     // a glossary of karate.
-    const TECHNIQUE_WORD: Record<AttackFamily, string> = {
-      forward: 'forward',
-      back: 'back',
-      up: 'up',
-      down: 'down',
+    // Both halves, in one entry. Round 103 made these the bare direction words
+    // so the glyph would mean the same thing on the sheet and the stick — which
+    // fixed the contradiction and made the legend a copy of the stick captions
+    // directly beneath it. The next reviewer run said so in one line: "STANCE
+    // maps directions to actions, whereas TECHNIQUE labels directions only".
+    //
+    // So: the direction first, because that is what the glyph is and what the
+    // thumb does, then the action, because that is what the stick does NOT say
+    // anywhere. `▲ up · kick` agrees with the stick on the symbol and earns its
+    // line by adding what the stick cannot.
+    const TECHNIQUE_ACTION: Record<AttackFamily, string> = {
+      forward: 'punch',
+      back: 'reverse',
+      up: 'kick',
+      down: 'sweep',
     };
+    const TECHNIQUE_WORD = Object.fromEntries(
+      (Object.keys(FAMILY_GLYPH) as AttackFamily[]).map((f) => [
+        f,
+        `${f} · ${TECHNIQUE_ACTION[f]}`,
+      ]),
+    ) as Record<AttackFamily, string>;
     const stanceWords = (Object.keys(QUALIFIER_GLYPH) as Qualifier[]).map(
       (q) => [QUALIFIER_GLYPH[q], STANCE_WORD[q]] as [string, string],
     );

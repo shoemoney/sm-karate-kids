@@ -4387,3 +4387,63 @@ question that is correctly unanswerable is worth more than a defect that is not
 there.
 
 Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 104 — the reviewer caught my over-correction, and it was right both times
+
+First finding, unprompted: `technique-hints-repeat-directions` — *"STANCE maps
+directions to actions such as step, jump, and crouch, whereas TECHNIQUE labels
+directions only as back, forward, up, and down."*
+
+**That is round 103's fix, reported back as insufficient**, and it is right. I
+fixed the contradiction by making the legend the bare direction words, which made
+it a verbatim copy of the stick captions three lines below it. Two rounds, two
+findings, because the first fix was a *choice* between two options and I picked
+one, when the answer was neither.
+
+The reviewer's suggestion is the third option, and it is the correct one:
+
+    ▲  up · kick          ◀  back · reverse
+    ▼  down · sweep       ▶  forward · punch
+
+**The glyph agrees with the stick; the word adds what the stick cannot say.**
+Round 103 removed the action to fix a contradiction and lost the only thing the
+legend was for. Round 104 keeps both, which is what a key is supposed to do — the
+symbol is the input, the word is the output, and neither copy has to yield.
+
+### The same finding also named a cost I had introduced
+
+`technique-legend-delays-move-list`: *"five STANCE legend entries and four
+TECHNIQUE legend entries appear in vertically stacked sections before the first
+named attack."*
+
+That is the bill for round 100's legend, and it is a real one — **I fixed an
+unexplained glyph by putting nine rows in front of the moves the player opened the
+sheet to read.** The sheet is a reference *for moves*; the legend is a key to the
+notation, and a key you have to scroll past is a key nobody reaches. Now two
+columns, which is the layout the reviewer's own fix suggested, and the first move
+name arrives on a phone without scrolling.
+
+**Both of these were found in the first two findings of one run, and both were
+caused by the previous round's fix.** That is now a three-round pattern — r102's
+generated paragraph disagreed with the rows, r103's generated legend disagreed
+with the stick, r104's correction made the legend redundant — and it is worth
+naming precisely, because it is a different failure from the one I diagnosed in
+round 102 and I nearly carried the wrong lesson forward.
+
+Round 102's lesson was "generate it and the copy cannot drift." True, and
+incomplete. **The failure is not hand-writing, it is deciding.** Every one of
+these was a decision — *how should this glyph be named, where should this legend
+sit* — made once, in my head, and then realised differently in two places.
+Generating removes the second copy of the *data*. It does nothing about the second
+copy of a *judgement*, and a judgement is the part that was actually wrong three
+times in three rounds.
+
+So the rule has two clauses now, and the second is the one that keeps biting:
+
+1. **Never hand-write what the data already knows.** Generate it.
+2. **When a surface must agree with another, decide once and put the decision
+   somewhere both can read** — or check both, deliberately, in the same round
+   the decision is made. The review that catches it is always the one that reads
+   the two screens *together*, and there is no gate in this repo that does.
+
+Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
