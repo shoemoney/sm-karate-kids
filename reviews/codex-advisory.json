@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-30T01:58:09",
+ "reviewed_at": "2026-09-30T02:13:18",
  "items": [
   {
-   "title": "prefight-reference-access",
-   "claim": "Image #2 shows the qualifier instructions and Fight button without a visible Moves control, whereas Image #3 includes Moves.",
-   "reason": "New players need the command reference alongside the introductory instructions.",
-   "suggest": "Add a Techniques button beside Fight that opens the existing reference screen."
+   "title": "countdown-competes-with-reading",
+   "claim": "Image #2 presents strategy and control instructions alongside \u201cSTARTING IN 7,\u201d without a visible option to defer the start.",
+   "reason": "A new player is being asked to understand the controls while the screen communicates a deadline.",
+   "suggest": "Keep the introduction open until the player selects Fight; reserve countdowns for an explicitly confirmed start."
   },
   {
-   "title": "countdown-reading-pressure",
-   "claim": "Image #2 displays STARTING IN 7 beneath Fight while presenting instructions, and Image #8 displays STARTING IN 8 beneath Rematch.",
-   "reason": "The wording signals a deadline for reading instructions or reviewing results; these stills cannot establish what happens when the countdown expires.",
-   "suggest": "Make these decision screens player-paced and remove the countdown text; first capture countdown expiry to determine whether this requires a logic change or only a copy change."
+   "title": "stick-meanings-separated",
+   "claim": "Image #3 places direction meanings in a separate strip above chevron-only stick sectors, while image #15 shows those sectors without the explanatory strip.",
+   "reason": "The player must look elsewhere\u2014or remember the mapping\u2014to identify what each thumb direction means.",
+   "suggest": "Put persistent action labels directly around the corresponding stick sectors, replacing the chevrons and reflowing the controls rather than shrinking the labels."
   },
   {
-   "title": "technique-hint-mapping",
-   "claim": "Image #3 labels the technique directions back, forward, up and down, while Image #6 additionally identifies their meanings as reverse, punch, kick and sweep.",
-   "reason": "The in-fight hint omits the action mapping that the reference provides, making beginners memorize it.",
-   "suggest": "Use Forward: punch, Back: reverse, Up: kick and Down: sweep in the technique hint, wrapping the labels rather than shrinking them."
+   "title": "reference-name-mismatch",
+   "claim": "The reference button reads \u201cMOVES\u201d in image #3, but its displayed reference sheet is titled \u201cTECHNIQUES\u201d in image #6.",
+   "reason": "Different names for the same reference add avoidable terminology to an already unfamiliar control system.",
+   "suggest": "Rename the button \u201cTechniques\u201d to match the sheet and the technique stick."
   },
   {
-   "title": "point-call-explanation",
-   "claim": "The IPPON banner in Image #17 and WAZA-ARI banner in Image #20 identify the fighter and technique but do not explicitly state the awarded point value.",
-   "reason": "Players unfamiliar with the terminology must consult the scoreboard or reference to understand the call.",
-   "suggest": "Add Full point or Half point to the banner, derived from the actual scoring event, while retaining the Japanese call."
+   "title": "opening-example-missing",
+   "claim": "Image #2 explains the input combination abstractly without a named example, whereas image #6 explicitly pairs Lunge Punch with centered stance and forward technique.",
+   "reason": "One immediately usable move gives a beginner a clearer starting point than the combination rule alone.",
+   "suggest": "Add \u201cTry Lunge Punch: stance centered + technique forward\u201d to the introduction, using the same labeled input notation as the reference sheet."
   },
   {
-   "title": "settings-backdrop-cutoff",
-   "claim": "In Images #7 and #16, the opaque settings surface ends partway down the screen, hiding the fighters' upper bodies while leaving their lower bodies visible beneath it.",
-   "reason": "The abrupt partial reveal distracts from the settings and makes the overlay feel visually unfinished.",
-   "suggest": "Extend the opaque settings surface to the full viewport height, with scrollable content and a persistently available Close control."
+   "title": "text-size-unverified",
+   "claim": "The HUD names and stick captions in image #3 are visibly smaller than the settings labels in image #7, but these raster frames cannot establish their CSS font sizes.",
+   "reason": "Visual comparison alone cannot verify compliance with the required 18 CSS px minimum.",
+   "suggest": "Measure computed font sizes at 390\u00d7844 and desktop for HUD names, timer suffixes, stick captions, countdowns, and technique metadata; raise any below 18px and adjust layout instead of scaling text."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"prefight-reference-access\",\n    \"claim\": \"Image #2 shows the qualifier instructions and Fight button without a visible Moves control, whereas Image #3 includes Moves.\",\n    \"reason\": \"New players need the command reference alongside the introductory instructions.\",\n    \"suggest\": \"Add a Techniques button beside Fight that opens the existing reference screen.\"\n  },\n  {\n    \"title\": \"countdown-reading-pressure\",\n    \"claim\": \"Image #2 displays STARTING IN 7 beneath Fight while presenting instructions, and Image #8 displays STARTING IN 8 beneath Rematch.\",\n    \"reason\": \"The wording signals a deadline for reading instructions or reviewing results; these stills cannot establish what happens when the countdown expires.\",\n    \"suggest\": \"Make these decision screens player-paced and remove the countdown text; first capture countdown expiry to determine whether this requires a logic change or only a copy change.\"\n  },\n  {\n    \"title\": \"technique-hint-mapping\",\n    \"claim\": \"Image #3 labels the technique directions back, forward, up and down, while Image #6 additionally identifies their meanings as reverse, punch, kick and sweep.\",\n    \"reason\": \"The in-fight hint omits the action mapping that the reference provides, making beginners memorize it.\",\n    \"suggest\": \"Use Forward: punch, Back: reverse, Up: kick and Down: sweep in the technique hint, wrapping the labels rather than shrinking them.\"\n  },\n  {\n    \"title\": \"point-call-explanation\",\n    \"claim\": \"The IPPON banner in Image #17 and WAZA-ARI banner in Image #20 identify the fighter and technique but do not explicitly state the awarded point value.\",\n    \"reason\": \"Players unfamiliar with the terminology must consult the scoreboard or reference to understand the call.\",\n    \"suggest\": \"Add Full point or Half point to the banner, derived from the actual scoring event, while retaining the Japanese call.\"\n  },\n  {\n    \"title\": \"settings-backdrop-cutoff\",\n    \"claim\": \"In Images #7 and #16, the opaque settings surface ends partway down the screen, hiding the fighters' upper bodies while leaving their lower bodies visible beneath it.\",\n    \"reason\": \"The abrupt partial reveal distracts from the settings and makes the overlay feel visually unfinished.\",\n    \"suggest\": \"Extend the opaque settings surface to the full viewport height, with scrollable content and a persistently available Close control.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"countdown-competes-with-reading\",\n    \"claim\": \"Image #2 presents strategy and control instructions alongside \u201cSTARTING IN 7,\u201d without a visible option to defer the start.\",\n    \"reason\": \"A new player is being asked to understand the controls while the screen communicates a deadline.\",\n    \"suggest\": \"Keep the introduction open until the player selects Fight; reserve countdowns for an explicitly confirmed start.\"\n  },\n  {\n    \"title\": \"stick-meanings-separated\",\n    \"claim\": \"Image #3 places direction meanings in a separate strip above chevron-only stick sectors, while image #15 shows those sectors without the explanatory strip.\",\n    \"reason\": \"The player must look elsewhere\u2014or remember the mapping\u2014to identify what each thumb direction means.\",\n    \"suggest\": \"Put persistent action labels directly around the corresponding stick sectors, replacing the chevrons and reflowing the controls rather than shrinking the labels.\"\n  },\n  {\n    \"title\": \"reference-name-mismatch\",\n    \"claim\": \"The reference button reads \u201cMOVES\u201d in image #3, but its displayed reference sheet is titled \u201cTECHNIQUES\u201d in image #6.\",\n    \"reason\": \"Different names for the same reference add avoidable terminology to an already unfamiliar control system.\",\n    \"suggest\": \"Rename the button \u201cTechniques\u201d to match the sheet and the technique stick.\"\n  },\n  {\n    \"title\": \"opening-example-missing\",\n    \"claim\": \"Image #2 explains the input combination abstractly without a named example, whereas image #6 explicitly pairs Lunge Punch with centered stance and forward technique.\",\n    \"reason\": \"One immediately usable move gives a beginner a clearer starting point than the combination rule alone.\",\n    \"suggest\": \"Add \u201cTry Lunge Punch: stance centered + technique forward\u201d to the introduction, using the same labeled input notation as the reference sheet.\"\n  },\n  {\n    \"title\": \"text-size-unverified\",\n    \"claim\": \"The HUD names and stick captions in image #3 are visibly smaller than the settings labels in image #7, but these raster frames cannot establish their CSS font sizes.\",\n    \"reason\": \"Visual comparison alone cannot verify compliance with the required 18 CSS px minimum.\",\n    \"suggest\": \"Measure computed font sizes at 390\u00d7844 and desktop for HUD names, timer suffixes, stick captions, countdowns, and technique metadata; raise any below 18px and adjust layout instead of scaling text.\"\n  }\n]"
 }

@@ -5562,3 +5562,57 @@ is a judgement about whether anyone should be stranded, and that is a different
 kind of decision.
 
 Gates: `pnpm check` 140 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 127 — the reviewer was reading yesterday's screenshots, and one finding it made was real
+
+`countdown-competes-with-reading`: *"Image #2 presents strategy and control
+instructions alongside STARTING IN 7, without a visible option to defer the
+start."*
+
+**Round 126 removed that countdown and verified it in a browser.** So the first
+thing to check was the obvious one — the frames the reviewer reads:
+
+    02-phone-fight.png   captured 01:37
+    the r126 fix landed          02:10
+
+**The review set was 33 minutes stale.** Round 126 changed product code, verified
+it with a one-off probe, ran the e2e suite, committed and deployed — and never
+re-ran `review-shots.mjs`. The reviewer was reading screenshots taken before the
+fix existed, and reported the exact thing that had already been fixed.
+
+**That is the fourth environment-shaped failure in four rounds, and it is the
+most expensive kind, because it does not announce itself.** A server that is down
+throws. A wrong route throws. A stale screenshot set returns a *plausible,
+current-looking, confident* answer about code that has already changed, and the
+only tell is a file timestamp.
+
+**So the frames are now regenerated, and the rule is written down where it will
+be read rather than remembered:** *any round that changes product code regenerates
+the review set before the reviewer runs.* The cost is one command. The cost of not
+doing it is a round spent re-fixing a fixed thing, and — worse — a log entry
+that says the reviewer was wrong when it was the loop that was.
+
+### `reference-name-mismatch` — real, and found on stale frames, which does not make it wrong
+
+*"The reference button reads MOVES in image #3, but its displayed reference sheet
+is titled TECHNIQUES in image #6."*
+
+**Nothing to do with staleness.** The button has said `MOVES` since the sheet was
+built, and the sheet has said `TECHNIQUES` just as long, and nothing noticed,
+because a reviewer looking at either screen alone sees a perfectly reasonable
+label. It is the same shape as rounds 102–105, 109, 122 and 124: **two surfaces,
+one fact, decided once and typed twice.** The button now reads `TECHNIQUES`.
+
+And the game's own vocabulary settled this twenty-five rounds ago — round 53
+renamed "RIGHT STICK FORWARD / BACK" to `STANCE` and `TECHNIQUE` because the
+stick is the thing you press and "moves" was a third word for it. The button was
+never moved off `MOVES`, so the loop has been carrying **three** names for one
+idea: the stick's `STANCE`/`TECHNIQUE`, the sheet's `TECHNIQUES`, and the
+button's `MOVES`.
+
+**That is a seven-round-old decision that never propagated to the third surface
+it had**, and it is the cleanest example in this log of why the fence approach
+exists: it is not that nobody looked, it is that nobody had a reason to compare
+the button's label to the sheet's title until this round.
+
+Gates: `pnpm check` 140 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
