@@ -293,6 +293,16 @@
   --flash-edge: rgb(255 246 226 / 0);
   --glow-display: rgb(255 214 140 / 0.4);
   --stroke-ink: rgb(8 4 2 / 0.6);
+  /* The referee's call is the one moment in a bout where the room behind is not
+     allowed to be seen. `--scrim-banner` at 0.68 dims the shoji but leaves a
+     third of it, and a shoji is a high-contrast grid — so what came through the
+     letter counters read as a wireframe. `gemini-3.8-flash` called it tessellation
+     and `claude-opus-5.5`, a round later, called the thick outline "dark bars
+     slicing through the letterforms". Both were looking at the same window
+     frame. Thickening the stroke darkened the *edges* and left the counters
+     exactly as open, which is why the second fix did not help. The call gets an
+     effectively opaque pool; the softer one stays for smaller banners. */
+  --scrim-call: rgb(10 6 3 / 0.95);
 
   --perf-ink: #8be08b; /* instrumentation is meant to look like instrumentation */
   --perf-plate: rgb(0 0 0 / 0.62);
@@ -930,7 +940,7 @@ body.show-perf #backend {
   /* Opaque to 62% and only then falling away. Fading from the very centre meant
      the pool was weakest exactly where the word is widest, so the shoji grid
      showed through the outer letters most. */
-  background: radial-gradient(ellipse at 50% 50%, var(--scrim-banner) 0%, var(--scrim-banner) 62%, transparent 88%);
+  background: radial-gradient(ellipse at 50% 50%, var(--scrim-call) 0%, var(--scrim-call) 70%, var(--scrim-banner) 92%, transparent 100%);
   pointer-events: none;
 }
 
@@ -958,7 +968,16 @@ body.show-perf #backend {
      tessellation artifacts inside the WAZA-ARI banner" and that is exactly what
      it is: not a broken font, the backdrop's grid seen through a letterform
      that is not opaque enough to hide it. The stroke scales with the glyph. */
-  -webkit-text-stroke: 0.09em var(--stroke-ink);
+  /* Back to a hairline, now that the backdrop behind it is actually dark. The
+     0.09em was fixing the wrong thing: it thickened the letter's edges while
+     leaving its counters open, which is where the lattice was coming from. */
+  /* `paint-order: stroke fill` draws the stroke *behind* the fill instead of
+     centred on the outline. Centred, it eats the inside edge of every stroke
+     and leaves a pale wedge in each counter — which at this weight is visible on
+     the A and the R. Behind the fill, the letter stays solid and only a thin
+     dark edge shows against the pool. */
+  paint-order: stroke fill;
+  -webkit-text-stroke: 0.02em var(--stroke-ink);
   text-shadow:
     0 0 0.9rem var(--glow-display),
     0 0.35em 0.9rem var(--shadow-ink);

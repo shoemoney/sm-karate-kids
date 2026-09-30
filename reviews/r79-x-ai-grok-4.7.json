@@ -1,0 +1,89 @@
+{
+  "model": "x-ai/grok-4.7",
+  "elapsed_s": 171.4,
+  "usage": {
+    "prompt_tokens": 18685,
+    "completion_tokens": 10969,
+    "total_tokens": 29654,
+    "cost": 0.101456,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1152,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.101456,
+      "upstream_inference_prompt_cost": 0.035642,
+      "upstream_inference_completions_cost": 0.065814
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 9681,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "half-point-score-illegible",
+      "title": "Half-point scores wrap and become unreadable",
+      "what": "On the in-bout top bar (WAZA-ARI frames) Asmongold's score is a tiny stacked 1-over-2 crammed beside the name and the timer pill, not a number you can read at a glance. On the HasanAbi wins screen the center lockup breaks: \"0 \u2014 2\" sits on one line and \"1/2\" drops under the 2, while the top bar repeats the same stacked fraction next to a full-size 2.",
+      "why": "This is a first-to-2 bout with half points. If the player cannot tell 0, \u00bd, 1, and 2 apart in a 30-second round, they cannot decide whether to cash a safe half point or hunt an ippon, and the win screen does not confirm what just happened.",
+      "how": "Stop using a wrapping vulgar fraction in a one-line slot. Render halves as a single precomposed \"\u00bd\" or as \"0.5\"/\"2.5\" at the same cap height as the integer, in a fixed-width score slot (about 3ch) so the timer pill never collides with it. On the results lockup, keep \"0 \u2013 2.5\" on one line with tabular figures and no second-line wrap."
+    },
+    {
+      "id": "fight-button-races-countdown",
+      "title": "Gold FIGHT/REMATCH button fights the auto-start countdown",
+      "what": "On every Qualifier intro the primary control is a gold FIGHT pill over the fighters' shins, with \"STARTING IN 2\" (and \"STARTING IN 4\") in gold caps directly under it, while both sticks are already drawn as live. The wins screens do the same: a gold REMATCH pill plus \"STARTING IN 8\".",
+      "why": "Two opposite instructions in the first seconds of every bout. The button looks like it must be tapped; the countdown says it will start anyway. Players either mash a control that may do nothing, or wait and miss the opening exchange. The same collision fires again the moment a bout ends.",
+      "how": "Pick one model and make the other stop looking interactive. If the bout auto-starts, replace the gold pill with a non-button status (\"GET READY\" / \"REMATCH IN 8\") \u2014 no fill, no shadow, no pill \u2014 and gray the sticks until the round is live. If tap-to-start is the real control, remove the countdown, and only start when FIGHT or REMATCH is pressed."
+    },
+    {
+      "id": "stance-legend-double-step",
+      "title": "Stance hint labels both directions \"step\"",
+      "what": "In the in-bout STANCE card (visible across the neutral, Lunge Punch, and Ippon frames) the left and right arrows are both labeled \"step\" (\u25c0 step / \u25b6 step), with only jump and crouch distinguished. The TECHNIQUES sheet treats those same arrows as different inputs: right-arrow stance is Stepping Lunge Punch, left-arrow stance is Back Fist, Reverse Punch, and Spinning Back Kick.",
+      "why": "Stance plus technique is the entire skill of the game. The hint that sits on screen during the fight tells the player the two horizontal stance inputs are the same, so they cannot learn why one side scores a mid punch and the other a high kick.",
+      "how": "Drive the hint from the same input table as the TECHNIQUES sheet. Label stance left \"back\" and stance right \"step\" (up \"jump\", down \"crouch\"), matching the arrow glyphs already used in that list. Do not hardcode the word \"step\" on both horizontal directions."
+    },
+    {
+      "id": "techniques-list-cut-off",
+      "title": "Techniques sheet cuts off the last moves with no scroll cue",
+      "what": "On the TECHNIQUES sheet, TECHNIQUE UP ends with Rising Knee fully drawn and the next row (a kick, \"high \u00b7 Full point\") sliced by the bottom edge and faded out. There is no scrollbar, chevron, or \"more\" label \u2014 only a fade into the screen edge. The close control is at the top, so nothing at the bottom says the list continues.",
+      "why": "This sheet is the move tutor for a combo game. A clipped last row looks like a broken layout, and players who do not think to drag will never see the downward techniques, then whiff them in the bout.",
+      "how": "Give the list a bottom inset past the home indicator so the last row can sit fully on screen, and add a persistent scroll cue (a small chevron or a 1px progress track) until the user reaches the end. Pad the final section so its last row is not the thing the fade hides."
+    },
+    {
+      "id": "ui-covers-the-low-line",
+      "title": "Legend and sticks cover the feet and the low-attack line",
+      "what": "In portrait bouts the two sticks own the bottom quarter, and when the STANCE/TECHNIQUE card is up it sits on the tatami at the fighters' feet. On the HasanAbi spinning-back-kick ippon, the extended foot meets the top of that card. On the stepping-lunge ippon, Asmongold's lead foot is flush with the stick deck. Low and mid contact happens in the band the UI owns.",
+      "why": "Point karate is judged on whether contact was high, mid, or low. If the foot and the mat line are behind a panel, a landed crouching punch and a whiffed front kick look the same, and the player is staring at chrome instead of the exchange.",
+      "how": "Keep a hard gap between the contact zone and the controls: feet at least 24px above the legend and the stick tops. Dock the hint as one line under the timer (or auto-hide it on the first input) instead of a card over the mat, and shrink the stick deck into the bottom safe area so a full kick extension stays inside the fight stage."
+    }
+  ],
+  "raw": null
+}

@@ -1,0 +1,89 @@
+{
+  "model": "anthropic/claude-opus-5.5",
+  "elapsed_s": 60.6,
+  "usage": {
+    "prompt_tokens": 22290,
+    "completion_tokens": 4043,
+    "total_tokens": 26333,
+    "cost": 0.17002,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.17002,
+      "upstream_inference_prompt_cost": 0.08916,
+      "upstream_inference_completions_cost": 0.08086
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1727,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fraction-score-typography",
+      "title": "Half-point scores render as a broken '2 1 2' glyph stack in the HUD and on the result screen",
+      "what": "The HUD shows HasanAbi's 2.5 as a large red '2' with a tiny '1' and '2' stacked beside it, with no fraction bar visible. On the 'HASANABI WINS' screen the scoreline reads '0 \u2014 2' with a '1' and '2' stacked below the baseline, which scans as '0 \u2014 212'. On the WAZA-ARI frames, Asmongold's '\u00bd' is a small stacked glyph that sits visibly lower and narrower than HasanAbi's '0' across the pill.",
+      "why": "The score is the one number a point-karate player must read at a glance. The half point is the core rule the game teaches in the Moves screen. Right now the most important outcome, the final score, looks like a rendering bug on the screen players are most likely to screenshot and share.",
+      "how": "Replace the hand-built stacked spans with a single typographic unit. Use the Unicode '\u00bd' glyph from a font that has a real vulgar-fraction design, or render '2.5' in tabular numerals. If you keep a stacked fraction, draw the vinculum and set numerator and denominator at about 55% size, top-aligned to the digit's cap height, inside an inline-flex with a fixed width so the score pill doesn't reflow. Apply the same component to the HUD, the result scoreline and 'BEST'."
+    },
+    {
+      "id": "call-banner-stroke-artifacts",
+      "title": "IPPON and WAZA-ARI call-outs have dark bars slicing through the letterforms",
+      "what": "In both IPPON frames, the gold 'IPPON' has dark vertical strokes running inside the P, O and N counters and stems, so the word looks cracked. WAZA-ARI shows the same inner-contour lines through the A, Z and R. The effect is worst at the moment of scoring, over the bright shoji band.",
+      "why": "This is the game's biggest payoff moment, the thing that says 'you scored'. Glitched letterforms make it read as a render bug rather than a stamp, which undercuts the cinematic tone the rest of the art direction works hard for.",
+      "how": "This is the classic -webkit-text-stroke on a variable or overlapping-contour font problem. Fix it one of two ways. You can drop text-stroke and fake the outline with layered text-shadow (for example 0 0 0 2px dark plus the glow) or paint-order: stroke fill. Alternatively, switch the call-out to a static-instance font with no overlapping contours, or bake IPPON and WAZA-ARI as SDF or SVG lockups. Verify at 3x DPR on the 390px viewport."
+    },
+    {
+      "id": "loading-bar-no-progress",
+      "title": "Loading screen progress bar shows no fill, and the status line uses a mismatched monospace font",
+      "what": "On the ShoeMoney pre-boot screen, the bar below 'Downloading the game' is a uniform dark brown capsule with no visible fill, percentage or motion cue. The status text is pure white monospace, while 'SM KARATE KIDS', 'ASMONGOLD VS HASANABI' and 'A SHOEMONEY AI LABS GAME' are all tracked uppercase in a warm palette. The status line is the brightest element on screen and the one that looks unfinished.",
+      "why": "This is literally the first second of the product. On a phone over cellular, a bar that never visibly moves reads as a hang, which drives back-button abandonment before the player ever sees the dojo.",
+      "how": "Give the bar a gold (#E8B85A-ish) fill driven by real bytes loaded. Show at least a 4-6% fill immediately, plus a subtle shimmer while indeterminate phases run, such as shader compile. Restyle the status line to match the HUD: tracked uppercase sans at about 12px in the muted warm grey. Append a percentage, for example 'LOADING 42%'."
+    },
+    {
+      "id": "intro-card-covers-fighters",
+      "title": "The pre-bout FIGHT button sits on the fighters' shins, and the button is redundant with the 2-second auto-start",
+      "what": "On the QUALIFIER / 'vs HasanAbi' card, the gold FIGHT pill spans about x145-445 at y780-870. It covers both fighters' lower legs and feet and cuts HasanAbi's front knee. Meanwhile 'STARTING IN 2' or 'STARTING IN 4' counts down beneath it. The top also repeats itself: a cyan 'ROUND 1/5 \u00b7 QUALIFIER' chip sits directly above the giant 'QUALIFIER' title.",
+      "why": "This is the character-reveal moment: the only time the player gets a calm look at the matchup and the stances. Blocking the fighters makes the shot look cropped. A primary button that self-fires in 2s trains players that tapping doesn't matter, and it risks a mis-tap landing on the sticks at fight start.",
+      "how": "Move FIGHT and the countdown into the dead band between the fighters' feet (about y800) and the stick panel (y935). Shrink it to about 52px tall, or anchor it just above the sticks, so the full bodies from head to feet stay clear. Remove the 'ROUND 1/5 \u00b7 QUALIFIER' chip while the card is up, or fold it into the title as 'ROUND 1 OF 5 \u2014 QUALIFIER'. Ignore stick input for about 250ms after the card dismisses."
+    },
+    {
+      "id": "control-legend-ambiguous",
+      "title": "On-mat control legend is ambiguous ('\u25c4 step / \u25ba step', 'back / forward') and only appears in some bouts",
+      "what": "The translucent legend at about y865-950 reads 'STANCE \u25c4 step \u25b2 jump \u25ba step \u25bc crouch / TECHNIQUE \u25c4 back \u25ba forward \u25b2 up \u25bc down'. The two stance directions are both just 'step', and the technique labels name directions rather than moves, so it says nothing the stick arrows don't already. It also covers the front edge of the mat right under the fighters' feet. In other fight frames (the WAZA-ARI and FRONT KICK ones) it's absent entirely, so its purpose is unclear.",
+      "why": "The move system is combinatorial: stance plus technique gives 20+ moves in the Moves list. A new player needs to learn that the two sticks combine. The current legend doesn't teach that, and it spends prime screen space right where attacks land.",
+      "how": "Replace it with a first-bout coach strip that teaches the combo concept, for example '\u25c4 \u25ba step \u00b7 \u25b2 jump \u00b7 \u25bc crouch' under STANCE and 'Flick a direction to strike \u2014 combine with stance for 20 moves' under TECHNIQUE. Fade it out after the first scored point or first 3 techniques thrown, and keep it off afterward. Alternatively, move the labels onto the stick rims as tiny glyph captions so nothing overlaps the mat."
+    }
+  ],
+  "raw": null
+}

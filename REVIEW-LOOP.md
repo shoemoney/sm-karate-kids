@@ -2991,3 +2991,70 @@ of work. Again: a picture, next to the other picture. The loop now has three
 rounds' worth of evidence that the cheapest instrument is the one I am most
 reluctant to reach for, every single time, because reasoning about it feels
 like progress and cropping feels like nothing.
+
+### Round 79 — round 78's fix was wrong, and a reviewer said so
+
+`x-ai/grok-4.7`, `anthropic/claude-opus-5.5`, `openai/gpt-6.1-sol-pro`.
+
+`claude-opus-5.5`: **"IPPON and WAZA-ARI call-outs have dark bars slicing through
+the letterforms."** That is round 78's fix, reported back as a regression, one
+model later. It was right, and the crop confirmed it — the lattice was still
+there.
+
+**The diagnosis in round 78 was wrong, and it was wrong in an instructive way.**
+I concluded the outline was too thin, so I thickened it from `1.5px` to `0.09em`
+and pushed the pool's opaque stop outward. Neither touched the cause. A stroke
+darkens a letter's **edges**; the shoji grid was coming through the letter's
+**counters**, which a stroke does not fill at all. So the second fix darkened
+the edges further, leaving the counters exactly as open, and made the word read
+*more* like bars.
+
+**The cause was one number:** `--scrim-banner` is `rgb(10 6 3 / 0.68)`. Two
+thirds opaque, over a shoji — which is a high-contrast rectangular grid. The
+frame was always visible; the letters were never opaque enough to hide it.
+
+    --scrim-call   rgb(10 6 3 / 0.95)      (new: the call is the one moment the room is not allowed through)
+    ::before       opaque to 70%, softening to the old scrim at 92%
+    text-stroke    0.09em -> 0.02em        (back to a hairline — it was never the problem)
+    paint-order    stroke fill             (behind the fill, not centred on the outline)
+
+That last one fixed a pale wedge the thicker stroke had introduced in every
+counter, visible on the `A` and the `R` at this weight. Three crops, three
+iterations: lattice gone after the first, wedge gone after the second.
+
+### The test I wrote in round 78 was wrong, and the failure was the useful part
+
+Round 78 shipped a guard asserting the call word's stroke must be **at least**
+0.07em. Round 79 changed the stroke to 0.02em and `pnpm check` failed — the test
+caught the thing it was written to protect, which was my own bad reasoning from
+one round earlier.
+
+That is the correct behaviour of a test and the wrong behaviour of a test. It
+did its job perfectly: it stopped a value from changing. It just happened to be
+guarding a *wrong* value, so the thing it protected was a defect, and the failure
+was the only signal that would have told me so — I would otherwise have shipped
+a thinner stroke with a green gate and a passing test standing behind it.
+
+**The test has been rewritten to assert the real properties, and one of them is
+that the stroke must NOT be thick**, because a thick stroke is its own artifact:
+
+- `--scrim-call` at **0.95 or more** — the actual defect
+- the banner's `::before` actually **uses** it
+- `paint-order: stroke fill` — counters stay solid
+- the stroke is a **hairline** (≤ 0.03em) — the anti-assertion
+
+Gates: `pnpm check` **124 passed** (was 122), `pnpm test:e2e` 35 passed / 5
+skipped / exit 0.
+
+### On writing a test for a fix in the same breath
+
+Round 78 I added a guard asserting the specific value my fix introduced, one
+round after that value was found to be wrong. The guard did not catch a bug. It
+**froze a bug in place and then failed when the bug was fixed** — which is a more
+expensive failure than no test at all, because it arrives wearing the costume of
+a passing gate and arrives *at the moment the work is right**.
+
+The tests worth writing for a visual fix assert the *reason* it broke, not the
+number I happened to change. "The pool is opaque enough" survives the next three
+fixes. "The stroke is 0.09em" blocks all of them, including the one that was
+correct.

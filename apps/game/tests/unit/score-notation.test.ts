@@ -102,39 +102,48 @@ describe('the stacked fraction is sized to be read', () => {
 /**
  * The referee's call has to be readable against the brightest thing in the game.
  *
- * The call word is set at `--text-display` with a 1.5px outline, over a pool
- * that faded to transparent almost immediately. On a shoji backdrop that
- * combination let the window frame show through the letter counters, which a
- * reviewer read as "polygonal tessellation artifacts inside the WAZA-ARI
- * banner" — and it was the backdrop, not a broken font.
+ * This test is here because it was wrong once. Round 78 asserted the call word's
+ * outline must be at least 0.07em, on the reasoning that a thin outline let the
+ * shoji show through the letter counters. Round 79 showed that reasoning was
+ * wrong: thickening the stroke darkens a letter's *edges* and leaves its
+ * counters exactly as open, so the window frame kept coming through and
+ * `claude-opus-5.5` reported the thick outline as "dark bars slicing through the
+ * letterforms".
  *
- * Both values are asserted here because both fail silently: a thinner stroke or
- * an earlier fade does not throw, does not shift layout, and does not fail a
- * behavioural test. It just quietly makes the biggest word in the game harder to
- * read, on the one frame the set only learned to capture in round 75.
+ * The lattice was never about the stroke. It was about `--scrim-banner` sitting
+ * at 0.68 opacity behind a high-contrast grid. The fix is an effectively opaque
+ * pool, and the outline only has to be a hairline.
+ *
+ * So this asserts the actual properties, and specifically not the one I got
+ * wrong: the pool behind the call must be effectively opaque, the stroke must be
+ * drawn behind the fill, and the stroke must NOT be thick — because a thick one
+ * is its own artifact.
  */
 describe("the referee's call is legible over the shoji", () => {
   const css = read('../../src/styles.css');
 
-  test('the outline scales with the glyph, not with body text', () => {
-    const stroke = css.match(/\.banner \.call-word \{[\s\S]*?-webkit-text-stroke:\s*([\d.]+)(em|px)/);
-    expect(stroke, '.call-word has no text-stroke').not.toBeNull();
-    const [, value, unit] = stroke!;
-    if (unit === 'em') {
-      expect(Number(value), 'an em stroke keeps the outline proportional').toBeGreaterThanOrEqual(0.07);
-    } else {
-      expect(Number(value), 'a px stroke below 3px lets the backdrop through the counters').toBeGreaterThanOrEqual(3);
-    }
+  test('the pool behind the call is effectively opaque, not merely dimmed', () => {
+    // The real defect. 0.68 over a window grid is a wireframe through the
+    // counters; the call has to sit on something effectively solid.
+    const scrim = css.match(/--scrim-call:\s*rgba?\([^)]*?\/\s*([\d.]+)\s*\)/);
+    expect(scrim, 'no dedicated opaque scrim for the call').not.toBeNull();
+    expect(Number(scrim![1]), 'the call pool leaves the shoji visible').toBeGreaterThanOrEqual(0.9);
   });
 
-  test('the pool behind the call is opaque across the width of the word', () => {
-    const pool = css.match(/\.banner::before \{[\s\S]*?radial-gradient\([^;]*;/);
-    expect(pool).not.toBeNull();
-    const stops = [...pool![0].matchAll(/(\d+(?:\.\d+)?)%/g)].map((m) => Number(m[1]));
-    const opaque = stops.filter((v) => v > 0);
+  test('the pool is actually used by the banner behind the call word', () => {
+    expect(css).toMatch(/\.banner::before \{[\s\S]*?var\(--scrim-call\)/);
+  });
+
+  test('the stroke is drawn behind the fill, so counters stay solid', () => {
+    expect(css).toMatch(/\.banner \.call-word \{[\s\S]*?paint-order:\s*stroke fill/);
+  });
+
+  test('the stroke stays a hairline — a thick one is its own artifact', () => {
+    const stroke = css.match(/\.banner \.call-word \{[\s\S]*?-webkit-text-stroke:\s*([\d.]+)em/);
+    expect(stroke, '.call-word has no em stroke').not.toBeNull();
     expect(
-      Math.max(...opaque),
-      'the scrim reaches transparent before the word does, so the outer letters sit on bare backdrop',
-    ).toBeGreaterThanOrEqual(55);
+      Number(stroke![1]),
+      'a stroke thick enough to eat the inside of a stem leaves a pale wedge in every counter',
+    ).toBeLessThanOrEqual(0.03);
   });
 });

@@ -1,0 +1,89 @@
+{
+  "model": "openai/gpt-6.1-sol-pro",
+  "elapsed_s": 33.6,
+  "usage": {
+    "prompt_tokens": 44004,
+    "completion_tokens": 2393,
+    "total_tokens": 46397,
+    "cost": 0.0840962,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 19887,
+      "cache_write_tokens": 19887,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0840962,
+      "upstream_inference_prompt_cost": 0.0601662,
+      "upstream_inference_completions_cost": 0.02393
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 487,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "teach-stick-actions",
+      "title": "Make the two-stick controls understandable before the first exchange",
+      "what": "On the portrait bout screen, both sticks show only chevrons. The narrow legend above them labels TECHNIQUE directions as 'back', 'forward', 'up', and 'down', rather than naming attacks. At the 390px design width, its body text is roughly 10px tall. The separate TECHNIQUES screen requires decoding pairs of small circular symbols.",
+      "why": "A new player can see where to drag but cannot readily tell what attack that drag will produce, or that combining the sticks changes the move.",
+      "how": "Add a first-bout practice prompt that highlights one direction on each stick and names the resulting move. Replace the technique legend's directional words with base attack names, use at least 14px text at 390px width, and show the selected combination immediately above the controls."
+    },
+    {
+      "id": "player-controlled-start",
+      "title": "Give players control over when a bout starts",
+      "what": "The QUALIFIER introduction presents a large FIGHT button alongside 'STARTING IN 2' or 'STARTING IN 4'. The results screens similarly pair REMATCH with 'STARTING IN 8'. Neither screen shows a way to cancel the countdown.",
+      "why": "The interface simultaneously asks for a deliberate tap and announces an impending start. Beginners have little visible opportunity to study the controls, and returning players cannot comfortably inspect their result.",
+      "how": "For the first bout, wait for a FIGHT tap before beginning a short ready countdown. Keep results on screen until REMATCH is tapped; if automatic rematches are intentional, add a clearly labeled cancel control beside the countdown."
+    },
+    {
+      "id": "repair-half-point-layout",
+      "title": "Keep fractional scores compact and aligned",
+      "what": "On the HASANABI WINS screen, the right HUD score renders the half-point numerator and denominator below the large '2', nearly filling the HUD height. The central '0 \u2014 2\u00bd' result also drops the fraction onto two descending lines. WAZA-ARI screenshots show a vertically stacked '1/2' instead of a score aligned with the opposing zero.",
+      "why": "Half-point scores are a core rule, but their current layout looks broken and makes the score harder to scan during a short bout.",
+      "how": "Render scores in a fixed-height, non-wrapping inline container using '\u00bd' or '2\u00bd'. Give the fractional glyph a deliberate smaller size and baseline alignment, and reserve enough width for the largest supported score without changing HUD height."
+    },
+    {
+      "id": "complete-front-kick-sprite",
+      "title": "Remove the visibly truncated front-kick leg",
+      "what": "In the wide-gap FRONT KICK screenshot with the timer at 30s, the white fighter's raised trouser leg ends abruptly at approximately x267, y575 in the supplied 591px-wide image. There is no visible lower leg or foot beyond that opening, so the pose reads as an amputated limb rather than a kick.",
+      "why": "The attack silhouette fails to communicate reach and contact, while the missing anatomy visibly undermines the photoreal fighter presentation.",
+      "how": "Inspect that specific front-kick frame's source image and alpha bounds. Replace or repair it to include the complete kicking limb, preserve transparent padding around the foot, and preview every attack frame against the dojo background before shipping."
+    },
+    {
+      "id": "show-download-progress",
+      "title": "Make the pre-boot download state visibly informative",
+      "what": "On the ShoeMoney loading screen, 'Downloading the game' sits above a thin, almost uniformly brown progress track. The capture shows no clearly distinguishable completed segment, percentage, or downloaded amount.",
+      "why": "At the product's first interaction, the player has little visual evidence that a substantial browser download is advancing rather than waiting indefinitely.",
+      "how": "Use a distinct warm-gold fill inside the existing track and add a compact progress value beneath the status. If total download size is unavailable, show an animated indeterminate segment and the current loading stage instead of an apparently empty bar."
+    }
+  ],
+  "raw": null
+}
