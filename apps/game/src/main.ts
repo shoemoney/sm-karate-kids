@@ -324,7 +324,24 @@ async function boot(screen: BootScreen): Promise<void> {
 
   // Where a technique actually lands: the strike point along the mat, at the
   // height band it targets, lifted by the attacker's jump if airborne.
-  const BAND_HEIGHT = { low: 0.32, mid: 1.05, high: 1.5 } as const;
+  /**
+   * Where on the defender a strike lands, in world units.
+   *
+   * These were 0.32 / 1.05 / 1.5, and `high` put the impact at 1.5 — which on a
+   * fighter standing around 1.7 is *head* height. A spinning back kick is a
+   * `high` move, and on `11-phone-impact` its foot is visibly planted on the
+   * white fighter's chest while the sparks burst around his jaw, a body-part
+   * above the contact. `mimo-v2.6-flash` put it as "the impact sparks spawn
+   * above his head instead of at contact", which is exactly right and is the
+   * reason it is worth fixing rather than refusing: the effect was at a
+   * consistent wrong height on every high move, so every high kick in the game
+   * had it.
+   *
+   * A high kick is a kick to the upper body, not a headbutt — the target is the
+   * solar plexus / jaw line, which is high on the defender without being the top
+   * of their skull.
+   */
+  const BAND_HEIGHT = { low: 0.3, mid: 0.95, high: 1.24 } as const;
   const impactAt = (player: 0 | 1, moveId: string) => {
     const attacker = state.fighters[player];
     const move = state.moves.get(moveId);

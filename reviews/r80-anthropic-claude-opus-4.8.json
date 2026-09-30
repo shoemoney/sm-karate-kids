@@ -1,0 +1,89 @@
+{
+  "model": "anthropic/claude-opus-4.8",
+  "elapsed_s": 40.6,
+  "usage": {
+    "prompt_tokens": 22288,
+    "completion_tokens": 2115,
+    "total_tokens": 24403,
+    "cost": 0.164315,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.164315,
+      "upstream_inference_prompt_cost": 0.11144,
+      "upstream_inference_completions_cost": 0.052875
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighters-float-no-contact-shadow",
+      "title": "Fighters have no ground contact shadow and appear to float",
+      "what": "In every combat screen (e.g. screenshots 3, 4, 13) both fighters' bare feet sit directly on the tatami with no cast shadow, contact darkening, or ambient occlusion beneath them. On the IPPON/WAZA-ARI action shots (screenshots 11, 17, 19) the red fighter's lunging front foot and Asmongold's raised kicking leg cast nothing, so the pose reads as a cardboard cutout pasted over the backdrop rather than a body standing in the room.",
+      "why": "This is the single most-noticed break of the 'photoreal sprite fighters in a 3D dojo' illusion, visible in the first 5 seconds of the pre-fight card. Floating characters make an otherwise premium cinematic scene look like a cheap asset composite, which undercuts the whole ShoeMoney production quality.",
+      "how": "Render a soft elliptical contact shadow blob under each fighter, anchored to the foot positions and scaled to the current pose's footprint. Feed it the same warm key-light direction (upper-left, matching the volumetric window light) so shadows fall down-right. Even a single multiplied radial-gradient sprite per fighter, darkened where feet meet mat, will kill the float. Tie its opacity/offset to jump height so airborne moves lift the shadow away."
+    },
+    {
+      "id": "fighter-composite-fringing",
+      "title": "Fighter sprites show hard cutout edges and halo fringing against the backdrop",
+      "what": "On the win/action screens the sprites show matte-line artifacts: the red gi's shoulder in screenshot 8 and Asmongold's hair edge in screenshot 11 have a faint bright/soft fringe and slightly aliased silhouette where the sprite meets the darker dojo, and the raised-leg kicks (screenshots 17, 19) show blurred, low-res edges around the trailing foot that don't match the sharp torso.",
+      "why": "Combined with the missing shadow, the crisp-vs-blurry edge and light halo make the fighters read as flat pasted layers on top of the room instead of lit inhabitants of it, breaking the photoreal promise exactly when the camera pushes in for a scoring beat.",
+      "how": "Re-cut the sprite alpha with a slightly eroded, feathered matte (1-2px) and remove the light-colored halo by decontaminating edge pixels. Add a subtle rim/edge tint sampled from the warm scene light so the silhouette picks up the tungsten glow instead of a neutral gray fringe. Ensure all pose frames are exported at the same resolution so kick limbs aren't softer than the body."
+    },
+    {
+      "id": "dead-mat-space-lower-third",
+      "title": "Large empty tatami band sits between fighters and the controls",
+      "what": "On the portrait combat screens (screenshots 3, 4, 13, 16) the fighters occupy roughly the vertical center, but a wide strip of empty foreground tatami runs from their feet down to the control panel, and a second empty warm band sits above their heads below the HUD. The fighters end up small in frame with dead mat on three sides.",
+      "why": "The characters are the entire show in a 1v1 point-karate bout, yet they read as small and distant. On a 390px-wide phone this wastes the most valuable screen real estate and makes hits feel less impactful because the fighters are tiny relative to the frame.",
+      "how": "Push the camera/framing in so the fighters fill from roughly the belt line downward and their heads sit just under the score bar, cropping most of the foreground mat. Reserve only enough floor to keep feet and the new contact shadows visible. Keep the current control panel height; just re-anchor the fighter group upward and larger within the available scene viewport."
+    },
+    {
+      "id": "score-callout-covers-fighters",
+      "title": "IPPON/WAZA-ARI banner overlaps and obscures the scoring moment",
+      "what": "On the score screens (11, 17, 19) the giant 'IPPON'/'WAZA-ARI' + name + technique text block lands directly on top of the fighters' heads and upper bodies. In screenshot 11 the 'HASANABI / SPINNING BACK KICK' text sits right over the point of contact, and the impact spark is squeezed into the small gap below the banner.",
+      "why": "The scoring hit is the payoff moment of the entire exchange, and the UI is covering the exact frame the player wants to see \u2014 the clean contact. It also creates a cluttered stack of text competing with the action instead of celebrating it.",
+      "how": "Move the callout to the empty upper band above the fighters (there's dead space under the score bar) or reserve it to the lower foreground area, so it never overlaps the contact point. Alternatively animate it in briefly then shrink/fade to a corner tag so the impact frame is clean. Keep the impact spark unobscured and centered on the actual contact."
+    },
+    {
+      "id": "landscape-controls-marooned-corners",
+      "title": "Landscape layout strands the two sticks in far bottom corners with a dead black band",
+      "what": "The landscape screenshot (screenshot 9) puts the STANCE stick in the extreme bottom-left corner and TECHNIQUE in the extreme bottom-right, separated by a wide empty black bar across the bottom third. The fighters and dojo sit in a letterboxed strip up top while most of the lower screen is unused black.",
+      "why": "On a phone held in landscape, thumbs rest lower-center and inward; sticks jammed into the outer corners force an awkward reach and the huge black dead-zone wastes half the screen. It looks unfinished next to the polished portrait layout and hurts control comfort during fast exchanges.",
+      "how": "In landscape, pull both sticks inward and up so they sit within natural thumb arcs (roughly 20-25% in from each edge, vertically centered in the lower band), and expand the dojo render to fill the vertical space instead of letterboxing. Optionally add a subtle warm gradient or vignette to the lower band rather than flat black so it matches the portrait treatment."
+    }
+  ],
+  "raw": null
+}

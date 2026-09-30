@@ -1,0 +1,89 @@
+{
+  "model": "xiaomi/mimo-v2.6-flash",
+  "elapsed_s": 203.5,
+  "usage": {
+    "prompt_tokens": 15879,
+    "completion_tokens": 8845,
+    "total_tokens": 24724,
+    "cost": 0.00469966,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00469966,
+      "upstream_inference_prompt_cost": 0.00222306,
+      "upstream_inference_completions_cost": 0.0024766
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7017,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighters-too-small-in-frame",
+      "title": "The fight screen wastes a third of the phone on empty wall while the fighters occupy a 25%-tall band",
+      "what": "Fight screen (screenshots 2, 14, 21): the HUD ends at y\u224865 of 1280 and the fighters' heads don't begin until y\u2248475 \u2014 that 410px (\u224832% of the viewport) is bare shoji screen and wall with nothing in it. The fighters themselves span only y\u2248475\u2013790, i.e. ~300px \u2248 25% of frame height in an image that is only ~100 CSS px tall at 390-wide. There is another ~80px of empty mat between their feet and the legend band at y\u2248870.",
+      "why": "On a phone held at arm's length the sprites are tiny; you can't read which limb is extending, whether contact was made, or the opponent's wind-up \u2014 which is exactly the information the qualifier copy ('he waits for your wind-up') tells you to watch for. A third of a 390x844 screen showing nothing makes the bout look like a diorama rather than a fight.",
+      "how": "Move the camera in so the fighters render at ~55\u201360% of viewport height with their feet anchored at ~62\u201365% of frame height, and raise the look-at so the dead upper wall shrinks to ~15%. Keep headroom for the IPPON banner by pulling the camera back/tilting up only while the banner is on screen, instead of permanently reserving that empty band during play."
+    },
+    {
+      "id": "no-defender-hit-reaction",
+      "title": "Hits land with zero reaction from the struck fighter, and the impact sparks spawn above his head instead of at contact",
+      "what": "Screenshot 3 (IPPPON, spinning back kick): the kicking foot connects with Asmongold's raised forearm/chest, yet Asmongold's sprite is pixel-for-pixel the same idle guard stance he holds in the pre-fight shot (screenshot 2) \u2014 no recoil, no head snap, no stagger. The white spark cluster fires in a spray above the top of his hair, roughly a quarter-screen above where the foot actually touches. The same holds in screenshot 4 and 6: the punched Hasanabi stays in his untouched idle guard while a fist is buried in his chest.",
+      "why": "The whole product is 'one clean contact ends the exchange'. If the defender never flinches and the sparks appear in the wrong place, every strike reads as a whiff that clipped through the opponent \u2014 the core loop feels weightless, and players can't tell a scoring hit from a miss except by reading the banner after the fact.",
+      "how": "Add one or two hit-reaction frames per fighter (torso jolt back, head snap, gi ripple) plus a 60\u2013100ms knockback offset on the defender, triggered on the contact frame, and a brief white flash on the struck gi. Move the spark emitter onto the striking limb's transform so particles spawn at the actual contact point rather than at a fixed position above the target's head."
+    },
+    {
+      "id": "scoring-banner-hard-black-seam",
+      "title": "IPPPON/WAZA-ARI is drawn on a full-width black rectangle with razor-straight edges cutting the dojo, and WAZA-ARI is the only cool-white text in the game",
+      "what": "Screenshots 3, 4, 6, 13: the scoring callout sits on a solid, flat black bar spanning the entire frame width from y\u2248190 to y\u2248440, whose top and bottom edges slice the warm shoji screen with a single hard horizontal seam across the whole image \u2014 no gradient, no falloff, no rounding. Inside that band, 'WAZA-ARI' (screenshots 6, 13) is set in a cold blue-white, while 'IPPPON' (screenshots 3, 4) and every other HUD element \u2014 names, timer, MOVES button, REMATCH button \u2014 is warm cream/amber.",
+      "why": "This is the loudest, most-shared moment in the game and it currently reads as an unstyled placeholder overlay pasted over the scene. The lone ice-blue headline looks like a missing style token in a 'tungsten and tatami' palette, so the biggest reward moment looks like a bug rather than a flourish.",
+      "how": "Replace the flat black rect with a vertical gradient scrim \u2014 full black in the text zone, fading to 0 alpha over 60\u201380px at both the top and bottom edge \u2014 so the dojo stays visible through the banner's boundaries. Set WAZA-ARI in the same warm cream used for IPPON (keep the cool blue only for the small 'ROUND 1/5 \u00b7 QUALIFIER' pill, where it already works)."
+    },
+    {
+      "id": "half-point-score-breaks-layout",
+      "title": "Half-point scores render as stacked fraction digits that overflow the HUD and wrap the result headline onto two lines",
+      "what": "Screenshot 6 HUD: Asmongold's score shows a '1' stacked directly above a '2' mid-row instead of a compact \u00bd, changing the row's alignment. Screenshot 17 HUD: a large '2' is followed by a tiny stacked '1'/'2' that crowds into the HASANABI label. Worst, screenshot 17's result screen: the headline '0 \u2014 2 \u00bd' wraps so the big numerals land on line one and the '1/2' drops to a second, much smaller line below the baseline.",
+      "why": "Half points are awarded constantly (the Techniques sheet marks most techniques 'Half point'), so this fires often. The final score screen is the screenshot players share and the HUD score must be scannable at a glance mid-bout; a wrapped, mis-baselined headline looks like a rendering failure and undercuts a win.",
+      "how": "Render half points as a single '\u00bd' glyph (or a fixed-width inline SVG fraction) at ~0.6em with a baseline shift, inside a fixed-width score box using tabular numerals and `white-space: nowrap`. On the result headline, fit the text \u2014 step the font-size down until '0 \u2014 2\u00bd' fits one line \u2014 so it can never wrap."
+    },
+    {
+      "id": "legend-and-sticks-occupy-thumb-zone",
+      "title": "Static control legend plus two full-size pads consume the bottom 35% of the screen, right where thumbs sweep",
+      "what": "Fight screen (screenshots 2, 14, 19, 21): the always-on legend band ('STANCE \u25c0 step \u25b2 jump\u2026' / 'TECHNIQUE \u25c0 back \u25b6 forward\u2026') occupies y\u2248870\u2013955 and the twin joystick pads occupy y\u2248965\u20131230; with the 65px HUD, roughly 35% of the 1280px frame is non-playable chrome. The legend sits immediately above the pads, in the arc a thumb travels when lifting off the stick, and it repeats information already labelled under each pad and available in the MOVES sheet.",
+      "why": "The band eats vertical space the fighters could be using (see the empty wall above their heads), and it sits precisely where a resting or moving thumb occludes it, so it's unreadable when you'd need it and a permanent texture when you don't. Meanwhile the floating technique pill ('FRONT KICK', 'LUNGE PUNCH' at y\u2248315) sits alone in the dead backdrop band with no performer name and no success/failure color, so the one piece of live move feedback is detached from both the fighters and the sticks.",
+      "how": "Collapse the legend after the first bout (or show it only on the qualifier screen) and reclaim that ~85px for the camera; keep the pad labels 'STANCE'/'TECHNIQUE' and the arrow glyphs already printed on each pad. Move the technique pill down to sit just above the corresponding stick and color it warm cream on a scoring contact vs dim/gray on a whiff, prefixed with the performer's name."
+    }
+  ],
+  "raw": null
+}

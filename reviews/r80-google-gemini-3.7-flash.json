@@ -1,0 +1,89 @@
+{
+  "model": "google/gemini-3.7-flash",
+  "elapsed_s": 25.5,
+  "usage": {
+    "prompt_tokens": 23094,
+    "completion_tokens": 2856,
+    "total_tokens": 25950,
+    "cost": 0.0280305,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0280305,
+      "upstream_inference_prompt_cost": 0.0173205,
+      "upstream_inference_completions_cost": 0.01071
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1951,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png",
+    "20-phone-call.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighter-framing-and-scale",
+      "title": "Fighter scale is too small with excessive dead mat space",
+      "what": "In all portrait gameplay screens (e.g., screenshots 3, 4, 14, 17), the fighters occupy only ~20% of the vertical viewport in the center, leaving a large expanse of empty tatami mat below them and empty shoji panels above.",
+      "why": "On a 390x844 phone screen, the photoreal facial likenesses and subtle martial arts wind-up cues become tiny and difficult to read quickly during high-speed exchanges.",
+      "how": "Tighten the 3D camera framing by lowering camera distance on Z and adjusting Y target so fighter sprites occupy roughly 35-40% of the active combat viewport height above the joystick controls."
+    },
+    {
+      "id": "ingame-control-legend-clutter",
+      "title": "Persistent control cheat sheet clutters active combat area",
+      "what": "A prominent dark rounded box listing 'STANCE' and 'TECHNIQUE' directional legends sits continuously right beneath the fighters and above the thumbsticks during live rounds (screenshots 3, 4, 10, 11, 14, 17).",
+      "why": "It acts as visual clutter directly inside the primary eye-tracking zone between the fighters' feet and the controls, distracting during fast matches.",
+      "how": "Fade this cheat-sheet panel out automatically after the match countdown completes (or upon first joystick touch), keeping it accessible only via the top 'MOVES' modal."
+    },
+    {
+      "id": "fractional-score-hud-alignment",
+      "title": "Half-point stacked fraction misaligns HUD and victory screen text",
+      "what": "In the top HUD (screenshots 12, 16, 17) and the win screen (screenshot 8), the half-point score displays as an unaligned vertical fraction stack that breaks the baseline of opponent scores and results in awkward numeric overlap (e.g., '0 - 2 1/2' in screenshot 8).",
+      "why": "The broken typographic baseline makes fast score checks during a 30-second round visually confusing and looks unpolished on the final results card.",
+      "how": "Format scores using inline glyphs (e.g., '1.5' or '1\u00bd') with fixed baseline heights, or render point indicators as discrete visual karate point pips/badges under the competitor names."
+    },
+    {
+      "id": "feet-contact-shadow-grounding",
+      "title": "Soft diffuse foot shadows fail to ground the fighter sprites",
+      "what": "Under the fighters' bare feet (seen in screenshots 3, 10, 14, 17), contact shadows are soft, generic circular gradients that do not conform to the stance or sole contact points.",
+      "why": "Because the fighters are photorealistic 2D cutouts positioned in a 3D scene, diffuse blob shadows cause them to look detached and float above the tatami floor.",
+      "how": "Implement tight, higher-opacity ambient occlusion contact shadows directly under the heel and ball of each grounded foot sprite, fading into the broader soft floor shadow."
+    },
+    {
+      "id": "moves-and-settings-modal-viewports",
+      "title": "Modal overlays have inconsistent sheet heights and clipped scroll content",
+      "what": "The Settings modal (screenshots 7, 13) terminates abruptly mid-screen revealing fighter torsos underneath, while the Techniques modal (screenshot 6) cuts off bottom move entries ('Roundhouse Kick') without clear scroll bounding.",
+      "why": "On mobile devices, half-height non-docked modals look disjointed and risk clipping critical gameplay input reference data.",
+      "how": "Convert modals into standard mobile bottom sheets or full-height overlay drawers with an explicit sticky header/close button and a scrollable viewport container with bottom padding."
+    }
+  ],
+  "raw": null
+}

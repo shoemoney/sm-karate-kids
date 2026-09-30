@@ -3058,3 +3058,59 @@ The tests worth writing for a visual fix assert the *reason* it broke, not the
 number I happened to change. "The pool is opaque enough" survives the next three
 fixes. "The stroke is 0.09em" blocks all of them, including the one that was
 correct.
+
+### Round 80 — the impact was firing a body-part above the contact, on every high kick
+
+`google/gemini-3.7-flash`, `anthropic/claude-opus-4.8`, `xiaomi/mimo-v2.6-flash`.
+
+`mimo-v2.6-flash`: **"the impact sparks spawn above his head instead of at
+contact."** Confirmed against `11-phone-impact` — the red fighter's foot is
+visibly planted on the white fighter's **chest**, and the sparks were bursting
+around his **jaw**.
+
+**This was a positional bug, not a visual one, and it was the right thing to have
+queued rather than refused.** `BAND_HEIGHT` was `{ low: 0.32, mid: 1.05, high:
+1.5 }`, and a fighter stands around 1.7 tall — so **every `high` move fired its
+impact at head height.** Six of the twenty moves are `high`, including both
+roundhouse kicks and the spinning back kick, so half the game's kicks had the
+impact landing on a part of the body the foot was nowhere near.
+
+    low  0.32 -> 0.30     (ankle / foot sweep, essentially unchanged)
+    mid  1.05 -> 0.95     (chest — where most strikes actually land)
+    high 1.50 -> 1.24     (jaw / solar plexus, NOT the top of the skull)
+
+The reframing that made the right number obvious: `height` is the *target band on
+the defender*, not the height of the attacker's limb. A high kick is a kick to
+the upper body — the jaw line and solar plexus — which is high on the defender
+without being the crown of their head. Reading it as "how high does the attacker
+reach" is what produced 1.5.
+
+Verified by re-capture: the sparks now burst on the chest and shoulder, on the
+contact, where the foot is.
+
+Gates: `pnpm check` 124 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Two different classes of finding in one round, and the loop is now finding both
+
+Rounds 78 and 80 were the same set of models, and they produced opposite kinds of
+result:
+
+- **Round 78/79** was a *rendering* defect — a lattice, a colour, a scrim. Fixed
+  by looking at a crop and adjusting a value until the crop was right.
+- **Round 80** is a *logic* defect — a coordinate that was wrong in the data, on
+  every high kick, since the moves were authored. No amount of looking at the
+  picture would have told me the number was wrong; the foot and the sparks were
+  both drawn faithfully from the same bad number, so the frame looked
+  self-consistent.
+
+The reason the crop caught it is that a reviewer had to *compare two things in
+one frame* — the foot and the sparks — and notice they disagreed. That is a
+class of finding a per-element review can never produce, and it only became
+available once the set had a frame where a strike, an impact and a body are all
+in the same shot. It has been since round 1; nobody had a reason to look.
+
+Worth stating: the loop's first eighty rounds were spent making single elements
+legible, and only recently has it been able to catch anything that depends on
+two elements agreeing with each other. Those are different failure modes, they
+need different instruments, and a review set of isolated elements will keep
+finding the first and never the second.
