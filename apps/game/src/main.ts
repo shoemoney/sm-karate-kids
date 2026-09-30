@@ -622,8 +622,18 @@ async function boot(screen: BootScreen): Promise<void> {
         f.append(document.createTextNode(`${STYLE[round.archetype] ?? ''} `));
         const note = document.createElement('span');
         note.className = 'result-notation';
-        note.textContent =
-          'A move is one stance input plus one technique input — the sheet lists every combination.';
+        // 45 characters, not 88. Round 119 measured the card at 144 characters
+        // against a 4-second hold and raised it to 7.2s, then said plainly that
+        // 7.2s is still under the 8.6s a careful read needs — and that the better
+        // fix was the sentence, not the clock. This is that fix.
+        //
+        // The `+` is deliberate: it is the same character the techniques sheet
+        // puts between its two glyphs, so the sentence teaches the notation while
+        // using it. The dropped clause ("the sheet lists every combination") is
+        // the one thing this screen does not need — the sheet is a labelled
+        // button two inches away and the sentence is already pointing at the
+        // idea.
+        note.textContent = 'A move = one stance input + one technique input.';
         f.append(note);
         return f;
       })(),

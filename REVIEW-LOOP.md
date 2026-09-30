@@ -5204,3 +5204,41 @@ stopwatch on 7.2 seconds, and I am not going to report a number I did not read
 off a clock — which is round 95's lesson, one round after it stopped being fresh.
 
 Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 120 — the sentence, not the clock
+
+Round 119 raised the hold from 4s to 7.2s, said plainly that 7.2 is still under
+the 8.6 a careful read needs, and named the better fix: shorten the sentence.
+**Taken.**
+
+    was  A move is one stance input plus one technique input — the sheet lists
+         every combination.                                              88 chars
+    now  A move = one stance input + one technique input.              45 chars
+
+    total on the card   144 -> 104 characters
+    careful read         8.6s -> 6.2s
+    against a 7.2s hold  0.83x -> 1.15x margin
+
+**Closed from the right side.** The card now has more time than it needs rather
+than less, and the hold stays at 7.2s — so the change from round 119 was not
+wasted, it is the floor that makes the shorter sentence safe. Between the two
+rounds the briefing went from being shown at half reading speed to having a
+margin, and the fix was a copy edit plus a clock, in that order, with the copy
+edit doing the real work.
+
+**The `+` is the part worth keeping.** It is the same character the techniques
+sheet puts between its two glyphs, so the sentence *teaches the notation while
+using it* — which is the thing none of the four surfaces managed to do on their
+own across rounds 113 to 118. The dropped clause was the one this screen does
+not need: the sheet is a labelled button two inches away, and the sentence is
+already pointing at the idea.
+
+**Two rounds, one lesson, and it is the loop's oldest one wearing a new coat.**
+Round 118 added text to a card and measured the cost a round later. Round 119
+measured the cost and reached for the obvious lever — the clock. Round 120
+measured again and took the lever that was actually correct. **The expensive
+mistake in review loops is not adding something wrong, it is adding something
+right and then paying for it in the wrong currency**, and the currency here was
+a four-second timer rather than 45 characters of English.
+
+Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
