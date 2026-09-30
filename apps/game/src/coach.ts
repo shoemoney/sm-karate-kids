@@ -103,8 +103,15 @@ export function createControlCoach(): ControlCoach {
       for (const lesson of LESSONS) {
         const half = document.createElement('div');
         half.className = 'coach-half';
-        const title = document.createElement('strong');
-        title.textContent = lesson.title;
+        // The title is gone. Each half sits directly above its own stick, and
+        // the stick already carries the caption `STANCE` / `TECHNIQUE` — so for
+        // twenty rounds the same word has been printed twice on the same screen,
+        // reported by twelve-plus models, and removed by nobody.
+        //
+        // The narrowing from round 113 applies: now that the techniques sheet
+        // has a real key and the pre-bout card owns the notation, the *upper*
+        // pair is the redundant half rather than the lower. The stick captions
+        // stay, because they are the labels on the thing the thumb is on.
         const legend = document.createElement('span');
         legend.className = 'coach-legend';
         for (const pair of lesson.pairs) {
@@ -112,7 +119,7 @@ export function createControlCoach(): ControlCoach {
           cell.textContent = pair;
           legend.appendChild(cell);
         }
-        half.append(title, legend);
+        half.append(legend);
         strip.appendChild(half);
       }
       const pad = document.getElementById('pad');

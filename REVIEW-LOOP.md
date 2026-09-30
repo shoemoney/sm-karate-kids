@@ -5242,3 +5242,55 @@ right and then paying for it in the wrong currency**, and the currency here was
 a four-second timer rather than 45 characters of English.
 
 Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 121 — the oldest standing item, playtested and closed
+
+`duplicate-control-headings` has been reported by **twelve-plus models across
+twenty rounds** and never fixed. Rounds 113 and 118 narrowed it twice and
+deferred it twice. This round ran the playtest.
+
+**Removed the upper half.** Each coach panel sits directly above its own stick,
+and the stick already carries the caption `STANCE` / `TECHNIQUE`, so for twenty
+rounds the same word has been printed twice on one screen. The stick captions
+stay — they label the thing the thumb is on — and the panel's own heading goes:
+
+    before   STANCE            TECHNIQUE
+             ◀ back  ▲ jump     ◀ back  ▶ forward
+             ▶ in    ▼ crouch    ▲ up    ▼ down
+             [  stick  ]         [  stick  ]
+             STANCE            TECHNIQUE
+
+    after                    ◀ back  ▲ jump     ◀ back  ▶ forward
+                             ▶ in    ▼ crouch    ▲ up    ▼ down
+                             [  stick  ]         [  stick  ]
+                             STANCE            TECHNIQUE
+
+The association is spatial and vertical — panel, stick, caption — so nothing is
+lost by dropping the heading, and the panel is visibly shorter, which gives back
+mat. **Rounds 113's narrowing was right**, and it was right for a reason that
+only became true in round 118: the redundant half was the upper pair *because*
+the sheet grew a key and the pre-bout card took the notation. Before those, the
+heading was the only thing tying the panel to its stick.
+
+### The e2e run, honestly
+
+The first `pnpm test:e2e` after this change came back **exit 1, five passed and
+then everything failing at ~500ms**. That is not a coach assertion failing and
+the logs say why plainly:
+
+    page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4173/
+
+Every test failed on navigation, before touching the game. `lsof -ti:4173` showed
+nothing squatting, so the preview server simply did not bind on the first attempt,
+and a re-run gave **35 passed / 5 skipped / exit 0**.
+
+**Recording it because the tempting reading is the wrong one.** A green suite
+after a red one is exactly the pattern of round 90's 0.06 and round 95's exit
+127 — something that moved in the direction I wanted without me establishing
+why. The difference is that this time I went and read the failure rather than
+re-running until it went green: sixteen identical `page.goto` refusals at
+sub-second timings is a server that never started, not a regression in a coach
+heading, and the error text says so unambiguously. Re-running was the second
+step, not the first.
+
+Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
