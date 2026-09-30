@@ -2685,3 +2685,42 @@ the previous one.
 **A finding cannot be closed by reasoning about it, and it cannot be closed by a
 clean measurement either. It closes when a frame exists that shows the thing, and
 everything before that is inference with better manners.**
+
+### Round 73 (reviews) — first reviews that can see a half point, a kick and a scored result
+
+`anthropic/claude-sonnet-5.5`, `z-ai/glm-5.3-flash`, `deepseek/deepseek-v4.1-flash`,
+on a 20-frame set that now includes the scored result card, a real `front_kick`
+and a half point on the board.
+
+**The half-point finding has changed shape again, and this time it moved toward
+accuracy rather than away from it.** Across five rounds the complaint was
+"ambiguous", "reads as `21/2`", "cramped". With the frame present:
+
+- `claude-sonnet-5.5`: "hits lack impact and **half-point display is tiny**"
+- `glm-5.3-flash`: "the stacked ½ fraction is **unreadable at HUD size**"
+
+Both are now about **size**, not about meaning. Nothing in the set suggests the
+notation is ambiguous any more, which is the specific thing round 67 fixed, and
+the fix is now visible in the same frame the reviewers are looking at. That is
+the review set doing the job it exists to do.
+
+Whether the fraction should be larger is a real question and is *not* a repeat of
+anything already decided — the stacked fraction was sized to sit on the digit
+baseline and to stop `10½` clipping, and neither of those fixes its apparent
+scale. Queued as a genuine open item, not refused.
+
+New this round and genuinely unchecked:
+
+- `fight-cta-overlaps-fighters` / `announcement-covers-fighters`
+  (deepseek-v4.1-flash) — the FIGHT button over the fighters' shins, and the
+  IPPON / WAZA-ARI announcement landing on their heads at the moment of the
+  strike. The first is a known pre-bout layout tension; the second is a *timing*
+  collision that the announcement-bump work in `ee0b17a` and `69d579e` may not
+  have covered, since those moved the coach and the result, not the callout.
+  Recorded open.
+- `landscape-dead-space` / `fighters-lower-third-empty-mat` — the portrait
+  camera trade again, on a fourth and fifth model. Refused with numbers three
+  times; not re-litigated.
+- `loading-bar-no-progress` — the oldest false alarm in the loop, now at six
+  models. Refuted by contrast measurement and by the bar tracking real weighted
+  boot units.

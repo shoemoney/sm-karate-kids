@@ -1,0 +1,88 @@
+{
+  "model": "deepseek/deepseek-v4.1-flash",
+  "elapsed_s": 136.7,
+  "usage": {
+    "prompt_tokens": 10587,
+    "completion_tokens": 8610,
+    "total_tokens": 19197,
+    "cost": 0.00537774,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00537774,
+      "upstream_inference_prompt_cost": 0.00021174,
+      "upstream_inference_completions_cost": 0.005166
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7430,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighter-scale-portrait",
+      "title": "Fighters are compressed into a small band while the top 40% of the frame is empty dojo",
+      "what": "In the portrait fight view (screenshot 3, 13, 14) the two fighters span roughly y=380 to y=610 \u2014 about 230px of an 844px screen, under 30% of the height \u2014 while the dojo wall and shoji window band above them (y=60 to y=380) carries nothing but the MOVES/gear buttons and a floating callout pill. The heads are roughly the size of the MOVES button.",
+      "why": "Point karate is a read-the-opponent game: you have to see the wind-up, the stance shift, the hip rotation to react. At this scale the fighters read as silhouettes and the player ends up reacting to the text callout instead of the body, which kills the whole premise.",
+      "how": "Pull the camera in and/or raise the fighter rig scale so the pair fills roughly y=280 to y=700, and drop the floor line so the mat band below the feet stays ~60-80px. Verify the heads still clear the shoji window band so silhouettes stay against the dark wall."
+    },
+    {
+      "id": "fight-cta-overlaps-fighters",
+      "title": "The FIGHT button on the pre-fight card covers the fighters' feet and shins",
+      "what": "On the pre-fight card (screenshot 2, 11, 15) the gold FIGHT pill spans roughly y=530 to y=600, and the fighters' feet sit at about y=555 \u2014 the white gi fighter's front foot and the red gi fighter's feet are hidden behind the button.",
+      "why": "The pre-fight card is the one moment the player studies the matchup art and the opponent's stance before the round starts. The primary CTA is sitting on top of exactly that, and it also makes the fighters look like they're standing behind a UI element rather than on the mat.",
+      "how": "Move the FIGHT button down into the control band \u2014 below the fighters' feet, above the thumbsticks \u2014 or shrink it and dock it to the bottom edge. Keep the full figures unobstructed on the card."
+    },
+    {
+      "id": "announcement-covers-fighters",
+      "title": "IPPON / WAZA-ARI text stack lands on the fighters' heads at the moment of the strike",
+      "what": "On the IPPON screen (screenshot 12) the three-line stack 'IPPON / HASANABI / SPINNING BACK KICK' runs from about y=150 to y=230, and the third line collides with the fighters' heads at y=230-250. The WAZA-ARI screen (screenshot 18) has the same collision with 'LUNGE PUNCH'.",
+      "why": "The scoring announcement fires on the exact frame of the winning technique \u2014 the payoff the entire round builds toward \u2014 and the text is sitting on top of it. The player is told they scored but can't see what they scored with.",
+      "how": "Anchor the announcement stack higher (top around y=110) and/or offset it to one side, then hold the fighters' frozen pose for an extra beat after the text clears so the strike is visible unobstructed."
+    },
+    {
+      "id": "stick-legend-duplication",
+      "title": "The STANCE/TECHNIQUE legend panel duplicates labels already on the sticks, then vanishes",
+      "what": "In the early fight screenshots (3, 4, 5) a rounded panel at roughly y=575-640 prints 'STANCE / step jump / step crouch' and 'TECHNIQUE / back forward / up down' \u2014 the same two words already printed under each stick, and the same four directions already drawn as chevrons on the stick rings. By screenshot 13 the panel is gone and the layout has shifted.",
+      "why": "It eats about 65px of the vertical band directly under the fighters, and because it disappears after a few seconds the layout changes mid-session. The player who needed the reference loses it right when they're still learning, and the player who didn't gets a cramped view for no reason.",
+      "how": "Delete the panel and move the four direction words inside the stick rings themselves, faint, at the chevron positions. The mapping is then always visible and never costs vertical space."
+    },
+    {
+      "id": "loading-bar-no-progress",
+      "title": "Pre-boot progress bar is a static line with no fill, percentage, or motion",
+      "what": "On the ShoeMoney pre-boot screen the progress indicator is a single thin gold line at about y=530 with no visible fill, no percentage, and no animation. 'Downloading the game' is the only status text.",
+      "why": "This is the first thing a player sees, and on a phone over cellular a static line gives no way to distinguish 'loading' from 'hung'. That ambiguity is the most common reason people kill a tab before a browser game ever starts.",
+      "how": "Drive the bar fill from real asset progress 0-100%, add a numeric percentage and a subtle animated shimmer on the unfilled portion, and swap the label to the current asset group ('Loading dojo\u2026', 'Loading fighters\u2026') so the screen is visibly alive."
+    }
+  ],
+  "raw": null
+}

@@ -1,0 +1,88 @@
+{
+  "model": "anthropic/claude-sonnet-5.5",
+  "elapsed_s": 26.4,
+  "usage": {
+    "prompt_tokens": 21275,
+    "completion_tokens": 2227,
+    "total_tokens": 23502,
+    "cost": 0.06482,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.06482,
+      "upstream_inference_prompt_cost": 0.04255,
+      "upstream_inference_completions_cost": 0.02227
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighters-lower-third-empty-mat",
+      "title": "Fighters are small and the frame wastes space above and below them",
+      "what": "In the live-fight screens (Front Kick, Lunge Punch, IPPON) the fighters are about 300px tall in an 844px-tall frame. A band of blank amber ceiling and haze sits above them, from roughly y=85 to y=320. Bare tatami sits below, down to the hint card at y=865. The action occupies only the middle third. The result screens show the same issue, with a large dark mat gap between the fighters and the REMATCH button.",
+      "why": "The fighters are the whole game. On a 390px-wide phone their hands, feet and contact moments are small, so it is hard to read the height of a strike (high, mid or low), which is central to point karate. Vertical space is spent on dead backdrop.",
+      "how": "Lower the camera FOV or dolly in so the fighters fill about 45-50% of the play-area height. Frame vertically from the head-to-feet range plus a small margin. Crop the ceiling band, and shift the horizon up so the fighters sit around y=45-60% of the play area instead of the lower half. Keep a slow push-in on hits."
+    },
+    {
+      "id": "permanent-hint-card-blocks-view",
+      "title": "The stance/technique legend card sits permanently on the play area and duplicates the sticks",
+      "what": "In the in-fight screens a large bordered panel at y\u2248865-950 lists 'STANCE \u25c0 step \u25b2 jump / TECHNIQUE \u25c0 back \u25b6 forward...'. It stays up mid-bout, including during the IPPON screenshot. Directly below it are the sticks, which already carry 'STANCE' and 'TECHNIQUE' labels and arrow glyphs. The card is a bright, opaque, gold-bordered slab that competes with the fighters' feet and shadows.",
+      "why": "It is redundant chrome that eats vertical space and pulls the eye away from the fight. It also never teaches the actual move combos, since those live behind MOVES. After the first bout it is noise.",
+      "how": "Show the card only for the first bout or first ~5 seconds, then fade it out. Alternatively, fold the hints into the stick rings as faint labels, and bring the card back only on a long idle. Store a 'seen tutorial' flag. Use the reclaimed space for a larger 3D viewport."
+    },
+    {
+      "id": "pre-bout-overlay-clutter",
+      "title": "Pre-bout screen stacks text over the fighters and puts a bright FIGHT button in the middle of the arena",
+      "what": "On the 'QUALIFIER vs HasanAbi' screen, the title, the subtitle and a dark pill of tips text (y\u2248305-360) cover the dojo windows. The giant gold FIGHT button with its 'STARTING IN 2/3/4' countdown sits at y\u2248780-900, overlapping the fighters' feet and mat. The countdown reads 4, 3, 2, so a 4-5 second forced wait sits on top of a button that reads like a tap target. The scene beneath is dimmed and muddy.",
+      "why": "The button's label says FIGHT but it also auto-starts, so the player is unsure whether to tap it or wait. The mid-screen placement covers the stage the player is about to fight on. Small tracked caps in low-contrast grey-gold are hard to read on the busy background.",
+      "how": "Make the countdown the primary element, either as a big centered number or as a ring that fills the button. Change the label to 'FIGHT NOW' or 'SKIP' if tapping only skips the wait. Move the button down toward the stick zone, away from the fighters. Put the opponent tip on a solid scrim with larger, brighter text (at least 15-16px, light cream)."
+    },
+    {
+      "id": "sticks-low-affordance-and-contrast",
+      "title": "Dual sticks are dark-on-dark, with a nearly invisible centre state and no feedback about the two-stick combo",
+      "what": "The idle rings are brown-on-near-black with thin gold outlines. The arrow chevrons are tiny (about 12px) and dim, and the centre dots are a pale blue and a gold ring that are easy to miss. In the Lunge Punch screenshot the technique knob deflects right and the ring lights gold, but the stance stick shows no state. The 'STANCE' and 'TECHNIQUE' labels are dim grey at about 13px. Both rings sit at the very bottom edge, with about 60px of blank space beneath them.",
+      "why": "This is a twin-stick game played with thumbs, often in glare or on a dark screen. The thumb needs to find the stick and know which direction it has committed to. The move combo (stance + technique) is the core mechanic, but the screen never shows which combination is currently held.",
+      "how": "Brighten the ring stroke and chevrons to about 60-70% opacity. Highlight the active direction chevron with a bright gold glow, on both sticks. Show the technique name the moment the combo is resolved, not only after it fires. Increase the label size and contrast. Make the touch zones extend beyond the visible rings, so drift does not drop input."
+    },
+    {
+      "id": "hit-feedback-and-score-readability",
+      "title": "Scoring moments are readable but hits lack impact and half-point display is tiny",
+      "what": "On IPPON HASANABI the spinning back kick is shown with only a few small spark glyphs near Asmongold's head. There is no obvious freeze frame, flash or shake visible in the still. The score display for half points is cramped: the HUD shows a tiny stacked '1/2' fraction (e.g. '2\u00bd' in red, a bare '\u00bd' for Asmongold) at roughly 10px, and on the result screen '0 \u2014 2\u00bd' with a subscript-looking fraction. The IPPON/WAZA-ARI banner sits at y\u2248250-380, partly over the window backdrop, with a very small technique subtitle (~11px) in low-contrast gold.",
+      "why": "Point karate is about one clean contact, so the hit is the payoff and needs to feel decisive. Players also need to read the score at a glance, and the stacked fraction is hard to parse on a phone. The move name that just beat them is the most useful teaching info and is barely legible.",
+      "how": "Add a 80-120ms hit-stop, a white flash frame, a brief radial shockwave and camera punch-in at the contact point. Render half points as a clear '\u00bd' glyph or as '0.5' at the same size as whole numbers. Increase the banner's subtitle to at least 16px with a dark text shadow or scrim. Keep the banner clear of the fighters' heads."
+    }
+  ],
+  "raw": null
+}

@@ -1,0 +1,88 @@
+{
+  "model": "z-ai/glm-5.3-flash",
+  "elapsed_s": 73.3,
+  "usage": {
+    "prompt_tokens": 21042,
+    "completion_tokens": 9988,
+    "total_tokens": 31030,
+    "cost": 0.0081503,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0081503,
+      "upstream_inference_prompt_cost": 0.0031563,
+      "upstream_inference_completions_cost": 0.004994
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 8586,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "19-phone-half-point.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighter-scale-too-small",
+      "title": "Push the camera in \u2014 the fighters read as props, not players",
+      "what": "In every portrait in-fight capture (idle frames, FRONT KICK, WAZA-ARI), the two fighters occupy only ~25% of frame height: heads sit ~38% from the top, feet at ~62%. The band above them \u2014 roughly a third of the frame between the score bar and their heads \u2014 is pure backdrop (dark ceiling plus the upper shoji-window wall) with no gameplay in it, while only a thin strip of mat separates their feet from the moves-legend panel below.",
+      "why": "The game's own pre-fight tip says the opponent 'waits for your wind-up \u2014 then makes you pay': the core loop is reading limb tells. At 25% frame height a wind-up is a few pixels of arm motion, so reads become guesswork, and the first-five-seconds impression is watching a bout from the bleachers instead of being in one.",
+      "how": "Zoom the portrait camera ~35-40% (shorten camera distance or narrow FOV) and reframe so the shoji window band sits directly behind the fighters' upper bodies instead of above their heads. Target fighters filling ~45% of frame height, heads near the upper-third line, feet anchored just above the control zone. Verify the tallest technique (jumping punch) still fits with ~10% headroom."
+    },
+    {
+      "id": "permanent-moves-legend",
+      "title": "Retire the always-on stick cheat-sheet once it has done its job",
+      "what": "A bordered two-column panel \u2014 'STANCE: \u25c0 step \u25b2 jump / \u25b6 step \u25bc crouch \u00b7 TECHNIQUE: \u25c0 back \u25b6 forward / \u25b2 up \u25bc down' \u2014 sits above the sticks in every in-fight portrait capture, including deep into the bout and during the IPPON and WAZA-ARI frames. It costs ~7-8% of frame height, sits right on the fighters' feet, and duplicates the STANCE/TECHNIQUE labels already printed beneath each stick.",
+      "why": "It is tutorial text rendered as permanent chrome. After the first exchange every player has learned it, yet it keeps taxing the scarcest resource on a portrait phone \u2014 vertical stage space \u2014 and visually severs the sticks from the stage they control.",
+      "how": "Show the legend only until the player has thrown at least one input in each of the four technique directions (or for the first 15 seconds of the first bout), then fade it down behind the stick zone. Keep the full mapping in the MOVES modal and let the 3D stage extend into the reclaimed space."
+    },
+    {
+      "id": "half-point-legibility",
+      "title": "The stacked \u00bd fraction is unreadable at HUD size",
+      "what": "In the WAZA-ARI capture, Asmongold's top-bar score renders as a tiny stacked fraction \u2014 a small '1' over a small '2', a fraction of the height of the adjacent full-size '0' next to it. The results screen repeats the pattern: '0 \u2014 2' with a subscript stacked \u00bd hanging off the final digit. The player's own score is the least legible number on screen at exactly the moment it matters.",
+      "why": "Score is the primary state in a first-to-2 point-karate game. If the player can't tell at a glance whether they sit at 1, 1\u00bd, or 2, the 'one clean hit ends it' tension collapses, and a round can feel lost or won without the player understanding why.",
+      "how": "Replace the stacked fraction with a full-height glyph: either '1.5' in the same numeral style, or a '\u00bd' character sized to the digit height on a shared baseline. Alternatively keep whole digits and append a small gold WAZA-ARI pip beside the score. Apply the same treatment to the '0 \u2014 2\u00bd' line on the results card."
+    },
+    {
+      "id": "ippon-impact-vfx",
+      "title": "The payoff strike lands almost silently",
+      "what": "In the IPPON capture (spinning back kick), contact is marked by a sparse spray of roughly a dozen small gold specks near the struck head and nothing else \u2014 no flash on the struck fighter, no visible freeze or camera reaction in the frame; the WAZA-ARI punch shows a single tiny white fleck at the fist. The big banner does the celebrating; the hit itself is visually quiet.",
+      "why": "Landing the one clean strike is the entire product promise of point karate. When the peak moment is carried by UI text rather than by the hit itself, a score feels barely different from a whiff, and the player's agency \u2014 the thing that drives 'one more rematch' \u2014 goes unrewarded.",
+      "how": "On contact add a 90-120ms hitstop, a 1-2 frame white/gold rim flash on the struck sprite, a radial burst of 20-30 particles seeded at the actual contact point, and a quick 5-8% camera punch-in with a brief vignette pulse \u2014 gold-tinted for IPPON, silver for WAZA-ARI \u2014 so the existing banner lands on an already-hot frame."
+    },
+    {
+      "id": "landscape-dead-space",
+      "title": "Landscape ships as an empty room with sticks stranded in the corners",
+      "what": "In the landscape capture, the fighters are a small centered cluster (~40% of frame width, ~35% of height) with bare mat stretching ~350-400px to each side; the two sticks are pinned to the extreme bottom corners with roughly 900px of empty black between them, and the 3D stage is letterboxed by black bars above and below the scene.",
+      "why": "Anyone who rotates the phone \u2014 or opens this browser build on a desktop, which it invites \u2014 gets this frame, and it reads as unfinished: stage, fighters, and controls are three disconnected islands with no shared composition, undercutting the cinematic-dojo pitch in a single glance.",
+      "how": "In landscape, zoom the camera until the fighters span ~55-60% of the stage width, inset the sticks to ~12-15% from the screen edges (or pull them up to flank the stage), and cut the bottom control band so the tatami floor runs down to meet the sticks. Leave the portrait framing untouched as the baseline."
+    }
+  ],
+  "raw": null
+}
