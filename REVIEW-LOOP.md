@@ -3683,3 +3683,50 @@ fighter is extended or *which way* they face, so a foot shadow cannot be placed
 without threading per-fighter strike state into the renderer. That is a real
 change with a real design in it, and it belongs to whoever owns the renderer
 rather than to a review loop on iteration ninety.
+
+### Round 91 — second attempt at the foot shadow, correct plumbing, still nothing, reverted
+
+Round 90 left a named blocker rather than a shrug: `frame()` receives a single
+`reach` that is the **maximum over both fighters**, so a foot shadow cannot be
+placed without knowing which fighter is extended and which way they face. That
+is a real design gap and it is fixable, so I fixed it.
+
+- `frame()` gained an optional `strikes` argument carrying `{ x, dir, reach }`
+  per fighter, documented with the reason the aggregate `reach` is the right
+  number for the camera and the wrong one for a shadow
+- `main.ts` populates it from the live fighter states rather than from
+  `strikeReach(left, right)`
+- `Stage` builds two cast-shadow blobs and shows the one whose fighter is
+  extended, dimmer, wider and softer than the contact shadow
+
+Typecheck clean, 127 tests green, frames re-captured. **And there is still no
+shadow under the foot** — the leg hangs against bare mat exactly as before.
+
+Two mistakes left, and I could not close either inside this session:
+
+1. **Coordinate space.** `strike.x` is a *render* x (the camera's spacing
+   transform has already been applied) while `reach` is in *world* units, and I
+   multiply one by the other. `renderX` is non-linear, so `renderX(x) + reach`
+   is not the render position of a point `reach` away.
+2. **Height.** A foot in the active window is well above the mat, and its ground
+   shadow should therefore sit *displaced toward the camera* from directly below
+   it — a long way down the mat at this perspective. I placed it at the foot's
+   own x, which puts it behind and under the fighter, outside the crop and very
+   likely behind the plane of the mat.
+
+**Reverted, and this time I did not touch a number first.** Round 90's mistake
+was reading a 0.06 improvement as a win; the discipline for this round was to
+open the crop before believing anything, and when the crop showed nothing, to
+delete the work rather than go looking for a measurement that agreed.
+
+`stage.ts` and `main.ts` are at HEAD. Tree clean, 127 passing, 22 frames.
+
+**What the finding is now, stated for whoever picks it up.** It is not a sprite
+defect and it is not a shadow defect — it is a *rendering* defect at a specific
+scale. The foot is a complete, correctly-drawn, correctly-facing shape that
+occupies about 11 pixels at rgb(229,189,159) on a mat of rgb(139,103,54), which
+is 2.96:1. Seven reviewers independently reported it as missing and they were
+right every time. The cheapest honest fixes remain the two art ones this loop
+should not make alone — a rim light on the foot, or lifting its value in the
+atlas so it clears 4.5:1 against the mat — and both are one value in a
+provenance-tracked asset.
