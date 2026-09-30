@@ -677,7 +677,25 @@ async function boot(screen: BootScreen): Promise<void> {
         // So the sentence has to name the option without growing back into the
         // 88 characters round 120 removed. 62 is the number that fits:
         //   "A move = a technique input, plus a stance input or a centred one."
-        note.textContent = 'A move = a technique input + a stance input, or leave the stance centred.';
+        // The objective joins the notation, in the same span and the same voice.
+        //
+        // Rounds 118-122 put *how a move is input* on this card and left *what
+        // you are playing for* on the techniques sheet, one screen away — so a
+        // first-time player is told the grammar of the game and not the point of
+        // it. `openai/gpt-6.1-sol` (via codex), round 130.
+        //
+        // The target is read from the same ruleset row the techniques sheet
+        // reads, for the reason round 102 established: the sheet computes its
+        // own paragraph from `pointsToWin`, and a second hand-written copy of
+        // that number is a bug waiting for a round number. Both screens now
+        // derive the target, so they cannot disagree about it.
+        note.append(
+          document.createTextNode('A move = a technique input + a stance input, or leave the stance centred. '),
+        );
+        const goal = document.createElement('span');
+        goal.className = 'result-goal';
+        goal.textContent = `First to ${content.rulesets[0]!.pointsToWin} takes the round.`;
+        note.appendChild(goal);
         f.append(note);
         return f;
       })(),

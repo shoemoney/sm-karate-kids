@@ -2657,6 +2657,12 @@ body.no-backdrop-filter .result-score,
   line-height: 1.45;
 }
 
+/* The objective, sharing the notation's sentence-case voice because it is part
+   of the same thought: what a move is, and what you are playing for. */
+.result-goal {
+  color: var(--text-muted);
+}
+
 body.no-backdrop-filter .result-detail {
   background: var(--result-plate-solid);
 }

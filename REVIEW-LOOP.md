@@ -5807,3 +5807,54 @@ move is input and not what he is playing for, and the sheet is one screen away.
 It is a one-sentence fix in the same place as the sentence already there.
 
 Gates: `pnpm check` 140 passed.
+
+### Round 131 — the objective, and the fence catching a change of mechanism
+
+`opening-card-omits-goal`: *"the opening card explains combining technique and
+stance inputs but does not state the first-to-two-points objective."*
+
+**Real, and a gap of my own making.** Rounds 118–122 put *how a move is input*
+on the pre-bout card and left *what you are playing for* on the techniques sheet,
+one screen away. A first-time player was told the grammar of the game and not the
+point of it. Now it says both, in the same voice:
+
+    PATIENT. HE WAITS FOR YOUR WIND-UP, THEN MAKES YOU PAY.
+    A move = a technique input + a stance input, or leave the stance centred.
+    First to 2 takes the round.
+
+And the number is **derived**, not typed — `content.rulesets[0]!.pointsToWin`,
+the same row the techniques sheet's computed paragraph reads. Two screens that
+both derive the target cannot disagree about it, which is the round-102 lesson
+applied to the second surface that was repeating a fact.
+
+### The fence failed, correctly, for a reason I did not expect
+
+Adding the goal as a second child changed the notation from a `textContent`
+assignment into a `document.createTextNode`, and **two of the round-123
+assertions failed immediately** — they read `note.textContent = '...'` and found
+nothing.
+
+**The sentences were fine. The mechanism moved.** And that is the round-128 limit
+stated concretely: a source-shaped assertion breaks when the shape moves even if
+the words do not, and this file is full of source-shaped assertions because
+there is no DOM in the unit environment.
+
+The fix was to widen the reader to both forms, not to force the old shape back
+and not to delete the assertion:
+
+    main.match(/note\.textContent = '([^']+)'/) ??
+    main.match(/document\.createTextNode\(\s*'(A move[^']+)'\s*\)/)
+
+**Which is the honest limitation of a source fence: it guards meaning by guarding
+shape, and a change of shape is indistinguishable from a change of meaning until
+someone reads the diff.** Twice in two rounds that has been a false alarm
+(round 110's vacuous comparison, this one), and twice the answer has been the
+same — narrow the thing you are actually asserting, and keep the assertion.
+
+A third assertion was added for the new fact: the card must state the target
+**and derive it from the ruleset**, so a future hand-typed `2` fails.
+
+Gates: `pnpm check` **141 passed** (was 140), `pnpm test:e2e` 35 passed /
+5 skipped / exit 0. Two 502s in the capture log on `01`, `10` and `13` are the
+known per-capture asset noise, and the dev server answered 200 immediately after
+— verified rather than assumed, following round 121's rule.

@@ -95,7 +95,16 @@ describe('the pre-bout briefing is complete, not merely short', () => {
   });
 
   test('the briefing names the centred-stance option', () => {
-    const note = main.match(/note\.textContent = '([^']+)'/);
+    // Read the sentence out of whichever form it takes. It was a
+    // `textContent` assignment until round 131, when the objective was appended
+    // as a second child and the sentence became a `document.createTextNode`.
+    // The fence caught that immediately — and it caught a *change of mechanism*,
+    // not a change of meaning, which is the round-128 limit stated concretely: a
+    // source-shaped assertion breaks when the shape moves even if the words do
+    // not. It now reads the whole notation block and looks for the words.
+    const note =
+      main.match(/note\.textContent = '([^']+)'/) ??
+      main.match(/document\.createTextNode\(\s*'(A move[^']+)'\s*\)/);
     expect(note, 'could not find the briefing notation sentence').not.toBeNull();
     const text = (note?.[1] ?? '').toLowerCase();
     expect(
@@ -107,8 +116,20 @@ describe('the pre-bout briefing is complete, not merely short', () => {
   test('the briefing still names both inputs', () => {
     // The complement of the above: a sentence that stops naming the technique
     // input is short for the same reason the last one was.
-    const note = main.match(/note\.textContent = '([^']+)'/);
+    const note =
+      main.match(/note\.textContent = '([^']+)'/) ??
+      main.match(/document\.createTextNode\(\s*'(A move[^']+)'\s*\)/);
     expect((note?.[1] ?? '').toLowerCase()).toContain('technique');
+  });
+
+  test('the briefing states the objective, derived from the ruleset', () => {
+    // Round 131. The card taught the notation and left "first to 2" on a screen
+    // one tap away, so a first-time player was told the grammar of the game and
+    // not the point of it. And the number must come from the ruleset, because
+    // the techniques sheet computes its own paragraph from the same value and
+    // two hand-written copies of a number is the defect this file exists to stop.
+    expect(main, 'the pre-bout card does not state the win target')
+      .toMatch(/First to \$\{content\.rulesets\[0\]!\.pointsToWin\} takes the round/);
   });
 });
 
