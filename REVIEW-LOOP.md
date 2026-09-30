@@ -3829,3 +3829,41 @@ this set has only recently been able to show a reviewer both at once.
 Round 80 fixed where the burst *fires*. Rounds 76 and 93 were about how it
 *looks* and how far it *goes*, and neither was in the review set's gift until the
 strike, the impact and the body were in one shot.
+
+### Round 94 — the velocity fix was real, and the residual is 4x larger than the model says
+
+Round 93 predicted the remaining spread was a *lifetime* question. Measured
+first, as the discipline requires, and the prediction was wrong.
+
+    276 isolated bright specks
+    vertical extent 332px
+    fighter height   ~371px
+    => the burst spans 89% of a fighter's height
+
+Round 93's arithmetic says it should be **0.41 world units — 0.36 after the
+re-measure of the actual speed peak — which is 24% of the fighter's height.**
+The frame is showing 89%. That is a factor of four, and it means velocity was
+never the whole story.
+
+**Ruled out, rather than assumed:**
+
+- *Repeated emission.* `contact` is pushed inside the `else if (p1Scores)`
+  scoring branch in `match.ts:318`, once per scoring event. Not per active
+  frame. So the burst fires once.
+- *Particle count.* 26 for a heavy strike. The 276 "specks" my isolation test
+  counted are almost certainly ~26 streaks sampled at 5px intervals — the
+  streaks rotate (`spin`) and are elongated, so each contributes several
+  apparently-isolated bright pixels.
+
+**So the residual is either the streaks' own length, their rotation, or their
+0.55–0.90s lifetime carrying them across the frame during the 95ms hitstop**
+(`juice.update` runs on wall time specifically so the freeze frame still
+sparkles, which means the burst is animating while the world is held).
+
+**Not resolved in this session, and not going to be claimed as fixed.** The
+velocity change in round 93 is real and measured and the column is visibly
+tighter; this residual is a separate mechanism that the velocity model does not
+describe. Left open with the number attached, because a wrong explanation
+shipped at iteration ninety would be worse than an honest gap — and the last two
+rounds of this log are both about measurements that looked like successes and
+were not.
