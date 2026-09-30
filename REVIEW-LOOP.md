@@ -2500,6 +2500,43 @@ reviewer had ever been shown the thing they were reporting about. The same
 shape as the missing result card in round 68, except this time the gap hid a
 true finding instead of a fixed one.
 
-Open, and the next product change: fighters need depth order and a contact
-shadow or occlusion cue at the moment a kick lands, so a striking limb reads as
-in front of or behind the body it is striking rather than through it.
+### Round 70 — correction: the occlusion "defect" I logged in round 69 was mine, and it was wrong
+
+I wrote above that the white fighter's foot was **inside** the red fighter's
+torso with no occlusion, and queued a depth-order fix. Before changing product
+code I went looking for where depth is assigned, and it has been there the whole
+time, at `main.ts:678`:
+
+    const attacking = fighter.phase === 'startup' || fighter.phase === 'active';
+    views[index]!.root.position.z = attacking ? 0.08 : index === 0 ? 0.02 : -0.02;
+
+**The striking fighter is deliberately drawn in front, and the frame shows
+exactly that** — the white fighter's kicking leg passes *over* the red fighter's
+body, which is what a side-view kick connecting is supposed to look like. Both
+fighters also carry distinct depths at rest, so they never fight over the same
+pixels.
+
+So there is no occlusion defect, there is no depth bug, and the fix I queued
+does not need to exist. What I saw as "a leg through a torso" is a leg in front
+of a torso, at a z-offset chosen four months ago for exactly this moment.
+
+**This is the seventh time this loop has caught a confident, specific, wrong
+conclusion — and the first time the wrong conclusion was mine rather than a
+model's.** I have spent six rounds applying that discipline to reviewers and
+then walked straight into it myself, on a frame I had only just built, with a
+crop I had already been burned by twice in this same file.
+
+The specific failure is worth naming because it is not "did not look closely".
+I looked closely, at a good crop, and got the direction of the overlap wrong.
+Confidence was never the problem. **The problem was that I had a story ready —
+"the set was missing the screen, so the frame must be showing a real defect" —
+and the frame was more agreeable with the story than with the code.** A frame
+that finally appears after you have spent a round insisting one is missing is
+the most persuasive frame you will ever look at, and that is exactly when to go
+read the renderer instead of the picture.
+
+The real, still-open observation from that frame is smaller and is already known
+to the loop: on `front_kick@active` there is no contact cue at the point of
+impact. That is the impact-VFX finding that `grok-4.5`, `qwen3.6-flash`,
+`claude-opus-4.8` and others have reported, it is a different thing from
+occlusion, and it is not fixed.
