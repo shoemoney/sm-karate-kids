@@ -439,7 +439,11 @@ export class Hud {
   }
 
   /** Builds the technique reference list straight from content — no second copy of the move list. */
-  renderTechniques(container: HTMLElement, moves: ReadonlyMap<string, MoveSpec>): void {
+  renderTechniques(
+    container: HTMLElement,
+    moves: ReadonlyMap<string, MoveSpec>,
+    pointsToWin: number,
+  ): void {
     container.replaceChildren();
 
     // A key, once, for the two glyphs every row is built from.
@@ -545,21 +549,27 @@ export class Hud {
     // them what they were looking at.
     const rules = document.createElement('p');
     rules.className = 'tech-rules';
-    rules.textContent =
-      // This was not merely ambiguous, it was inverted. It said "a half point is
-      // awarded for a technique that lands only partway", which describes a
-      // landing, but the half is a property of the MOVE — `value: 'half'` in the
-      // content data — and what varies is whether the referee promotes it. A
-      // half-point technique is promoted to a full point when it lands as a
-      // counter, i.e. while the opponent is still winding up; otherwise it
-      // scores the half it is listed as. `openai/gpt-6.1-sol` (via codex) caught
-      // it as "rows list Half point or Full point without identifying those
-      // values as fixed awards or maximum awards" — the rows are right and the
-      // paragraph was the thing telling the player otherwise.
-      'Point karate. One clean contact ends the exchange — no health bars, no damage. ' +
-      'Each move lists what it scores: half or full. A half-point move is promoted to a ' +
-      'full point when it lands as a counter — while your opponent is still winding up. ' +
-      'First to 2 takes the round.';
+    // Built from the data, not written beside it.
+      // Built from the data, not written beside it.
+      // Round 101 corrected this sentence by hand and said the real fix was to
+      // generate it. Three defects in three rounds had come from this one
+      // surface describing the same five glyphs and the same scoring rule in
+      // four places — a key, a notation, a legend and this paragraph — and a
+      // hand-written one is a fourth place to forget to update.
+      //
+      // So: the counts come from the move list and the win target comes from the
+      // ruleset, both of which are already loaded here. If a move table changes
+      // the paragraph changes with it, and if `pointsToWin` is ever not 2 the
+      // sentence can no longer say 2.
+      const all = [...moves.values()];
+      const halfCount = all.filter((m) => m.value === 'half').length;
+      const fullCount = all.length - halfCount;
+      rules.textContent =
+        'Point karate. One clean contact ends the exchange — no health bars, no damage. ' +
+        `Of the ${all.length} techniques, ${fullCount} score a full point and ` +
+        `${halfCount} score a half, and a half is promoted to a full when it lands ` +
+        'as a counter — while your opponent is still winding up. ' +
+        `First to ${pointsToWin} takes the round.`;
     container.append(rules);
 
     for (const family of FAMILIES) {

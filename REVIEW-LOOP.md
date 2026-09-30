@@ -4270,3 +4270,53 @@ now does with the glyphs, and what this paragraph should have done with the
 scoring rule all along.
 
 Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 102 — finishing what round 101 said the fix was
+
+Round 101 corrected the rules paragraph by hand and then wrote, correctly, that
+the real fix was to generate it. **This round does that**, because the sentence
+was still hand-written and the note next to it was still a promise.
+
+    Of the 20 techniques, 10 score a full point and 10 score a half,
+    and a half is promoted to a full when it lands as a counter.
+
+The counts come from `moves.values()` and the win target from
+`content.rulesets[0].pointsToWin` — both already loaded where the sheet renders.
+So the sentence cannot disagree with the table above it, because it is computed
+from it. If a move is added, re-valued, or the round target changes, the
+paragraph changes with it, and there is no longer a fourth place to forget.
+
+One wrinkle worth recording: the obvious source for the target was
+`state.ruleset.pointsToWin`, and that does not exist yet at the call site —
+`createMatch` runs at line 220 and the sheet renders at 206, long before a bout
+exists. The value is the same one the ruleset carries, and reading it from
+`content` is what makes the sheet renderable before a fight has been started,
+which is the whole point of it being a reference sheet.
+
+### The shape of the last four rounds, which is the real content of this log
+
+    r92   rows ordered the `+` wrongly        — notation hand-written
+    r100  key rendered two identical dots     — key hand-written
+    r101  prose inverted the scoring rule     — paragraph hand-written
+    r102  the paragraph is now computed       — the pattern, not the symptom
+
+Four defects, one cause, and the cause is not carelessness: **every one of them
+was a place where the code knows something exactly and a human wrote a second
+copy of it next to the first.** The glyph maps, the move table, the ruleset, the
+point values, the win target — all of them are data, and all of them had prose
+beside them.
+
+The round-100 legend is the proof the pattern is real rather than a theory: when
+the key was built from `QUALIFIER_GLYPH` and `FAMILY_GLYPH` instead of typed out,
+it immediately gained a *new* bug — the same word under two different glyphs —
+which was the last possible moment for a hand-written list to go wrong, and is
+also the moment it is most likely to, because by then you are looking at it
+fresh. Generating it fixed that too, not by being clever but by removing the
+copy.
+
+**The generalisable rule, and it is the one I would carry to any codebase:
+whenever a string restates something the machine already knows, the string is a
+bug waiting for a round number.** There is no review that finds all of them. The
+only thing that finds them is deleting the copy.
+
+Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.

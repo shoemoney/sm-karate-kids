@@ -203,7 +203,11 @@ async function boot(screen: BootScreen): Promise<void> {
   const input = new PlayerInput();
   const settings = new SettingsStore();
   bindSettingsUI(settings, hud, audio);
-  hud.renderTechniques(byId('tech-ref-list'), indexMoves(content));
+  // Read from the content, not from `state` — the match is not built until line
+  // 220 and the sheet is rendered long before a bout exists. The value is the
+  // same one the ruleset carries; asking the content for it is what stops the
+  // paragraph from being able to disagree with the rule it describes.
+  hud.renderTechniques(byId('tech-ref-list'), indexMoves(content), content.rulesets[0]!.pointsToWin);
   updateCareerSummary();
 
   // The round/result card's painted backdrop. Set as a token rather than written
