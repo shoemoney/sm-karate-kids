@@ -3637,3 +3637,49 @@ candidate fixes, and it is the strongest candidate in this log for a human to
 overrule.** The reviewers were not hallucinating a missing limb for six rounds;
 they were accurately reporting that at the size a player actually sees it, the
 foot is not there.
+
+### Round 90 — a shadow under the raised foot, and a measurement that flattered me
+
+Round 89 named three fixes for the invisible foot. Two are art-direction changes
+to a generated asset with a provenance record. **The third is not**: a cast
+shadow under a raised foot is a presentation effect, and `stage.ts` already
+builds a contact-shadow blob per fighter from the same texture and geometry. So
+it is in scope, and it was the right thing to attempt.
+
+Built it: a second, softer, dimmer blob per fighter, hidden until a strike is
+extended, placed at `move.reach` because the foot is at the end of its own reach
+and `reach` is real simulation data rather than a guess about the art.
+
+**And it did not work, and my own measurement said it had.**
+
+    build with the shadow    foot-vs-underfoot  3.26:1
+    reverted to baseline     foot-vs-underfoot  3.20:1
+
+That is a 0.06 difference. I took the 3.26 as a 10% improvement and was about to
+gate it, commit it and write it up as a fix. Then I looked at the frame, and
+**there is no shadow under the foot** — the blob was being placed at the frame's
+midpoint with a hardcoded direction, nowhere near the kicking fighter's actual
+foot, so it was landing on bare mat beside them.
+
+**This is the most dangerous failure in the log, and it is worse than any of the
+false reports, because every layer of it agreed with me.** The code compiled. The
+typecheck passed. The measurement moved in the right direction. The commit
+message was going to be confident. The only thing that caught it was the crop I
+had already decided to take, and if I had skipped that crop — which I had
+skipped the equivalent one in rounds 64, 70 and 82 — I would have shipped a
+no-op with a green gate and a number in the log to back it.
+
+**A metric that moves when you have just changed the thing it measures is not
+evidence until the picture agrees with it.** The 0.06 was noise; the honest
+baseline is that this foot is at ~3.2:1 against the mat and has not been changed
+at all.
+
+Reverted. `stage.ts` is at HEAD and `pnpm check` is green.
+
+**The underlying problem is now stated properly, and it is a plumbing one rather
+than a creative one:** `frame()` receives `midpointX`, `gap` and a single
+`reach`, and `reach` is the maximum over *both* fighters. It cannot say *which*
+fighter is extended or *which way* they face, so a foot shadow cannot be placed
+without threading per-fighter strike state into the renderer. That is a real
+change with a real design in it, and it belongs to whoever owns the renderer
+rather than to a review loop on iteration ninety.
