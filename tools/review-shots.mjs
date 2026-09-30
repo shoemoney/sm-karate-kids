@@ -486,6 +486,89 @@ await capture('17-phone-scored-result', phone, async (page) => {
   await page.screenshot({ path: `${OUT}/17-phone-scored-result.png` });
 });
 
+/* ---------- Round 69: a frame that actually contains a kick ---------- */
+
+/* `03-phone-strike` shows a guard stance and has done since round 1, which is
+ * why two models have reported an amputated kick from a frame with no kick in
+ * it. The kick also has the longest reach in the game and is the only move the
+ * camera pulls back for, so it is the frame most worth actually having.
+ *
+ * Drawn on the simulation clock, not on a screenshot timer: the phase is read
+ * from the same debug surface the e2e suite reads, so the capture lands in the
+ * active window of a real kick rather than near one. */
+await capture('18-phone-kick', phone, async (page) => {
+  await page.goto(`${BASE}/?mode=dojo`, { waitUntil: 'networkidle' });
+  await waitFight(page);
+  const anchor = async (sel) => {
+    const box = await page.locator(sel).boundingBox();
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  };
+  const L = await anchor('#zone-left');
+  const R = await anchor('#zone-right');
+  const cdp = await page.context().newCDPSession(page);
+  const pts = new Map();
+  const send = (type) =>
+    cdp.send('Input.dispatchTouchEvent', {
+      type,
+      touchPoints: [...pts].map(([id, q]) => ({ x: Math.round(q.x), y: Math.round(q.y), id })),
+    });
+  const state = () =>
+    page.evaluate(() => (globalThis.__smkk?.state?.() ?? null));
+
+  // Close the gap first, so the kick is thrown from inside strike range rather
+  // than from across the mat where it would whiff.
+  for (let i = 0; i < 24; i += 1) {
+    pts.clear();
+    pts.set(1, { x: L.x, y: L.y });
+    await send('touchStart');
+    pts.set(1, { x: L.x + 58, y: L.y });
+    await send('touchMove');
+    await page.waitForTimeout(170);
+    await send('touchEnd');
+    await page.waitForTimeout(140);
+    const s = await state();
+    const pos = s?.positions ?? [];
+    const ax = typeof pos[0] === 'object' ? pos[0].x : pos[0];
+    const bx = typeof pos[1] === 'object' ? pos[1].x : pos[1];
+    if (typeof ax === 'number' && typeof bx === 'number' && Math.abs(ax - bx) < 1.5) break;
+  }
+
+  // Now throw, and shoot on the frame the move is actually active.
+  pts.clear();
+  pts.set(1, { x: L.x, y: L.y });
+  await send('touchStart');
+  pts.set(2, { x: R.x, y: R.y });
+  await send('touchStart');
+  // technique UP is `front_kick`. The stick directions are not named after the
+  // moves: forward is a lunge punch, down a foot sweep, back a reverse punch.
+  pts.set(2, { x: R.x, y: R.y - 58 });
+  await send('touchMove');
+  await send('touchEnd');
+  pts.clear();
+
+  // `p1Phase` and `p1Move` are the flat debug surface; a kick is an active
+  // phase on a move whose id names a kick. Anything else and this would
+  // screenshot a recovery frame and call it a kick, which is the mistake the
+  // `03-phone-strike` frame has been making since round 1.
+  let caught = false;
+  for (let i = 0; i < 24; i += 1) {
+    const s = await state();
+    const isKick = String(s?.p1Move ?? '').includes('kick');
+    if (s?.p1Phase === 'active' && isKick) {
+      await page.screenshot({ path: `${OUT}/18-phone-kick.png` });
+      caught = true;
+      break;
+    }
+    if (String(s?.p1Move ?? '').includes('kick') && s?.p1Phase === 'startup') {
+      await page.screenshot({ path: `${OUT}/18-phone-kick.png` });
+      caught = true;
+      break;
+    }
+    await page.waitForTimeout(20);
+  }
+  if (!caught) console.warn('18-phone-kick: no active kick observed, frame not written');
+});
+
 await browser.close();
 console.log(`shots in ${OUT}`);
 if (errors.length) console.log('console errors:\n' + [...new Set(errors)].join('\n'));

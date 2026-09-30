@@ -2459,3 +2459,47 @@ the set since round 1 and has never contained a strike.
 
 Both are captures, not product changes, and both are cheap now that
 `17-phone-scored-result` proved the thumb grammar reaches a real result.
+
+### Round 69 — the kick frame, and the harness refusing to lie about it
+
+**First run of the kick capture wrote nothing, and that was the feature working.**
+
+I drove `technique → forward`, which reads as "the kick" to anyone who has not
+read the move table. It is `lunge_punch`. The capture's guard required an active
+phase on a move whose id names a kick, found `lunge_punch`, and printed
+`18-phone-kick: no active kick observed, frame not written` rather than saving a
+punch under a kick's name.
+
+**The stick directions are not named after the moves:**
+
+    technique up       front_kick
+    technique forward  lunge_punch
+    technique down     foot_sweep
+    technique back     reverse_punch
+
+So the frame the loop has been missing since round 1 was one input away from
+where I was pressing, and `03-phone-strike` has been showing a guard stance
+while carrying a filename that promises a strike. Fixed: `technique → up` is
+`front_kick`, and `18-phone-kick` now writes on a real `front_kick@active`.
+
+**And the frame immediately earned its place by making a claim visible that this
+loop had twice recorded as untestable.**
+
+`step-3.7-flash` reported in round 66 that "fighter limbs clip through each
+other during kicks", and it went into this log as open-but-untested, because no
+frame contained a kick. The capture shows it: on the captured frame the white
+fighter's extended foot is **inside the red fighter's torso**, with the two
+torsos merging and the red fighter's arm passing behind the white fighter's
+thigh. Both fighters are fully drawn, both limbs are intact — this is not the
+amputated-kick report, which was a phantom — but the contact frame has no
+occlusion, so a leg that should be behind a body reads as through it.
+
+**That is a real defect, found by adding a frame rather than by adding a model.**
+It is the first finding in this log that no reviewer reported, because no
+reviewer had ever been shown the thing they were reporting about. The same
+shape as the missing result card in round 68, except this time the gap hid a
+true finding instead of a fixed one.
+
+Open, and the next product change: fighters need depth order and a contact
+shadow or occlusion cue at the moment a kick lands, so a striking limb reads as
+in front of or behind the body it is striking rather than through it.
