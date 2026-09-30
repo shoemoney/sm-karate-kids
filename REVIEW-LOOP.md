@@ -3867,3 +3867,51 @@ describe. Left open with the number attached, because a wrong explanation
 shipped at iteration ninety would be worse than an honest gap — and the last two
 rounds of this log are both about measurements that looked like successes and
 were not.
+
+### Round 95 — the impact fix holds, and a bare number gets a name
+
+Standing reviewer, `openai/gpt-6.1-sol` via codex:
+
+    misaligned-half-score
+    unreadable-kick-foot
+    wrong-way-result-pose
+    tiny-technique-metadata
+    unexplained-result-time          <- fixed this round
+
+**`displaced-impact-streak` is gone from the list.** Round 93's velocity change
+took the burst from a torso-height column to something the reviewer no longer
+mentions, and the residual round 94 could not explain turned out not to be
+visible enough to report. Recorded as a working fix even though the arithmetic
+is not fully understood — the review is the instrument, and it stopped reporting.
+
+**`unexplained-result-time` is a real copy defect and the cheapest kind there
+is.** The result card read:
+
+    BOUTS WON 1 / 1 · best 6.4s
+
+A bare number next to a lowercase `best`, on a card whose clock reads 29s. A
+player cannot check that claim — 6.4s looks like a different clock, a bug, or a
+round they never saw. It is the fastest win.
+
+**The interesting part is that the game already knew.** Line 105 of the same file
+builds the career view as `best win 6.4s` — correct, and written by the same
+loop. Line 408 built the result card as a bare `6.4s`. **Two screens, one file,
+two meanings for the same number**, and the reviewer read the one that was
+wrong. Fixed to `FASTEST WIN 6.4S`, which also makes the "no win yet" case
+readable instead of emitting a lone em-dash.
+
+This is round 92's defect again — the same class, found by the same reviewer on
+its third run. Round 92 was a notation the key disagreed with; round 95 is a
+label that doesn't say what it labels. **Both are cases of the product
+containing a statement it never checked**, and both were invisible to every
+automated gate in this repo because a string is a string.
+
+**`wrong-way-result-pose` is the eighth report in the kick family**, now
+restated against the scored-result frame rather than the kick frame. Round 89
+established the mechanism — the foot is whole, and it is 11px at 2.96:1 against
+the mat, which is a thing a viewer reports as absent — and that remains the
+open, measured, correct finding. Three high-zoom refusals and one honest
+concession later, the loop's position on it has not moved: **the sprite is fine
+and the foot does not read.**
+
+Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.

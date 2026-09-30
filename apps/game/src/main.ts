@@ -405,7 +405,18 @@ async function boot(screen: BootScreen): Promise<void> {
           finishTournamentBout(winner === 0, nowMs);
         } else {
           const [a, b] = state.fighters;
-          const best = record.bestWinTicks === null ? '—' : `${(record.bestWinTicks / 60).toFixed(1)}s`;
+          // This card said `Bouts won 1 / 1 · best 6.4s`, and a bare number
+          // with a lowercase `best` next to it is not a claim a player can
+          // check: the clock beside it reads 29s, so 6.4s looks like a different
+          // clock, a bug, or a round they never saw. It is the fastest win, and
+          // saying so costs four characters. `openai/gpt-6.1-sol` (via codex)
+          // called it "unexplained result time"; the career view at line 105
+          // already words it correctly, so the two screens disagreed about what
+          // the same number meant.
+          const best =
+            record.bestWinTicks === null
+              ? 'no win yet'
+              : `fastest win ${(record.bestWinTicks / 60).toFixed(1)}s`;
           // The lesson belongs to a live bout. See clearBoutUi.
         coach.dismiss();
         // The lesson belongs to a live bout. See clearBoutUi.
@@ -418,7 +429,7 @@ async function boot(screen: BootScreen): Promise<void> {
               f.append(scoreFragment(a.score), document.createTextNode(' — '), scoreFragment(b.score));
               return f;
             })(),
-            detail: `Bouts won ${record.boutsWon} / ${record.boutsPlayed} · best ${best}`,
+            detail: `Bouts won ${record.boutsWon} / ${record.boutsPlayed} · ${best}`,
             rematch: () => act(),
           });
           schedule(restart, REMATCH_AFTER_MS, nowMs);

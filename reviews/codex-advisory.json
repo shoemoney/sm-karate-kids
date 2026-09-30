@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-29T22:05:19",
+ "reviewed_at": "2026-09-29T22:25:39",
  "items": [
   {
-   "title": "misaligned-half-points",
-   "claim": "In 07-phone-result.png, the denominator of HasanAbi\u2019s half-point fraction drops below the adjacent whole-number baseline in both the HUD and result score.",
-   "reason": "The stacked digits make a single mixed score harder to read quickly.",
-   "suggest": "Use a compact inline \u00bd glyph aligned with the whole number in both locations."
+   "title": "misaligned-half-score",
+   "claim": "In Image #8, the fraction in both the HUD\u2019s 2\u00bd and the result\u2019s 0 \u2014 2\u00bd hangs below the neighboring whole numbers.",
+   "reason": "The score reads as separate vertically scattered digits.",
+   "suggest": "Keep the integer and fraction in one inline row, with the fraction vertically centered beside the integer."
   },
   {
-   "title": "displaced-impact-streak",
-   "claim": "In 11-phone-impact.png, white particles extend from above Asmongold\u2019s head to his belt, while HasanAbi\u2019s kicking foot meets his neck and shoulder.",
-   "reason": "The effect obscures where the strike actually connects.",
-   "suggest": "Center a compact particle burst at the foot\u2019s contact point and shorten its vertical trails."
+   "title": "unreadable-kick-foot",
+   "claim": "In Image #13, Asmongold\u2019s raised leg ends abruptly near the trouser cuff, and I cannot distinguish a complete foot despite the FRONT KICK label.",
+   "reason": "The incomplete silhouette makes the technique harder to recognize.",
+   "suggest": "Inspect that atlas cell and give the raised foot a complete, clearly visible silhouette."
   },
   {
-   "title": "small-phone-labels",
-   "claim": "At the stated 390\u00d7844 viewport, the visible letters in the fighter names and stick captions in 02-phone-fight.png are roughly 10\u201312 pixels tall.",
-   "reason": "Players must read these labels while watching the fight on a small screen.",
-   "suggest": "Set label fonts to at least 18 CSS pixels and help text to 20 pixels, adjusting spacing and wrapping."
+   "title": "wrong-way-result-pose",
+   "claim": "In Image #18, the winning Asmongold extends his kicking foot left while HasanAbi stands to his right.",
+   "reason": "The result illustration shows the strike pointing away from the opponent.",
+   "suggest": "Use a dedicated victory stance for the result screen."
   },
   {
-   "title": "inconsistent-combination-notation",
-   "claim": "In 05-phone-techref.png, the header places \u201c+\u201d between Stance and Technique, but the move rows place \u201c+\u201d after both stick diagrams.",
-   "reason": "The rows contradict the notation used to explain how commands combine.",
-   "suggest": "Render each row as stance diagram, plus sign, technique diagram, then move name."
+   "title": "tiny-technique-metadata",
+   "claim": "In Image #6, the technique metadata letters are roughly 10px tall when the screenshot is scaled to the stated 390px viewport.",
+   "reason": "Players must read these labels to compare target height and scoring value.",
+   "suggest": "Set metadata to at least 18 CSS px and wrap it beneath each move name."
   },
   {
-   "title": "controls-outsize-fighters",
-   "claim": "In 21-phone-kick-open.png, each joystick is approximately 168 CSS pixels across while each fighter is approximately 130 CSS pixels tall.",
-   "reason": "The controls dominate the view while the smaller fighters make poses harder to distinguish.",
-   "suggest": "Limit portrait camera zoom-out to keep fighters at least 170 CSS pixels tall while preserving the sticks\u2019 touch areas."
+   "title": "unexplained-result-time",
+   "claim": "Image #18 shows a 29s bout clock alongside BEST 6.4S without identifying what time the record measures.",
+   "reason": "A player cannot reconcile the remaining bout time with the displayed record.",
+   "suggest": "Show explicitly labeled elapsed time on the result and define BEST using that same clock."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"misaligned-half-points\",\n    \"claim\": \"In 07-phone-result.png, the denominator of HasanAbi\u2019s half-point fraction drops below the adjacent whole-number baseline in both the HUD and result score.\",\n    \"reason\": \"The stacked digits make a single mixed score harder to read quickly.\",\n    \"suggest\": \"Use a compact inline \u00bd glyph aligned with the whole number in both locations.\"\n  },\n  {\n    \"title\": \"displaced-impact-streak\",\n    \"claim\": \"In 11-phone-impact.png, white particles extend from above Asmongold\u2019s head to his belt, while HasanAbi\u2019s kicking foot meets his neck and shoulder.\",\n    \"reason\": \"The effect obscures where the strike actually connects.\",\n    \"suggest\": \"Center a compact particle burst at the foot\u2019s contact point and shorten its vertical trails.\"\n  },\n  {\n    \"title\": \"small-phone-labels\",\n    \"claim\": \"At the stated 390\u00d7844 viewport, the visible letters in the fighter names and stick captions in 02-phone-fight.png are roughly 10\u201312 pixels tall.\",\n    \"reason\": \"Players must read these labels while watching the fight on a small screen.\",\n    \"suggest\": \"Set label fonts to at least 18 CSS pixels and help text to 20 pixels, adjusting spacing and wrapping.\"\n  },\n  {\n    \"title\": \"inconsistent-combination-notation\",\n    \"claim\": \"In 05-phone-techref.png, the header places \u201c+\u201d between Stance and Technique, but the move rows place \u201c+\u201d after both stick diagrams.\",\n    \"reason\": \"The rows contradict the notation used to explain how commands combine.\",\n    \"suggest\": \"Render each row as stance diagram, plus sign, technique diagram, then move name.\"\n  },\n  {\n    \"title\": \"controls-outsize-fighters\",\n    \"claim\": \"In 21-phone-kick-open.png, each joystick is approximately 168 CSS pixels across while each fighter is approximately 130 CSS pixels tall.\",\n    \"reason\": \"The controls dominate the view while the smaller fighters make poses harder to distinguish.\",\n    \"suggest\": \"Limit portrait camera zoom-out to keep fighters at least 170 CSS pixels tall while preserving the sticks\u2019 touch areas.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"misaligned-half-score\",\n    \"claim\": \"In Image #8, the fraction in both the HUD\u2019s 2\u00bd and the result\u2019s 0 \u2014 2\u00bd hangs below the neighboring whole numbers.\",\n    \"reason\": \"The score reads as separate vertically scattered digits.\",\n    \"suggest\": \"Keep the integer and fraction in one inline row, with the fraction vertically centered beside the integer.\"\n  },\n  {\n    \"title\": \"unreadable-kick-foot\",\n    \"claim\": \"In Image #13, Asmongold\u2019s raised leg ends abruptly near the trouser cuff, and I cannot distinguish a complete foot despite the FRONT KICK label.\",\n    \"reason\": \"The incomplete silhouette makes the technique harder to recognize.\",\n    \"suggest\": \"Inspect that atlas cell and give the raised foot a complete, clearly visible silhouette.\"\n  },\n  {\n    \"title\": \"wrong-way-result-pose\",\n    \"claim\": \"In Image #18, the winning Asmongold extends his kicking foot left while HasanAbi stands to his right.\",\n    \"reason\": \"The result illustration shows the strike pointing away from the opponent.\",\n    \"suggest\": \"Use a dedicated victory stance for the result screen.\"\n  },\n  {\n    \"title\": \"tiny-technique-metadata\",\n    \"claim\": \"In Image #6, the technique metadata letters are roughly 10px tall when the screenshot is scaled to the stated 390px viewport.\",\n    \"reason\": \"Players must read these labels to compare target height and scoring value.\",\n    \"suggest\": \"Set metadata to at least 18 CSS px and wrap it beneath each move name.\"\n  },\n  {\n    \"title\": \"unexplained-result-time\",\n    \"claim\": \"Image #18 shows a 29s bout clock alongside BEST 6.4S without identifying what time the record measures.\",\n    \"reason\": \"A player cannot reconcile the remaining bout time with the displayed record.\",\n    \"suggest\": \"Show explicitly labeled elapsed time on the result and define BEST using that same clock.\"\n  }\n]"
 }
