@@ -2540,3 +2540,45 @@ to the loop: on `front_kick@active` there is no contact cue at the point of
 impact. That is the impact-VFX finding that `grok-4.5`, `qwen3.6-flash`,
 `claude-opus-4.8` and others have reported, it is a different thing from
 occlusion, and it is not fixed.
+
+### Round 71 — `lunge_punch` is a half point, and a half point never appears
+
+Closing the last open instrument gap needs a frame with a half on the board, so
+the stacked fraction can be judged instead of inferred. The move table settles
+which move that is — `value` is `half` for ten of the twenty moves, and among
+the four reachable from the thumb grammar the half-point one is
+**`lunge_punch`, which is `technique → forward`**.
+
+Which means the move I have been pressing in every capture this loop is the half
+point, and driving it for 18–26 attempts ends at:
+
+    scores: [2, 0]      HUD text: "2"      .score-frac: absent
+
+**A whole number.** So after two dozen half-point strikes the board reads `2`,
+not `0.5`, `1`, `1.5`, and never shows a fraction at any sampled moment. Polling
+`state().scores` and the DOM together across 26 attempts produced **no frame in
+which the HUD was showing a half**.
+
+Two readings, and I am not choosing between them on a guess:
+
+1. **The half is real and my sampling missed it.** The score could pass through
+   0.5 between two 460ms polls, and the e2e read latency on a real browser is
+   easily that. The fix is a 60Hz read of `state().scores` from inside the page
+   rather than a round trip per check.
+2. **`value: 'half'` does not mean the score increments by 0.5.** It may be
+   describing a scoring *category* rather than a magnitude, and the board may only
+   ever hold integers — in which case the stacked fraction the loop has spent
+   thirty-one rounds on, and six models have reported, **renders only on paths
+   the game never actually reaches**, and the entire finding is about dead code.
+
+The second reading is the uncomfortable one, and it is the reason this is written
+down rather than quietly fixed. If (2) is true then round 67's fix was correct,
+its tests were correct, and the thing five models reported was an artefact of
+reviewing a notation they could see in the source and not in play.
+
+**The check that settles it, for next round:** sample `state().scores` inside the
+page on every animation frame for one whole bout, and log every distinct value it
+takes. If 0.5 is in that set, the capture is a timing problem. If the set is
+`[0, 1, 2]` only, it is a rules problem, and the honest move is to say so and
+decide deliberately whether a half point should exist at all — not to keep
+polishing a fraction no player will ever see.
