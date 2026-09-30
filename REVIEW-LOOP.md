@@ -3308,3 +3308,59 @@ for six rounds because the reports arrive phrased as the other.
 Recorded as a real, measured, still-open composition finding rather than a
 refusal — which is the first time this claim has been given a number, and the
 first time the number has contradicted the loop's own reasoning.
+
+### Round 84 — the headroom is arithmetic, and two plausible fixes make it worse
+
+Round 83 left a measured claim: 39.7% of the play area is empty dojo above the
+fighters. I went to fix it, tried two levers, and both made the game worse. The
+reason is worth more than either fix.
+
+**Lever 1 — lift the camera.** `eyeY` 1.18 → 1.42, so the window looks higher.
+Measured result: **39.7% → 39.5%.** Nothing. Lifting the camera slides the window;
+it does not shrink it, and it spends the floor under the fighters' feet. The
+existing comment in `stage.ts` already said this had been tried — and it was
+right, and I should have read the comment before spending a round rediscovering
+it.
+
+**Lever 2 — cap the vertical window independently of the width-driven distance.**
+Mechanically sound, and it produced this:
+
+    fighters  99.9% of play width (was 85.4%)
+    empty above  37.6%          (was 39.7%)
+
+Two units of dead space traded for **the entire margin gone.** Both fighters now
+span the full frame width, which is exactly the condition round 80 measured and
+fixed — a 140-frame burst found 15 frames with a fighter's pixels against the
+stage edge, and a scored back kick with the foot cut off by the frame. **I was
+about to reintroduce the single worst visual defect this loop has found, to
+recover 2.1% of dead space.**
+
+Reverted both.
+
+**The arithmetic, which is the actual finding.** Three.js `PerspectiveCamera`
+takes a *vertical* FOV, and a 390x844 phone is 0.462 aspect, so holding the
+fighters' width sets the distance and the vertical window comes out 1/aspect —
+about 2.2x — taller than a square framing needs:
+
+    needed half-width   2.92 world units (both fighters + margin + body + reach)
+    forces distance     21.5
+    visible half-height 6.57
+    window              y -5.39 .. 7.75, for fighters 1.7 tall
+    headroom above a head   6.05 world units
+
+**The headroom is not a bug in the camera. It is the direct consequence of
+needing 5.84 world units of width on a screen that is 0.462 as wide as it is
+tall.** The only ways to remove it are to crop the kicks (round 80's defect), to
+pillarbox the frame (wasting the width the kicks need), or to accept it.
+
+So the eight reviewers' "the fighters are too small" was, underneath, a true
+observation about **unused vertical space** produced by a game whose moves are
+wide and whose screen is tall. Neither the camera nor the framing can fix that,
+and this loop spent round 84 proving it.
+
+**What would fix it is not a camera change, and it is the one honest answer from
+eighty-four rounds:** fill the space with something. The room above the fighters
+is 40% of the frame of a dojo with a back wall, a shoji screen and a crowd — all
+of it already modelled. A tighter crop on the *fighters* with the room visible
+above them is the composition the models keep describing, and it is available
+without touching the framing at all.
