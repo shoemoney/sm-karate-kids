@@ -1,0 +1,85 @@
+{
+  "model": "z-ai/glm-5.3-flash",
+  "elapsed_s": 72.2,
+  "usage": {
+    "prompt_tokens": 18000,
+    "completion_tokens": 8487,
+    "total_tokens": 26487,
+    "cost": 0.0069435,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0069435,
+      "upstream_inference_prompt_cost": 0.0027,
+      "upstream_inference_completions_cost": 0.0042435
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7163,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "portrait-fighter-scale",
+      "title": "Zoom the portrait camera in \u2014 the fighters are too small to read",
+      "what": "In the in-fight portrait shots, the two fighters occupy only about a quarter of the frame height (heads around 37% down, feet around 61% down the capture), while roughly 30% of the frame above their heads is empty shoji/ceiling and another band of bare mat sits below their feet before the STANCE/TECHNIQUE legend panel starts. On a 390x844 phone that works out to roughly 200px of fighter on screen, in a game whose entire skill is reading wind-ups and strike height.",
+      "why": "Players physically cannot distinguish mid vs low vs high at arm's length at that scale, so the core loop \u2014 see the technique coming, pick the correct height counter \u2014 degrades into squinting. Meanwhile the most valuable pixels on a portrait phone (the middle of the screen) are spent on backdrop and dead mat instead of the action.",
+      "how": "Add a portrait-specific camera zoom of roughly 1.35-1.5x (shorten camera distance or scale the framing target) so the fighters' bounding box fills ~55% of frame height with headroom left for jumps, and drop the floor line so feet sit just above the legend panel. Also auto-fade the STANCE/TECHNIQUE legend after the first completed round \u2014 it duplicates the MOVES sheet and permanently eats stage height."
+    },
+    {
+      "id": "ippon-impact-vfx",
+      "title": "The IPPON contact moment has almost no impact VFX",
+      "what": "In the 'IPPON / HASANABI / SPINNING BACK KICK' shot, the finisher that ends the exchange is marked in-scene by only a handful of thin white curved dashes near the defender's head. No flash, no burst, no ring, no visible screen response \u2014 the gold IPPON banner above is by far the loudest thing in the frame, louder than the strike itself.",
+      "why": "Point karate's whole fantasy is 'one clean contact ends it.' The contact frame is the money shot and the primary reward signal for every exchange; when the scene barely reacts and the payoff is just a text popup, finishes feel hollow and the core dopamine loop of the game underdelivers.",
+      "how": "At the contact frame, composite a 2-3 frame white-hot impact flash sprite at the contact point, 8-12 radial speed-line strokes tinted gold, an expanding shockwave ring on the tatami under the striker, an ~80ms hitstop with a quick 1.05x camera punch-in, and a one-frame warm exposure lift. Keep every effect warm-tinted so it sits inside the existing tungsten grade rather than fighting it."
+    },
+    {
+      "id": "loader-progress-invisible",
+      "title": "The loading bar shows no visible progress",
+      "what": "On the ShoeMoney boot screen, under 'Downloading the game', the progress bar is a uniform dark brown rounded track with no discernible fill \u2014 at this capture it reads as 0% even though the game is clearly mid-load \u2014 and there is no percentage or step count anywhere on the screen.",
+      "why": "A first-run player reads an empty bar as a frozen download. On cellular with no percentage, they have no way to know if it's 5 seconds or 50, and the boot/loading screen is the single most common drop-off point for browser games.",
+      "how": "Fill the track with the HUD's warm gold against the dark track for high contrast, drive it smoothly from real byte/asset progress rather than jumping, and add a small right-aligned '63%' or 'assets 41/58' readout just above the bar so forward motion is unmistakable even between progress jumps."
+    },
+    {
+      "id": "half-point-score-type",
+      "title": "The half point renders as a tiny subscript in the score",
+      "what": "When HasanAbi leads 2 and a half, the top score bar shows a full-size red '2' with a miniature '\u00bd' hanging off its lower-right at roughly 40% size and a dropped baseline; the results screen's '0 \u2014 2\u00bd' repeats the same shrunken glyph.",
+      "why": "The score is the most-referenced element on screen and half points are frequent \u2014 most techniques in the MOVES list are 'Half point' \u2014 so this is not an edge case. At phone size the tiny \u00bd reads as smudged noise or a rendering artifact, and players can't tell at a glance whether the score is 2, 2\u00bd, or match point.",
+      "how": "Typeset the fraction as a first-class glyph: render '2\u00bd' with the \u00bd at ~65-70% of the digit size and vertically centered against the digit (or simply use '2.5'), and apply the same treatment consistently in the top bar, the IPPON banner, and the results screen so the score grammar is uniform everywhere."
+    },
+    {
+      "id": "settings-sheet-cuts-fighters",
+      "title": "The settings sheet slices the fighters at the neck",
+      "what": "In both settings shots, the panel ends in a hard horizontal edge right at the fighters' chest/neck line \u2014 the live 3D scene continues below it, showing dimmed, headless torsos and legs standing on the mat. The overlay reads as decapitating the sprites rather than covering the screen, and the exposed strip of mat below the sheet does nothing useful.",
+      "why": "It looks like a rendering bug the instant settings open, which undermines trust in an otherwise polished presentation. A player who opens settings to toggle sound or handedness is greeted by what appears to be a glitch on the very first tap.",
+      "how": "Make the settings overlay full-screen with the scene behind it dimmed and blurred (or replaced by an opaque graded backdrop), or keep the partial sheet but fade the scene to black with a deep gradient scrim below its edge and shift the camera so the cut line lands on empty mat \u2014 never on the fighters' bodies."
+    }
+  ],
+  "raw": null
+}

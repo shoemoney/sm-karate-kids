@@ -2153,3 +2153,63 @@ That is the transferable lesson, and it is the last one this project has to
 teach: **before building an instrument to settle a question, check whether the
 question has a number in it.** A colour, a coordinate, a clock reading, a count.
 When it does, the answer is cheaper than the argument.
+
+### Round 64 — four models, twenty findings, two worth checking
+
+`openai/gpt-6.1-sol`, `z-ai/glm-5.3-flash`, `sakana/fugu-max`,
+`inclusionai/ling-3.0-flash-vl`. Eighteen of twenty are the standing repeats:
+the coach (now 11 models), the boot-progress bar (the oldest false alarm in the
+loop, still going), the portrait camera trade (refuted three times with numbers),
+the impact stack, the settings scrim (fixed in `217a165`), the settings sheet
+refuted twice at different zoom levels. The countdown/FIGHT conflict is the
+`STARTING IN n` split that already landed.
+
+Two were new enough to check, and **one of those was the most dangerous claim
+this loop has received since the fourteen detached limbs**:
+
+- `repair-front-kick-sprite: "restore the missing lower leg in the front-kick
+  pose"` (gpt-6.1-sol) — every limb report so far has been *detached* fragments,
+  which `a47ad7b` despeckled. This one says **absent**, and a despeckle that
+  removes small connected components is exactly the kind of change that could
+  take a real lower leg with it. It had to be checked properly.
+
+  **Refused.** Both fighters have complete legs ending in full feet, with
+  contact shadows under both. The atlas despeckle did not damage the sprite
+  sheet. (The first crop I took appeared to show the red fighter's second leg
+  sliced off at the right edge — that was my own crop boundary at 85% of the
+  width, not the frame. Seventh crop-boundary artifact in this loop.)
+
+  Worth recording that the sprite sheets came through a real verification
+  afterwards: high-zoom edges, no detached fragments, contact shadows intact.
+
+- `loading-screen-name-mismatch: "loading screen misspells fighter name"`
+  (ling-3.0-flash-vl) — **refused by grep.** `Asmongold` and `HasanAbi` are
+  spelled correctly in all four places: the meta description, the title, the
+  boot subtitle, and the HUD name element. A pure hallucination, and the first
+  this loop has received that asserts a text error rather than a visual one.
+
+### A bookkeeping defect, found by making a mistake
+
+This round I picked four models by typing IDs from memory. Three were invalid
+slugs (`gemini-3.8-flash-lite-preview`, `glm-5.1v`, `kimi-k2-thinking-vision`),
+and when I fell back to `ls reviews/` to work out what was left, the list came
+back nonsense — `google/gemini-3.8-flash` showed as unasked, and it had been
+reviewed in round 50.
+
+**The review filenames do not encode the model ID.** Every JSON carries a
+`model` field, so the asked-set was always derivable — I had been reading the
+wrong field, in the same way I once read the wrong zoom on a crop. Derived
+properly:
+
+    models asked            87
+    vision models on router 296
+    reachable (no :batch)  227
+    remaining              140
+
+**The loop had been reporting ~112 asked and ~113 remaining all along. The true
+figures are 87 and 140.** Fifty-three models were believed covered that were
+never asked at all. A queue that cannot be derived from disk is a queue that
+gets quietly wrong, and it was wrong in the flattering direction.
+
+Fix: derive the remaining list from the `model` field in `reviews/*.json`, never
+from filenames, and re-check it whenever a count is quoted.

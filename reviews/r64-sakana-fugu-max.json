@@ -1,0 +1,85 @@
+{
+  "model": "sakana/fugu-max",
+  "elapsed_s": 29.8,
+  "usage": {
+    "prompt_tokens": 18861,
+    "completion_tokens": 3044,
+    "total_tokens": 21905,
+    "cost": 0.055986,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.055986,
+      "upstream_inference_prompt_cost": 0.037722,
+      "upstream_inference_completions_cost": 0.018264
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 2071,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "fighter-scale-and-framing",
+      "title": "Enlarge fighter sprites and tighten combat framing in portrait mode",
+      "what": "In gameplay screens (e.g. bout screenshots 3, 4, 11, and 12), the combatants measure only ~150px tall, occupying under 20% of the 844px portrait height. They are dwarfed by an empty upper shoji wall and a deep expanse of blank tatami mat.",
+      "why": "On a physical mobile screen, karate strikes and spacing are difficult to read at this scale. The combatants feel miniature and detached, diluting the physical impact and tension of point karate exchanges.",
+      "how": "Tighten the Three.js camera framing by pulling the camera closer or decreasing the FOV to increase fighter sprite height by ~25-30%, anchoring the action firmly in the middle half of the screen."
+    },
+    {
+      "id": "sprite-contact-shadows",
+      "title": "Ground fighter feet with crisp directional contact shadows",
+      "what": "Across all bout screens (visible clearly in screenshots 3, 10, and 12), the fighters hover over the floor with faint, diffuse circular drop blobs under their feet that do not match their stances or the dojo's overhead lighting.",
+      "why": "Because the fighters are photorealistic cutouts, the lack of crisp occlusion contact patches makes them look like floating cardboard cutouts sliding across the mat rather than grounded martial artists bearing weight.",
+      "how": "Implement two tight, dark contact shadow meshes directly beneath each fighter's planted feet that scale with floor distance, paired with a slight elongated shadow cast backward to match the overhead lanterns."
+    },
+    {
+      "id": "persistent-control-legend-clutter",
+      "title": "Eliminate the static control cheat-sheet during active combat",
+      "what": "In screenshots 3, 4, 5, 10, 11, and 12, an opaque rectangular box displaying 'STANCE: step/jump/crouch' and 'TECHNIQUE: back/forward/up/down' sits permanently above the virtual joysticks, consuming ~65px of vertical space directly under the fighters' feet.",
+      "why": "It clutters the combat zone and obstructs the arena floor during active play. Players already have a dedicated 'MOVES' button in the upper HUD, making this permanent card redundant once the round starts.",
+      "how": "Fade this panel out upon the first touch or after the round countdown finishes, and embed minimal arrow glyphs or directional indicators directly into the virtual joystick base rings."
+    },
+    {
+      "id": "settings-modal-backdrop-cutoff",
+      "title": "Apply full-screen scrim behind the Settings bottom sheet",
+      "what": "In the Settings screen (screenshots 7 and 14), the dark background panel cuts off abruptly halfway down the screen (~55% mark), leaving the fighters' lower bodies and floor completely uncovered without any dimming overlay.",
+      "why": "The sharp horizontal truncation looks like an unstyled layout bug and causes visual confusion by exposing half of the underlying scene while obscuring the top half.",
+      "how": "Render a full-screen dark overlay scrim (e.g., rgba(0, 0, 0, 0.75) with backdrop-filter blur) across the entire viewport behind the settings card, matching the clean presentation used in the Techniques view (screenshot 6)."
+    },
+    {
+      "id": "strike-hud-callout-placement",
+      "title": "Anchor move names and impact feedback closer to fighter strike contacts",
+      "what": "In screenshots 5, 11, and 12, move banners ('LUNGE PUNCH', 'FRONT KICK') and scoring announcements ('IPPON') appear high up in the top third near the ceiling windows, far removed from the physical collision at chest/head level.",
+      "why": "Forcing mobile players to look back and forth between the high ceiling HUD and the combat collision point breaks focus during instantaneous point-karate exchanges.",
+      "how": "Reposition the move feedback badge to float directly above the acting fighter's head, and spawn the hit-spark flash and 'IPPON' callout centered immediately over the strike impact zone."
+    }
+  ],
+  "raw": null
+}

@@ -1,0 +1,85 @@
+{
+  "model": "openai/gpt-6.1-sol",
+  "elapsed_s": 25.5,
+  "usage": {
+    "prompt_tokens": 16238,
+    "completion_tokens": 1092,
+    "total_tokens": 17330,
+    "cost": 0.0515135,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 16235,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0515135,
+      "upstream_inference_prompt_cost": 0.0405935,
+      "upstream_inference_completions_cost": 0.01092
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 137,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "teach-stick-combinations",
+      "title": "Explain the two-stick input before the first fight",
+      "what": "On the QUALIFIER intro, the bottom controls show only STANCE and TECHNIQUE beneath four identical arrows. In the gameplay screenshots, the small legend says technique directions are merely 'back', 'forward', 'up', and 'down'; it does not identify their attacks or explain combining the sticks. At the 390px baseline, the legend text is roughly 10px tall.",
+      "why": "A new player is asked to fight before the visible interface explains how to produce a deliberate attack. Looking up combinations in the separate TECHNIQUES sheet interrupts learning and play.",
+      "how": "Add a first-bout practice prompt above the sticks: 'Hold STANCE right + TECHNIQUE right: Stepping Lunge Punch.' Highlight those two sectors and require one successful input before enabling FIGHT. Replace the technique legend's spatial labels with the corresponding neutral-stance attack names, using at least 13px text."
+    },
+    {
+      "id": "repair-front-kick-sprite",
+      "title": "Restore the missing lower leg in the front-kick pose",
+      "what": "In the FRONT KICK gameplay screenshot, Asmongold's raised white trouser leg terminates abruptly around capture coordinates x266, y575. There is no visible shin or foot beyond the horizontal thigh, making the limb look cut off rather than extended or bent.",
+      "why": "The silhouette fails to communicate the attack's reach, and the visibly incomplete fighter undermines the photoreal presentation at the exact moment players need to judge contact distance.",
+      "how": "Inspect the displayed front-kick sprite and its atlas rectangle. Restore the complete shin and foot in the source cutout, or correct the UV/crop bounds if they exclude those pixels. Check every kick frame against a contrasting background before re-exporting."
+    },
+    {
+      "id": "explicit-fight-start",
+      "title": "Separate player confirmation from the fight countdown",
+      "what": "The QUALIFIER screen displays a large FIGHT button while simultaneously showing 'STARTING IN 4', '3', or '2' directly underneath. The result screen repeats this conflict with REMATCH and 'STARTING IN 8'. The same region presents both an action to take and an apparently pending automatic action.",
+      "why": "Players cannot tell whether they must tap, whether tapping skips preparation, or whether another bout will begin without their consent. This is especially confusing while they are still inspecting unfamiliar touch controls.",
+      "how": "Keep FIGHT and REMATCH as explicit confirmation buttons with no countdown beneath them. After a tap, replace the button with a clearly non-interactive '3 \u00b7 2 \u00b7 1' countdown. If automatic starts are intentional, label the action 'START NOW' and provide a visible cancel control."
+    },
+    {
+      "id": "contain-half-point-score",
+      "title": "Keep fractional scores inside the scoreboard",
+      "what": "On the HASANABI WINS screen, the top-right score renders the half in 2\u00bd as a vertically stacked red 1 and 2. The denominator extends below the rounded scoreboard's bottom edge, unlike the clean 2\u00bd shown in the central result.",
+      "why": "Half-point scoring is a core rule, but its HUD representation looks broken and is harder to read at phone size. The overflow also compromises the most persistent UI element.",
+      "how": "Use a single inline '\u00bd' glyph, matching the central result, inside a fixed-width score container. Give the container enough width for '2\u00bd', center it vertically, and cap any score-pop animation so the entire value remains inside the bar."
+    },
+    {
+      "id": "visible-loading-progress",
+      "title": "Give the download screen a readable progress state",
+      "what": "On the ShoeMoney pre-boot screen, 'Downloading the game' sits above a thin brown track spanning nearly the full width. The captured track has no distinguishable completed segment, percentage, or transferred amount.",
+      "why": "The first screen provides no visible evidence of progress, so a player cannot distinguish an active download from a stalled boot.",
+      "how": "Render a gold completed segment against the existing dark track and show a numeric percentage beside the status when total bytes are available. When they are not, use an animated indeterminate segment and a specific stage label such as 'Fetching fighter sprites', without changing the warm, low-key background."
+    }
+  ],
+  "raw": null
+}

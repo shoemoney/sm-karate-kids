@@ -1,0 +1,85 @@
+{
+  "model": "inclusionai/ling-3.0-flash-vl",
+  "elapsed_s": 57.7,
+  "usage": {
+    "prompt_tokens": 13036,
+    "completion_tokens": 10055,
+    "total_tokens": 23091,
+    "cost": 0.000893144,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000893144,
+      "upstream_inference_prompt_cost": 0.000273756,
+      "upstream_inference_completions_cost": 0.000619388
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 8526,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-screen-name-mismatch",
+      "title": "Loading screen misspells fighter name",
+      "what": "Screenshot 1 shows 'ASMGOLD VS HASANABI' on the ShoeMoney loading screen, but every in-game HUD (screenshots 2, 3, 8, 12, 16) displays 'ASMONGOLD' with the 'O'.",
+      "why": "The loading screen is the player's first impression. A visible typo in the fighter's name looks like a broken or unpolished product and undermines credibility before gameplay begins.",
+      "how": "Update the loading screen text to read 'ASMONGOLD VS HASANABI' to match the in-game HUD. Use a shared string reference rather than hardcoding the name."
+    },
+    {
+      "id": "desktop-view-wastes-screen",
+      "title": "Desktop browser view shrinks fighters into tiny center strip",
+      "what": "Screenshot 9 shows the game in a wide desktop browser viewport. The two fighters occupy only the central ~18% of the vertical frame (roughly y=280 to y=430 in an 844px-tall equivalent), surrounded by ~300px of empty dojo above and ~350px of black empty void below. The touch controls are pushed to the extreme bottom corners with ~200px gaps between them and the fighters.",
+      "why": "The game is touch-first on a phone. In a desktop browser, the current letterboxing makes fighters hard to see and track, and the separated touch controls become awkward to reach, breaking the mobile-first design.",
+      "how": "Implement viewport scaling or a portrait-fit mode for desktop browsers so the fighters remain large and centered. Alternatively, detect desktop and offer a 'Fit to Screen' option that scales the canvas to fill the window while keeping controls adjacent to the fighters."
+    },
+    {
+      "id": "fight-button-countdown-conflict",
+      "title": "FIGHT button conflicts with automatic countdown",
+      "what": "Screenshots 2, 11, and 14 show a large gold 'FIGHT' button with 'STARTING IN X' countdown text directly beneath it (2, 3, and 4 seconds respectively).",
+      "why": "This creates interaction ambiguity: players cannot tell if they should tap FIGHT to start immediately, or if the fight begins automatically after the countdown. This confusion occurs at the most critical engagement moment before gameplay.",
+      "how": "Remove the FIGHT button and rely solely on the countdown, OR make the FIGHT button the trigger that starts the countdown immediately on tap. If automatic start is desired, replace the FIGHT button with a 'Tap to skip' prompt."
+    },
+    {
+      "id": "top-right-buttons-too-small",
+      "title": "MOVES and settings buttons are undersized touch targets",
+      "what": "In gameplay screenshots (3, 4, 5, 10, 11, 12, 13, 15, 16), the 'MOVES' button and settings gear icon sit in the top-right corner, each appearing roughly 50x30px on a 390px-wide phone screen.",
+      "why": "These are critical accessibility and settings controls, yet they are difficult to tap accurately on a phone, especially during intense gameplay when the player is focused on the center of the screen and using both thumbs on the joysticks.",
+      "how": "Increase the touch target area to at least 48x48dp by expanding the invisible hit region. Move them slightly inward from the screen edge and add more horizontal spacing between the MOVES and gear buttons."
+    },
+    {
+      "id": "always-on-control-panel",
+      "title": "Control reference panel permanently blocks lower view",
+      "what": "In gameplay screenshots (3, 4, 5, 10, 11, 12, 13, 15, 16), a semi-transparent panel showing STANCE and TECHNIQUE inputs (step, jump, crouch, back, forward, up, down) is always visible, occupying roughly 100px of vertical space between the fighters' feet and the joysticks.",
+      "why": "This permanent panel reduces the visible 3D dojo environment and obscures the lower fighting area where footwork and positioning occur. For a fighting game, seeing the full floor and fighter footwork is essential for spatial awareness and timing.",
+      "how": "Make the control panel auto-hide after 3 seconds of inactivity or tie it to a long-press on the MOVES button. Alternatively, collapse it into a small icon that expands on demand, freeing up screen space for the dojo and fighters."
+    }
+  ],
+  "raw": null
+}
