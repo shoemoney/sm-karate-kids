@@ -2,38 +2,38 @@
  "model": "openai/gpt-6.1-sol",
  "harness": "codex-cli",
  "computer_use": true,
- "reviewed_at": "2026-09-29T22:47:36",
+ "reviewed_at": "2026-09-29T22:51:15",
  "items": [
   {
-   "title": "competing-start-cues",
-   "claim": "Image 2 displays both a FIGHT button and STARTING IN 2, giving the player simultaneous manual-start and countdown cues.",
-   "reason": "A newcomer may feel rushed before understanding the controls.",
-   "suggest": "Make the introduction wait for FIGHT; reserve countdowns for transitions after the player has explicitly started."
+   "title": "fight-button-overlaps-feet",
+   "claim": "In 01-phone-title, the FIGHT button obscures the fighters\u2019 forward-foot area, whereas 02-phone-fight shows those feet unobstructed.",
+   "reason": "The opening composition hides part of the fighting stances directly behind its primary action.",
+   "suggest": "Reserve an unobstructed band for FIGHT below the fighters, adjusting the opening composition rather than shrinking the button."
   },
   {
-   "title": "result-combat-poses",
-   "claim": "Image 18 announces ASMONGOLD WINS while Asmongold is shown kicking and HasanAbi remains in a standing guard pose.",
-   "reason": "The fighter presentation does not reinforce the outcome as clearly as the headline does.",
-   "suggest": "Use distinct winner-celebration and loser-defeat poses on the result screen, without changing the scored exchange."
+   "title": "undefined-neutral-symbol",
+   "claim": "The visible portion of 05-phone-techref uses a dot for Lunge Punch\u2019s stance input without explaining what that dot means.",
+   "reason": "A beginner cannot distinguish an instruction to center the stick from an instruction to press or touch its center.",
+   "suggest": "Add a plain-language definition beside the top input legend that states the dot\u2019s verified input meaning."
   },
   {
-   "title": "empty-desktop-control-band",
-   "claim": "Image 9 places the two sticks at opposite ends of a full-width dark band with an empty center beneath the arena.",
-   "reason": "The desktop composition gives substantial visual space to an otherwise empty control area.",
-   "suggest": "Use compact bottom-corner control panels on desktop and extend the arena into the released space, preserving the portrait-phone layout."
+   "title": "ambiguous-point-values",
+   "claim": "In 05-phone-techref, the paragraph associates half points with partial contact, while individual move rows list Half point or Full point without identifying those values as fixed awards or maximum awards.",
+   "reason": "These adjacent explanations leave unclear whether scoring depends on the selected technique, contact quality, or both.",
+   "suggest": "Identify the row values explicitly as fixed or maximum awards after checking the scoring rule, and revise the paragraph to explain that same relationship."
   },
   {
-   "title": "input-badges-lack-local-labels",
-   "claim": "Image 6 identifies STANCE and TECHNIQUE in the top legend, but the individual move rows contain two input badges without those labels.",
-   "reason": "Players must remember the legend's ordering while decoding each move.",
-   "suggest": "Add labelled STANCE and TECHNIQUE columns within each technique group, keeping the input badges aligned beneath their respective labels."
+   "title": "missing-desktop-key-legend",
+   "claim": "08-desktop-fight shows STANCE and TECHNIQUE stick graphics but no visible keyboard bindings.",
+   "reason": "A desktop player cannot learn the supported keyboard controls from this screen.",
+   "suggest": "Display the verified stance and technique key bindings in the unused lower-center area when keyboard input is selected."
   },
   {
-   "title": "front-kick-endpoint-unresolved",
-   "claim": "In Image 13, the raised leg's endpoint does not show a clearly distinguishable bare-foot silhouette comparable to the planted foot, but the still cannot establish whether the foot is clipped or simply obscured by the pose.",
-   "reason": "The striking limb needs a readable silhouette, but an unsupported anatomy correction could damage a valid sprite.",
-   "suggest": "Inspect the unscaled source pose, atlas crop boundaries, and a short kick sequence before editing; expand the affected crop only if clipping is confirmed."
+   "title": "text-size-unverified",
+   "claim": "The HUD names, stick captions, and technique award labels are visible, but these screenshots cannot establish their computed CSS font sizes.",
+   "reason": "Raster display scaling is not evidence that the required 18 CSS px minimum either passes or fails.",
+   "suggest": "Measure computed font sizes and ancestor scaling at 390\u00d7844 and desktop width; enlarge any text below 18 CSS px and reflow its surrounding layout rather than compressing it."
   }
  ],
- "raw": "[\n  {\n    \"title\": \"competing-start-cues\",\n    \"claim\": \"Image 2 displays both a FIGHT button and STARTING IN 2, giving the player simultaneous manual-start and countdown cues.\",\n    \"reason\": \"A newcomer may feel rushed before understanding the controls.\",\n    \"suggest\": \"Make the introduction wait for FIGHT; reserve countdowns for transitions after the player has explicitly started.\"\n  },\n  {\n    \"title\": \"result-combat-poses\",\n    \"claim\": \"Image 18 announces ASMONGOLD WINS while Asmongold is shown kicking and HasanAbi remains in a standing guard pose.\",\n    \"reason\": \"The fighter presentation does not reinforce the outcome as clearly as the headline does.\",\n    \"suggest\": \"Use distinct winner-celebration and loser-defeat poses on the result screen, without changing the scored exchange.\"\n  },\n  {\n    \"title\": \"empty-desktop-control-band\",\n    \"claim\": \"Image 9 places the two sticks at opposite ends of a full-width dark band with an empty center beneath the arena.\",\n    \"reason\": \"The desktop composition gives substantial visual space to an otherwise empty control area.\",\n    \"suggest\": \"Use compact bottom-corner control panels on desktop and extend the arena into the released space, preserving the portrait-phone layout.\"\n  },\n  {\n    \"title\": \"input-badges-lack-local-labels\",\n    \"claim\": \"Image 6 identifies STANCE and TECHNIQUE in the top legend, but the individual move rows contain two input badges without those labels.\",\n    \"reason\": \"Players must remember the legend's ordering while decoding each move.\",\n    \"suggest\": \"Add labelled STANCE and TECHNIQUE columns within each technique group, keeping the input badges aligned beneath their respective labels.\"\n  },\n  {\n    \"title\": \"front-kick-endpoint-unresolved\",\n    \"claim\": \"In Image 13, the raised leg's endpoint does not show a clearly distinguishable bare-foot silhouette comparable to the planted foot, but the still cannot establish whether the foot is clipped or simply obscured by the pose.\",\n    \"reason\": \"The striking limb needs a readable silhouette, but an unsupported anatomy correction could damage a valid sprite.\",\n    \"suggest\": \"Inspect the unscaled source pose, atlas crop boundaries, and a short kick sequence before editing; expand the affected crop only if clipping is confirmed.\"\n  }\n]"
+ "raw": "[\n  {\n    \"title\": \"fight-button-overlaps-feet\",\n    \"claim\": \"In 01-phone-title, the FIGHT button obscures the fighters\u2019 forward-foot area, whereas 02-phone-fight shows those feet unobstructed.\",\n    \"reason\": \"The opening composition hides part of the fighting stances directly behind its primary action.\",\n    \"suggest\": \"Reserve an unobstructed band for FIGHT below the fighters, adjusting the opening composition rather than shrinking the button.\"\n  },\n  {\n    \"title\": \"undefined-neutral-symbol\",\n    \"claim\": \"The visible portion of 05-phone-techref uses a dot for Lunge Punch\u2019s stance input without explaining what that dot means.\",\n    \"reason\": \"A beginner cannot distinguish an instruction to center the stick from an instruction to press or touch its center.\",\n    \"suggest\": \"Add a plain-language definition beside the top input legend that states the dot\u2019s verified input meaning.\"\n  },\n  {\n    \"title\": \"ambiguous-point-values\",\n    \"claim\": \"In 05-phone-techref, the paragraph associates half points with partial contact, while individual move rows list Half point or Full point without identifying those values as fixed awards or maximum awards.\",\n    \"reason\": \"These adjacent explanations leave unclear whether scoring depends on the selected technique, contact quality, or both.\",\n    \"suggest\": \"Identify the row values explicitly as fixed or maximum awards after checking the scoring rule, and revise the paragraph to explain that same relationship.\"\n  },\n  {\n    \"title\": \"missing-desktop-key-legend\",\n    \"claim\": \"08-desktop-fight shows STANCE and TECHNIQUE stick graphics but no visible keyboard bindings.\",\n    \"reason\": \"A desktop player cannot learn the supported keyboard controls from this screen.\",\n    \"suggest\": \"Display the verified stance and technique key bindings in the unused lower-center area when keyboard input is selected.\"\n  },\n  {\n    \"title\": \"text-size-unverified\",\n    \"claim\": \"The HUD names, stick captions, and technique award labels are visible, but these screenshots cannot establish their computed CSS font sizes.\",\n    \"reason\": \"Raster display scaling is not evidence that the required 18 CSS px minimum either passes or fails.\",\n    \"suggest\": \"Measure computed font sizes and ancestor scaling at 390\u00d7844 and desktop width; enlarge any text below 18 CSS px and reflow its surrounding layout rather than compressing it.\"\n  }\n]"
 }

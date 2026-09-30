@@ -473,7 +473,60 @@ export class Hud {
     join.className = 'tech-plus';
     join.setAttribute('aria-hidden', 'true');
     join.textContent = '+';
-    key.append(item('·', 'stance'), join, item('·', 'technique'));
+    // The key used to render two IDENTICAL middle dots — `· stance + · technique`
+    // — which says which half of a row is which and nothing else. So a player
+    // reading `• + ▶ Lunge Punch` has a `•` in front of them with no legend
+    // anywhere on the sheet: the glyph is the entire input and the sheet never
+    // enumerates it. `openai/gpt-6.1-sol` (via codex) put it as "uses a dot for
+    // Lunge Punch's stance input without explaining what that dot means", which
+    // is exactly right and is the same key-versus-row class as round 92.
+    //
+    // The legend is built from the glyph maps themselves, so it cannot fall out
+    // of step with the rows the way a hand-written one would: every qualifier
+    // and every family is listed by the same lookup the rows use.
+    const legend = (words: readonly [string, string][], label: string): DocumentFragment => {
+      const frag = document.createDocumentFragment();
+      const head = document.createElement('span');
+      head.className = 'tech-key-label';
+      head.textContent = label;
+      frag.append(head);
+      for (const [glyph, word] of words) frag.append(item(glyph, word));
+      return frag;
+    };
+    // Words live beside the glyph maps rather than inside them: the maps are
+    // `Record<union, string>` and must stay single-valued, but the legend needs
+    // the label AND the character, and hand-writing the pairing is how the two
+    // sides drift apart again.
+    // These are ATTACK qualifiers, not stick directions — the stance stick's own
+    // labels (step / jump / crouch) are on the pad under the sheet. So the words
+    // describe the stance the technique is thrown from. An earlier pass wrote
+    // "step back" for both `up` and `back`, which put the same word under two
+    // different glyphs; the qualifier decides the posture, not the direction of
+    // travel.
+    const STANCE_WORD: Record<Qualifier, string> = {
+      neutral: 'standing',
+      up: 'airborne',
+      down: 'low',
+      forward: 'lunging',
+      back: 'retreating',
+    };
+    const TECHNIQUE_WORD: Record<AttackFamily, string> = {
+      forward: 'punch',
+      back: 'reverse',
+      up: 'kick',
+      down: 'sweep',
+    };
+    const stanceWords = (Object.keys(QUALIFIER_GLYPH) as Qualifier[]).map(
+      (q) => [QUALIFIER_GLYPH[q], STANCE_WORD[q]] as [string, string],
+    );
+    const familyWords = (Object.keys(FAMILY_GLYPH) as AttackFamily[]).map(
+      (f) => [FAMILY_GLYPH[f], TECHNIQUE_WORD[f]] as [string, string],
+    );
+    const plus = document.createElement('span');
+    plus.className = 'tech-plus';
+    plus.setAttribute('aria-hidden', 'true');
+    plus.textContent = '+';
+    key.append(legend(stanceWords, 'stance'), plus, legend(familyWords, 'technique'));
     container.append(key);
 
     // The rules, once, above the moves that follow from them.

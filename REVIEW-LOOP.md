@@ -4160,3 +4160,66 @@ own evidence**, which is the only thing that was ever missing.
 The generalisable form, and it is worth more than any single fix in this log:
 **a reviewer that is told what its instrument cannot show will say so. A reviewer
 that is only told what to look for will invent the rest.**
+
+### Round 100 — the prompt change holds, and it found a real bug the caution made findable
+
+Second run with the round-99 caution in place. The question was whether that was
+one lucky run or a durable change, and it is durable — in fact it got *better*:
+
+    text-size-unverified — "these screenshots cannot establish their computed
+    CSS font sizes"
+
+The reviewer **declined to assert a size it cannot measure.** Rounds 86, 92 and 96
+all got confident "approximately 10 pixels" claims out of this same model on this
+same set. It now says the instrument does not support the claim and stops there.
+That is the whole point of round 99 working, and it is now the default rather
+than a fluke.
+
+**And the caution did not make the reviewer passive — it made it find something
+real.**
+
+`undefined-neutral-symbol`: *"uses a dot for Lunge Punch's stance input without
+explaining what that dot means."*
+
+**That is a genuine bug, and it is a bug this loop wrote.** The techniques sheet
+has a key. The key says:
+
+    · stance  +  · technique
+
+**Two identical middle dots.** It tells you which half of a row is which and
+nothing else — so a player reading `• + ▶ Lunge Punch` has a glyph in front of
+them that no legend on the sheet enumerates. Round 92 fixed the *order* of the
+row; this is the *content* of the key, and it was never a legend at all.
+
+Now it is one, built from the glyph maps the rows themselves use, so it cannot
+fall out of step with them:
+
+    STANCE                         TECHNIQUE
+    •  standing                    ▶  punch
+    ▲  airborne                    ◀  reverse
+    ▼  low                         ▲  kick
+    ▶  lunging                     ▼  sweep
+    ◀  retreating
+
+**A second bug, in my own fix, caught in the same breath:** the first version of
+the word list wrote `up: 'step back'` and `back: 'step back'` — the same word
+under two different glyphs, in a legend whose entire purpose is to tell glyphs
+apart. It is visible in the re-capture and it is a good illustration of why the
+legend is built from the maps rather than hand-written: the pairing is the thing
+that drifts.
+
+Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### One hundred rounds
+
+The scoreboard is unchanged and worth stating plainly: **8 real defects fixed,
+13 model-sourced changes shipped, 22 review frames built, 2 defects found by
+instrumentation rather than by a model, and roughly two dozen confident false
+reports caught** — by measurement, by geometry, by a crop I did not trust, and
+once by a gate that had exited 127.
+
+What the hundredth round actually shows is that the loop's yield has moved. The
+last two rounds produced no dramatic fix; they produced a reviewer that says
+"this frame cannot answer that," and then a real bug that the same reviewer found
+*because* it was being honest about its own limits. The instrument got better
+before the game did, and that was overdue.

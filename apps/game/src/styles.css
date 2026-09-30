@@ -2094,6 +2094,24 @@ body.high-contrast .setting-row input[type="checkbox"]:checked::before {
   font-variant-numeric: tabular-nums;
 }
 
+/* The legend heading inside the techniques key — "stance" / "technique" set
+   apart from the glyph+word pairs that follow it, so nine items in a row still
+   read as two lists rather than one long strip. */
+.tech-key-label {
+  display: block;
+  inline-size: 100%;
+  margin-block-end: var(--space-1);
+  color: var(--gold-bright);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+}
+
+.tech-key {
+  display: grid;
+}
+
 .tech-pip {
   display: inline-grid;
   place-items: center;
