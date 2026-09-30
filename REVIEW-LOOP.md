@@ -4447,3 +4447,55 @@ So the rule has two clauses now, and the second is the one that keeps biting:
    the two screens *together*, and there is no gate in this repo that does.
 
 Gates: `pnpm check` 127 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 105 — the gate for clause 2, and it caught a live bug on its first run
+
+Round 104 ended with a two-clause rule and admitted nothing in this repo enforces
+the second one:
+
+1. Never hand-write what the data already knows.
+2. When a surface must agree with another, **decide once** and put the decision
+   where both can read it.
+
+Clause 1 is a habit. Clause 2 has no mechanism at all — there is no gate in this
+repo that reads two files and compares what they *decided*, which is why the
+glyph disagreement took three rounds and a reviewer to find.
+
+So: `apps/game/tests/unit/glyph-vocabulary.test.ts`, five assertions around that
+specific three-round failure — the legend carries direction *and* action, the
+legend is not a bare copy of the stick, the five stance words are distinct, both
+halves are laid out in two columns, and the coach strip labels the same four
+technique directions the glyph map uses.
+
+**It failed on the first run, and it was right.**
+
+    AssertionError: expected 'display: flex; align-items: ce…'
+      to match /grid-template-columns/
+
+Round 104's two-column layout was **dead CSS**. I had inserted a `.tech-key`
+rule *earlier in the file* than the real one, and CSS resolves on order, so the
+real rule's `display: flex` won. **The two columns only ever worked because flex
+happened to wrap the same way** — the layout looked correct in every screenshot
+and was not the layout I had written. A reviewer would never have caught it,
+because the rendered result was right; the intent and the mechanism had silently
+diverged and nothing in the pipeline could see a rule that was being overridden
+by another rule.
+
+That is the same shape as rounds 102–104 one level down, and it is why the
+assertion is about the rule rather than the picture: **the picture was already
+right and the code was wrong**, and only the code knows.
+
+The duplicate is removed and the real `.tech-key` is now explicitly a two-column
+grid. The re-capture is byte-for-byte what it was before, which is the proof that
+the fix changed the mechanism and not the result.
+
+Gates: `pnpm check` **132 passed** (was 127), `pnpm test:e2e` 35 passed /
+5 skipped / exit 0.
+
+### What the fence is and is not
+
+It is five assertions around one specific failure. It will not catch the next
+disagreement that is not about a glyph, and it should not be described as if it
+would. Round 78's guard and round 90's 0.06 metric were both over-claims about
+what a test could see, and the honest description of this file is the narrow one:
+**a fence around a three-round failure, written by the loop that had it.**

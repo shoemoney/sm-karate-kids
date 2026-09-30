@@ -2037,7 +2037,15 @@ body.high-contrast .setting-row input[type="checkbox"]:checked::before {
 
 /* The key, once, for the two pips every row is made of. */
 .tech-key {
-  display: flex;
+  /* Two columns, explicitly. Round 104 added `display: grid` to a COPY of this
+     rule that sat earlier in the file, so the real one below kept `display:
+     flex` and won on order — the two-column layout only ever worked because
+     flex happened to wrap the same way. The duplicate is gone and this is the
+     rule that does it. Nine stacked rows pushed the first move name off a
+     phone screen, which is a poor price for explaining one glyph. */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--space-2);
   align-items: center;
   gap: var(--space-2);
   margin: 0 0 var(--space-3);
@@ -2108,18 +2116,6 @@ body.high-contrast .setting-row input[type="checkbox"]:checked::before {
   text-transform: uppercase;
 }
 
-/* Two columns, because nine stacked entries push the first named move off the
-   screen on a phone. `technique-legend-delays-move-list` put the cost of the
-   round-100 legend precisely: five STANCE rows and four TECHNIQUE rows, one
-   after another, before the player reaches a single move name. The sheet is a
-   reference for moves; the legend is a key to the notation, and a key that
-   scrolls is a key nobody reaches. */
-.tech-key {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: var(--space-2);
-  align-items: start;
-}
 
 /* The heading spans both columns so each list still reads as its own list
    rather than as one interleaved strip. */
