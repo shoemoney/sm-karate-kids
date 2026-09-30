@@ -5348,3 +5348,55 @@ is boring and unglamorous — **when everything fails at once and instantly, rea
 the error before the diff** — and it is now the reflex after round 121.
 
 Gates: `pnpm check` 136 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 123 — the fence that would have caught round 122's bug
+
+Round 122's defect — a briefing sentence that implies both sticks must be
+touched, when thirteen of twenty moves use a centred stance — **passed all 136
+tests.** Including every assertion in `glyph-vocabulary.test.ts`, which is the
+file built specifically to fence the surfaces that kept disagreeing.
+
+**That is not a gap in those assertions. It is what they are.** Every one of
+them is about *shape*: is the ordering right, are the words distinct, does the
+`+` span the row, do the two horizontal captions differ. None asks whether a
+sentence is *complete*, because completeness is a property of the copy measured
+against the data, and nothing in the repo compared those two.
+
+Three new assertions, and the first one is the one that matters:
+
+    the data really does have a majority neutral-stance case
+        -> standing / total must be > 0.5, so the sentence is guarding
+           something real. If the move table ever changes shape, this fails
+           loudly rather than passing against a changed world.
+    the briefing names the centred-stance option
+        -> the sentence must mention centred / centered / neutral / standing
+    the briefing still names both inputs
+        -> a sentence that drops the technique input is short for the same
+           reason the last one was
+
+**And mutation-tested, both ways, the way round 110 established is mandatory:**
+
+    revert r120 (the exact bug r122 found)
+        x the briefing names the centred-stance option
+    drop the technique input
+        x the briefing still names both inputs
+    restored
+        12 passed
+
+**The first mutation is the one that matters and it is worth being explicit
+about: that sentence shipped through a green suite.** It passed the typecheck,
+136 unit tests, 35 e2e tests, a deploy, and a review frame. The only thing that
+caught it was a model noticing that the pre-bout card and the techniques sheet
+disagreed — the same cross-surface read that has produced every real finding
+since round 80.
+
+**So the loop's two instruments finally cover both halves of the problem it has
+had for forty rounds.** The reviewer catches disagreement between surfaces, and
+cannot see a surface's internals. The fence catches internals, and could not see
+disagreement. A defect that is *only* visible across two surfaces is the reviewer's
+alone; a defect that is *only* visible inside one is the fence's alone; **round
+122's was visible in neither, and it took a round for the reviewer to find it and
+a round to build the fence that would have caught it.**
+
+Gates: `pnpm check` 139 passed (was 136), `pnpm test:e2e` unchanged at 35 passed /
+5 skipped.

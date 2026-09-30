@@ -56,6 +56,62 @@ describe('the rules paragraph is computed, not written', () => {
   });
 });
 
+/**
+ * The briefing has to say what the move table requires, not what fits.
+ *
+ * Round 118 added a notation sentence to the pre-bout card. Round 120 shortened
+ * it to satisfy a measured reading budget, and the shortened sentence said "one
+ * stance input + one technique input" — which is wrong for the thirteen of
+ * twenty moves whose `posture` is `stand`, because for those the stance stick
+ * stays *centred*. Round 122 found it, from a reviewer, two rounds late.
+ *
+ * It passed 136 tests including every assertion in this file, because every
+ * assertion here is about *shape* — is the ordering right, are the words
+ * distinct, does the `+` span the row. None of them asks whether the sentence
+ * is *complete*, and a shape test cannot: completeness is a property of the
+ * copy against the data, and nothing in the repo was comparing those two.
+ *
+ * That is the round-120 mistake stated as a class. **A string measured against
+ * a budget will be shortened until the measurement passes, and the measurement
+ * does not notice what stopped being said.** So this asserts the sentence
+ * covers the case the data says is the majority one.
+ */
+describe('the pre-bout briefing is complete, not merely short', () => {
+  const main = read('../../src/main.ts');
+  const moves = JSON.parse(read('../../data/../../../packages/content/data/moves.json') ?? '[]') as {
+    posture?: string;
+  }[];
+
+  test('the data really does have a majority neutral-stance case', () => {
+    // If this ever stops being true the assertion below is guarding nothing, and
+    // it should fail loudly rather than pass against a changed world.
+    const list = Array.isArray(moves) ? moves : [];
+    expect(list.length, 'could not read the move table').toBeGreaterThan(0);
+    const standing = list.filter((m) => m.posture === 'stand').length;
+    expect(
+      standing / list.length,
+      'the neutral-stance majority is what makes the briefing sentence matter',
+    ).toBeGreaterThan(0.5);
+  });
+
+  test('the briefing names the centred-stance option', () => {
+    const note = main.match(/note\.textContent = '([^']+)'/);
+    expect(note, 'could not find the briefing notation sentence').not.toBeNull();
+    const text = (note?.[1] ?? '').toLowerCase();
+    expect(
+      text,
+      'the sentence implies both sticks must be used; the stance stick is left centred for most moves',
+    ).toMatch(/centred|centered|neutral|standing/);
+  });
+
+  test('the briefing still names both inputs', () => {
+    // The complement of the above: a sentence that stops naming the technique
+    // input is short for the same reason the last one was.
+    const note = main.match(/note\.textContent = '([^']+)'/);
+    expect((note?.[1] ?? '').toLowerCase()).toContain('technique');
+  });
+});
+
 describe('the glyph vocabulary is decided once', () => {
   test('the technique legend carries the direction and the action together', () => {
     // Both halves, in one word. Direction-only was round 103 and it was a copy
