@@ -2258,3 +2258,49 @@ New but not actionable yet: `ippon-attribution-clarity` (whose score it was),
 `control-legend-microtext` (legend text size), `unify-splash-logo-color-palette`
 (would recolour the protected brand mark — **refused on sight**, that logo is
 carved out of the repo's MIT grant and is not ours to restyle).
+
+### Round 66 — the scrim, measured; and the standing half-point finding, fifth time
+
+**The scrim question, settled with a number.** `217a165` shipped a full-viewport
+scrim behind the Settings and Techniques panels, and models have kept reporting
+it missing. Rather than refuse it a fourteenth time, measure the same pixels in
+the same coordinates with the sheet open and closed:
+
+    02-phone-fight            (100, 67, 25)   lit mat
+    06-phone-settings         ( 18, 13,  9)   sheet open
+    15-phone-settings-mixed   ( 18, 13,  9)   sheet open
+
+An **82% reduction on identical pixels.** The scrim is working, unambiguously.
+
+And the reason fourteen models got it wrong is now obvious in hindsight, which
+is the interesting part: **a scrim at 0.86 opacity looks identical to there
+being nothing there.** The surround reads as flat near-black either way, so a
+reviewer asked "is the background dimmed?" sees black and answers no. The scrim
+is not too weak — it is doing its job so thoroughly that its effect is
+indistinguishable from its absence. Only a before/after comparison on the same
+pixels separates the two, which is why the number settles it and the eye never
+could. This is the second time in this loop that the same coordinates answered a
+question no amount of looking would have.
+
+**`score-fraction-*` and `half-point-score-*`, fifth model in a row** (mimo-v2.6-flash,
+step-3.7-flash, and now three others). The in-match HUD builds a DOM stacked
+fraction, but **`main.ts` still renders result, run, earned and career scores as
+a text string containing U+00BD**, and `16-phone-in-play` only ever captures a
+whole point. So the models are reading the *text* path, not the DOM path, and
+they are right that it reads as `21/2`.
+
+This is the standing open item and it is now the most-repeated true finding in
+the loop. It needs the text path finished, not another refusal.
+
+- `floating-fighters: "fighters hover above the tatami without ground contact"`
+  (step-3.7-flash) — **refused, contradicted by a crop taken this session.** Both
+  fighters show a soft contact shadow anchored at the feet, verified at 2.3x in
+  round 65. Also reported as "add sharp foot contact shadows" in the same round
+  by gemini-3.7-flash, so the panel is split on it within one round.
+- `animation-clipping: "fighter limbs clip through each other during kicks"` —
+  plausible and untested; the review set has no two-fighter-contact frame, which
+  is the exact gap round 61 could not close. Recorded as open rather than
+  refused.
+- `settings-sheet-hard-cut` (mimo) — this is the scrim finding above, plus the
+  same "sticks disappear" observation, which is correct: the panel is modal.
+- `prism-ml/ternary-bonsai-2-27b` — 429 from Darkbloom.

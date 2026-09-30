@@ -1,0 +1,85 @@
+{
+  "model": "stepfun/step-3.7-flash",
+  "elapsed_s": 25.4,
+  "usage": {
+    "prompt_tokens": 7868,
+    "completion_tokens": 3344,
+    "total_tokens": 11212,
+    "cost": 0.00433536,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00433536,
+      "upstream_inference_prompt_cost": 0.00125888,
+      "upstream_inference_completions_cost": 0.00307648
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 2663,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "floating-fighters",
+      "title": "Fighters appear to hover above the tatami without ground contact",
+      "what": "In screenshots 2, 8, and 11, the fighters' feet do not cast shadows or visually intersect with the tatami floor texture, creating a floating effect.",
+      "why": "This breaks the grounded, cinematic dojo atmosphere and makes the 3D space feel physically wrong, reducing immersion during the core gameplay loop.",
+      "how": "Add contact shadows or darken the foot areas where they meet the floor, and ensure foot pivot points align with the tatami geometry so the sprites feel planted."
+    },
+    {
+      "id": "score-fraction-legibility",
+      "title": "Half-point score display is cramped and hard to read",
+      "what": "In screenshot 8 (Hasanabi Wins), the score shows '2\u00bd' with the fraction rendered small and raised, creating a visually cramped numeral that competes with the '1' in the opponent's score.",
+      "why": "On a 390px wide phone screen, players cannot instantly parse the point differential, which is critical feedback for a scoring-based martial arts game.",
+      "how": "Redesign the score HUD to display half-points as '2.5' or use a larger, stacked fraction format with increased spacing, ensuring the timer and scores remain distinct."
+    },
+    {
+      "id": "control-label-clutter",
+      "title": "Control instruction text crowds the lower viewport",
+      "what": "In screenshots 3, 4, 12, and 14, the directional hint text ('step jump crouch', 'back forward up down') between the joysticks and the fighters consumes excessive vertical space on the portrait screen.",
+      "why": "This pushes the fighters upward and reduces the visible play area, making it harder to read footwork and technique animations on a small phone screen.",
+      "how": "Move the control hints to a collapsible overlay or reduce font size/line height, or integrate them into the joystick labels themselves to reclaim 40-60px of vertical space."
+    },
+    {
+      "id": "techniques-menu-touch-targets",
+      "title": "Techniques menu has microscopic text and tiny touch targets",
+      "what": "In screenshot 6, the point values ('mid \u00b7 Half point') and difficulty labels are rendered in very small type, and the adjacent play/pause/step icons are tiny circles difficult to tap accurately.",
+      "why": "Mobile players cannot reliably select moves or read scoring implications during pre-fight preparation, leading to frustration and mis-taps.",
+      "how": "Increase the font size for point values by 2-3px, enlarge the circular icon buttons to at least 44x44px touch targets, and add more vertical padding between list items."
+    },
+    {
+      "id": "animation-clipping",
+      "title": "Fighter limbs clip through each other during kicks",
+      "what": "In screenshot 11 (Ippon), the red fighter's shin and foot visibly intersect with the white fighter's torso and head during the spinning back kick animation.",
+      "why": "This breaks the photorealism of the sprite work and makes the game feel cheap or buggy during highlight moments that should feel impactful.",
+      "how": "Adjust the animation blend shapes or sprite layering order during high kicks to include depth-based rendering or slight sprite offset to prevent intersection, particularly for the attacking limb."
+    }
+  ],
+  "raw": null
+}

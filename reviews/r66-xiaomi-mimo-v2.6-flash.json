@@ -1,0 +1,85 @@
+{
+  "model": "xiaomi/mimo-v2.6-flash",
+  "elapsed_s": 67.6,
+  "usage": {
+    "prompt_tokens": 12991,
+    "completion_tokens": 4771,
+    "total_tokens": 17762,
+    "cost": 0.00714616,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00714616,
+      "upstream_inference_prompt_cost": 0.00103928,
+      "upstream_inference_completions_cost": 0.00610688
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 3175,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "loading-bar-shows-no-fill",
+      "title": "The pre-boot progress bar renders as an empty track, so the game looks stuck at 0%",
+      "what": "Screenshot 1 (ShoeMoney loading screen): under 'Downloading the game' there is a full-width rounded track at roughly y=818/1280, but no filled segment is visible anywhere along it \u2014 the interior is the same dark brown as the background and only the 1px border reads. The bar is indistinguishable from an empty/0% state.",
+      "why": "This is the literal first five seconds of the product. A progress bar that never appears to move reads as a hung page, and a player on mobile data will bail or refresh before the WebGPU bundle ever finishes downloading.",
+      "how": "Give the fill its own bright token (the existing HUD gold #E8C87A) at full track height with a rounded clip, animate it monotonically from actual byte/chunk progress, and add a minimum visible crawl (start at 8% on first paint) so the bar is never visually at zero while work is happening."
+    },
+    {
+      "id": "score-fraction-breaks-hud-row",
+      "title": "Half-point scores wrap the top HUD into two lines and break the score bar",
+      "what": "Screenshot 8 (results screen): HasanAbi's score of 2\u00bd renders as a stacked '2' over '2' with a tiny '1/2' glyph, pushing the red numeral onto two lines inside the top bar at y=20-70/1280, while Asmongold's '0' stays single-line. The bar's contents are vertically misaligned and the row is visibly taller than in every other screenshot.",
+      "why": "Point karate scores in halves by design, so this is not an edge case \u2014 it fires on any match where someone reaches 2\u00bd. The primary score readout, the one thing a player checks after every exchange, is the element that corrupts.",
+      "how": "Set the score span to white-space: nowrap with font-variant-numeric: tabular-nums and render \u00bd as a single precomposed character (U+00BD) at ~0.7em with vertical-align: super, or drop the fraction to a small superscript chip next to an integer. Lock the HUD row to a fixed height with overflow: hidden so a wide value can never reflow the bar."
+    },
+    {
+      "id": "legend-panel-squeezes-play-area",
+      "title": "A permanent key-hint panel duplicates the stick captions and eats a quarter of the phone screen",
+      "what": "Screenshots 3, 4, 5, 12, 13, 16: a full-width translucent panel sits at y\u2248865-955/1280 listing 'STANCE: \u25c0 step \u25b2 jump\u2026' and 'TECHNIQUE: \u25c0 back \u25b6 forward\u2026', and the exact words STANCE and TECHNIQUE are repeated again as captions under the sticks at y\u22481245. Legend + sticks together occupy the bottom ~320px (~25%) of the 844pt viewport, compressing the fighters into a narrow band between y\u2248470 and y\u2248790 with only ~75px of floor below their feet.",
+      "why": "On a 390x844 portrait phone this is the difference between a fight you can read and a fight you squint at. The panel is static reference text that never changes, permanently stealing vertical pixels from the only region where hits, footwork and spacing happen, and it says the same two words twice.",
+      "how": "Show the hint panel only for the first 5 seconds of the first bout (or on press-and-hold of a stick), then collapse it to zero height. Move the per-direction key hints into the stick captions themselves as small glyphs around each dial, reclaiming ~90px and pushing the camera's bottom framing down so the fighters get that space back."
+    },
+    {
+      "id": "landscape-letterboxes-arena",
+      "title": "In landscape the arena is squeezed into a letterboxed band with a huge empty black slab under it",
+      "what": "Screenshot 9 (landscape 1280x810): the 3D dojo is clipped to a band from y\u2248100 to y\u2248575 with hard black edges top and bottom; below y\u2248575 is ~235px of featureless black containing only two ~150px sticks pushed into the far corners, and the top black bar holds the HUD. The fighters occupy roughly the middle 40% of the frame height while the bottom 29% is dead black.",
+      "why": "Anyone rotating the phone \u2014 the natural way to hold a device for a two-stick game \u2014 gets a smaller fight view than portrait plus a visually broken composition where the floor ends in a razor-straight black cut. It reads as an unfinished layout, not a widescreen mode.",
+      "how": "In landscape, extend the camera's vertical FOV so the tatami fills the full height behind the controls, overlay the sticks semi-transparently on the arena instead of parking them in a black gutter, and let the HUD float over the scene. Delete the hard black bands entirely."
+    },
+    {
+      "id": "settings-sheet-hard-cut",
+      "title": "The settings sheet stops mid-screen with a hard edge and no scrim, while the sticks silently disappear",
+      "what": "Screenshots 7 and 15: the SETTINGS panel ends at y\u2248710/1280 in a razor-straight horizontal line. Below it the dojo renders at full brightness \u2014 the fighters' legs and lit tatami are clearly visible \u2014 with no dim, gradient or blur, while the two control sticks that normally occupy y\u2248960-1260 are gone. The control layer is hidden but the scene behind is not, so the panel looks like it is clipping the game rather than overlaying it.",
+      "why": "The mismatch (controls removed, world not dimmed) reads as a rendering glitch rather than a modal state, and the unscrimmed lower half competes for attention with the toggles, making the sheet feel unfinished at the exact moment the player is adjusting accessibility options.",
+      "how": "Either extend the sheet to full viewport height, or keep it as a top sheet and add a scrim below its bottom edge: a linear-gradient from rgba(0,0,0,0.75) at the cut to rgba(0,0,0,0.55) at the screen bottom, plus a 12px backdrop-blur on the exposed arena. Keep the sticks hidden, but dim the 3D layer by the same amount so the whole scene sits behind one consistent veil."
+    }
+  ],
+  "raw": null
+}
