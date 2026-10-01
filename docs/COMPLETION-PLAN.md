@@ -9,9 +9,9 @@ the plan for *finishing*, as distinct from the loop that has been improving.
 |---|---|
 | Playable | yes — tournament + dojo, two sticks, point karate |
 | Deployed | `https://arcade.shoemoney.ai/smkk/`, verified playing a real bout |
-| Tests | 142 unit, 35 e2e, 5 skipped, green |
-| Review loop | 130+ models, 22 review frames, mutation-tested fences |
-| Commits | 245 |
+| Tests | 163 unit, 35 e2e, 5 skipped, green locally |
+| Review loop | 144 rounds, 22 review frames, mutation-tested fences |
+| Commits | 246 |
 
 The game is not a prototype. What remains is a short list of specific, named
 gaps — every one of them is in this document, and nothing else is.
@@ -173,10 +173,63 @@ Because nothing is watching, three rules exist and are not optional:
 - [x] 2.1 and 2.2 raised with a recommendation — a human decides, the loop has done its part
 - [x] 3.1 unattended driver in place — `tools/loop-once.sh` on a launchd schedule
 - [x] 3.2 deploy verified against production bytes — `tools/verify-deploy.sh`, mutation-proved
-- [ ] every phase gated, logged, committed, deployed
+- [x] every phase gated, logged, committed, deployed
+- [ ] **renderer frame cost on a GPU-less device** — the last open item, measured at
+      r144 and blocked on a human because it is a look trade. See below.
 
 **Not "done" means:** every item above is either finished or blocked on a human
 decision with the measurement attached.
+
+---
+
+## Added at round 144 — the renderer is the last open item, and it is measured
+
+`tournament.spec.ts:179` was the only remaining known-red. Round 144 reproduced
+CI's failure exactly and **retired** r143's explanation for it.
+
+**What CI actually does** (from the trace artifact's per-step clock, all four runs):
+
+| step | duration |
+|---|---|
+| setup, through reading `pinnedTick` | 7.0–8.4s |
+| **`Click` on `.result-rematch`** | **50.4 / 52.3 / 52.3 / 53.4s** |
+| `expect(card).toBeHidden()` | 1.0–1.4s |
+
+The click is the whole failure. It does not fail — it arrives ~43s late, which is
+why the error surfaces at line 221 with an exhausted budget rather than at the click.
+
+**r143's mechanism was wrong.** It said the card self-dismisses and the click loses
+the race. The card dismisses at **9s** — two seconds into a 52-second click.
+
+**The real cause,** reproduced by forcing what CI has (no GPU, SwiftShader) and
+settled by a controlled A/B on one evaluate round trip:
+
+    busy (render loop running)   1930, 1485, 3227, 1388 ms
+    idle (rAF stubbed out)          19,   12,   21,   13 ms
+
+Under software rendering the game's own HUD reads **FPS 2, TPS 28, DRAW 26** — the
+simulation is fine and the renderer is the wall, and 26 draw calls means it is
+fragment cost, not scene complexity.
+
+**Why this is not a test bug.** r143 proposed pressing the button in-page to dodge
+the actionability wait. That is sound and measured (7.5s vs 52s), but it treats the
+symptom: the page still renders at 2fps on that runner, which is a real
+**performance** defect and not a test artefact. A phone from the design baseline is
+the same class of target.
+
+**The decision this needs — a human's, because it is a look trade:**
+
+- **Candidates:** scale render resolution when frames are slow; drop the post chain
+  below a frame-time threshold; reduce `antialias` (it is `true`, so the scene pass
+  runs 4× MSAA, and software rasterization pays 4× for it).
+- **Measured already:** bypassing the whole 5-pass chain took the median frame
+  614→177ms but left a 21.7s outlier and did **not** fix the click. 9× fewer pixels
+  moved the median 153→94ms and left max at 16.8s. So neither lever is sufficient
+  alone, and picking one by taste would be guessing.
+- **Do not** raise the 60s e2e timeout. It does not make the click faster; it only
+  lets a 52-second wait finish before the test gives up.
+
+Full method, discarded hypotheses and reproduction in `REVIEW-LOOP.md`, round 144.
 
 ### What is left, honestly
 

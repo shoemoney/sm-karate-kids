@@ -7048,3 +7048,154 @@ because the rule still did not say *which* gate. The rule is now:
 > `gh run list --commit $(git rev-parse HEAD) --json name,conclusion` and look
 > for `name == "CI"`. A bare `--limit 1` returns whichever workflow finished
 > most recently, which is not the one you mean.
+
+## Round 144 — the FIGHT click, reproduced exactly, and r143's hypothesis retired
+
+Round 143 closed with an honest "not reproduced": it could make that test time out
+under load, but not the way CI does, so it declined to change anything and left the
+mechanism as a hypothesis. This round reproduced CI's failure **exactly**, and the
+hypothesis was wrong.
+
+**The gate, read before the git line:** `gh run list --commit $(git rev-parse HEAD)
+--json name,conclusion` → `CI: failure` for this sha, `Push on main: success`.
+Red going in, which is correct — the standing rule exists because round 141 shipped
+red and called it fine.
+
+### Where the 52 seconds actually go
+
+Not from reading the error line. From the CI trace artifact, which is the only
+place the per-step clock exists:
+
+```
+gh run view <id> --log-failed          # the error line: "Test timeout of 60000ms exceeded"
+gh run download <id> -n playwright-report
+```
+
+Playwright's `test.trace` records a `before`/`after` pair per step. Pairing them
+gives real durations off CI's own runner. All four traces (2 viewports + retry):
+
+| step | duration |
+|---|---|
+| Navigate | 0.27–0.49s |
+| Wait for `ready` | 3.27–3.66s |
+| `expect(card).toBeVisible()` | 1.92–2.43s |
+| `Evaluate` (read `pinnedTick`) | 1.43–1.84s |
+| **`Click` on `.result-rematch`** | **50.43s / 52.31s / 52.34s / 53.39s** |
+| `expect(card).toBeHidden()` | 1.05–1.43s |
+
+The click is the entire failure. Setup is 7s of 60s; the click eats the other 52.
+And the failure is reported at **line 221**, not 214, because the 60s test budget
+died during the click and the next `waitForFunction` inherited an exhausted budget.
+`expect(card).toBeHidden()` *passing* at line 216 is the tell: the click does not
+fail, it arrives 43 seconds late.
+
+**This retires r143's mechanism.** It said the card self-dismisses on a wall-clock
+deadline and the click loses that race. But the card dismisses at 9s — two seconds
+*into* a 52-second click. The click is not losing a race it should have won; it is
+simply not being serviced.
+
+### Reproducing it exactly
+
+r143's recipe (40 × `yes`, load 82) produced a *different* failure, which is why it
+said no. The condition CI actually has is **no GPU**. GitHub's Linux runners have
+none, so Chromium software-rasterizes with SwiftShader:
+
+```ts
+test.use({ launchOptions: { args: ['--disable-gpu', '--use-gl=swiftshader', '--disable-gpu-compositing'] } });
+```
+
+That reproduces it precisely:
+
+| | local (GPU) | forced software (CI's condition) |
+|---|---|---|
+| click | **1.2s** | **timeout at 90s** |
+| median frame | 17ms | **174ms** |
+| max frame | — | **31.9s** |
+
+The game's own perf HUD, read in-page under that condition: **FPS 2, TPS 28,
+DRAW 26**. Two things fall out of that line. TPS 28 vs FPS 2 means the
+*simulation* is fine and the renderer is the wall. DRAW 26 means the geometry is
+trivial — so 2fps at 1280×505 with 26 draw calls is fragment cost, not scene
+complexity.
+
+### Two hypotheses I measured and threw away
+
+Recording these because both were plausible and both were wrong:
+
+**1. "The countdown caption moves the button, so Playwright waits for stability."**
+`setRematchCountdown` rewrites `resultCount.textContent` every second, and
+`.result-rematch` has `margin-top: auto` in a flex column, so the caption's height
+plausibly shifts the button. Measured the bounding box every animation frame for
+8s: **1 changed frame in 186**, median gap 17ms. Rock stable. Not it.
+
+**2. "The 5-pass post chain (bloom → split-tone → hue/sat → film → vignette) is the
+cost."** Patched `post.render()` out to a bare `renderer.render()` and rebuilt:
+
+| | median frame | max frame | click |
+|---|---|---|---|
+| shipped chain | 614ms | 1.9s | timeout 30s |
+| chain bypassed | 177ms | **21.7s** | **timeout 30s** |
+
+The chain is ~3.5× of the *median*, but the **21-second outlier survives it**, and
+the click still times out. So the chain is a real cost and it is not this bug.
+Resolution scaling ruled out the same way — 9× fewer pixels (646,400 → 72,320)
+moved the median 153→94ms and left max at 22.3→16.8s. The outlier is not
+fragment-bound.
+
+### What it actually is
+
+One evaluate round trip, same page, same call, two conditions:
+
+```
+busy (render loop running)   1930, 1485, 3227, 1388 ms
+idle (requestAnimationFrame stubbed to a no-op)   19, 12, 21, 13 ms
+```
+
+**Same evaluate, same page — 1388–3227ms while rendering, 12–21ms with the render
+loop stopped.** That is the whole finding. Every Playwright interaction is queued
+behind a main thread that is spending ~500ms–20s per frame in software rasterization,
+so *any* page round trip costs seconds. Playwright's click is not slow because
+clicking is hard; it is slow because it makes several round trips and each one waits
+out a frame.
+
+And the fix r143 proposed is measurable: reading `pinnedTick` **and** pressing the
+button in one in-page evaluate took **7.5s** end to end to `phase === 'fight'`,
+against a 52s actionability wait.
+
+### Why nothing is in the tree
+
+Because I have not shown the fix passes in CI, only that it is sound here. Shipping
+a change whose only evidence is a local probe is precisely the r90/r93/r95 mistake.
+So this round ships **the diagnosis and the reproduction**, not the patch. What the
+next round needs:
+
+- reproduce: `test.use({ launchOptions: { args: ['--disable-gpu', '--use-gl=swiftshader', '--disable-gpu-compositing'] } })`
+  on `tournament.spec.ts:179` — click times out at 90s, frame max ~21–32s
+- the claim to preserve: the press **releases the clock**, not merely hides the card.
+  An in-page `btn.click()` still fires the real listener, so the claim survives.
+- the floor cost of any page round trip there is **12–21ms idle, ~1.4–3.2s busy** —
+  so a test that needs N round trips needs N × that, not N × nothing
+- **do not raise the 60s test timeout.** r143 was right about this and for a better
+  reason than it gave: a bigger budget does not make the click faster, it just lets
+  a 52-second wait finish before the test gives up. The slowness is in the renderer.
+
+### The round in one table
+
+| | |
+|---|---|
+| r143's failure reproduced | **exactly**, via forced software rendering |
+| r143's mechanism | **retired** — the card is gone at 9s, the click runs to 52s |
+| time inside the click | **50.4–53.4s**, all four CI traces |
+| root cause, controlled A/B | same evaluate: **1388–3227ms busy / 12–21ms idle** |
+| hypotheses measured and discarded | 2 (button stability, post chain) |
+| local gate | check=pass, e2e=35 passed / 5 skipped / 0 failed |
+| changes shipped | **none, deliberately** — diagnosis only |
+
+**The finding worth keeping is the method, not the fix.** r143 declined to act on a
+mechanism it could not reproduce, which was right. It then left a plausible-sounding
+one in its place, and that plausible mechanism was wrong in a way that would have
+sent the next round to edit a *test* when the renderer was the problem. The only
+thing that caught it was a measurement cheap enough to actually run: the trace
+artifact already on disk, holding the answer as per-step durations nobody had read.
+
+Read the artifact you already have before you build the next probe.
