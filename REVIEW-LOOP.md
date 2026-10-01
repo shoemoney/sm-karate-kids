@@ -6765,3 +6765,137 @@ PNG (2% lighting), and any capture of the room (animated light). The capture
 gate exists precisely because a frame set has to be *proved* distinct and
 *proved* moving rather than trusted, and the same discipline applies to a single
 hero image nobody would think to check.
+
+---
+
+## Round 143 — CI had been red for three commits and the log said `e2e=0`
+
+The deploy gate shipped and CI came back **red**. The obvious move was to assume
+the flake everyone here has seen before and re-run. The measurement said
+otherwise.
+
+    $ gh run list --branch main --limit 8
+    failure  f456e79   (this round's deploy gate)
+    failure  7bcb818   (round 141 — "docs: five AAA cycles, five fixes")
+    failure  4acfeee
+    success  7691571
+
+**Round 141 shipped with CI red and its log recorded `e2e=0`.** So have the
+commits before it. The local gate was green, the remote gate was red, and the
+standing rule — "read the gate output before the git line" — only ever named the
+**local** one. Nobody was reading the remote gate at all, and a rule that names
+the wrong gate is worse than no rule, because it feels like coverage.
+
+That is this round's real finding. The flake underneath it is worth fixing too,
+and it turned out not to be a flake.
+
+### It is not the flake, it is two stale floors and a stale budget
+
+`tournament.spec.ts` failed on **both** commits, on **both** viewports, with the
+same assertion:
+
+    Error: the recorder barely sampled the hold, so the checks below are hollow
+    Expected: >= 60
+    Received:    9        (and 11, and 8)
+
+Nine samples. So the question is why a recorder that samples every 4ms got nine.
+
+**Because `setInterval` cannot fire on a blocked main thread.** The file's own
+reasoning had already half-noticed this and then talked itself out of it:
+
+> a slow main thread produces fewer, wider-spaced samples, not a shorter card
+
+That is **true**, and it is exactly why it is fatal. Fewer samples over an
+equally long window is what a slow runner looks like — and it is *also* what a
+broken recorder looks like. **`MIN_SAMPLES = 60` could not tell those two things
+apart**, so on a 2-core GitHub runner it read "this machine is slow" as "this
+recorder proved nothing" and failed. Its own failure message named the wrong
+culprit, which is what made it expensive to diagnose. This box has 14 cores; the
+runner has 2.
+
+And the number was never derived from anything. Git history, which is
+unambiguous here:
+
+    c745f5e  ROUND_INTRO_MS = 4000     (tournament lands)
+    02d7a94  ROUND_INTRO_MS = 7200     "the card held for 4s and needed 8.6s to read"
+    9ab135d  ROUND_INTRO_MS = 9000
+
+    $ git show --stat 02d7a94 9ab135d -- apps/game/tests/e2e/tournament.spec.ts
+    (no output — neither commit touched one line of it)
+
+The floors were written **once** (`e40c728`), against 4000ms. The budget grew
+2.25x for a good reason and the floors and every comment describing them stayed
+pinned to a number that stopped existing. `MIN_HOLD_MS = 3000` was "a fraction
+of that fixed 4s budget"; it is now a third of the real one, related to nothing.
+
+### The fix: a coverage floor, not a rate floor
+
+`setInterval` rate is the one quantity in this recording that varies with the
+machine, so a floor must not be built on it. What has to be established is that
+the recorder was awake **across the window**, and that is rate-independent.
+
+`apps/game/tests/e2e/holdFloors.ts`, extracted so the property is testable:
+
+- `MIN_HOLD_MS` 8000 — and **no upper bound on purpose**: a starved thread delays
+  a deadline, never advances one, so a long hold is always legitimate and an
+  upper bound would flake on exactly the runners this is for.
+- `MIN_SAMPLES` 3 — the only thing a raw count can still honestly say.
+- `MAX_SAMPLE_GAP_RATIO` 0.5 — **no stretch of the hold may be longer than half
+  the hold with nothing sampled in it.** That replaces the count.
+
+**And my own new guard had two holes, both found by the test I wrote to justify
+it.** Worth recording, because both would have shipped:
+
+1. **First attempt: first-to-last span.** Samples at t=0, t=30 and t=9000 span
+   the entire window while observing nothing in between, so endpoint sampling
+   passes a span check completely.
+2. **Second attempt: consecutive-gap.** That is caught by sixty samples crammed
+   into the last 50ms — which contain no internal gap at all to measure. The
+   only unsampled stretches are the **head before the first sample and the tail
+   after the last**, and both have to be part of the measurement.
+
+Nine tests, and the load-bearing one is the case the old floor *passed*:
+
+    9 samples over 9s (the real CI shape) ............ accepted
+    2250 samples over 9s (a healthy dev machine) ...... accepted
+    1 sample .......................................... rejected
+    samples only at the edges (0, 30, 9000) .......... rejected
+    60 samples crammed into the last 50ms ............ rejected  <- old floor passed this
+    samples clustered in the middle ................... rejected
+    a 4000ms hold (the stale budget) .................. rejected, names ROUND_INTRO_MS
+
+The margin is asserted rather than assumed: the CI recording's widest unsampled
+stretch is ~1/8 of the window against a ceiling of 1/2, and there is a test that
+fails if those two numbers ever drift together again.
+
+### What I did NOT fix, and am not claiming
+
+I reproduced a second failure locally that the floor change does **not** address.
+Loading this box to a load average of 51 and then 96 (14 cores, so ~4x and ~7x
+oversubscribed) makes both tournament tests fail again — but differently: the
+card is **already gone** by the time the test first looks at it.
+
+    Error: expect(locator).toBeVisible() failed
+    Locator: locator('.result')   Expected: visible   Received: hidden
+
+That is the boot race: a self-dismissing 9000ms card against `goto` + boot +
+assertions, and the test's comment claims "this test never races the 4s timer."
+It does. At load 29 these tests passed, so I have **no evidence this is what CI
+hits** — CI's recorded assertion is `MIN_SAMPLES`, and CI's aggregate slowness is
+~2.4x, not ~7x. I am not fixing it on a guess: the honest fix is a seam that can
+hold the card open, which is a design change to `main.ts` and not a thing to
+guess at with nobody watching. **It is recorded here with its reproduction
+recipe — 44 `yes > /dev/null` burners, then `playwright test
+tournament.spec.ts` — so the next round can start from a measurement.**
+
+I did take one cheap slice of it: the FIGHT test read the pinned clock and the
+button label in two round trips before pressing, and every millisecond of that
+is a countdown the card is spending. Both now come back in one evaluate. **No
+claim was removed** — the label assertion moved, it did not disappear.
+
+**CI green is not demonstrated yet.** The floor change provably accepts the
+recording CI actually produced and provably rejects what the old floor accepted,
+but "provably" here means proven against the numbers in the log, not against
+CI's hardware. The push below gets one look; if it is still red, the next round
+starts with a red gate and a named cause instead of a green log and no cause,
+which is the entire point of this entry.

@@ -20,17 +20,20 @@ type HeldWindow = { samples: HeldSample[]; openedAt: number; closedAt: number };
 const SAMPLE_MS = 4;
 
 /**
- * Floors the clock-freeze claim has to clear before it counts as evidence.
+ * ROUND_INTRO_MS as it is in `apps/game/src/main.ts` today, and the floors a
+ * recorded hold has to clear before the per-sample claims below count as
+ * evidence.
  *
- * The card is up for ROUND_INTRO_MS (4000ms) and the recorder sees ~960
- * samples across it. MIN_HOLD_MS is a fraction of that fixed 4s budget, not of
- * the sample count, so it holds the same on a starved runner: a slow main
- * thread produces fewer, wider-spaced samples, not a shorter card. MIN_SAMPLES
- * is the matching guard against a recorder that sampled twice over a long
- * window and proved nothing about the frames in between.
+ * These were wrong in this file for a long time, and the wrongness is the whole
+ * story of the CI failures they now exist to prevent. The card was 4000ms when
+ * they were written. It is 9000ms now — lengthened twice, for readability, in
+ * commits that touched no line of this spec — and the comments kept describing a
+ * 4s budget that stopped existing.
+ *
+ * The floors and their discrimination are in `holdFloors.ts`, unit-tested
+ * against the recordings that used to defeat them.
  */
-const MIN_HOLD_MS = 3_000;
-const MIN_SAMPLES = 60;
+import { evaluateHoldFloors } from './holdFloors.js';
 
 // Progress only. The round NAME belongs to the card headline; the HUD strip
 // carries how far through the run we are. Both used to name it, 130px apart.
@@ -140,19 +143,18 @@ test('the game opens on the tournament, holding the bout behind the round card',
   await waitForHoldToClose(page);
 
   const hold = await readHold(page);
-  const spanMs = Math.round(hold.closedAt - hold.openedAt);
   const ticks = [...new Set(hold.samples.map((sample) => sample.tick))];
   const tags = [...new Set(hold.samples.map((sample) => sample.roundTag))];
 
-  // Unconditional from here down. The window is proven real by the two floors
-  // first, so each claim below is about a measured stretch of the card being
-  // up rather than about whatever happened to be true.
-  expect(hold.samples.length, 'the recorder barely sampled the hold, so the checks below are hollow').toBeGreaterThanOrEqual(
-    MIN_SAMPLES,
-  );
-  expect(spanMs, 'the round card was held for too little time to prove anything about its clock').toBeGreaterThanOrEqual(
-    MIN_HOLD_MS,
-  );
+  // Unconditional from here down. The window is proven real by the floors first,
+  // so each claim below is about a measured stretch of the card being up rather
+  // than about whatever happened to be true.
+  //
+  // The floors live in holdFloors.ts and are unit-tested against the shapes that
+  // used to defeat them, because the first version of this check was a bare
+  // sample COUNT and it failed on CI at 9 samples on a two-core runner.
+  const floors = evaluateHoldFloors(hold);
+  expect(floors.ok, floors.ok ? '' : floors.because).toBe(true);
   expect(ticks, 'the bout clock must not move while the round card is up').toHaveLength(1);
   // `tick` is the simulation step count: createMatch starts it at 0 and step()
   // is the only thing that raises it, so a single 0 means no tick ran at all.
@@ -186,16 +188,29 @@ test('the round card’s FIGHT button releases the bout clock', async ({ page })
   // possible. Read it *after* the press and it is a lie: the release is
   // instant, so by the time the round trip lands the clock is legitimately
   // running and the value is a small positive number.
-  const pinnedTick = await page.evaluate(
-    () => (globalThis as Record<string, any>)['__smkk'].state().tick,
-  );
+  //
+  // The label comes back in the SAME round trip, because every millisecond
+  // between the card appearing and the press is time the self-dismissing
+  // countdown is spending. This test failed on CI for exactly that reason —
+  // the card was gone before the button got pressed — and asserting the label
+  // in its own separate call was a round trip spent proving something about a
+  // card that was on its way out. The claim is unchanged, the round trip is not.
+  const before = await page.evaluate(() => {
+    const w = globalThis as Record<string, any>;
+    return {
+      pinnedTick: w['__smkk'].state().tick as number,
+      // The label carries a live countdown, so match the stable part only.
+      label: document.querySelector('.result-rematch')?.textContent ?? '',
+    };
+  });
+  const pinnedTick = before.pinnedTick;
   expect(pinnedTick, 'the clock was not pinned while the round card was up').toBe(0);
+  expect(before.label, "the round card's action must read FIGHT").toContain('FIGHT');
 
-  // Deliberately early. The same 4s countdown that gives the test above a
-  // window long enough to measure will dismiss this card if the press is late,
-  // so this one must not wait for a long window first — the press is the claim.
-  // (The label carries a live countdown, so match the stable part only.)
-  await expect(page.locator('.result-rematch')).toContainText('FIGHT');
+  // Deliberately early. The same ROUND_INTRO_MS countdown that gives the test
+  // above a window long enough to measure will dismiss this card if the press is
+  // late, so this one must not wait for a long window first — the press is the
+  // claim.
   await page.locator('.result-rematch').click();
 
   await expect(card).toBeHidden();
