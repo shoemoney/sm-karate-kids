@@ -6508,3 +6508,53 @@ Three things this run changed about how the loop works, which outlast the fixes:
    been reported three times. Both earlier dismissals were also measurement
    failures — I had sampled the scrim *over* the panel and never the fight
    *under* it. Two sides of that ledger were mine.
+
+### Deployed, and the deploy itself needed a diagnosis
+
+`build=0`, then straight to the arcade. The deployment had drifted in a way
+worth recording, because the first symptom was a green check over stale bytes:
+
+- `https://arcade.shoemoney.ai/smkk/` returned **200** the whole time
+- the live HTML named `assets/index-CneFlWUJ.js`, the local build produced
+  `index-D5kxXh1i.js`, and the live bundle was **14 bytes smaller**
+- the live bundle contained **none** of the countdown fix, and the live CSS
+  contained **none** of the `100dvh` fix — while *some* older CSS fixes were
+  present
+
+So the site was healthy, reachable, and serving a build from **02:53** against a
+local build from **05:44**. "200 OK" and "the thing I changed is live" are
+different claims, and only the second one matters after a deploy.
+
+Finding the actual target took four probes, because it was not where any of the
+obvious places were: not `/mnt/tank/apps/arcade`, not the `arcade-api` container's
+`./data`, and not on `.3`, `.4` or `.5`. `dig arcade.shoemoney.ai` →
+`68.185.216.69` → the deploy root is
+`/mnt/.ix-apps/app_mounts/nginx-proxy-manager/data/arcade/smkk`, which is **not**
+under `/mnt/tank` at all. A deploy that had been quietly serving a two-hour-old
+bundle was in a path three directory guesses wide of where the docs implied.
+
+`rsync` over ssh was refused (`Permission denied (publickey)` for root), so the
+transfer was tar + scp + remote extract. Backed up first, then the remote
+`assets/` was **pruned to only the two files the new `index.html` names** — the
+previous sync had left four stale JS/CSS pairs behind, and an nginx root happily
+serves all of them forever.
+
+**Verified against production, not against the box:**
+
+```
+PRODUCTION: {"refText":"TECHNIQUES","refW":143,"refH":46,
+             "tag":"Round 1/5","qualifierCount":1}
+reference opens sheet: true
+```
+
+All five cycle fixes confirmed in the served bytes, the live bundle is
+byte-identical to the local build (`cmp` → `LIVE == LOCAL dist`), and the
+reference button opens the real sheet on the real domain.
+
+One pre-existing 404 surfaces on load: `GET /api/games/karate-kids/runs`. It is
+**not** from today's work and it is **not** a page error — `leaderboard.ts`
+documents that every call fails soft, "no board this run, never an error on
+screen", and no `pageerror` fired. The arcade API simply has no entry for this
+game's id yet. Left alone deliberately: wiring a game id into another service's
+data is a different change from the five defects this run was chartered to find,
+and it needs someone who owns that contract.
