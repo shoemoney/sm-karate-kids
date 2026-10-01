@@ -162,12 +162,42 @@ async function measureFrames(browser) {
     fighters: globalThis.__smkk.fighters,
   }));
 
+  /**
+   * What the adaptive-resolution controller decided, and how long it took.
+   *
+   * The ratio alone is not enough, and the reason is the whole point of this
+   * row. The controller is tuned in FRAMES — a decision every WINDOW frames —
+   * while the failure it exists to remove is in WALL-CLOCK seconds. A ladder
+   * that needs 180 frames to reach its floor reacts in 1s on a fast box and in
+   * half a minute on a slow one, which is exactly backwards: the slower the
+   * device, the later the relief arrives. So the harness records how long the
+   * floor was REACHED, and a caller can refuse a controller that descends too
+   * late to help the click it was built for.
+   */
+  const scale = await page.evaluate(() => {
+    const s = globalThis.__smkk.renderScale?.();
+    if (!s) return null;
+    return {
+      ratio: s.ratio,
+      ladder: s.ladder,
+      frames: s.frames,
+      /**
+       * Milliseconds since the game reported ready. Paired with `ratio` this is
+       * the reaction time: how long the controller took to get where it is. It
+       * is read AFTER the frame samples, so it is an upper bound on the time to
+       * the current ratio, not the time to reach it.
+       */
+      sinceReadyMs: Math.round(performance.now()),
+    };
+  });
+
   await context.close();
   const sorted = [...samples].sort((a, b) => a - b);
   const median = percentile(sorted, 0.5);
   return {
     backend: meta.backend,
     fighters: meta.fighters,
+    scale,
     frameSamples: sorted.length,
     frameMs: {
       median: round(median),

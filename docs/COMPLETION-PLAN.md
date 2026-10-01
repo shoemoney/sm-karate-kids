@@ -234,10 +234,24 @@ Deliberately **one lever, bounded, no art changes.**
 
 ### The measurement, on the test that was red
 
-`tournament.spec.ts:179` was the last known-red. Its click step alone took
-50.4–53.4s across four CI runs. It now runs in **1.9s** — and the full browser
-gate is **37 passed, 5 skipped**, with the known-red retired rather than
-explained.
+`tournament.spec.ts:179` is the test whose click step took **50.4–53.4s** across four
+CI runs. r145 took it to **17.2s** by pressing the button in-page — which r145 itself
+recorded as *the symptom*, leaving the 2fps renderer underneath as the open item.
+
+**Adaptive resolution addresses that renderer.** On the same runner, same spec:
+
+| | r145 (in-page press) | r146 (+ adaptive resolution) |
+|---|---|---|
+| phone-portrait | 17.2s | **12.8s** |
+| desktop | 13.6s | **10.3s** |
+
+Read that as **directionally positive, not a precise delta** — it is one run each on
+a noisy runner, and 12.8s is the whole test including its 7–8s of setup. The controlled
+measurement is the cliff A/B above: same session, same host, 27003ms → 2171ms.
+
+What changed is not a stopwatch number but a bound. Before this, fragment cost on a
+GPU-less device was unbounded and only the *test* had been worked around. Now it is
+bounded by construction, and CI is green at **37 passed, 5 skipped**.
 
 Proved able to fail: the new `cross-renderer` test asserts the controller is
 actually *fed*. Removing the `sample` call turns both viewports red. That

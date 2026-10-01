@@ -7393,11 +7393,39 @@ the code was never committed:
   deriving the budget from `renderScaleLadder(2).length` instead of hand-counting it,
   with a comment recording that the hand-counted version is how it drifted.
 
-### The known-red is retired, not explained
+### The known-red was already green; the *defect* behind it was not
 
-`tournament.spec.ts:179` — the click that took **50.4 / 52.3 / 52.3 / 53.4s** across
-four CI runs. With adaptive resolution it runs in **1.9s**. Full browser gate:
-**37 passed, 5 skipped**, on a GPU-less forced-SwiftShader box.
+`tournament.spec.ts:179` is the test that took **50.4 / 52.3 / 52.3 / 53.4s** across
+four CI runs. r145 shipped the in-page press (pin, read, press in one round trip) and
+took it to **17.2s** on CI — green, and correctly described at the time as *the
+symptom*, not the fix. What r145 explicitly refused to let go was the thing under it:
+the page still renders at **2fps** on that runner, which is a real performance defect
+and a phone from the design baseline is the same class of target. That was the open
+box.
+
+So the number that isolates *this* round is not 53.4s. It is 17.2s. On the same
+runner, same spec, one run each:
+
+| | r145 (in-page press) | r146 (+ adaptive resolution) |
+|---|---|---|
+| phone-portrait | 17.2s | **12.8s** |
+| desktop | 13.6s | **10.3s** |
+
+**~25%, and one run apiece — read it as directionally positive, not as a measured
+delta.** These tests carry their own setup, the runner is noisy, and no single pair of
+runs distinguishes 17.2 from 12.8 against variance. Anyone tempted to quote that as
+"25% faster" should re-run the pair three times before believing it.
+
+The number that *is* controlled is the cliff A/B, because it is same-session and
+same-host: at **30×** throttle (`logs/throttle-cliff.json`), click **27003ms →
+2171ms**, a 12.4× move at the rate that reproduces the failure. That is what answers
+r144's objection, and it is a mechanism measurement rather than a wall-clock one.
+
+What this round can claim without hedging: the fragment cost on a GPU-less device is
+now **bounded by construction** — a ladder with a floor, a median, and a two-window
+streak — where before it was unbounded and only the test had been worked around. CI
+is green: **37 passed, 5 skipped**, and the 12.8s is the whole test including its
+7–8s of setup.
 
 r144 left this open on the grounds that a better frame time on fast hardware says
 nothing about a two-core runner, and that was right. `tools/throttle-cliff.mjs` exists
@@ -7451,9 +7479,9 @@ than none. Proven able to fail: removing the `sample` call from the render loop 
 |---|---|
 | gate on arrival | **red** — wrong import path, wrong window count |
 | the failed test | **the test's arithmetic**, not the controller |
-| `tournament.spec.ts:179` | 50.4–53.4s → **1.9s** |
-| at the 30× cliff | click 27003ms → **2171ms** (12.4×) |
-| browser gate | **37 passed / 5 skipped** |
+| isolated effect on CI | `tournament:179` 17.2s → **12.8s** (r145's press, not this) |
+| at the 30× cliff | click 27003ms → **2171ms** (12.4×, controlled) |
+| CI 36940562320 | **success** — 37 passed / 5 skipped |
 | unit gate | **180 passed** across 19 files |
 | new test's mutation | **2/2 red** with the wiring removed |
 | open boxes in the plan | **zero** |
