@@ -6071,3 +6071,37 @@ time, including the round where the commit already feels written.
 
 Gates, properly read: `pnpm check` 142 passed, `pnpm test:e2e` **35 passed /
 5 skipped / exit 0** on the re-run, one `Target crashed` recorded above.
+
+### Round 136 — 1.2 shipped, and verified rather than assumed
+
+Phase 1.2: the pre-bout card points at the techniques sheet and offers no way to
+get there.
+
+**Checked before building**, which turned out to matter:
+
+    #btn-techniques  rect [0,0,0,0]   visible: false
+    elementFromPoint at its centre      -> the card, not the button
+    card z-index 4, pointer-events auto
+
+So the HUD's own TECHNIQUES button is a `0x0` target behind the card at **every
+phone width**, and the reference was named and genuinely unreachable on the only
+screen every player reads. Not a nitpick.
+
+The card now carries a `REFERENCE` control under its action, wired through an
+optional `reference: { label, onOpen }` on `showResult`, so no other card changes.
+Verified in a browser:
+
+    before REFERENCE   {hidden: true,  open: false}
+    after  REFERENCE   {hidden: false, open: true}
+
+**And the first probe of this was wrong.** It read `getComputedStyle(...).opacity`
+and reported `1` both before and after — because `toggleSheet` opens on `hidden`
+plus an `.open` class, and opacity is not how this sheet reports state. I nearly
+concluded the button did nothing because the number I chose was the wrong
+number. Same shape as round 95's exit code and round 90's 0.06: **the
+instrument was not measuring the thing.** Three now, and the discipline is the
+same each time — read the code that produces the state before choosing the value
+you will read.
+
+Gates, **read before the git line this round**: `pnpm check` 142 passed,
+`pnpm test:e2e` 35 passed / 5 skipped / exit 0.

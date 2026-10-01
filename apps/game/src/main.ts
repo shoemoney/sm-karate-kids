@@ -700,6 +700,13 @@ async function boot(screen: BootScreen): Promise<void> {
         return f;
       })(),
       action: 'FIGHT',
+      // The reference this card names, reachable from the card itself. The HUD's
+      // own TECHNIQUES button is behind it at every phone width.
+      reference: {
+        label: 'REFERENCE',
+        onOpen: () =>
+          toggleSheet(byId<HTMLElement>('tech-ref'), true, settings.get().reducedMotion),
+      },
       rematch: () => act(),
     });
     schedule(beginBout, ROUND_INTRO_MS, nowMs);

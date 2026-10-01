@@ -257,6 +257,11 @@ export class Hud {
     rematch: () => void;
     /** The button's label. Defaults to REMATCH. */
     action?: string;
+    /**
+     * A secondary control under the action — used by the pre-bout card to open
+     * the reference it tells the player to consult.
+     */
+    reference?: { label: string; onOpen: () => void };
     /** A small line above the headline, e.g. the round. */
     kicker?: string;
     /**
@@ -319,7 +324,22 @@ export class Hud {
     this.resultCount = count;
     this.result.dataset['tone'] = opts.tone;
     this.result.dataset['phase'] = opts.phase ?? 'result';
-    this.result.replaceChildren(kicker, headline, score, detail, button, count);
+    // The pre-bout card points at the techniques sheet — "the sheet lists every
+    // combination", since r122 — and offered no way to get there. Verified rather
+    // than assumed: on a 390px phone the HUD's own TECHNIQUES button measures
+    // 0x0 behind the card and `elementFromPoint` at its centre returns the card,
+    // not the button. The reference was named and unreachable on the one screen
+    // every player reads.
+    const parts: HTMLElement[] = [kicker, headline, score, detail, button, count];
+    if (opts.reference !== undefined) {
+      const ref = document.createElement('button');
+      ref.type = 'button';
+      ref.className = 'result-reference';
+      ref.textContent = opts.reference.label;
+      ref.addEventListener('click', opts.reference.onOpen, { once: true });
+      parts.splice(4, 0, ref);
+    }
+    this.result.replaceChildren(...parts);
     this.banner.classList.remove('show');
     this.result.classList.add('show');
     Hud.replay(this.result, 'slam');

@@ -2787,6 +2787,27 @@ body.high-contrast .result-score {
    then as a disabled button — every one of those a fair reading of whatever
    the previous version looked like. One control, one job; the countdown is
    prose sitting under it. */
+.result-reference {
+  justify-self: center;
+  margin-block-start: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  background: none;
+  border: 1px solid var(--edge-faint);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.result-reference:hover,
+.result-reference:focus-visible {
+  color: var(--gold-bright);
+  border-color: var(--gold);
+}
+
 .result-count {
   margin: var(--space-2) 0 0;
   min-block-size: 1em;
