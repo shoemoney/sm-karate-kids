@@ -703,7 +703,13 @@ async function boot(screen: BootScreen): Promise<void> {
       // The reference this card names, reachable from the card itself. The HUD's
       // own TECHNIQUES button is behind it at every phone width.
       reference: {
-        label: 'REFERENCE',
+        // Labelled REFERENCE, on a card whose own copy never once uses the word
+        // "reference" — so the button named a concept the player had not been
+        // given, while the HUD calls the same sheet TECHNIQUES in a button the
+        // card covers. Two names for one destination, and the visible one
+        // matched neither. It now says what it opens, in the same word the
+        // player sees everywhere else.
+        label: 'TECHNIQUES',
         onOpen: () =>
           toggleSheet(byId<HTMLElement>('tech-ref'), true, settings.get().reducedMotion),
       },

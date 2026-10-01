@@ -6300,3 +6300,68 @@ playtested and closed. Noted, not actioned.
 
 Gates: `pnpm check` **145 passed** (was 142, +3 from the new guard).
 `pnpm test:e2e` 35 passed, 5 skipped, `e2e=0`.
+
+### Cycle 3 — `unexplained-reference-label`: the best finding of the run, and the reviewer got the frames wrong
+
+The reviewer cited Images #2, #11 and #14 for a "small outlined label reading
+REFERENCE". **Every one of those frames is a dojo fight screen, and I looked at
+#2 — there is no REFERENCE button in it.** The frame attributions were wrong.
+
+The finding was still real, and worse than reported. Getting to it cost four
+probes, and the reason is the useful part:
+
+1. Probed the dojo path. No `.result-reference` in 60s. Assumed the reviewer had
+   hallucinated a whole button.
+2. Grepped for an e2e test covering it. **There is none** — the reference button
+   has never had a browser test, which is why a 21px target survived dozens of
+   rounds of a loop whose entire method is measuring things.
+3. Polled the DOM every 100ms for 12s. No `.result` element *ever* appears.
+4. Found `showResult` at four call sites and read which function held the one
+   passing `reference:` — `newRun` at line 715, the **tournament** path.
+
+**The button existed the whole time. I was probing the wrong game mode.** Dojo
+never renders that card; the tournament pre-bout card does. A finding dismissed
+as a hallucination on the strength of one probe in the wrong mode is exactly the
+error this loop exists to prevent, and the only reason it survived was that I
+kept probing instead of writing it off.
+
+**Measured, settled, at 390x844: `102x21px`, 10px `--text-muted` letterspaced
+caps.** (The first measurement said 181x43 — that was the card's slam animation
+still running. Measuring mid-animation is how a target gets declared "fine".)
+
+The 44px floor is WCAG 2.5.8 and the Apple HIG. This is **21px — under half** —
+and it is the *only* route to the techniques sheet from the one screen every
+player passes through, because `hud.ts` documents that the HUD's own TECHNIQUES
+button sits behind the card at every phone width. The reference was not merely
+small; it was unreachable by thumb on the screen built to introduce the game.
+
+Fixed: `min-height: 46px`, `--text-xs`, `--surface-sunken` fill, inline-flex
+centred. **143x46px.** And relabelled `REFERENCE` → `TECHNIQUES`, because the
+card's copy never uses the word "reference" while the HUD calls the same sheet
+TECHNIQUES — two names for one destination, and the visible one matched neither.
+
+**Verified by tap, not by CSS.** Dead-centre click at the new box:
+`{"sheetBefore":false,"sheetAfter":true,"opened":true,"pageerrors":0}`. A larger
+target that opens nothing is a different bug, and reading the stylesheet proves
+neither.
+
+Guard mutation-tested again: 2 of 3 fail against the pre-fix CSS, 3 pass after.
+
+Gates: `pnpm check` **148 passed** (was 145, +3). `pnpm test:e2e` 35 passed,
+5 skipped, `e2e=0`.
+
+### Three cycles, three data points on the reviewer's reliability
+
+| Finding | Verdict | Why |
+|---|---|---|
+| desktop control strip | **REAL** | 29% of viewport, 66% gap — measured, unambiguous |
+| countdown caption | **REAL** | aria-label already said what the visible text omitted |
+| fraction "heavy" | FALSE | smallest glyph in the HUD; owner-ordered at r93 |
+| reference label | **REAL, misframed** | right defect, wrong frames, worse than described |
+| stick mapping detached | FALSE | the mapping strip is directly above each stick |
+| start instructions subdued | FALSE | verified 16.89:1 at the scrolled position |
+
+**4 of 6 actionable, and one of the four needed me to go looking in a mode the
+reviewer never mentioned.** Two cycles produced one fix each. That is the real
+throughput, and quoting five-findings-per-cycle as five units of progress is how
+a loop convinces itself it is converging.
