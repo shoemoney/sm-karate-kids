@@ -6008,3 +6008,31 @@ explicit rather than accidental.
 
 Gates: `pnpm check` 142 passed (was 141), `pnpm test:e2e` 35 passed / 5 skipped /
 exit 0.
+
+### Round 135 — the plan, and 1.1 shipped
+
+`docs/COMPLETION-PLAN.md` written: three phases, every remaining item named,
+blocked items marked as blocked on a human with the measurement attached.
+
+**Phase 1.1 — the keyboard legend. Shipped.** Four reviewers across four rounds
+(r96, r98, r102, r132) asked where the key bindings were, because the game has
+supported two four-direction clusters since `input/keyboard.ts` was written and
+**nothing on screen has ever said so**:
+
+    STANCE              WASD        TECHNIQUE         arrows (or IJKL)
+
+Verified in both states rather than one:
+
+    desktop 1280   display: block   "W A S D"
+    phone   390    display: none    "W A S D"
+
+**Behind `(hover: hover) and (pointer: fine) and (min-width: 720px)`** — a phone
+has no keyboard to tell and the layout is already the tightest thing in the
+game. The media query is the feature: the bindings are true on every device, and
+shown only where they are reachable.
+
+**And the desktop frame confirms the r127 fix is live** — the button reads
+TECHNIQUES, not MOVES. Two rounds of naming drift, settled in a single glance at
+a screenshot that had never been taken at desktop width.
+
+Gates: `pnpm check` 142 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.

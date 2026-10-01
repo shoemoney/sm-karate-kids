@@ -1130,6 +1130,33 @@ body.show-perf #backend {
 }
 
 /* The dish: a hollow of dark leather inside a brass bezel, lit from above. */
+/* The keyboard bindings, for the players who have a keyboard.
+ *
+ * The game has supported two four-direction key clusters since the input layer
+ * was written — WASD for the stance stick, arrows (or IJKL) for the technique
+ * stick — and four reviewers across four rounds asked where they were, because
+ * **nothing on screen has ever said so.** A desktop player is told nothing about
+ * how to play and has to guess that a keyboard is wired up at all.
+ *
+ * Desktop only, and hidden below the breakpoint where the sticks are thumb
+ * sized: on a phone there is no keyboard to tell, and the layout is already the
+ * tightest thing in the game.
+ */
+.key-hint {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--track-wide);
+  color: var(--text-faint);
+  text-align: center;
+}
+
+@media (hover: hover) and (pointer: fine) and (min-width: 720px) {
+  .key-hint {
+    display: block;
+  }
+}
+
 .stick {
   position: relative;
   display: grid;
