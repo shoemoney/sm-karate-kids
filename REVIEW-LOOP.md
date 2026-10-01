@@ -7199,3 +7199,171 @@ thing that caught it was a measurement cheap enough to actually run: the trace
 artifact already on disk, holding the answer as per-step durations nobody had read.
 
 Read the artifact you already have before you build the next probe.
+
+## Round 145 — the click was racing a 9-second card, and r143 was right all along
+
+Round 144 shipped a diagnosis and no fix, correctly: it could not show a fix passing
+in CI, only that one was sound locally. It then wrote the next round a pointer toward
+the renderer. That pointer was wrong, and following it would have cost another round.
+
+### r144 retired the right mechanism for the wrong reason
+
+r144 reported the click taking **50.4–53.4s** and the card dismissing at **9s** — and
+called that proof the card was *not* what the click lost a race to. Those two numbers
+are not in conflict. They are the bug. A 9-second card cannot host a 53-second press.
+
+What r144 never opened was the trace artifact it had already downloaded, sitting in
+the report bundle with per-step durations in it:
+
+```
+   0.11s   0.25s  Navigate
+   0.36s   2.77s  Wait for function
+   3.13s   1.81s  Expect "toBeVisible"
+   4.94s   1.38s  Evaluate            ← pin + label
+   6.32s  45.99s  Click                ← 77% of a 60s budget, one step
+  52.31s   8.27s  Expect "toBeHidden"
+  60.07s   1.04s  After Hooks         ← budget gone
+```
+
+Both CI attempts: `45.99s` and `50.69s`, both starting at `t+6.3s`. The `waitForFunction`
+at line 221 — the assertion the log blamed — got **0.01s**. It inherited an exhausted
+budget. The clock claim was never false; it was never asked.
+
+### The failure's own page snapshot says what actually happened
+
+The `error-context.md` in the same bundle:
+
+```
+generic [ref=e9]: 29 seconds remaining
+main → status: IPPON / HasanAbi / Reverse Punch
+```
+
+No `.result` card in the tree. The card had dismissed itself, the bout then ran
+**unattended for ~48 seconds**, and the CPU had already scored a full point. The test
+was not slow. It was watching an empty room.
+
+### Worse than slow: the click succeeded on the wrong button
+
+Playwright's locator re-resolves `.result-rematch` on every poll. The wait outlives the
+card, so by the time actionability converged the locator had found **round 2's**
+freshly-built button. The click "succeeded", `expect(card).toBeHidden()` passed, and
+`held === false` passed — all for the wrong reason, on a different round's control.
+
+That is the part worth carrying forward: a test can go green-adjacent on a claim it
+never exercised, and the only reason it went red at all was a 60s budget expiring
+somewhere else entirely.
+
+### Why 46 seconds: deviceScaleFactor 3
+
+The phone project runs at DPR 3 — `devices['iPhone 12']` — while the config overrides
+the viewport but **not** the scale factor:
+
+| project | viewport | DPR | backing pixels |
+|---|---|---|---|
+| phone-portrait | 390×844 | **3** | **2,962,920** |
+| desktop | 1280×800 | 1 | 1,024,000 |
+
+Under software rasterization every page round trip queues behind a frame. Measured
+directly, same page, same test, only DPR varied:
+
+```
+DPR 3: clickMs 2233   canvas 780×1062
+DPR 1: clickMs  294   canvas 390×531
+```
+
+**7.6× on the click from the pixel tax alone.** Same test, 60s on the phone project,
+15.1s on desktop, on one runner with `workers: 1` and no contention to blame.
+
+### r144's frame outlier does not exist in CI
+
+r144 recorded a `21.7s` outlier and a `31.9s` max frame. The screencast frame
+filenames in the trace carry epoch milliseconds, so the renderer's real cadence is
+recoverable:
+
+```
+frames: 161 over 59.87s
+  0- 5s :  48 frames   9.6 fps   ← boot, before the 3D loop settles
+  5-60s : 113 frames  ~2.1 fps   ← steady, and FLAT
+gap  median 0.462s   p90 0.615s   max 1.199s
+```
+
+**Max gap 1.199s.** There is no 21-second frame in CI. The renderer is not stalling —
+it is slow and *predictably* so, and predictability is what made the press
+unservicable rather than merely late.
+
+### The fix
+
+Pin, read, and press now happen in **one synchronous block inside the page**. Nothing
+between the pin and the press crosses the page boundary, because a round trip there is
+exactly the time being removed. `button.click()` still dispatches at the real listener
+(`addEventListener('click', opts.rematch, { once: true })`), so `act()` runs as a tap
+does: cancels `pendingAt`, calls `beginBout`.
+
+An `onScreen` assertion on the button's box was added for the specific failure mode
+above — a dismissed card reports `0×0`, so it stops the press from silently becoming a
+press on nothing.
+
+Honest cost: this no longer exercises the browser's synthesized pointer event or
+hit-testing. Real-pointer reachability of this control is covered by
+`reference-tap-target.test.ts`; the claim here is about the clock.
+
+### Measured, then mutation-tested, then gated
+
+Under CI's exact condition (forced SwiftShader, both projects):
+
+| | before | after |
+|---|---|---|
+| phone-portrait | 60s timeout ×2 | **4.6s** |
+| desktop | 15.1s | 12.4s |
+
+A green test that cannot go red is the r90 mistake, so the fix was mutated: `beginBout`
+changed to hide the card *without* clearing `held` — precisely the "releases the clock,
+not merely hides the card" claim. Both projects **failed in 5.2s**, `Expected: false /
+Received: true`. The test is load-bearing.
+
+**CI, run 36931445958: 18 unit files passed, 35 e2e passed, 0 failed, 0 retries.**
+`tournament.spec.ts:179` on phone-portrait: **17.2s**, first attempt. The gate r144
+could not reach.
+
+### Also measured: one failure that was not mine
+
+`tournament.spec.ts:118` fails under forced SwiftShader locally. Verified pre-existing
+by stashing the change and re-running: identical failure both ways (3410ms vs 2292ms
+observed against a 5000ms floor). It is a starved in-page sampler on a box slower than
+CI, where the same test passes in 22.8s. Recorded because "it fails on my machine" is
+the sentence that precedes every false regression claim.
+
+### The round in one table
+
+| | |
+|---|---|
+| r143's mechanism | **correct after all** — 9s card vs 46–51s press |
+| r144's frame outlier | **not in CI** — max real gap 1.199s |
+| asymmetry | **DPR 3**, 2.96M vs 1.02M px; click 2233ms vs 294ms |
+| the click's real cost | 45.99s / 50.69s, both from `t+6.3s` |
+| failure snapshot | `29 seconds remaining`, IPPON scored, no card |
+| fix | pin + read + press in one in-page block |
+| mutation | fails both projects in 5.2s when `held` isn't cleared |
+| CI 36931445958 | **35 passed / 0 failed / 0 retries**, phone 17.2s |
+
+### Watch items — passing, so not touched
+
+Two tests run close enough to their 60s budgets to be worth naming. Neither is failing
+and neither was edited:
+
+| test | CI time | budget |
+|---|---|---|
+| `boot.spec.ts:70` game keys still type into a text field | **47.8s** | 60s |
+| `touch-bout.spec.ts:117` stance stick moves the fighter | **42.1s** | 60s |
+
+Every test over 60s (`boot.spec.ts:92`, `tournament.spec.ts:278`,
+`touch-bout.spec.ts:42`) already carries a raised timeout with the reason in a comment
+— they wait out a 1800-tick bout at 15 ticks/frame, which genuinely needs 120+ frames
+at 2fps. That is the good kind of raised timeout. These two are not there yet and do
+not need to be until they actually go red.
+
+**The finding worth keeping is r144's, and it is a finding about itself.** It declined to
+ship a fix it could not prove, which was right. It then wrote down a mechanism that
+contradicted its own measurements, because a hypothesis that *sounds* mechanistic reads
+as progress. Two rounds of very good measurement sat on top of an artifact holding the
+answer in per-step durations. Open the file you already downloaded.
