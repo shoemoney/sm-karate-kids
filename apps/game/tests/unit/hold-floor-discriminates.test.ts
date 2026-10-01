@@ -82,13 +82,25 @@ describe('the round-card hold floors', () => {
     if (!verdict.ok) expect(verdict.because).toMatch(/not awake across the window/);
   });
 
-  test('rejects a hold shorter than the floor, and names the drift', () => {
-    // 4000ms is the budget these floors were originally written against. If
-    // someone moves ROUND_INTRO_MS back to it, or the card starts dismissing
-    // early, this must be loud and must say what to look at.
-    const verdict = evaluateHoldFloors(spread(0, 4_000, 1_000));
+  test('accepts every hold span CI actually measured, on both commits', () => {
+    // These four numbers are read out of CI logs, not invented. Each is the
+    // recorder's OBSERVED span for a card that was genuinely up for 9000ms,
+    // short by the sampling lag at both ends on a two-core runner. An earlier
+    // version of these floors compared this observed span against the 9000ms
+    // budget and failed all four.
+    for (const span of [6_391, 6_799, 6_819, 7_350]) {
+      const verdict = evaluateHoldFloors(spread(0, span, 9));
+      expect(verdict.ok, `CI observed ${span}ms`).toBe(true);
+    }
+  });
+
+  test('rejects a card that genuinely came and went too fast', () => {
+    // The floor's only remaining job: a hold that is short because the CARD was
+    // short, not because the sampler was slow. Two seconds is unambiguous — no
+    // amount of sampling lag explains it.
+    const verdict = evaluateHoldFloors(spread(0, 2_000, 9));
     expect(verdict.ok).toBe(false);
-    if (!verdict.ok) expect(verdict.because).toMatch(/ROUND_INTRO_MS moved/);
+    if (!verdict.ok) expect(verdict.because).toMatch(/lower bound on the card/);
   });
 
   test('rejects samples clustered in the middle of the hold — the head and tail count as gaps', () => {

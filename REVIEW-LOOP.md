@@ -6899,3 +6899,82 @@ but "provably" here means proven against the numbers in the log, not against
 CI's hardware. The push below gets one look; if it is still red, the next round
 starts with a red gate and a named cause instead of a green log and no cause,
 which is the entire point of this entry.
+
+### Round 143, corrected — my premise was wrong and CI said so
+
+I pushed the floor change and polled CI with:
+
+    gh run list --commit $SHA --limit 1 --json status,conclusion
+    -> [175s] completed/success
+
+I was about to write "CI is green." **It is not.** `--limit 1` returned the
+*most recent* run, which was `Push on main` (CodeQL), not `CI`. Reading it by
+name: `Push on main: completed/success`, **`CI: completed/failure`**.
+
+**That is the same mistake as the finding, made in the act of documenting it.** A
+rule that says "read the gate" without saying *which* gate gets you reading the
+wrong one, and I proved it forty minutes after writing the lesson down. The
+fix is in the rule now: name the workflow, and never poll a bare run list.
+
+And CI's failure overturned the reasoning I had just committed:
+
+    Error: the hold lasted 6819ms, under the 8000ms floor
+    Error: the hold lasted 6391ms, ...
+    Error: the hold lasted 7350ms, ...
+    Error: the hold lasted 6799ms, ...
+
+**Under 8000ms — and all four are far under the 9000ms budget.** I had written,
+as a load-bearing justification:
+
+> a starved main thread *delays* a deadline, it never advances one, so a long
+> hold is always legitimate and an upper bound would flake
+
+That is **true, and irrelevant, because I had the wrong quantity.** The card's
+hold *is* a wall-clock deadline — `pendingAt = performance.now() + ROUND_INTRO_MS`,
+fired against the rAF timestamp (`main.ts:541`, `main.ts:859`) — so a slow runner
+does not shorten it, and the card held for its full 9 seconds on CI exactly as
+designed. What a slow runner shortens is the window **the recorder manages to
+observe**. A starved `setInterval` fires its first sample some hundreds of ms
+*after* the card appears, and its last sample some hundreds of ms *before* the
+poll that notices the card left. And 9000 − 6391 = 2609ms is almost exactly the
+lag at both ends.
+
+**So `MIN_HOLD_MS` was comparing the recorder's observed span against the card's
+nominal budget — two different quantities, one of which is a lower bound.** The
+old 8000ms floor failed on CI four times while the card behaved perfectly, and
+so would mine.
+
+The floor is now **5000ms**, and it is honest about being empirical: ~28% under
+the worst legitimate observation (6391ms, measured on CI across two commits and
+both viewports), and still rejecting a card that came and went in under five
+seconds. A test now asserts against **all four** measured CI spans, so the next
+person to retune this is holding the real numbers rather than a story about them.
+
+The coverage guard is untouched by this and keeps its value: the 9-sample CI
+recording passes it, and the recordings the old count floor accepted still fail
+it.
+
+### What this round got right, and what it got wrong
+
+Right, and worth keeping: the diagnosis that `MIN_SAMPLES` was a **rate** floor
+and could not distinguish a slow runner from a broken recorder. That is correct
+and it is why the error message blamed the wrong thing.
+
+Wrong, and it is the more expensive half: having found a real defect, I built a
+guard on a **second unverified assumption** — that the hold's observed span is
+bounded below by the nominal budget — and asserted it in a comment as though it
+were established. It was not tested, and it was false. I wrote a test that
+"proves" the fix, ran it, watched it pass, and treated that as proof the *fix*
+was right. **A test that passes on numbers I chose proves the arithmetic, not the
+premise.** The only thing that settled it was a red CI log containing a number I
+had not predicted.
+
+That is the r90 rule wearing a disguise, and it is worth more than the fix.
+
+### One flake, reproduced three times clean
+
+The first local e2e after the correction came back **34 passed / 1 failed**:
+`touch-bout.spec.ts` — `Expected: "over", Received: "ready"`. Three isolated re-runs
+of that spec: **3/3 green.** A different spec file, and no game source was touched
+this round, so it is contention under a still-loaded box rather than a
+regression — reported with the reproduction counts rather than as a pass.

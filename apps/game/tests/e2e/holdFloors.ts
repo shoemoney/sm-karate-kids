@@ -31,13 +31,32 @@
 export const ROUND_INTRO_MS = 9_000;
 
 /**
- * The hold must last at least this long.
+ * The hold must last at least this long, as *the recorder saw it*.
  *
- * There is deliberately no upper bound. A starved main thread *delays* a
- * deadline, it never advances one, so a long hold is always legitimate — and an
- * upper bound would flake on exactly the slow runners this exists for.
+ * This is NOT compared against ROUND_INTRO_MS, and the reason is the correction
+ * this file exists to record. The card's hold is a wall-clock deadline
+ * (`pendingAt = performance.now() + 9000`, fired against the rAF timestamp), so
+ * a slow runner does not shorten it. What a slow runner *does* shorten is the
+ * window the recorder manages to observe: a starved `setInterval` fires its
+ * first sample some hundreds of ms after the card appears and its last sample
+ * some hundreds of ms before the poll that notices the card left. CI measured
+ * 6391 / 6799 / 6819 / 7350ms for a 9000ms card, and the ~2.6s difference is
+ * almost exactly the lag at both ends.
+ *
+ * So the recorded span is a *lower bound* on the hold, and pairing it with the
+ * nominal budget is comparing two different quantities. An earlier version of
+ * this file did exactly that with an 8000ms floor and failed on CI four times
+ * while the card was behaving exactly as designed.
+ *
+ * 5000ms is therefore empirical, and honestly so: it sits ~28% under the worst
+ * legitimate observation (6391ms, CI, both viewports, two commits) and still
+ * rejects a card that came and went in under five seconds, which is a real
+ * defect rather than a slow machine.
+ *
+ * There is deliberately no upper bound. A starved thread delays a deadline, it
+ * never advances one, so a long observed hold is always legitimate.
  */
-export const MIN_HOLD_MS = 8_000;
+export const MIN_HOLD_MS = 5_000;
 
 /** The only thing a raw count can still honestly assert: the recorder ran
  *  repeatedly rather than once, or not at all. It asserts nothing about rate. */
@@ -89,9 +108,11 @@ export const evaluateHoldFloors = (hold: HoldWindow): FloorVerdict => {
     return {
       ok: false,
       because:
-        `the hold lasted ${spanMs}ms, under the ${MIN_HOLD_MS}ms floor. If this is a new ` +
-        'number rather than a slow runner, ROUND_INTRO_MS moved and these floors were never ' +
-        `re-derived (it is pinned at ${ROUND_INTRO_MS}ms in main.ts)`,
+        `the recorder observed only ${spanMs}ms of the hold, under the ${MIN_HOLD_MS}ms floor. Note that ` +
+        'this is a lower bound on the card\'s real lifetime, not the card\'s lifetime: a starved ' +
+        'sampler loses time at both ends, so a slow runner reads short here even when the card is ' +
+        'holding for exactly as long as it should. If this fires on a fast machine the hold really ' +
+        'is too short.',
     };
   }
 
