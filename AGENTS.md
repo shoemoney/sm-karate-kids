@@ -29,11 +29,17 @@ three shell/Python/Node tools, which have their own shebang or interpreter.
 | `gen-art.sh` | `bash tools/gen-art.sh [jobs]` | Generates the art set with the codex image tool, one process per asset in parallel. Derives the repo root from `BASH_SOURCE`, so it works from any clone or worktree. |
 | `optimize-art.sh` | `bash tools/optimize-art.sh` | Downscales and converts `assets/generated/` → `apps/game/public/generated/*.webp` per the manifest's `maxWidth`/`alpha`. Also derives its root from `BASH_SOURCE`. |
 | `build-fighter-atlas.py` | `python3 tools/build-fighter-atlas.py` | Segments the fighter contact sheets in `assets/` into the WebP atlases + `manifest.json`. **The source sheets are gitignored** — see [`docs/sprite-pipeline.md`](docs/sprite-pipeline.md) before running it. |
+| `despeckle-fighters.py` | `python3 tools/despeckle-fighters.py` | Erases detached keyed fragments from the fighter atlases (islands of artwork beside the figure — usually a back hand the keyer separated from its sleeve). Five vision reviewers across four rounds reported the symptom and none could name it; this is the fix for the cause. |
 | `shots.mjs` | `node tools/shots.mjs [outDir]` | Throwaway look-at-the-game screenshot harness. Not part of any gate. |
 | `fps.mjs` | `node tools/fps.mjs` | Throwaway frame-rate / post-chain cost measurement. Not part of any gate. |
 | `review-shots.mjs` | `node tools/review-shots.mjs /tmp/smkk-loop` | Plays a bout and captures the review frame set. **Regenerate before every review** — stale frames produced a false finding about already-fixed code at r127. |
 | `verify_shots.py` | `python3 tools/verify_shots.py /tmp/smkk-loop` | Gate on the capture itself: frames distinct, non-flat, and moving. A set that fails here was never a review set. |
 | `review-codex.sh` | `bash tools/review-codex.sh [shotsDir] [outJson]` | The advisory/consumer reviewer (codex → `openai/gpt-6.1-sol` via OpenRouter, computer use). Fails closed on an empty bearer or an empty answer rather than reporting a broken run as findings. |
+| `vision-review.py` | `python3 tools/vision-review.py <model-id> <shotdir> [--out review.json]` | Sends the review frames to a vision model on OpenRouter as one multi-image turn and asks for exactly 5 concrete improvements. The other reviewer in `REVIEW-LOOP.md`. |
+| `bench-server.mjs` | *(imported, not run)* | `startPreview(gameDir, port?)` — spawns a `vite preview` on **4188**, awaits until it actually answers, and kills it on the way out. A benchmark whose subject can vanish between the build and the measurement is measuring something else; a hand-started background server did exactly that and the next run died on `ERR_CONNECTION_REFUSED` with nothing naming the cause. |
+| `renderer-bench.mjs` | `node tools/renderer-bench.mjs <label> [--frames N] [--gfx webgl\|webgpu]` | Measures the two numbers r145 needed: rAF **frame times**, and the **click** (`.result-rematch`, on a pinned tick) that is the actual CI failure. Measured on **separate page loads**, because the round card self-dismisses at 9s and one load measuring both gets `NEW TOURNAMENT` instead of the card. Software rendering is **forced** — measuring with a GPU measures a different machine than the one that fails. |
+| `renderer-sweep.mjs` | `node tools/renderer-sweep.mjs` | Frame-time across renderer configs by patching source, rebuilding, measuring and **reverting** every edit, so the tree ends the run as it started. Numbers are **relative**: only the ratio between configs measured on the same host in the same session is comparable, which is what a look trade needs. Tuned by `SWEEP_GFX` / `SWEEP_FRAMES`. |
+| `throttle-cliff.mjs` | `CPU_LADDER=1,4,8,16 node tools/throttle-cliff.mjs` | Finds the CPU throttle rate at which the CI failure reproduces **locally**, then checks whether a candidate fix removes it at that rate. A lever that helps at 1× and does nothing at the cliff is not a fix. Same patch-and-revert anchors as the sweep. |
 | `verify-deploy.sh` | `bash tools/verify-deploy.sh [baseUrl]` | **Post-deploy gate.** Fetches the live `index.html`, compares it byte-for-byte with `apps/game/dist/index.html`, then fetches every asset the served html names and compares sha256 against the local file. Exit 0 = the served bytes are the built bytes. HTTP 200 proves nothing here; at r141 the site answered 200 for hours over a two-hour-old build. |
 | `verify-deploy-mutation.sh` | `bash tools/verify-deploy-mutation.sh` | Proves `verify-deploy.sh` can fail: 6 cases over a real local HTTP server (faithful copy, stale names, right-name/wrong-bytes, absent asset, dead origin, absent local build), asserting exit code **and** the diagnosis. Run it after touching the gate. |
 | `loop-once.sh` | `bash tools/loop-once.sh` | One unattended review-loop iteration (the `launchd` driver). Takes the lock, builds the prompt, runs `opencode run`. |
@@ -43,6 +49,13 @@ this table that need the network, and they are the only two that must be run
 against a real origin to mean anything — a deploy gate exercised only against
 `localhost` has not exercised the deploy. Neither is in `pnpm check`, because
 `pnpm check` must stay runnable offline.
+
+`renderer-sweep.mjs` and `throttle-cliff.mjs` **edit `apps/game/src` to measure
+it, rebuild, then revert** — a full `vite build` per configuration. Do not run
+one while you have uncommitted work in the tree you would mind losing to a
+killed run, and re-read `git status` afterwards rather than trusting the exit
+code. They also each spawn their own preview on 4188 (see `bench-server.mjs`),
+which is deliberately *not* the e2e suite's 4173 so the two cannot collide.
 
 Two modules in `apps/game/src` are the runtime half of the art story: **`artLoader.ts`** is the one
 door every generated texture comes through (it returns `null` and warns on a miss, so a missing file

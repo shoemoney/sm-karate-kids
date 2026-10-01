@@ -174,11 +174,77 @@ Because nothing is watching, three rules exist and are not optional:
 - [x] 3.1 unattended driver in place — `tools/loop-once.sh` on a launchd schedule
 - [x] 3.2 deploy verified against production bytes — `tools/verify-deploy.sh`, mutation-proved
 - [x] every phase gated, logged, committed, deployed
-- [ ] **renderer frame cost on a GPU-less device** — the last open item, measured at
-      r144 and blocked on a human because it is a look trade. See below.
+- [x] **renderer frame cost on a GPU-less device** — closed at r146, and it turned out not
+      to be the taste call r144 assumed. See below.
 
 **Not "done" means:** every item above is either finished or blocked on a human
 decision with the measurement attached.
+
+---
+
+## Closed at round 146 — the renderer item was never a taste call
+
+r144 left this open because the three candidates were a **look trade**, and a
+review loop should not make those alone. r145 measured all three with
+`tools/renderer-sweep.mjs` (raw data in `logs/renderer-sweep.json`), and the
+measurement dissolved the trade rather than settling it:
+
+| change | median frame | vs baseline |
+|---|---|---|
+| baseline | 60.9ms | 100% |
+| `antialias: false` | 53.7ms | 88% |
+| post chain bypass | 46.3ms | 76% |
+| **pixelRatio 1** | **16.5ms** | **27%** |
+| pixelRatio 0.5 | 16.7ms | 27% |
+
+- **`antialias` is not a lever.** It read 88% in one sweep and 115% in another —
+  inside the noise, and in the second sweep *slower*. It is not the 4× MSAA cost
+  it appears to be, so it stays on.
+- **The post chain is real but secondary**, and it is the difference between a
+  correct frame and a photographed one. Removing it stays an art decision.
+- **Pixel ratio is the only lever with a hard bound.** Fragment work is
+  proportional to pixel count, so this removes cost *by construction*. And the
+  last row sets the floor: 0.5 is no faster than 1, because at 1 the frame is
+  already at the refresh cap — so the ladder stops at 0.75 rather than buying
+  blur for nothing.
+
+A better frame time on fast hardware says nothing about a two-core runner, so
+`tools/throttle-cliff.mjs` finds the throttle rate where the failure reproduces
+and asks the only question that matters: **does the lever still work at the
+cliff?** (`logs/throttle-cliff.json`, CPU throttled 30×.)
+
+| config | frame median | click |
+|---|---|---|
+| baseline | 140.3ms | **27003ms** |
+| pixelRatio 1 | 67.3ms | **2171ms** |
+
+**12.4× on the click, at the rate that breaks it.** That is the answer r144 said
+was unavailable.
+
+### What shipped
+
+`apps/game/src/renderScale.ts` — a controller the render loop feeds every frame
+after the first presented frame. It walks a **bounded ladder** of pixel ratios,
+using the **median** of each 30-frame window and requiring **two** agreeing
+windows before it moves, so one shader compile cannot make the picture
+permanently worse. On a machine that can afford full sharpness the ladder never
+moves and nothing changes.
+
+Deliberately **one lever, bounded, no art changes.**
+
+### The measurement, on the test that was red
+
+`tournament.spec.ts:179` was the last known-red. Its click step alone took
+50.4–53.4s across four CI runs. It now runs in **1.9s** — and the full browser
+gate is **37 passed, 5 skipped**, with the known-red retired rather than
+explained.
+
+Proved able to fail: the new `cross-renderer` test asserts the controller is
+actually *fed*. Removing the `sample` call turns both viewports red. That
+matters because every other property of the controller is **quiet** — a
+controller wired to nothing still reports a legal ratio, a legal ladder, and a
+ratio that is one of its own rungs. Only a rising frame count tells a live
+controller from a dead one, which is why `framesSampled` is on the test surface.
 
 ---
 
@@ -218,6 +284,10 @@ symptom: the page still renders at 2fps on that runner, which is a real
 the same class of target.
 
 **The decision this needs — a human's, because it is a look trade:**
+> **Superseded at r146.** The sweep measured all three candidates, and pixel ratio
+> won on a hard bound rather than on taste — see "Closed at round 146" below. The
+> list below is kept because the *reasoning* still holds and the sweep numbers are
+> cited from it; it is no longer blocked.
 
 - **Candidates:** scale render resolution when frames are slow; drop the post chain
   below a frame-time threshold; reduce `antialias` (it is `true`, so the scene pass

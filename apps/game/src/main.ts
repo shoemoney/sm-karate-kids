@@ -29,6 +29,7 @@ import { PlayerInput } from './input/index.js';
 import { loadCareer, loadPlayerName, recordBoutResult, recordRun, savePlayerName } from './persist.js';
 import { Leaderboard } from './leaderboard.js';
 import { createRenderer } from './renderer.js';
+import { RenderScaleController } from './renderScale.js';
 import { createPostStack } from './post.js';
 import { FighterRig, loadEmblem } from './rig.js';
 import { SettingsStore, type Settings } from './settings.js';
@@ -251,6 +252,11 @@ async function boot(screen: BootScreen): Promise<void> {
   screen.advance('renderer');
   screen.advance('fighters', 1, 'Lacing the fighters');
   hud.setBackend(label);
+
+  // Adaptive resolution. Created here so it is holding the device's own pixel
+  // ratio before the first frame, and consulted from the render loop below.
+  // The controller decides; it never touches the renderer itself.
+  const renderScale = new RenderScaleController(globalThis.devicePixelRatio);
 
   let fighterMode: 'sprite' | 'mesh';
   let views: readonly FighterView[];
@@ -889,6 +895,20 @@ async function boot(screen: BootScreen): Promise<void> {
       void screen.close().then(publishTestSurface);
     }
 
+    // Adaptive resolution, and only from here on.
+    //
+    // Sampling before the first frame is presented would feed the controller
+    // shader-compile time and the boot screen's own repaints — every one of
+    // them a genuinely slow frame that has nothing to do with steady-state
+    // cost. It would walk the ladder to its floor in the first second and then
+    // have to climb back, which is exactly the flicker this is meant to
+    // remove. `handedOver` is the first frame that actually reached the screen,
+    // so it is the first frame whose cost means anything.
+    if (handedOver) {
+      const changed = renderScale.sample(frameDt);
+      if (changed !== null) renderer.setPixelRatio(changed);
+    }
+
     perfFrames += 1;
     perfTicks += ticks;
     const perfElapsed = now - perfWindowStart;
@@ -917,6 +937,25 @@ async function boot(screen: BootScreen): Promise<void> {
         backend: label,
         mode,
         fighters: fighterMode,
+        /**
+         * The adaptive-resolution state, read-only.
+         *
+         * A phone with no GPU cannot afford the device's full pixel ratio, so
+         * the ratio in force is not a constant and asserting on it is how a
+         * test tells "the renderer degraded gracefully" from "the renderer did
+         * nothing at all" — which look identical on a screenshot.
+         *
+         * `frames` is the part that can fail. The ratio, the ladder and the
+         * membership between them are all satisfied by a controller that is
+         * never fed, so they cannot on their own distinguish a live controller
+         * from a dead one. A rising frame count is what proves the render loop
+         * is calling into it.
+         */
+        renderScale: () => ({
+          ratio: renderScale.ratio,
+          ladder: [...renderScale.rungs],
+          frames: renderScale.framesSampled,
+        }),
         state: () => ({
           tick: state.tick,
           phase: state.phase,

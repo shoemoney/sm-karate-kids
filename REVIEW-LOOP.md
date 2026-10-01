@@ -7367,3 +7367,101 @@ ship a fix it could not prove, which was right. It then wrote down a mechanism t
 contradicted its own measurements, because a hypothesis that *sounds* mechanistic reads
 as progress. Two rounds of very good measurement sat on top of an artifact holding the
 answer in per-step durations. Open the file you already downloaded.
+
+---
+
+## Round 146 — the last open item is closed, and the red was a defect, not a test bug
+
+`docs/COMPLETION-PLAN.md` carried one unchecked box: **renderer frame cost on a
+GPU-less device**, blocked on a human because r144 believed the fix was a look
+trade. The r145 measurement work (three new tools, four untracked files) landed in the
+tree ungated. This round gated it, fixed what the gate found, and closed the box.
+
+### The gate was red before anything else
+
+Two failures, both in the new work, neither of which a reviewer had looked at because
+the code was never committed:
+
+- **typecheck failed**: the new unit test imported `'../src/renderScale.js'`. The test
+  is at `tests/unit/`, so that resolves to `tests/src/` — a directory that does not
+  exist. Every sibling uses `'../../src/'`. A one-character path error, invisible to a
+  reviewer reading logic and fatal to the gate.
+- **one test failed**: `returns the new ratio only when it changes` expected
+  `[1.5, 1, 0.75]` and got `[1.5]`. **The test was wrong, not the controller.** It fed
+  `WINDOW * (SCALE_STREAK + 1)` = 3 windows and expected 3 rungs, but walking a rung
+  costs `SCALE_STREAK` windows, so 3 rungs at a streak of 2 needs **6**. Fixed by
+  deriving the budget from `renderScaleLadder(2).length` instead of hand-counting it,
+  with a comment recording that the hand-counted version is how it drifted.
+
+### The known-red is retired, not explained
+
+`tournament.spec.ts:179` — the click that took **50.4 / 52.3 / 52.3 / 53.4s** across
+four CI runs. With adaptive resolution it runs in **1.9s**. Full browser gate:
+**37 passed, 5 skipped**, on a GPU-less forced-SwiftShader box.
+
+r144 left this open on the grounds that a better frame time on fast hardware says
+nothing about a two-core runner, and that was right. `tools/throttle-cliff.mjs` exists
+to answer exactly that objection — it finds the throttle rate where the failure
+reproduces locally and asks whether the candidate still works *there*. At **30×**:
+
+| config | frame median | click |
+|---|---|---|
+| baseline | 140.3ms | **27003ms** |
+| pixelRatio 1 | 67.3ms | **2171ms** |
+
+**12.4× on the click at the rate that breaks it.** So the lever was never a taste
+trade: `antialias` is inside the noise (88% one sweep, 115% the next), and the post
+chain is an art decision, but fragment cost is proportional to pixel count and so has a
+hard bound. Raw data in `logs/renderer-sweep.json` and `logs/throttle-cliff.json`.
+
+**A measurement is a claim about the machine it ran on.** The sweep rows are relative
+and only comparable within one host and session — the numbers in
+`renderScale.ts`'s header are labelled that way, and the file records *why* each
+candidate was kept or dropped rather than just which won.
+
+### The part worth arguing about: a green test that could not have failed
+
+`__smkk.renderScale` shipped with a doc comment describing precisely what it was for:
+
+> asserting on it is how a test tells "the renderer degraded gracefully" from "the
+> renderer did nothing at all" — which look identical on a screenshot
+
+**Zero tests consumed it.** A test surface authored, documented, wired into
+`main.ts`, and never read is the exact shape this loop has been bitten by before, so
+it got a test.
+
+The interesting part is what the test can and cannot assert. It deliberately does
+**not** assert the ratio dropped: whether it drops depends on the machine, so that
+assertion would be red on every fast box and green only on the slow one — backwards.
+
+What is left is worse in a way worth naming. Ratio-is-a-rung-of-its-own-ladder, ratio
+is above the floor, ladder never exceeds the device ratio — **every one of those is
+satisfied by a controller that is never fed.** They are quiet properties. They would
+have gone green on the unwired version forever.
+
+So `framesSampled` exists to give the test one property that cannot be quiet, and the
+e2e polls for it **growing** rather than merely being non-zero, because two evaluates
+can land inside one animation frame on a slow runner and a flaky assertion is worse
+than none. Proven able to fail: removing the `sample` call from the render loop turns
+**both viewports red**. Restored, green, suite re-run.
+
+### The round in one table
+
+| | |
+|---|---|
+| gate on arrival | **red** — wrong import path, wrong window count |
+| the failed test | **the test's arithmetic**, not the controller |
+| `tournament.spec.ts:179` | 50.4–53.4s → **1.9s** |
+| at the 30× cliff | click 27003ms → **2171ms** (12.4×) |
+| browser gate | **37 passed / 5 skipped** |
+| unit gate | **180 passed** across 19 files |
+| new test's mutation | **2/2 red** with the wiring removed |
+| open boxes in the plan | **zero** |
+
+### Watch items — passing, so not touched
+
+`boot.spec.ts:70` (47.8s) and `touch-bout.spec.ts:117` (42.1s) still run close to their
+60s budgets. The renderer fix took ~45s off the frame-bound tests' clock, so both
+should now clear with margin. Neither is failing and neither was edited; if either
+starts trending up again, the frame cost has moved and the number is where it shows
+first.

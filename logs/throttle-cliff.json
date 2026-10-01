@@ -1,0 +1,58 @@
+{
+  "ladder": [
+    30
+  ],
+  "clicks": "1",
+  "rows": [
+    {
+      "label": "baseline",
+      "gfx": "webgl",
+      "cpuThrottle": 30,
+      "backend": "WebGL 2",
+      "fighters": "sprite",
+      "frameSamples": 30,
+      "frameMs": {
+        "median": 140.3,
+        "p95": 337.2,
+        "max": 1428.5,
+        "fpsMedian": 7.1
+      },
+      "clicks": 1,
+      "clickReleased": 1,
+      "clickMsMedian": 27003,
+      "clickMsMax": 27003,
+      "clickSamples": [
+        27003
+      ],
+      "clickError": null,
+      "heldAtPress": false,
+      "pinnedTick": 27,
+      "cardLabel": "FIGHT"
+    },
+    {
+      "label": "pixelratio-1",
+      "gfx": "webgl",
+      "cpuThrottle": 30,
+      "backend": "WebGL 2",
+      "fighters": "sprite",
+      "frameSamples": 30,
+      "frameMs": {
+        "median": 67.3,
+        "p95": 99.1,
+        "max": 100,
+        "fpsMedian": 14.9
+      },
+      "clicks": 1,
+      "clickReleased": 1,
+      "clickMsMedian": 2171,
+      "clickMsMax": 2171,
+      "clickSamples": [
+        2171
+      ],
+      "clickError": null,
+      "heldAtPress": false,
+      "pinnedTick": 1018,
+      "cardLabel": "NEW TOURNAMENT"
+    }
+  ]
+}

@@ -1,0 +1,230 @@
+{
+  "gfx": "webgl",
+  "frames": "80",
+  "results": [
+    {
+      "label": "baseline",
+      "gfx": "webgl",
+      "backend": "WebGL 2",
+      "fighters": "sprite",
+      "frameSamples": 80,
+      "frameMs": {
+        "median": 60.9,
+        "p95": 77.1,
+        "max": 198.2,
+        "fpsMedian": 16.4
+      },
+      "clicks": 5,
+      "clickReleased": 5,
+      "clickMsMedian": 940,
+      "clickMsMax": 1251,
+      "clickSamples": [
+        900,
+        1251,
+        958,
+        736,
+        940
+      ],
+      "clickError": null,
+      "heldAtPress": true,
+      "pinnedTick": 0,
+      "cardLabel": "FIGHT"
+    },
+    {
+      "label": "antialias-off",
+      "gfx": "webgl",
+      "backend": "WebGL 2",
+      "fighters": "sprite",
+      "frameSamples": 80,
+      "frameMs": {
+        "median": 53.7,
+        "p95": 81.2,
+        "max": 189.9,
+        "fpsMedian": 18.6
+      },
+      "clicks": 5,
+      "clickReleased": 5,
+      "clickMsMedian": 604,
+      "clickMsMax": 802,
+      "clickSamples": [
+        802,
+        578,
+        604,
+        687,
+        559
+      ],
+      "clickError": null,
+      "heldAtPress": true,
+      "pinnedTick": 0,
+      "cardLabel": "FIGHT"
+    },
+    {
+      "label": "post-bypassed",
+      "gfx": "webgl",
+      "backend": "WebGL 2",
+      "fighters": "sprite",
+      "frameSamples": 80,
+      "frameMs": {
+        "median": 46.3,
+        "p95": 56.1,
+        "max": 81,
+        "fpsMedian": 21.6
+      },
+      "clicks": 5,
+      "clickReleased": 5,
+      "clickMsMedian": 542,
+      "clickMsMax": 753,
+      "clickSamples": [
+        753,
+        659,
+        542,
+        504,
+        526
+      ],
+      "clickError": null,
+      "heldAtPress": true,
+      "pinnedTick": 0,
+      "cardLabel": "FIGHT"
+    },
+    {
+      "label": "pixelratio-1",
+      "gfx": "webgl",
+      "backend": "WebGL 2",
+      "fighters": "sprite",
+      "frameSamples": 80,
+      "frameMs": {
+        "median": 16.5,
+        "p95": 18.6,
+        "max": 27.4,
+        "fpsMedian": 60.6
+      },
+      "clicks": 5,
+      "clickReleased": 5,
+      "clickMsMedian": 542,
+      "clickMsMax": 787,
+      "clickSamples": [
+        787,
+        669,
+        289,
+        529,
+        542
+      ],
+      "clickError": null,
+      "heldAtPress": true,
+      "pinnedTick": 0,
+      "cardLabel": "FIGHT"
+    },
+    {
+      "label": "pixelratio-half",
+      "gfx": "webgl",
+      "backend": "WebGL 2",
+      "fighters": "sprite",
+      "frameSamples": 80,
+      "frameMs": {
+        "median": 16.7,
+        "p95": 23.9,
+        "max": 40.3,
+        "fpsMedian": 59.9
+      },
+      "clicks": 5,
+      "clickReleased": 5,
+      "clickMsMedian": 921,
+      "clickMsMax": 1113,
+      "clickSamples": [
+        1113,
+        931,
+        921,
+        416,
+        627
+      ],
+      "clickError": null,
+      "heldAtPress": true,
+      "pinnedTick": 0,
+      "cardLabel": "FIGHT"
+    },
+    {
+      "label": "aa-off+post-off",
+      "gfx": "webgl",
+      "backend": "WebGL 2",
+      "fighters": "sprite",
+      "frameSamples": 80,
+      "frameMs": {
+        "median": 31.3,
+        "p95": 39.7,
+        "max": 43.9,
+        "fpsMedian": 31.9
+      },
+      "clicks": 5,
+      "clickReleased": 5,
+      "clickMsMedian": 527,
+      "clickMsMax": 829,
+      "clickSamples": [
+        829,
+        507,
+        496,
+        527,
+        535
+      ],
+      "clickError": null,
+      "heldAtPress": true,
+      "pinnedTick": 0,
+      "cardLabel": "FIGHT"
+    },
+    {
+      "label": "aa-off+pr-half",
+      "gfx": "webgl",
+      "backend": "WebGL 2",
+      "fighters": "sprite",
+      "frameSamples": 80,
+      "frameMs": {
+        "median": 16.7,
+        "p95": 17.5,
+        "max": 17.8,
+        "fpsMedian": 59.9
+      },
+      "clicks": 5,
+      "clickReleased": 5,
+      "clickMsMedian": 930,
+      "clickMsMax": 1208,
+      "clickSamples": [
+        1208,
+        935,
+        914,
+        930,
+        926
+      ],
+      "clickError": null,
+      "heldAtPress": true,
+      "pinnedTick": 0,
+      "cardLabel": "FIGHT"
+    },
+    {
+      "label": "aa-off+post-off+pr-half",
+      "gfx": "webgl",
+      "backend": "WebGL 2",
+      "fighters": "sprite",
+      "frameSamples": 80,
+      "frameMs": {
+        "median": 16.7,
+        "p95": 17.5,
+        "max": 17.8,
+        "fpsMedian": 59.9
+      },
+      "clicks": 5,
+      "clickReleased": 5,
+      "clickMsMedian": 915,
+      "clickMsMax": 1341,
+      "clickSamples": [
+        1341,
+        97,
+        1059,
+        915,
+        915
+      ],
+      "clickError": null,
+      "heldAtPress": true,
+      "pinnedTick": 0,
+      "cardLabel": "FIGHT"
+    }
+  ]
+}
