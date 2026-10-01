@@ -184,34 +184,63 @@ test('the round card’s FIGHT button releases the bout clock', async ({ page })
   const card = page.locator('.result');
   await expect(card).toBeVisible();
 
-  // The pinned baseline, read while the card is still up and as early as
-  // possible. Read it *after* the press and it is a lie: the release is
-  // instant, so by the time the round trip lands the clock is legitimately
-  // running and the value is a small positive number.
+  // Pin, read, and press — in that order, in ONE round trip, inside the page.
   //
-  // The label comes back in the SAME round trip, because every millisecond
-  // between the card appearing and the press is time the self-dismissing
-  // countdown is spending. This test failed on CI for exactly that reason —
-  // the card was gone before the button got pressed — and asserting the label
-  // in its own separate call was a round trip spent proving something about a
-  // card that was on its way out. The claim is unchanged, the round trip is not.
+  // The press cannot be a Playwright `.click()`. Not because clicking is hard:
+  // because Playwright's actionability wait cannot fit inside the card's
+  // lifetime. Measured on CI's condition (no GPU, SwiftShader) and read off the
+  // trace artifact:
+  //
+  //   step                        t+        dur
+  //   Evaluate (pin + label)      6.32s     1.38s
+  //   Click                       6.32s    45.99s     ← 77% of a 60s budget
+  //   Expect "toBeHidden"        52.31s     8.27s
+  //   Wait for function          60.07s   (test timeout, ~0.1s of budget left)
+  //
+  // Both CI attempts, and the same test on the desktop project passing in 15.1s.
+  // The cause is that the phone project runs at deviceScaleFactor 3 — 2.96M
+  // backing pixels against the desktop project's 1.02M — so under software
+  // rasterization every page round trip queues behind a ~460ms frame, and the
+  // actionability poll needs many of them. Meanwhile `frame(now)` is driven by the
+  // rAF timestamp, so ROUND_INTRO_MS really is 9 seconds of wall time: the card
+  // dismisses itself while the click is still queued, and the countdown wins
+  // every time. The page snapshot from the failure shows the consequence — "29
+  // seconds remaining" and an IPPON already scored, because the bout ran
+  // unattended for the ~48s the click was waiting to be actionable.
+  //
+  // Worse than slow: the wait outlives the card, so the locator re-resolves onto
+  // the NEXT round's freshly-built button and the click "succeeds" on round 2.
+  // `expect(card).toBeHidden()` and `held === false` then pass for the wrong
+  // reason, which is why this read as a clock assertion failing when the clock
+  // claim was never the thing that broke.
+  //
+  // So the press is delivered in-page, in the same synchronous block as the pin.
+  // `button.click()` dispatches a real click event at the real listener
+  // (`addEventListener('click', opts.rematch, { once: true })`), so `act()` runs
+  // exactly as a tap does: it cancels `pendingAt` and calls `beginBout`. Nothing
+  // between the pin and the press crosses the page boundary, because a round trip
+  // there is precisely the time this whole change exists to remove. What this no
+  // longer exercises is the browser's synthesized pointer event and hit-testing;
+  // real-pointer reachability of this control is covered by
+  // reference-tap-target.test.ts, and the claim here is about the clock.
   const before = await page.evaluate(() => {
     const w = globalThis as Record<string, any>;
-    return {
-      pinnedTick: w['__smkk'].state().tick as number,
-      // The label carries a live countdown, so match the stable part only.
-      label: document.querySelector('.result-rematch')?.textContent ?? '',
-    };
+    const button = document.querySelector<HTMLButtonElement>('.result-rematch');
+    const box = button?.getBoundingClientRect();
+    // Proof the press is about to land on a control that is genuinely on screen.
+    // A card that has already dismissed reports a 0x0 box, so this is what stops
+    // the press from silently becoming a press on nothing.
+    const onScreen = !!box && box.width > 0 && box.height > 0;
+    const pinnedTick = w['__smkk'].state().tick as number;
+    // The label carries a live countdown, so only the stable part is asserted.
+    const label = button?.textContent ?? '';
+    button?.click();
+    return { pinnedTick, label, onScreen };
   });
+  expect(before.onScreen, 'the FIGHT button must be on screen when the press lands').toBe(true);
   const pinnedTick = before.pinnedTick;
   expect(pinnedTick, 'the clock was not pinned while the round card was up').toBe(0);
   expect(before.label, "the round card's action must read FIGHT").toContain('FIGHT');
-
-  // Deliberately early. The same ROUND_INTRO_MS countdown that gives the test
-  // above a window long enough to measure will dismiss this card if the press is
-  // late, so this one must not wait for a long window first — the press is the
-  // claim.
-  await page.locator('.result-rematch').click();
 
   await expect(card).toBeHidden();
   expect((await tournament(page)).held).toBe(false);
