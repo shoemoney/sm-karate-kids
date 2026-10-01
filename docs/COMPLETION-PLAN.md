@@ -37,15 +37,18 @@ viewports only. Touch layout untouched.
 **Do:** add a reference button to the pre-bout card beside FIGHT.
 **Accept:** pressing it opens the techniques sheet and returns to the card.
 
-### 1.3 Coach labels on the sticks, not in a panel — `P2`
+### 1.3 Coach labels on the sticks, not in a panel — `CLOSED, r138`
 **Found:** r113, r124, r132.
-**Why it matters:** the direction→action mapping sits in a strip above the
-sticks while the stick edges show only chevrons. Round 121 removed the
-duplicate headings; the mapping itself is still one screen away from the control
-it describes.
-**Do:** move the action words onto the stick pads.
-**Accept:** the stick carries its own labels on desktop and phone.
-**Note:** judged a playtest, not a patch — deferred at r124 for this reason.
+**Playtested at r138 and reverted.** The action words already carry their own
+arrow — `◀ back`, `▲ jump` — and each arrow sits directly above the chevron it
+describes, so the mapping from word to direction is already positional and
+already explicit. Moving the words onto the pads would put four words inside a
+170px ring whose chevrons are directional *markers*, and the result is a control
+that reads as clutter.
+
+The answer to "the mapping is one screen away" is that it is **directly above**
+the control, aligned to its own glyphs, and that is the correct place for a
+legend. Refused on a playtest, like r108.
 
 ---
 
