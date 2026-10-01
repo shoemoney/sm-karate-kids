@@ -6420,3 +6420,91 @@ The reporting was reliable. The *verdicts* kept arriving already closed, and bot
 sides of that ledger were mine. A repeat report is evidence about the reporter;
 it is not evidence about the claim, and treating it as either is how a loop ends
 up defending a position instead of checking a pixel.
+
+### Cycle 5 — `round-intro-copy-overload`: the real defect was a word printed twice
+
+Reported as "copy overload" and as `crowded-round-introduction` in cycle 4, so a
+repeat. The framing was wrong and the defect was cleaner than the description.
+
+Measured on the rendered card, not read off the frame:
+
+```
+{"tag":"Round 1/5","headline":"Qualifier","qualifierCount":1}
+```
+
+**The round name was printed twice on one screen, 130px apart** — the HUD strip
+read `Round 1/5 · Qualifier` and the card headlined `Qualifier` directly below
+it. `main.ts:627` put `round.name` in the strip; `main.ts:635` put the same
+string in the headline.
+
+The strip now carries `Round 1/5` and the headline keeps the name, because the
+headline is the dramatic beat and the strip only has to answer "how far through
+the run are we". `qualifierCount: 1` is the check that matters.
+
+**This card has already survived this exact defect once.** r117 removed a
+duplicated lesson line from the same card, and the code comment there says the
+lesson belongs to a live bout. So the pattern is known, was fixed once, and came
+back through a different field — which is why the guard is on the *class* rather
+than this string: the HUD strip must not interpolate `round.name`, and there must
+be exactly one `headline: round.name` in the file.
+
+### The gate caught this one, and that is the part worth keeping
+
+`pnpm test:e2e` came back **1**, not 0, on both viewports:
+
+```
+Error: the round tag must name the same round for the whole hold
+expect(tags).toEqual([ROUND_ONE_TAG])
+```
+
+`tournament.spec.ts:35` pinned the literal `'Round 1/5 · Qualifier'`. So an
+intentional behaviour change was stopped at the gate by a test written for a
+different reason — the assertion's actual intent is that the tag stays *stable
+during the hold*, and the string was incidental.
+
+I updated the pinned constant to `'Round 1/5'` and left the stability assertion
+exactly as it was. That is the legitimate shape of a test update: the mechanism
+changed on purpose, the property being protected did not, and the change is
+recorded here rather than quietly folded in. A test edited to stop failing
+without that distinction is the failure mode this loop keeps warning about, and
+the reason the red gate was read before git instead of after.
+
+Gates: `pnpm check` **153 passed** (was 150, +3). `pnpm test:e2e` **35 passed,
+5 skipped, `e2e=0`** after the test update.
+
+---
+
+## The five cycles, honestly
+
+| # | Finding | Verdict | Shipped |
+|---|---|---|---|
+| 1 | desktop control strip | REAL — 29% of viewport, 66% gap | pad 231→185px, keys 5.10→8.45:1 |
+| 2 | countdown caption | REAL — aria said what the text omitted | "rematch in 8" |
+| 3 | reference label | REAL, wrong frames, worse than said | 102×21 → 143×46px, relabelled |
+| 4 | settings crops fighters | REAL after 3 cycles of dismissal | sheet 517→844px, +9.6%→+57.3% |
+| 5 | round intro copy | REAL — name printed twice | `qualifierCount` 2 → 1 |
+| — | fraction "heavy" ×2 | FALSE — smallest glyph in the HUD | owner-ordered at r93 |
+| — | stick mapping detached ×2 | FALSE — strip is above each stick | verified |
+| — | instructions subdued ×2 | FALSE — 16.89:1 measured | verified |
+| — | start copy competes | FALSE — settled at r150 | playtested |
+| — | direction legend decoding | FALSE — the legend is right there | verified |
+
+**Five cycles, twenty-five reported items, five fixes.** One finding per cycle,
+and cycle 4's was only reachable because I refused to accept a dismissal I had
+already made twice.
+
+Three things this run changed about how the loop works, which outlast the fixes:
+
+1. **The capture gate (`tools/verify_shots.py`) exists and it throws.** It failed
+   on its first live run with `cannot unpack non-iterable int object` — a gate
+   that crashes is a gate nobody runs, and had it caught that and printed OK it
+   would have been the failure it exists to prevent.
+2. **The consumer reviewer is a real lens with a ~50% actionable rate**, and its
+   frame attributions are unreliable while its *reporting* is dependable. Cycle
+   3's finding named three frames that did not contain the defect, and the
+   defect was worse than described. That asymmetry has to be known before the
+   findings are trusted, not discovered each round.
+3. **Repeated reports deserve measurement, not a second refusal.** Cycle 4 had
+   been reported three times. Both earlier dismissals were also measurement
+   failures — I had sampled the scrim *over* the panel and never the fight
+   *under* it. Two sides of that ledger were mine.

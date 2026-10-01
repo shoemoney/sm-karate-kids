@@ -624,7 +624,13 @@ async function boot(screen: BootScreen): Promise<void> {
     tally = emptyTally();
     clearBoutUi();
     held = true;
-    hud.setRound(`Round ${run.round + 1}/${TOURNAMENT.length} · ${round.name}`);
+    // Progress only. This read `Round 1/5 · Qualifier` while the card directly
+    // below it headlined the same string again — the round name twice on one
+    // screen, 130px apart, which is the same redundancy this card's own history
+    // already removed once (r117, the duplicated lesson line). The headline is
+    // the dramatic beat and keeps the name; the strip only has to say how far
+    // through the run we are.
+    hud.setRound(`Round ${run.round + 1}/${TOURNAMENT.length}`);
     // No kicker. The HUD strip directly above already reads "Round 1/5" and
     // the headline below is the round's own name, so a third statement of the
     // same two facts stacked 60px apart was pure redundancy — and it was the

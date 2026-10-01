@@ -1,0 +1,39 @@
+{
+ "model": "openai/gpt-6.1-sol",
+ "harness": "codex-cli",
+ "computer_use": true,
+ "reviewed_at": "2026-10-01T05:35:48",
+ "items": [
+  {
+   "title": "fraction-score-hierarchy",
+   "claim": "In Image #8, HasanAbi\u2019s score has a vertically stacked half-point fraction that extends below the whole number, while Asmongold\u2019s zero remains a compact single-line numeral.",
+   "reason": "The uneven score shapes make the scoreboard harder to scan at a glance during a two-thumb fight.",
+   "suggest": "Use a compact typographic half glyph beside the whole number, and align both players\u2019 scores within the same visual band while preserving readable text."
+  },
+  {
+   "title": "round-intro-copy-overload",
+   "claim": "In Image #2, the dark panel combines an opponent scouting sentence with a multi-line control explanation between the matchup heading and the Techniques button.",
+   "reason": "The player must separate tactical advice from basic instructions before reaching the prominent Fight action.",
+   "suggest": "Keep one short opponent tip on the round card, move the detailed input explanation into Techniques, and retain a concise first-to-two rule beside Fight."
+  },
+  {
+   "title": "direction-legend-decoding",
+   "claim": "In Image #3, the instruction strip compresses stance and technique mappings into two adjacent text groups, including 'back \u00b7 reverse' and 'forward \u00b7 punch', while the sticks themselves show direction marks without action labels.",
+   "reason": "A newcomer has to repeatedly translate the legend into thumb directions instead of recognizing the desired action directly on the control.",
+   "suggest": "Place short action labels around each stick\u2019s corresponding directions, with a distinct treatment for stance versus technique, and remove the duplicated instruction strip once that mapping is readable."
+  },
+  {
+   "title": "scoring-banner-dominance",
+   "claim": "In Image #20, the Waza-ari announcement occupies a broad dark band above the fighters, with the award word substantially more prominent than either the scoring technique or the updated half-point score.",
+   "reason": "The spectacle communicates that something happened more strongly than what the player earned and which move earned it.",
+   "suggest": "Use a more compact award card that groups 'Half point', the fighter name, and 'Lunge Punch', leaving more of the dojo visible and giving the updated score a coordinated emphasis."
+  },
+  {
+   "title": "result-lettering-shadow-weight",
+   "claim": "In Image #18, the winner heading and result numerals have conspicuous dark offset shadows and outlined edges, whereas the Rematch label uses clean, flat lettering.",
+   "reason": "The competing text treatments make the result screen feel less cohesive, and the large shadows add visual clutter to its most important message.",
+   "suggest": "Give the winner heading and score the same crisp typographic family as the action button, retaining a restrained gold highlight and a softer, smaller shadow for separation."
+  }
+ ],
+ "raw": "[\n  {\n    \"title\": \"fraction-score-hierarchy\",\n    \"claim\": \"In Image #8, HasanAbi\u2019s score has a vertically stacked half-point fraction that extends below the whole number, while Asmongold\u2019s zero remains a compact single-line numeral.\",\n    \"reason\": \"The uneven score shapes make the scoreboard harder to scan at a glance during a two-thumb fight.\",\n    \"suggest\": \"Use a compact typographic half glyph beside the whole number, and align both players\u2019 scores within the same visual band while preserving readable text.\"\n  },\n  {\n    \"title\": \"round-intro-copy-overload\",\n    \"claim\": \"In Image #2, the dark panel combines an opponent scouting sentence with a multi-line control explanation between the matchup heading and the Techniques button.\",\n    \"reason\": \"The player must separate tactical advice from basic instructions before reaching the prominent Fight action.\",\n    \"suggest\": \"Keep one short opponent tip on the round card, move the detailed input explanation into Techniques, and retain a concise first-to-two rule beside Fight.\"\n  },\n  {\n    \"title\": \"direction-legend-decoding\",\n    \"claim\": \"In Image #3, the instruction strip compresses stance and technique mappings into two adjacent text groups, including 'back \u00b7 reverse' and 'forward \u00b7 punch', while the sticks themselves show direction marks without action labels.\",\n    \"reason\": \"A newcomer has to repeatedly translate the legend into thumb directions instead of recognizing the desired action directly on the control.\",\n    \"suggest\": \"Place short action labels around each stick\u2019s corresponding directions, with a distinct treatment for stance versus technique, and remove the duplicated instruction strip once that mapping is readable.\"\n  },\n  {\n    \"title\": \"scoring-banner-dominance\",\n    \"claim\": \"In Image #20, the Waza-ari announcement occupies a broad dark band above the fighters, with the award word substantially more prominent than either the scoring technique or the updated half-point score.\",\n    \"reason\": \"The spectacle communicates that something happened more strongly than what the player earned and which move earned it.\",\n    \"suggest\": \"Use a more compact award card that groups 'Half point', the fighter name, and 'Lunge Punch', leaving more of the dojo visible and giving the updated score a coordinated emphasis.\"\n  },\n  {\n    \"title\": \"result-lettering-shadow-weight\",\n    \"claim\": \"In Image #18, the winner heading and result numerals have conspicuous dark offset shadows and outlined edges, whereas the Rematch label uses clean, flat lettering.\",\n    \"reason\": \"The competing text treatments make the result screen feel less cohesive, and the large shadows add visual clutter to its most important message.\",\n    \"suggest\": \"Give the winner heading and score the same crisp typographic family as the action button, retaining a restrained gold highlight and a softer, smaller shadow for separation.\"\n  }\n]"
+}

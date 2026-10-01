@@ -32,7 +32,9 @@ const SAMPLE_MS = 4;
 const MIN_HOLD_MS = 3_000;
 const MIN_SAMPLES = 60;
 
-const ROUND_ONE_TAG = 'Round 1/5 · Qualifier';
+// Progress only. The round NAME belongs to the card headline; the HUD strip
+// carries how far through the run we are. Both used to name it, 130px apart.
+const ROUND_ONE_TAG = 'Round 1/5';
 
 /**
  * Records the whole round-card window from inside the page, starting before the
