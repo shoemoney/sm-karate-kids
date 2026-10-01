@@ -375,6 +375,34 @@ export class Stage {
       row.material.color.set('#4a3320');
       row.position.set(0, 0.62, CROWD_Z);
       this.scene.add(row);
+
+      // A gold sash across the row.
+      //
+      // The crowd is four models' worth of "identical light-grey cardboard
+      // busts" (qwen3.8-max-prime, r82) and it has been that for eighty rounds:
+      // one plane, one tint, no separation between the figures. The tint was
+      // warmed twice and neither time broke the row up, because the problem was
+      // never the colour — it is that a single flat fill has nothing in it for
+      // the eye to separate figures by.
+      //
+      // A horizontal band at shoulder height does what a recolour cannot: it
+      // crosses every figure at the same height, so the eye reads the row as a
+      // rank of people wearing the same thing rather than as a strip of grey.
+      // It is the one mark that is native to the scene — a dojo where the
+      // students all wear the same belt is the whole point of a tournament.
+      const sash = new Mesh(
+        new PlaneGeometry(11, 0.17),
+        new MeshBasicMaterial({
+          transparent: true,
+          opacity: 0.55,
+          depthWrite: false,
+          toneMapped: true,
+        }),
+      );
+      sash.material.color.set('#d9a441');
+      sash.position.set(0, 0.02, CROWD_Z + 0.02);
+      sash.renderOrder = 3;
+      this.scene.add(sash);
     }
 
     if (shaft !== null) {

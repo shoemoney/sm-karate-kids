@@ -5959,3 +5959,52 @@ it should be.**
 Gates: `pnpm check` 141 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
 Styles reverted to the round-74 state, which is the last one verified by
 measurement rather than by inspection.
+
+### Round 134 — a gold sash on the crowd
+
+**Jeremy: "the small zerg like enemes should have a yello strpe."**
+
+That is the crowd row — the seated students behind the fighting area, which has
+been four models' worth of "identical light-grey cardboard busts" since
+`qwen3.8-max-prime` in round 82 and has been that for eighty rounds through two
+tint fixes. "Zerg-like" is exactly the right description: small, uniform,
+head-and-shoulders shapes sitting on the horizon with nothing to separate them.
+
+**Two recolours did not work and a recolour was never going to.** The row is one
+plane, one tint, one flat fill. Warming the colour changes what the grey *is* and
+cannot change the fact that a single flat fill has nothing in it for the eye to
+separate one figure from the next.
+
+**A horizontal band at the base of the row does.** Every figure is crossed at the
+same height, so the eye reads a rank of people standing behind a rail rather than
+a strip of identical cutouts:
+
+    sash  PlaneGeometry(11, 0.17), #d9a441 at 0.55
+          y 0.02, CROWD_Z + 0.02, renderOrder 3
+
+**Three placements before it landed**, and the reason is worth recording because
+it is the same arithmetic as rounds 133 and 82. The crowd is at `CROWD_Z = -8.2`
+and the fighters are at z ≈ 0, so a plane at the right *depth* is not at the right
+*screen* height — the projection differs by 7 units of distance:
+
+    y 1.06   the sash crossed the fighters' shoulders, 10% of frame
+    y 0.34   it crossed at their belts
+    y 0.02   it sits at the base of the crowd row, where the busts are
+
+And a stripe is only the right answer because it is native to the thing rather
+than applied to it. **A tournament dojo where the students all wear the same belt
+is the entire point of a dojo** — the stripe says "these are the people who came
+to watch a tournament", which is what the row was trying to say with geometry and
+could not.
+
+### And the fraction ships taller
+
+**Jeremy: "ship it taller."** Already the state of the code — round 133 reverted
+three compression attempts and left the stack at its measured, 16.89:1 form. A
+stacked fraction is taller than the digit beside it because two line boxes cannot
+pack below ~0.7x font-size without the numerals colliding, and round 74 already
+established that shrinking it is what made it "tiny". Both decisions are now
+explicit rather than accidental.
+
+Gates: `pnpm check` 142 passed (was 141), `pnpm test:e2e` 35 passed / 5 skipped /
+exit 0.
