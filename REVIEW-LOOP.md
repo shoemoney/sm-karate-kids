@@ -6978,3 +6978,73 @@ The first local e2e after the correction came back **34 passed / 1 failed**:
 of that spec: **3/3 green.** A different spec file, and no game source was touched
 this round, so it is contention under a still-loaded box rather than a
 regression — reported with the reproduction counts rather than as a pass.
+
+### Round 143, final reading — what is confirmed, and what I stopped short of
+
+**Confirmed by CI, on the real two-core runner:**
+
+    before this round   4 failed   tournament.spec.ts:118  (both viewports)
+                                   tournament.spec.ts:179  (both viewports)
+    after the fix      2 failed   tournament.spec.ts:179  (both viewports)
+
+`tournament.spec.ts:118` — the test the floors govern, the one that recorded
+`Expected: >= 60, Received: 9` — **now passes on CI on both viewports.** That is
+the floor change validated against the only runner that ever objected, and it is
+the half of the round I can stand behind.
+
+**Not fixed, isolated, and named:** `tournament.spec.ts:179`, the FIGHT test.
+
+    Error: locator.click: Test timeout of 60000ms exceeded
+    Error: page.waitForFunction: Test timeout of 60000ms exceeded
+
+**I attempted to reproduce it before touching it, and the reproduction was not
+exact, so I did not change the test.** Loading this box to a load average of 82
+(14 cores, ~6x oversubscribed) does fail that test — but as
+`page.waitForFunction`, i.e. the test running out of its 60s budget *after* the
+press, which is a different failure from the `locator.click` actionability wait
+CI recorded. CI's aggregate slowness is ~2.4x, well short of the ~6x I needed to
+break it here, so I could not construct the exact condition.
+
+That is the second time this round that a plausible mechanism sat in front of me
+and the answer was still no. The first was the hold-span premise, and it cost a
+commit. The difference this time is that I checked before committing, which is
+the only thing that actually saved it.
+
+**The likely mechanism, offered as a hypothesis and not as a conclusion:** the
+card self-dismisses on a wall-clock deadline while the test tries to click a
+button on it, so Playwright's actionability wait can lose the race — the element
+is gone, or its box never settles under a slow renderer. The obvious fix is to
+dispatch the click from inside the page, in the same evaluate that reads
+`pinnedTick`, which removes the actionability wait without removing the claim
+(press the real button, assert the real clock advances). **I have not measured
+that it fixes this**, so it is not in the tree.
+
+What the next round needs, and does not have to re-derive:
+
+- reproduction: `nohup bash -c 'for i in $(seq 1 40); do (timeout 1200 yes >/dev/null) & done; wait' &`
+  then `playwright test tournament.spec.ts --project=phone-portrait -g "releases the bout clock"`
+  — load 82 reproduces a timeout in this test, not CI's exact one
+- the mechanical suspicion is in Playwright's click actionability, not in the game
+- **do not raise the 60s test timeout.** The failure is a race, not a slowness,
+  and a bigger budget hides the race instead of removing it.
+
+### The round in one table
+
+| | |
+|---|---|
+| deploy gate shipped + mutation-proved | 6/6 cases, 2 real defects it caught in the gate |
+| production vs local build | byte-identical, verified over the wire |
+| **CI failures 4 → 2** | **the hold test now passes on the 2-core runner** |
+| unverified changes pushed | 1 (the 8000ms floor — caught by CI, corrected, documented) |
+| defects found in my own new guard | 2, both by the test written to justify it |
+| remaining known-red | `tournament.spec.ts:179`, mechanism suspected, not reproduced exactly |
+
+**The process finding outranks every fix above.** Round 141 shipped with red CI
+and wrote `e2e=0`, because the standing rule named the *local* gate and nobody
+read the remote one. Then, documenting that, I read CodeQL's `success` as CI's,
+because the rule still did not say *which* gate. The rule is now:
+
+> read the gate, **by workflow name**, for **this sha**, before the git line —
+> `gh run list --commit $(git rev-parse HEAD) --json name,conclusion` and look
+> for `name == "CI"`. A bare `--limit 1` returns whichever workflow finished
+> most recently, which is not the one you mean.
