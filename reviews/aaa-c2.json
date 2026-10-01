@@ -1,0 +1,39 @@
+{
+ "model": "openai/gpt-6.1-sol",
+ "harness": "codex-cli",
+ "computer_use": true,
+ "reviewed_at": "2026-10-01T05:04:43",
+ "items": [
+  {
+   "title": "fraction-heavy-score-treatment",
+   "claim": "In Image #8, the stacked half beside HasanAbi\u2019s 2 extends below the whole numeral in both the scoreboard and the large result score, making the score markedly taller than Asmongold\u2019s 0.",
+   "reason": "The player should read the outcome immediately; the oversized vertical fraction competes with the whole score instead of reading as its suffix.",
+   "suggest": "Use a compact, deliberately aligned mixed-number treatment with a smaller stacked fraction, and give both score slots enough room to preserve a consistent visual center."
+  },
+  {
+   "title": "unexplained-reference-label",
+   "claim": "In Images #2, #11, and #14, a small outlined label reading REFERENCE sits between the instructions and fighters without identifying what it refers to.",
+   "reason": "It resembles an unfinished annotation or an unexplained control at the moment the player is deciding how to start.",
+   "suggest": "If it opens instructions, label it TECHNIQUE GUIDE and make its button treatment unmistakable; if it is only a caption, replace it with a specific description or remove it."
+  },
+  {
+   "title": "detached-stick-mapping",
+   "claim": "In Images #3 and #10, the directional action names appear in a separate two-column strip above the sticks, while the corresponding stick edges carry only chevrons.",
+   "reason": "A newcomer must repeatedly translate between the legend and the thumb surface rather than recognize an action where they touch.",
+   "suggest": "Place short action labels at the corresponding stick sectors, preserving an unobstructed thumb area, and move the longer combination explanations into the technique guide."
+  },
+  {
+   "title": "subdued-start-instructions",
+   "claim": "In Image #2, the explanatory paragraph inside the dark introduction panel is visibly more subdued than the opponent heading and gold FIGHT button.",
+   "reason": "The essential explanation of the two-stick grammar receives less visual emphasis than the invitation to start, making the first fight harder to understand at a glance.",
+   "suggest": "Give the instruction paragraph a brighter solid text treatment and simplify it into two short lines that clearly distinguish stance from technique."
+  },
+  {
+   "title": "ambiguous-result-countdown",
+   "claim": "In Images #8 and #18, the text STARTING IN 8 appears beneath REMATCH without naming what is starting.",
+   "reason": "The result screen leaves the player uncertain whether the countdown refers to a rematch, another tournament round, or something else; a still cannot establish the actual behavior.",
+   "suggest": "Name the destination explicitly, such as REMATCH STARTS IN 8, and make the button wording agree with it; verify the destination against a recording before choosing the final copy."
+  }
+ ],
+ "raw": "[\n  {\n    \"title\": \"fraction-heavy-score-treatment\",\n    \"claim\": \"In Image #8, the stacked half beside HasanAbi\u2019s 2 extends below the whole numeral in both the scoreboard and the large result score, making the score markedly taller than Asmongold\u2019s 0.\",\n    \"reason\": \"The player should read the outcome immediately; the oversized vertical fraction competes with the whole score instead of reading as its suffix.\",\n    \"suggest\": \"Use a compact, deliberately aligned mixed-number treatment with a smaller stacked fraction, and give both score slots enough room to preserve a consistent visual center.\"\n  },\n  {\n    \"title\": \"unexplained-reference-label\",\n    \"claim\": \"In Images #2, #11, and #14, a small outlined label reading REFERENCE sits between the instructions and fighters without identifying what it refers to.\",\n    \"reason\": \"It resembles an unfinished annotation or an unexplained control at the moment the player is deciding how to start.\",\n    \"suggest\": \"If it opens instructions, label it TECHNIQUE GUIDE and make its button treatment unmistakable; if it is only a caption, replace it with a specific description or remove it.\"\n  },\n  {\n    \"title\": \"detached-stick-mapping\",\n    \"claim\": \"In Images #3 and #10, the directional action names appear in a separate two-column strip above the sticks, while the corresponding stick edges carry only chevrons.\",\n    \"reason\": \"A newcomer must repeatedly translate between the legend and the thumb surface rather than recognize an action where they touch.\",\n    \"suggest\": \"Place short action labels at the corresponding stick sectors, preserving an unobstructed thumb area, and move the longer combination explanations into the technique guide.\"\n  },\n  {\n    \"title\": \"subdued-start-instructions\",\n    \"claim\": \"In Image #2, the explanatory paragraph inside the dark introduction panel is visibly more subdued than the opponent heading and gold FIGHT button.\",\n    \"reason\": \"The essential explanation of the two-stick grammar receives less visual emphasis than the invitation to start, making the first fight harder to understand at a glance.\",\n    \"suggest\": \"Give the instruction paragraph a brighter solid text treatment and simplify it into two short lines that clearly distinguish stance from technique.\"\n  },\n  {\n    \"title\": \"ambiguous-result-countdown\",\n    \"claim\": \"In Images #8 and #18, the text STARTING IN 8 appears beneath REMATCH without naming what is starting.\",\n    \"reason\": \"The result screen leaves the player uncertain whether the countdown refers to a rematch, another tournament round, or something else; a still cannot establish the actual behavior.\",\n    \"suggest\": \"Name the destination explicitly, such as REMATCH STARTS IN 8, and make the button wording agree with it; verify the destination against a recording before choosing the final copy.\"\n  }\n]"
+}

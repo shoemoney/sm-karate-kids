@@ -6245,3 +6245,58 @@ Up one step to 12px and one step brighter. **Now 8.45:1** for both `W A S D` and
 `↑ ← ↓ →`, clearing 7:1 comfortably.
 
 Gates: `pnpm check` 142 passed. `pnpm test:e2e` **35 passed, 5 skipped**, `e2e=0`.
+
+### Cycle 2 — one real finding out of five, and a false positive worth keeping
+
+The consumer reviewer returned five items. **Four were re-opens of settled
+decisions and one was real.** Recording the ratio matters as much as the fix: a
+reviewer that produces five findings per cycle and three of them are
+already-decided means the loop's yield is roughly one item per cycle, not five.
+
+**`fraction-heavy-score-treatment` — FALSE POSITIVE, and the reason is worth more
+than the verdict.** The reviewer described the stacked half-point as a "heavy
+score treatment". I measured the DOM first (`.score-frac` correctly absent at
+0-0, because the builder only makes a fraction when there IS a half), then drove
+for a real scored state, then gave up on the sim and went to the pixels: cropped
+the HUD from frame 19 at 6x and looked at it.
+
+The fraction is the *smallest* element in that HUD — a tight `1` over `2` with a
+hairline bar, occupying a fraction of the pixels its own nameplate beside it
+does. "Heavy" describes a glyph that dominates; this one does not appear in the
+frame at all at a glance.
+
+More decisively: **this is the change the owner explicitly ordered** ("ship
+fraction taller"), and round 93 proved the notation structurally incompressible
+at 22px. A blind reviewer re-opening a settled owner decision on a subjective
+visual impression is the round-138 pattern, not a new finding, and the correct
+action is the same one taken there: playtest it, don't cave.
+
+**`ambiguous-result-countdown` — REAL, and the code said so itself.** The result
+card's visible caption read `starting in 8` while the button's `aria-label` read
+`REMATCH, starting in 8 seconds`. So a screen-reader user got the full context
+and a sighted player got the ambiguous half.
+
+The reason this is worth fixing is that the file *already documents the exact
+mistake four lines above*, in a different costume: a bare numeral in a circle
+beside a score reads as a point total, "so it says what it is". The caption had
+reintroduced the same bug as a countdown that never says what it counts down
+**to**. Now `rematch in 8`, carrying the same noun the button above it already
+shows, so the two agree. Verified on the rendered result card, not in source:
+`{"count":"rematch in 8"}`.
+
+**The guard is mutation-tested, and the mutation is the part that matters.**
+`result-countdown-noun.test.ts` asserts the caption is built from a template
+containing `${this.resultAction`, and that it is not the bare `starting in`.
+Against the old caption: **2 failed, 1 passed.** Against the fix: **3 passed.**
+A guard never seen red is a guess about a mechanism rather than a fact about
+this code, and this is the second time in this project a test file has been
+written in the wrong dialect (`it` instead of `test`, which fails as
+`describe is not a function` before a single assertion runs) — the third guard
+in a row to need the existing tests read before writing a new one.
+
+The other three (`unexplained-reference-label`, `detached-stick-mapping`,
+`subdued-start-instructions`) are re-opens of the r150 pre-bout work, which was
+playtested and closed. Noted, not actioned.
+
+Gates: `pnpm check` **145 passed** (was 142, +3 from the new guard).
+`pnpm test:e2e` 35 passed, 5 skipped, `e2e=0`.

@@ -402,7 +402,15 @@ export class Hud {
     // So it says what it is. "FIGHT IN 3" cannot be misread as a round number,
     // and the action word stays the largest thing on the pill.
     this.resultButton.textContent = this.resultAction;
-    if (this.resultCount !== null) this.resultCount.textContent = `starting in ${seconds}`;
+    // The visible caption said only "starting in 8" while the aria-label said
+    // "REMATCH, starting in 8 seconds" — so a screen-reader user got the full
+    // context and a sighted player got the ambiguous half, which is the same
+    // mistake the comment above describes in another costume: a countdown that
+    // does not say what is counting down to. The caption now carries the same
+    // noun the button above it already shows, so the two agree.
+    if (this.resultCount !== null) {
+      this.resultCount.textContent = `${this.resultAction.toLowerCase()} in ${seconds}`;
+    }
     this.resultButton.setAttribute(
       'aria-label',
       `${this.resultAction}, starting in ${seconds} second${seconds === 1 ? '' : 's'}`,
