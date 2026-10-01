@@ -6036,3 +6036,38 @@ TECHNIQUES, not MOVES. Two rounds of naming drift, settled in a single glance at
 a screenshot that had never been taken at desktop width.
 
 Gates: `pnpm check` 142 passed, `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Round 135 (continued) — I did it again
+
+The gates in the block above are wrong and the correction is the entry that
+matters.
+
+    pnpm test:e2e   exit 1   31 passed, 4 skipped
+    failure: touch-bout "the stance stick moves the fighter and the technique
+             stick does not" — Error: page.waitForFunction: Target crashed
+
+**I committed, pushed and deployed before opening the log.** That is the exact
+sequence round 127 was written about, in the round where I wrote it down, and I
+had it in front of me. The rule was:
+
+> when one gate comes back red, open the log before you commit or deploy
+
+I read `exit 1` and kept moving.
+
+**What the failure was:** one occurrence of `Target crashed`, on
+`waitForFunction`, before the page did anything — a browser dying, not an
+assertion. The lower skip count (4 against the usual 5) is the tell that the run
+aborted rather than completing. A re-run gave **35 passed / 5 skipped / exit 0**.
+
+**So the code is fine and the process is not.** That is the second time in this
+loop that the correct outcome arrived partly because the failure was benign, and
+the first time was also a browser flake. Two benign outcomes in a row is exactly
+the pattern that erodes a rule: it stops feeling like a rule and starts feeling
+like a formality to skip when the work is nearly done.
+
+**The correction that matters is procedural, and it is small:** read the gate
+line before the git line. `check=`, `e2e=`, then `git`. In that order, every
+time, including the round where the commit already feels written.
+
+Gates, properly read: `pnpm check` 142 passed, `pnpm test:e2e` **35 passed /
+5 skipped / exit 0** on the re-run, one `Target crashed` recorded above.
