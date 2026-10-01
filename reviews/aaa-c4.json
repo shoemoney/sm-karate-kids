@@ -1,0 +1,39 @@
+{
+ "model": "openai/gpt-6.1-sol",
+ "harness": "codex-cli",
+ "computer_use": true,
+ "reviewed_at": "2026-10-01T05:26:23",
+ "items": [
+  {
+   "title": "crowded-round-introduction",
+   "claim": "In Image #2, the opponent description and input explanation share a large central text panel, while the Techniques button overlaps the fighters\u2019 head-level space.",
+   "reason": "The opening presentation makes instructions, opponent identity, and fighter artwork compete instead of giving the player a clear invitation to fight.",
+   "suggest": "Keep one short opponent tip above the fighters, move the input explanation into Techniques, and place the Techniques control beside the Fight button without covering either fighter."
+  },
+  {
+   "title": "reference-sheet-scanability",
+   "claim": "In Image #6, the move list starts only after two direction legends and two explanatory paragraphs, leaving just the first technique group and part of the second visible.",
+   "reason": "A player looking up a move must first scan material that repeats the basic control explanation.",
+   "suggest": "Put a compact stance-plus-technique legend beneath the heading, move scoring details into an expandable section, and provide clearly labeled technique-group tabs above the move list."
+  },
+  {
+   "title": "fraction-heavy-score-layout",
+   "claim": "In Image #8, the stacked half-point fraction extends below the adjacent whole-number score in both the top scoreboard and the central result tally.",
+   "reason": "The fraction gives mixed scores a substantially different silhouette from whole scores, making the otherwise simple result display less visually cohesive.",
+   "suggest": "Use a compact inline half-point treatment in both locations, with consistent spacing and alignment; verify the final baseline and bounding boxes in the rendered layout rather than estimating them from this screenshot."
+  },
+  {
+   "title": "weak-contact-reaction",
+   "claim": "In Image #12, the scoring kick and contact sparks meet Asmongold\u2019s upper body, but his visible pose remains an upright guard rather than a distinct impact reaction.",
+   "reason": "The contact location agrees with the effect, but the defender\u2019s pose contributes little to the force and clarity of the scoring moment.",
+   "suggest": "Use a dedicated upper-body hit-reaction pose during the scoring presentation, preserving the aligned contact effect and keeping the struck fighter\u2019s face readable."
+  },
+  {
+   "title": "settings-panel-crops-fighters",
+   "claim": "In Images #7 and #16, the Settings panel ends across the fighters\u2019 bodies, exposing their lower legs and the arena beneath it.",
+   "reason": "The abrupt crop makes the settings surface feel layered over an unfinished composition rather than deliberately separated from play.",
+   "suggest": "Extend the settings backdrop through the full viewport while keeping the settings content compact, or use a clearly bounded sheet with a uniformly dimmed arena behind it."
+  }
+ ],
+ "raw": "[\n  {\n    \"title\": \"crowded-round-introduction\",\n    \"claim\": \"In Image #2, the opponent description and input explanation share a large central text panel, while the Techniques button overlaps the fighters\u2019 head-level space.\",\n    \"reason\": \"The opening presentation makes instructions, opponent identity, and fighter artwork compete instead of giving the player a clear invitation to fight.\",\n    \"suggest\": \"Keep one short opponent tip above the fighters, move the input explanation into Techniques, and place the Techniques control beside the Fight button without covering either fighter.\"\n  },\n  {\n    \"title\": \"reference-sheet-scanability\",\n    \"claim\": \"In Image #6, the move list starts only after two direction legends and two explanatory paragraphs, leaving just the first technique group and part of the second visible.\",\n    \"reason\": \"A player looking up a move must first scan material that repeats the basic control explanation.\",\n    \"suggest\": \"Put a compact stance-plus-technique legend beneath the heading, move scoring details into an expandable section, and provide clearly labeled technique-group tabs above the move list.\"\n  },\n  {\n    \"title\": \"fraction-heavy-score-layout\",\n    \"claim\": \"In Image #8, the stacked half-point fraction extends below the adjacent whole-number score in both the top scoreboard and the central result tally.\",\n    \"reason\": \"The fraction gives mixed scores a substantially different silhouette from whole scores, making the otherwise simple result display less visually cohesive.\",\n    \"suggest\": \"Use a compact inline half-point treatment in both locations, with consistent spacing and alignment; verify the final baseline and bounding boxes in the rendered layout rather than estimating them from this screenshot.\"\n  },\n  {\n    \"title\": \"weak-contact-reaction\",\n    \"claim\": \"In Image #12, the scoring kick and contact sparks meet Asmongold\u2019s upper body, but his visible pose remains an upright guard rather than a distinct impact reaction.\",\n    \"reason\": \"The contact location agrees with the effect, but the defender\u2019s pose contributes little to the force and clarity of the scoring moment.\",\n    \"suggest\": \"Use a dedicated upper-body hit-reaction pose during the scoring presentation, preserving the aligned contact effect and keeping the struck fighter\u2019s face readable.\"\n  },\n  {\n    \"title\": \"settings-panel-crops-fighters\",\n    \"claim\": \"In Images #7 and #16, the Settings panel ends across the fighters\u2019 bodies, exposing their lower legs and the arena beneath it.\",\n    \"reason\": \"The abrupt crop makes the settings surface feel layered over an unfinished composition rather than deliberately separated from play.\",\n    \"suggest\": \"Extend the settings backdrop through the full viewport while keeping the settings content compact, or use a clearly bounded sheet with a uniformly dimmed arena behind it.\"\n  }\n]"
+}

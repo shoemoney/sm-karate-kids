@@ -6365,3 +6365,58 @@ Gates: `pnpm check` **148 passed** (was 145, +3). `pnpm test:e2e` 35 passed,
 reviewer never mentioned.** Two cycles produced one fix each. That is the real
 throughput, and quoting five-findings-per-cycle as five units of progress is how
 a loop convinces itself it is converging.
+
+### Cycle 4 — `settings-panel-crops-fighters`: reported three cycles running, and earlier rounds "fixed" the wrong region
+
+This is the finding that had been reported in cycles 1, 2 and 3 and dismissed or
+"corrected" each time. Three repeats is the skill's own trigger for taking a
+report seriously rather than counting how many times it has been refused.
+
+**It was real the whole time, and the earlier fix verified the wrong pixels.**
+
+Measured at 390x844 with the settings sheet open:
+
+- the sheet rendered **517px tall in an 844px viewport** — the bottom **327px**
+  of the live bout stayed at full brightness underneath it
+- `elementFromPoint` at 80% down returned **`view`** — the live canvas, not the sheet
+- a pixel strip at y=675 went from luma 36.8 to 33.3: **+9.6% attenuation**
+
+9.6% is not a dim. It is the absence of one. **Earlier rounds had verified the
+scrim that covers the panel and called the treatment confirmed, and the region
+they never sampled was the one a player can actually see the fight through.**
+That is the skill's failure mode 2c wearing a pass: the check was measuring an
+input, not the output that reaches the player.
+
+The cause is that `inset: 0` on the open sheet was not making it fill, and the
+computed `inset` read `0px / 0px / 326.812px / 0px` — bottom resolved to 327px.
+I walked every ancestor for a `transform` / `filter` / `backdrop-filter` that
+would make one the containing block and found none, so the cascade stayed
+unexplained.
+
+**I did not keep digging, and that was the right call.** The thing to verify is
+the strip going dark, not which rule won the cascade, so the fix states the
+height outright — `height: 100dvh` — which is immune to whichever rule was
+winning. Explaining the mystery would have been the satisfying move; it would
+also have been a second change to a rule that now demonstrably works.
+
+After: sheet **517 → 844px**, `elementFromPoint` returns **`settings-sheet`**,
+and the same strip went to **+57.3% attenuation**. Confirmed visually — the panel
+is now a clean bounded surface with no fighters' legs and no exposed mat below a
+straight cut.
+
+Guard mutation-tested: 1 of 2 fails without the height, 2 pass with it.
+
+Gates: `pnpm check` **150 passed** (was 148, +2). `pnpm test:e2e` 35 passed,
+5 skipped, `e2e=0`.
+
+### The lesson that outranks the fix
+
+**Three cycles reported this and two of them were wrong anyway — for the
+opposite reason.** The first two dismissals were also measurement failures, just
+mine: I measured the scrim over the panel rather than the fight under it, and
+`elementFromPoint` at 80% down is the check that settles it in one call.
+
+The reporting was reliable. The *verdicts* kept arriving already closed, and both
+sides of that ledger were mine. A repeat report is evidence about the reporter;
+it is not evidence about the claim, and treating it as either is how a loop ends
+up defending a position instead of checking a pixel.

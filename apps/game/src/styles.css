@@ -1526,6 +1526,13 @@ body.show-perf #backend {
 body:has(.sheet:not([hidden])) .sheet {
   position: fixed;
   inset: 0;
+  /* Measured: the sheet rendered 517px tall in an 844px viewport, so the
+     bottom 327px of the live bout stayed at full brightness under the panel —
+     elementFromPoint at 80% down returned the canvas, and a pixel strip there
+     attenuated just 9.6%. `inset: 0` alone was not making it fill. Stated as a
+     height rather than debugged as a cascade, because the thing to verify is
+     the strip going dark, not which rule won. */
+  height: 100dvh;
   z-index: 60;
 }
 
