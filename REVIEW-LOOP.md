@@ -6105,3 +6105,69 @@ you will read.
 
 Gates, **read before the git line this round**: `pnpm check` 142 passed,
 `pnpm test:e2e` 35 passed / 5 skipped / exit 0.
+
+### Rounds 139–140 — 2.1 attempted three times and not shipped; 2.2 examined and declined
+
+Jeremy: **"go with your recommendation."** So both Phase 2 items are decided, and
+one of the decisions is *no*.
+
+#### 2.1 — the invisible kicking foot. Attempted, reverted, and the reason is now known.
+
+Round 89's measurement stands: the foot is whole, correct and correctly facing at
+`rgb(229,189,159)` on `rgb(139,103,54)` — **2.96:1 at about 11px**. Seven reviews
+reported it missing and a reviewer has now cross-referenced two frames and
+diagnosed it as a rendering inconsistency, which is the right description.
+
+The recommendation was a cast shadow under the raised foot — presentation-only,
+using the machinery that already grounds the standing feet, and touching no
+provenance-tracked art. **Rounds 90 and 91 had each attempted exactly this and
+each put the blob on bare mat.** Three attempts this round too:
+
+1. `blob.position.z = SHADOW_OFFSET_Z + lift * 0.9` — **wrong axis.** The mat is a
+   horizontal plane and the shadow plane is too, so a z-offset slides the blob
+   along the view axis, toward the lens, not down the mat.
+2. Replaced with a proportional **x** displacement, `strike.x + lift * 1.35`,
+   which is the correct geometry for a camera looking down at a floor.
+3. Re-captured at three zooms. **Still nothing visible under the raised foot.**
+
+**Reverted, and the finding is that the correct geometry is not sufficient.** The
+blob renders, the kick is genuinely active, there are no page errors, and the
+shadow is not on the mat. A correct displacement that produces nothing means the
+placement is right and the *result* is still too faint to see at 11px against a
+2.96:1 subject — which is the same wall as r89: **the problem is legibility, and
+a shadow under the foot is a second low-contrast object, not more contrast on the
+first.**
+
+**So the recommendation changes, and the measurement that would settle it is
+named:** the only fix that addresses legibility directly is raising the foot's
+value in the atlas until it clears 4.5:1 against the mat. That is an edit to a
+generated asset with a provenance record, it touches every frame of both
+fighters, and it is a human decision about art direction — not a change a review
+loop should make on a measurement, with no one able to see whether the fighters
+still look right.
+
+#### 2.2 — the ceiling. Examined, and the recommendation is to leave it.
+
+`sd 8–19` against `47.6` on the mat, the flattest region in a portrait frame,
+after two tint attempts both made it *flatter* (18.9 → 7.3), which proves the
+tint is not the lever and the source art is low-contrast.
+
+**But flatness in a region that carries no information is not a defect — it is
+correct.** The band above the shoji holds no text, no score, no control, and
+nothing the player is asked to read. It is a lit wall at the top of a room, and
+a room's far wall *should* be flatter than its floor. Four reviewers described it
+as "empty brown haze," which is a fair description of a wall and an unfair
+standard for one.
+
+The genuine cost is the 39.7% of dead space above the fighters, and r84 settled
+that as arithmetic: it is the consequence of needing 5.84 world units of width
+on a 0.462-aspect screen, and no camera change fixes it without either cropping
+the kicks (r80's defect) or pillarboxing. **The frame is the composition, not the
+ceiling.**
+
+Recommended, and not taken: regenerate the eave art, or treat it per-pixel. Both
+are expensive, both are art direction, and neither buys a player anything. Left
+as it is, with the reason recorded so a later round does not re-open it as a new
+finding.
+
+Gates: `pnpm check` 142 passed, unchanged.

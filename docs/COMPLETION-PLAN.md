@@ -66,7 +66,13 @@ sprite.
 **Three candidates:** a rim light on the foot at extension; a floor shadow under
 it during the active window; raising the foot's value in the atlas to clear
 4.5:1.
-**Blocked on:** someone who can look at the art and decide. Not on engineering.
+**Decision at r140: attempt the cast shadow — REVERTED after three attempts.**
+Rounds 90, 91 and 139-140 have each placed it correctly and each produced nothing
+visible under the foot. The geometry is right and the *result* is still too faint,
+because a shadow under the foot is a second low-contrast object, not more
+contrast on the first. **The fix that addresses legibility is raising the foot's
+value in the atlas to clear 4.5:1**, which is a human art-direction decision on
+a provenance-tracked asset, not a loop change.
 
 ### 2.2 The ceiling is the flattest region in the frame — `P3, needs a human`
 **Measured** (r85, r106): the band above the shoji is mean luminance 42–48 with
@@ -74,7 +80,11 @@ a standard deviation of 8–19, against 47.6 on the mat. Two tint attempts both 
 it **flatter** (sd 18.9 → 7.3), which proves the tint is not the lever — the
 source art is low-contrast and no global multiply can fix it.
 **Candidates:** different source art; per-pixel treatment of the eave.
-**Blocked on:** the same decision.
+**Decision at r140: LEAVE IT.** Flatness in a region carrying no information is
+correct — it is a far wall, and a far wall should be flatter than the floor. The
+real cost is the 39.7% dead space above the fighters, which r84 settled as
+arithmetic, not art. Regenerating the eave is expensive and buys a player
+nothing. Recorded so it is not re-opened as a new finding.
 
 ---
 
