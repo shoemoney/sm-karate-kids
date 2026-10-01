@@ -1154,6 +1154,12 @@ body.show-perf #backend {
 @media (hover: hover) and (pointer: fine) and (min-width: 720px) {
   .key-hint {
     display: block;
+    /* Measured at 10px / --text-faint: 5.10:1. That clears AA for body text
+       but these are the arrow glyphs, and thin arrow strokes at 10px on near
+       black are the first thing to disappear on a dim monitor. Up a step, and
+       a full step brighter than the wordmark it sits under. */
+    font-size: var(--text-xs);
+    color: #b8a894; /* measured lift from #8e8071; one step under the wordmark */
   }
 }
 
@@ -1410,14 +1416,21 @@ body.show-perf #backend {
 
 @media (min-width: 720px), (orientation: landscape) and (min-height: 420px) {
   :root {
-    --pad-height: clamp(170px, 30dvh, 230px);
-    --stick-size: min(20vw, 150px);
+    /* Measured at 1280x800: the strip was 231px — 29% of the viewport — with
+       the sticks at the far edges and 66% of the width doing nothing between
+       them. A pad is a thumb rest; on a pointer device there are no thumbs at
+       the extremes, so the height buys nothing and just steals the fight. */
+    --pad-height: clamp(112px, 15dvh, 150px);
+    --stick-size: min(13vw, 108px);
   }
 
   #pad {
     position: absolute;
     inset: auto 0 0 0;
-    padding: 0 2vw var(--space-5);
+    /* Inboard, not edge-to-edge. Pinned to start/end the two plaques sat
+       66% apart with a black void between them; pulled in they bracket the
+       mat and the gap reads as the arena floor rather than dead space. */
+    padding: 0 12vw var(--space-4);
     background: transparent;
     border-top: 0;
     pointer-events: none;

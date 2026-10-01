@@ -6171,3 +6171,77 @@ as it is, with the reason recorded so a later round does not re-open it as a new
 finding.
 
 Gates: `pnpm check` 142 passed, unchanged.
+
+## AAA cycles — the method, ported off Godot
+
+Asked for five triple-A cycles. The skill is Godot-specific (`live_capture.gd`,
+`wf_aaa.js`, `difficulty_probe.gd`) and this is TypeScript/Vite/Three.js, so the
+*method* is ported and the scripts are not. The one piece that had to be written
+first was the capture gate, because `SAVED` proves nothing.
+
+### `tools/verify_shots.py` — the gate, and it caught its own bug
+
+Three checks, all of them from having watched a harness print `SAVED` for every
+frame of a run where it had written byte-identical black PNGs:
+
+- **not identical** — 22 distinct byte streams
+- **not flat** — every frame clears 12 colours
+- **not motionless** — mean inter-frame luma delta. This is the check that caught
+  45 cycles of a Godot run reviewing a bot that died in sector 1, and it is the
+  reason the floor exists at all: a dead run measures ~2.0.
+
+**Result: `OK 22 frames, 22 distinct, motion 12.19`.** Twelve, not two — this
+capture is a played bout, so the frames carry real motion and a reviewer judging
+them is judging the game rather than a still.
+
+**And the gate threw on its first live run** — `statistics.mean` over
+`convert("L").getdata()` unpacked each element as an RGB triple, but `L` yields
+ints, so every frame raised `TypeError: cannot unpack non-iterable int object`. A
+gate that crashes is a gate nobody runs, and had I wrapped the whole thing in a
+try/except and reported "OK" on failure it would have become the exact failure
+mode it exists to prevent. Fixed to average the ints directly, re-run, and it
+passed on substance.
+
+### Cycle 1 — desktop control strip. REAL, measured, fixed.
+
+The consumer reviewer (OpenRouter `gpt-6.1-sol` via Codex, seeing 22 frames and
+no source) returned five craft items. The second lens then measured them,
+because a shopper can see that space is empty but not how much of the viewport it
+is.
+
+**Measured at 1280x800 before the fix: the pad was 231px — 29% of the viewport —
+and the two sticks sat at the far edges with 66% of the width between them doing
+nothing.** The causes were two lines of CSS: `--pad-height: clamp(170px, 30dvh,
+230px)` on wide screens, and `.stick-zone { justify-self: start/end }`.
+
+The reasoning behind the change is the part worth keeping. A control pad is a
+*thumb rest* — it exists because a phone needs somewhere to put two thumbs. On a
+pointer device there are no thumbs at the extremes, so the height buys nothing
+and is simply stolen from the fight.
+
+- `--pad-height` 230 → 150px, `--stick-size` 150 → 108px
+- padding `0 2vw` → `0 12vw`, pulling the plaques inboard so the gap reads as
+  arena floor rather than dead space
+
+**After: pad 231 → 185px (29% → 23%), stage 462 → 508px, centre gap 66% → 53%.**
+The fight got 46px of height back and the plaques now bracket the mat instead of
+abandoning it.
+
+**Phone is untouched, and that was the thing to verify rather than assume:** pad
+228px, both stick zones 179x207 against a 44px target, `key-hint` still `none`,
+zero page errors. The media query did what it says.
+
+### Cycle 1, second finding — the key hints I added were too dim to read
+
+`↑ ← ↓ →` measured **5.10:1 at 10px**. It clears AA for body text, so no
+automated check anywhere in this repo would ever have complained — but thin
+arrow strokes at 10px on near-black are the first thing to disappear on a dim
+monitor, and the whole point of the desktop hint is that a first-time player
+reads it. This is a measure, not an opinion: the previous round's `key-hint` was
+`--text-2xs` in `--text-faint`, the smallest and dimmest pairing the design
+system offers, applied to the one label that exists to be read.
+
+Up one step to 12px and one step brighter. **Now 8.45:1** for both `W A S D` and
+`↑ ← ↓ →`, clearing 7:1 comfortably.
+
+Gates: `pnpm check` 142 passed. `pnpm test:e2e` **35 passed, 5 skipped**, `e2e=0`.

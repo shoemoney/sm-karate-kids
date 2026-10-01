@@ -1,0 +1,39 @@
+{
+ "model": "openai/gpt-6.1-sol",
+ "harness": "codex-cli",
+ "computer_use": true,
+ "reviewed_at": "2026-10-01T04:52:59",
+ "items": [
+  {
+   "title": "kick-silhouette-break",
+   "claim": "In Images 13 and 19, the white fighter\u2019s raised trouser leg ends without a visibly distinguishable foot, unlike the clearly visible raised foot in Image 22.",
+   "reason": "The striking limb is the focal point of a fighter; an unreadable endpoint makes the pose look unfinished and obscures its reach.",
+   "suggest": "Review these poses at phone size and adjust the artwork or silhouette so the foot is distinguishable from the trouser cuff; animation playback would establish whether this is only a transitional pose."
+  },
+  {
+   "title": "instructions-detached-from-sticks",
+   "claim": "In Image 3, the movement and attack meanings appear in a separate text strip above the sticks, while the sticks themselves display only directional marks.",
+   "reason": "A new player must translate between the legend and two thumb surfaces instead of recognizing actions where they touch.",
+   "suggest": "Place concise action labels around each stick during onboarding, with stance and technique distinguished consistently, rather than concentrating both mappings in a separate strip."
+  },
+  {
+   "title": "intro-copy-competes-with-matchup",
+   "claim": "In Image 2, the opponent description and control explanation share one prominent dark panel between the matchup heading and the fighters.",
+   "reason": "The introduction mixes opponent personality with operating instructions, weakening the immediate visual hierarchy of who to fight and how to begin.",
+   "suggest": "Keep one short opponent cue on the round card and move the control explanation into a distinct, visually demonstrated first-fight instruction."
+  },
+  {
+   "title": "settings-panel-cuts-through-fighters",
+   "claim": "In Image 7, the settings panel ends across the fighters\u2019 bodies, leaving their lower legs and the arena exposed beneath its straight bottom edge.",
+   "reason": "The exposed body fragments make the settings screen feel like an abruptly cropped overlay rather than a deliberately composed mobile screen.",
+   "suggest": "Extend the settings backdrop to the bottom of the viewport, or use a clearly bounded sheet with a uniformly dimmed game beneath it."
+  },
+  {
+   "title": "desktop-control-strip-dead-space",
+   "claim": "In Image 9, the bottom control area contains a stick at each outer edge and a broad empty center, while the fight occupies the band above it.",
+   "reason": "The empty strip draws attention to the interface footprint without adding useful information or spectacle.",
+   "suggest": "On desktop, overlay compact secondary controls on the arena or reduce the dedicated control strip, giving the fight more of the available screen while preserving readable keyboard hints."
+  }
+ ],
+ "raw": "[\n  {\n    \"title\": \"kick-silhouette-break\",\n    \"claim\": \"In Images 13 and 19, the white fighter\u2019s raised trouser leg ends without a visibly distinguishable foot, unlike the clearly visible raised foot in Image 22.\",\n    \"reason\": \"The striking limb is the focal point of a fighter; an unreadable endpoint makes the pose look unfinished and obscures its reach.\",\n    \"suggest\": \"Review these poses at phone size and adjust the artwork or silhouette so the foot is distinguishable from the trouser cuff; animation playback would establish whether this is only a transitional pose.\"\n  },\n  {\n    \"title\": \"instructions-detached-from-sticks\",\n    \"claim\": \"In Image 3, the movement and attack meanings appear in a separate text strip above the sticks, while the sticks themselves display only directional marks.\",\n    \"reason\": \"A new player must translate between the legend and two thumb surfaces instead of recognizing actions where they touch.\",\n    \"suggest\": \"Place concise action labels around each stick during onboarding, with stance and technique distinguished consistently, rather than concentrating both mappings in a separate strip.\"\n  },\n  {\n    \"title\": \"intro-copy-competes-with-matchup\",\n    \"claim\": \"In Image 2, the opponent description and control explanation share one prominent dark panel between the matchup heading and the fighters.\",\n    \"reason\": \"The introduction mixes opponent personality with operating instructions, weakening the immediate visual hierarchy of who to fight and how to begin.\",\n    \"suggest\": \"Keep one short opponent cue on the round card and move the control explanation into a distinct, visually demonstrated first-fight instruction.\"\n  },\n  {\n    \"title\": \"settings-panel-cuts-through-fighters\",\n    \"claim\": \"In Image 7, the settings panel ends across the fighters\u2019 bodies, leaving their lower legs and the arena exposed beneath its straight bottom edge.\",\n    \"reason\": \"The exposed body fragments make the settings screen feel like an abruptly cropped overlay rather than a deliberately composed mobile screen.\",\n    \"suggest\": \"Extend the settings backdrop to the bottom of the viewport, or use a clearly bounded sheet with a uniformly dimmed game beneath it.\"\n  },\n  {\n    \"title\": \"desktop-control-strip-dead-space\",\n    \"claim\": \"In Image 9, the bottom control area contains a stick at each outer edge and a broad empty center, while the fight occupies the band above it.\",\n    \"reason\": \"The empty strip draws attention to the interface footprint without adding useful information or spectacle.\",\n    \"suggest\": \"On desktop, overlay compact secondary controls on the arena or reduce the dedicated control strip, giving the fight more of the available screen while preserving readable keyboard hints.\"\n  }\n]"
+}
