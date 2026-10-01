@@ -31,6 +31,18 @@ three shell/Python/Node tools, which have their own shebang or interpreter.
 | `build-fighter-atlas.py` | `python3 tools/build-fighter-atlas.py` | Segments the fighter contact sheets in `assets/` into the WebP atlases + `manifest.json`. **The source sheets are gitignored** — see [`docs/sprite-pipeline.md`](docs/sprite-pipeline.md) before running it. |
 | `shots.mjs` | `node tools/shots.mjs [outDir]` | Throwaway look-at-the-game screenshot harness. Not part of any gate. |
 | `fps.mjs` | `node tools/fps.mjs` | Throwaway frame-rate / post-chain cost measurement. Not part of any gate. |
+| `review-shots.mjs` | `node tools/review-shots.mjs /tmp/smkk-loop` | Plays a bout and captures the review frame set. **Regenerate before every review** — stale frames produced a false finding about already-fixed code at r127. |
+| `verify_shots.py` | `python3 tools/verify_shots.py /tmp/smkk-loop` | Gate on the capture itself: frames distinct, non-flat, and moving. A set that fails here was never a review set. |
+| `review-codex.sh` | `bash tools/review-codex.sh [shotsDir] [outJson]` | The advisory/consumer reviewer (codex → `openai/gpt-6.1-sol` via OpenRouter, computer use). Fails closed on an empty bearer or an empty answer rather than reporting a broken run as findings. |
+| `verify-deploy.sh` | `bash tools/verify-deploy.sh [baseUrl]` | **Post-deploy gate.** Fetches the live `index.html`, compares it byte-for-byte with `apps/game/dist/index.html`, then fetches every asset the served html names and compares sha256 against the local file. Exit 0 = the served bytes are the built bytes. HTTP 200 proves nothing here; at r141 the site answered 200 for hours over a two-hour-old build. |
+| `verify-deploy-mutation.sh` | `bash tools/verify-deploy-mutation.sh` | Proves `verify-deploy.sh` can fail: 6 cases over a real local HTTP server (faithful copy, stale names, right-name/wrong-bytes, absent asset, dead origin, absent local build), asserting exit code **and** the diagnosis. Run it after touching the gate. |
+| `loop-once.sh` | `bash tools/loop-once.sh` | One unattended review-loop iteration (the `launchd` driver). Takes the lock, builds the prompt, runs `opencode run`. |
+
+`tools/verify-deploy.sh` and `tools/verify-deploy-mutation.sh` are the only two in
+this table that need the network, and they are the only two that must be run
+against a real origin to mean anything — a deploy gate exercised only against
+`localhost` has not exercised the deploy. Neither is in `pnpm check`, because
+`pnpm check` must stay runnable offline.
 
 Two modules in `apps/game/src` are the runtime half of the art story: **`artLoader.ts`** is the one
 door every generated texture comes through (it returns `null` and warns on a miss, so a missing file

@@ -6558,3 +6558,210 @@ screen", and no `pageerror` fired. The arcade API simply has no entry for this
 game's id yet. Left alone deliberately: wiring a game id into another service's
 data is a different change from the five defects this run was chartered to find,
 and it needs someone who owns that contract.
+
+### Round 142 — the gate that should have existed before the round that needed it
+
+The plan had nothing open in it. 1.1 shipped at r135, 1.2 at r136, 1.3 was
+playtested and closed at r138, 2.1/2.2 were raised with measurements at r140, and
+the unattended driver went in at r140. So the question was not "which open item
+do I finish" — it was **"what did the last round leave behind that was not on the
+list."**
+
+Round 141's own closing section describes a deploy that served stale bytes for
+hours, a target path that cost four probes to find, and a diagnosis made by
+hand. **None of it is in the repo.** There was no deploy script, no deploy gate,
+and no record of the deploy root. The next unattended iteration would repeat the
+whole thing, and the round after that might not notice at all — because the
+process only ever asked for a status code, and the status code said 200.
+
+So this round builds the thing the last round needed and did not have.
+
+#### `tools/verify-deploy.sh` — "200 OK" and "my build is being served" are different claims
+
+Only the second one matters after a deploy, and it is the one nobody was
+checking. The gate makes the served bytes provably equal the built bytes:
+
+1. the URL answers 200 and the body is non-empty
+2. **a local build exists** and its mtime is printed — a gate pointed at an
+   absent dist must refuse rather than quietly verify nothing
+3. served `index.html` against local `dist/index.html`, byte for byte
+4. every asset the **served** html names, fetched over the wire, sha256 against
+   the local file of the same name
+5. every served name must exist locally, so a name the server invents cannot pass
+
+Step 4 is the one that earns the script. Names alone pass a half-finished deploy
+where `index.html` landed but the asset it names is the old one. Content alone is
+impossible without trusting a name first. Both, in that order.
+
+**No deploy happened this round, so the "did I break it" question has an honest
+answer: nothing in `apps/game` was touched.** The gates below are green because
+the tree is unchanged, not because a build was re-verified after an edit.
+
+**Refused deliberately — marker strings.** The obvious design is a list of
+substrings that must appear in the served bundle (`100dvh`, `rematch in`, the
+`min-height:46px` rule). I measured that all three are present today and then did
+not use them. Vite rewrites custom properties and mangles literals on any
+refactor, so each marker is a future false alarm, and the fix for a gate that
+cries wolf is deletion. A sha256 comparison is exact, cannot rot, and if the
+served bytes equal the built bytes then every fix inside them is live. No list of
+strings can say more than that.
+
+#### The mutation harness found two real bugs in the gate on its first run
+
+Six cases, each over a real local HTTP server, each asserting **exit code and
+diagnosis** — because a gate that goes red for the wrong reason is broken in the
+way that is hardest to notice, since it still looks red. Both of the two failures
+on the first run were in the branch I was least sure about.
+
+**Bug 1 — an empty-but-present dist returned the wrong exit code.** Case 6
+expected exit 2 and got exit 1 with `the dist is present but incomplete`. Exit 1
+means "the deployed thing disagrees with the built thing," which sends an
+operator hunting a deploy problem **they do not have** — there is simply nothing
+to compare against. Now exit 2, with the same `run pnpm build first` message as a
+missing dist, because it is the same operator error.
+
+**Bug 2 — the stale-deploy branch deleted its own evidence.** This is the one I
+would have shipped. Evidence retention was implemented per-branch, in the asset
+path only. The EXIT trap cleaned up on everything else, so the **html-mismatch
+branch — the round-141 shape, the entire reason the script exists — deleted the
+fetched bytes it had just used to reach its verdict**, and the only trace left was
+two sha256 lines in a log. A gate that discards the only copy of what it saw is a
+gate that has to be re-run to be believed, and a re-run against a transient origin
+is a re-run that can agree. Now a single `STATUS` in the trap: pass deletes, any
+failure keeps the directory and prints where.
+
+```
+[1/6] positive   ok  exit=0
+[2/6] stale      ok  exit=1
+[3/6] wrongbytes ok  exit=1
+[4/6] missing    ok  exit=1
+[5/6] dead       ok  exit=1
+[6/6] nodist     ok  exit=2
+harness: 6 passed, 0 failed, 6 cases
+```
+
+Case 3 is the one a names-only gate cannot see: identical html, identical asset
+name, one appended comment in the body. Case 2 is round 141 reproduced exactly.
+
+#### Verified against the real origin, not only localhost
+
+A deploy gate exercised only against `localhost` has not exercised the deploy.
+
+    $ tools/verify-deploy.sh
+    deploy gate: https://arcade.shoemoney.ai/smkk/
+      local build  .../apps/game/dist
+      built at     2026-10-01 05:44:01
+      http         200, 10159 bytes
+      html         identical to local build
+      assets/index-D5kxXh1i.js  1062545 bytes  sha256:d6fc5dc6edc0
+      assets/index-DA3Jeuju.css   39670 bytes  sha256:1d980f7d50e9
+    OK  2 assets served, byte-identical to the local build
+
+And a **real** negative control over the real internet, not a local stub — the
+arcade root, which is a different app and must fail:
+
+    $ tools/verify-deploy.sh https://arcade.shoemoney.ai/
+    FAIL: served index.html is NOT the local build's index.html
+      served sha256:9fc616c4...  local sha256:42b400d0...
+    exit=1    kept: /tmp/tmp.8FY6g1g32X.failed/live.html (22542 bytes)
+
+That is also the bug-2 check: the kept directory exists on the branch that had
+been discarding it.
+
+#### One measurement I refused to report
+
+Two identical red runs were fired **in parallel** in the same message. Both wrote
+to the same glob, so the `.failed` directory I inspected could belong to either,
+and it contained a CSS file that a pure html-mismatch run should never have
+fetched. The measurement was unattributable, so I discarded it, re-ran serially,
+and got the answer. Rule 5 is not a formality about lab conditions; it is about
+two commands racing for one piece of evidence.
+
+#### Also: a real, if small, defect in this document
+
+`docs/COMPLETION-PLAN.md` line 23 contained **two literal U+FFFD replacement
+characters** where an em dash belonged, rendering as `keyboard legend  \`P1\``.
+`git grep` finds exactly two in the whole repo and both were here, so the fix is
+unambiguous: 6 bytes of `ef bf bd` → 3 bytes of `e2 80 94`, verified by asserting
+the count went to zero. A file that is the entry point for every future
+unattended round should not open with a byte that means nothing.
+
+#### AGENTS.md was lying about `tools/`
+
+The `tools/` table claims to describe what is in `tools/`. Four scripts were
+missing from it — `review-shots.mjs`, `verify_shots.py`, `review-codex.sh`,
+`loop-once.sh` — and the one standing instruction the loop runs on ("regenerate
+the review set before every review") names a script the table does not mention.
+All six gate/driver scripts are now listed, with the note that the two deploy
+gates are the only tools needing the network and therefore not in `pnpm check`,
+which must stay runnable offline.
+
+#### Gates
+
+`pnpm check` **153 passed**, exit 0. `pnpm test:e2e` **35 passed / 5 skipped**,
+exit 0, with `lsof -ti:4173` clear beforehand so the suite could not have reused a
+foreign server.
+
+**And one thing worth recording from the e2e run, because it is the gate proving
+itself by accident:** `pnpm test:e2e` runs `pnpm build` first, so it **rebuilt
+`dist` out from under the verification above.** Rather than assume a reproducible
+build, re-ran the gate on the new artifacts:
+
+    built at  2026-10-01 11:41:48        (was 05:44:01)
+    index-D5kxXh1i.js   index-DA3Jeuju.css    (same hashes)
+    OK  2 assets served, byte-identical to the local build
+
+Same content hash from a different build, so the bundle is reproducible and
+production was never at risk during the gate run. That is a claim I would have
+otherwise made from the absence of a diff, which is not the same thing.
+
+#### What this round found, measured
+
+| | |
+|---|---|
+| gate that can fail | 6/6 cases, exit **and** diagnosis asserted |
+| real defects the harness caught in the gate | **2** (wrong exit code, evidence discarded) |
+| deploys performed | 0 — no `apps/game` change this round |
+| production vs local build | byte-identical, verified over the wire |
+| build reproducibility | same hashes across two builds 6h apart |
+| U+FFFD in tracked files | 2 → 0 |
+| undocumented scripts in `AGENTS.md` | 4 → 0 |
+
+The plan now has nothing open in Phase 1 or 3. Phase 2 is blocked on a human by
+design, with the measurement attached to each item, and the checklist says so
+rather than leaving seven unticked boxes to be rediscovered next round.
+
+#### A dirty binary nobody in this round touched
+
+`docs/preview/portrait.png` came back modified after `pnpm test:e2e`, and I
+wrote none of it. `apps/game/tests/e2e/capture.spec.ts` explains why: it
+screenshots straight into `docs/preview/` on every run, and its own docstring
+says freshness "is a manual step, and deliberately so" — the committed PNG is
+only as current as the last local run somebody committed.
+
+The easy call is to commit it. The measured answer is that the committed frame
+is **content-identical**, and committing would have been 1.7MB of churn for
+nothing:
+
+    raw 57.23% of pixels differ        <- the number that looks alarming
+    after 3px blur 55.93%              <- not high-frequency grain
+    after 8px blur 53.07%              <- so it is not structural either
+    mean |delta| 5.46 / 255  (2.14%)
+    mean luma  53.18 (HEAD)  vs  53.16 (new)
+
+A **uniform 2% lighting offset touches nearly every pixel while changing no
+content**, so "N% of pixels differ" is the wrong test for "is this frame stale"
+and a structural comparison is the right one. A magnified 1:1 crop of the mat
+puts it beyond argument: same planks, same grain, same legend, right side a shade
+darker. Per band — HUD 11.99%, room+mat 85.72%, sticks 28.20% — the room carries
+almost all of it, which is where the sampled lighting lives.
+
+Reverted. The next round that changes `apps/game` and wants a fresh hero can
+commit one, and it will know the lighting sample moves ~2% every capture.
+
+**Recorded because the generalisation is the useful part:** this project now has
+three artifacts whose freshness cannot be judged by byte equality — the preview
+PNG (2% lighting), and any capture of the room (animated light). The capture
+gate exists precisely because a frame set has to be *proved* distinct and
+*proved* moving rather than trusted, and the same discipline applies to a single
+hero image nobody would think to check.

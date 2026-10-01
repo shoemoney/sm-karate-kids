@@ -20,7 +20,7 @@ gaps — every one of them is in this document, and nothing else is.
 
 ## Phase 1 — Close the gaps the loop has already found
 
-### 1.1 Desktop keyboard legend �� `P1`
+### 1.1 Desktop keyboard legend — `P1`
 **Found:** r96, r98, r102, r132. Four reviewers, four rounds, never fixed.
 **Why it matters:** the game supports WASD for stance and arrows/IJKL for
 technique (`input/keyboard.ts`), and **nothing on screen says so.** A desktop
@@ -29,6 +29,11 @@ how to play and has to guess that a keyboard is even wired up.
 **Do:** render the key glyphs beside the coach's direction labels, on wide
 viewports only. Touch layout untouched.
 **Accept:** the keys appear on desktop and are absent on a 390px phone.
+**SHIPPED at r135.** r141 then measured the glyphs at **5.10:1** — `--text-2xs` in
+`--text-faint`, the smallest and dimmest pairing the design system offers, applied
+to the one label that exists to be read — and took them to **8.45:1** at 12px.
+Both viewports verified in the same pass: `display:block` at 1280, `display:none`
+at 390.
 
 ### 1.2 Pre-fight card opens the sheet it points at — `P1`
 **Found:** r125, r130. Round 118 put the notation on the card; the card says
@@ -36,6 +41,11 @@ viewports only. Touch layout untouched.
 **Why it matters:** a dangling reference on the one screen every player reads.
 **Do:** add a reference button to the pre-bout card beside FIGHT.
 **Accept:** pressing it opens the techniques sheet and returns to the card.
+**SHIPPED at r136.** The button r136 added was then measured at **102x21px** —
+under half the 44px floor, on the only route to the sheet from the screen that
+introduces the game — and fixed at r141 to **143x46**, relabelled REFERENCE →
+TECHNIQUES because the card's own copy never uses the word "reference" while the
+HUD calls the same sheet TECHNIQUES. Verified by tap, not by stylesheet.
 
 ### 1.3 Coach labels on the sticks, not in a panel — `CLOSED, r138`
 **Found:** r113, r124, r132.
@@ -101,6 +111,47 @@ So unattended means **an external driver**, and there are two:
 2. **A launchd job on this machine** that invokes the loop unattended. That is a
    real answer to "without me having to tell you to continue," and it is the one
    that keeps working when this session ends.
+3. **`tools/loop-once.sh`** — built at r140 and installed on a schedule. Takes a
+   lock (stale locks over 45m are reclaimed), writes a log per iteration into
+   `.loop/`, and stamps `.loop/last-ok` only on exit 0. **In place, running.**
+
+### 3.2 The deploy is not verified until a gate says the bytes match — `SHIPPED at r141`
+
+Added at r141, and it is the one item here that existed because the loop itself
+broke it rather than because a reviewer found it.
+
+Round 141 shipped a deploy and the site answered **200** for hours while serving
+a build two hours stale. Nothing was wrong with the site. The evidence anyone had
+was a status code, and a status code was all the process asked for:
+
+    200 OK                        -> "the deploy worked"
+    the bundle I pushed is served -> "the deploy worked"
+
+`tools/verify-deploy.sh` now makes the second claim the one that counts: served
+`index.html` against local `dist/index.html` byte-for-byte, then every asset the
+served html names fetched over the wire and compared by sha256. The deploy root
+is recorded in the script's header because finding it cost four probes and it is
+not under `/mnt/tank` where the docs implied.
+
+**Proved able to fail**, which is the part that counts — six cases in
+`tools/verify-deploy-mutation.sh`, each over a real local HTTP server, asserting
+exit code *and* diagnosis: faithful copy (pass), stale names, right name with
+wrong bytes, asset absent from the wire, dead origin, absent local build. The
+harness caught two real defects in the gate on its first run, both of which are
+the kind that survive a casual read:
+
+- an empty-but-present dist returned **exit 1**, which reads as "the deploy
+  disagrees with the build" and sends an operator hunting a problem they do not
+  have; now **exit 2**, operator error
+- the html-mismatch branch **deleted its own evidence** via the EXIT trap while
+  the asset branches kept theirs, so the stale-deploy case — the one the script
+  exists for — left nothing to inspect. Now centralized in the trap.
+
+Refused deliberately: a list of "is my fix live?" marker strings. Vite rewrites
+custom properties and mangles literals on any refactor, so each marker is a
+future false alarm and a gate that cries wolf gets deleted. A sha256 comparison
+is exact, and if the served bytes equal the built bytes then every fix in them is
+live.
 
 ### 3.1 Standing rule for unattended runs
 Because nothing is watching, three rules exist and are not optional:
@@ -116,12 +167,24 @@ Because nothing is watching, three rules exist and are not optional:
 
 ## Done means
 
-- [ ] 1.1 keyboard legend on desktop
-- [ ] 1.2 pre-bout card opens the sheet
-- [ ] 1.3 coach labels on the sticks (playtested)
-- [ ] 2.1 and 2.2 raised with a recommendation — a human decides, the loop has done its part
-- [ ] 3.1 unattended driver in place, or a documented decision not to
+- [x] 1.1 keyboard legend on desktop — shipped r135, contrast fixed r141 (8.45:1)
+- [x] 1.2 pre-bout card opens the sheet — shipped r136, target size fixed r141 (143x46)
+- [x] 1.3 coach labels on the sticks — playtested at r138 and closed, with the reason
+- [x] 2.1 and 2.2 raised with a recommendation — a human decides, the loop has done its part
+- [x] 3.1 unattended driver in place — `tools/loop-once.sh` on a launchd schedule
+- [x] 3.2 deploy verified against production bytes — `tools/verify-deploy.sh`, mutation-proved
 - [ ] every phase gated, logged, committed, deployed
 
 **Not "done" means:** every item above is either finished or blocked on a human
 decision with the measurement attached.
+
+### What is left, honestly
+
+Nothing in Phase 1 or 3. Phase 2 is blocked on a human by design, with the
+measurement attached to each item.
+
+One thing deliberately **not** done, recorded so it is not re-opened: the
+pre-existing `GET /api/games/karate-kids/runs` 404 on load. It fails soft by
+design (`leaderboard.ts` — "no board this run, never an error on screen") and
+fires no page error. Wiring a game id into the arcade API is a different change
+from anything in this document and belongs to whoever owns that contract.
