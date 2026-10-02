@@ -39,8 +39,12 @@ three shell/Python/Node tools, which have their own shebang or interpreter.
 | `vision-review.py` | `python3 tools/vision-review.py <model-id> <shotdir> [--out review.json]` | Sends the review frames to a vision model on OpenRouter as one multi-image turn and asks for exactly 5 concrete improvements. The other reviewer in `REVIEW-LOOP.md`. |
 | `bench-server.mjs` | *(imported, not run)* | `startPreview(gameDir, port?)` — spawns a `vite preview` on **4188**, awaits until it actually answers, and kills it on the way out. A benchmark whose subject can vanish between the build and the measurement is measuring something else; a hand-started background server did exactly that and the next run died on `ERR_CONNECTION_REFUSED` with nothing naming the cause. |
 | `renderer-bench.mjs` | `node tools/renderer-bench.mjs <label> [--frames N] [--gfx webgl\|webgpu]` | Measures the two numbers r145 needed: rAF **frame times**, and the **click** (`.result-rematch`, on a pinned tick) that is the actual CI failure. Measured on **separate page loads**, because the round card self-dismisses at 9s and one load measuring both gets `NEW TOURNAMENT` instead of the card. Software rendering is **forced** — measuring with a GPU measures a different machine than the one that fails. |
-| `renderer-sweep.mjs` | `node tools/renderer-sweep.mjs` | Frame-time across renderer configs by patching source, rebuilding, measuring and **reverting** every edit, so the tree ends the run as it started. Numbers are **relative**: only the ratio between configs measured on the same host in the same session is comparable, which is what a look trade needs. Tuned by `SWEEP_GFX` / `SWEEP_FRAMES`. |
-| `throttle-cliff.mjs` | `CPU_LADDER=1,4,8,16 node tools/throttle-cliff.mjs` | Finds the CPU throttle rate at which the CI failure reproduces **locally**, then checks whether a candidate fix removes it at that rate. A lever that helps at 1× and does nothing at the cliff is not a fix. Same patch-and-revert anchors as the sweep. |
+| `sweep.mjs` | *(imported, not run)* | The patch-build-measure-put-back lifecycle every sweep tool shares: snapshot source, apply edits, restore, **rebuild**, and assert `dist` is byte-identical to the build the sweep started from. Added at r154; see the note under the table. |
+| `sweep-mutation.sh` | `bash tools/sweep-mutation.sh` | Proves the sweep guard can fail: 5 cases over real `vite build`s (~90s by design — a stubbed build cannot reproduce the disagreement). Covers an honest sweep, a stale `dist` (the r153/r154 defect), an unrestored source, a moved anchor, and that the harness itself ends with a clean tree. |
+| `host-load.mjs` | `node tools/host-load.mjs` | The 1-minute load average, read once per bench row. Extracted at r154 from `renderer-bench.mjs`, where it had been reading **0** on every row since r145 (a brace-strip parse left a leading space, `split(/\s+/)` took `""`, `Number("")` is 0). Unreadable input is `null`, never 0. |
+| `host-load-mutation.sh` | `bash tools/host-load-mutation.sh` | Proves the load reader can fail: 5 cases including **the r145 parse reproduced verbatim on live output**, so the old reader is demonstrably wrong rather than merely absent. Also: no `sysctl` on `PATH` is `null`/exit 7, not a quiet 0. |
+| `renderer-sweep.mjs` | `node tools/renderer-sweep.mjs` | Frame-time across renderer configs by patching source, rebuilding, measuring and **reverting** every edit. The revert now covers the build too (`tools/sweep.mjs`). Numbers are **relative**: only the ratio between configs measured on the same host in the same session is comparable, which is what a look trade needs — and only when the two rows carry a real `load`, which is the column this row's numbers are worthless without. Tuned by `SWEEP_GFX` / `SWEEP_FRAMES`. |
+| `throttle-cliff.mjs` | `CPU_LADDER=1,4,8,16 node tools/throttle-cliff.mjs` | Finds the CPU throttle rate at which the CI failure reproduces **locally**, then checks whether a candidate fix removes it at that rate. A lever that helps at 1× and does nothing at the cliff is not a fix. Same patch-and-revert anchors as the sweep, via `tools/sweep.mjs`. |
 | `notation-probe.mjs` | `node tools/notation-probe.mjs [outPng]` | Every candidate half-point notation side by side, in the shipped font stack at the score's real 22px on the real plate. Not a gate — it is the **evidence** for a decision, and r148's reversal of the r36 rejection of U+00BD rests on it. Re-run it before arguing about score notation again. |
 | `measure-score.mjs` | `node tools/measure-score.mjs` | The half-point score in boxes: `.score-frac` against `.points` and `.scoreline`, at 4 viewports, plus a **pixel count** of fraction ink falling outside the plate. Lands a real half through touch input with the stance stick held neutral — `match.ts` promotes the call to a full point when the defender is winding up, which is why the measurement was impossible for 31 rounds. `SMKK_BASE` to point at a server. |
 | `scoreline-stability.mjs` | `node tools/scoreline-stability.mjs` | The scoreline in three states — no half, half landed, half +400ms/+1600ms — answering the question a still screenshot cannot: **does the HUD bar move when a score changes?** Found the +9.94px reflow that the r53..r147 stacked fraction caused. |
@@ -67,9 +71,20 @@ so both are recorded in `tools/deploy.sh`'s header rather than re-derived.
 `renderer-sweep.mjs` and `throttle-cliff.mjs` **edit `apps/game/src` to measure
 it, rebuild, then revert** — a full `vite build` per configuration. Do not run
 one while you have uncommitted work in the tree you would mind losing to a
-killed run, and re-read `git status` afterwards rather than trusting the exit
-code. They also each spawn their own preview on 4188 (see `bench-server.mjs`),
-which is deliberately *not* the e2e suite's 4173 so the two cannot collide.
+killed run. They also each spawn their own preview on 4188 (see
+`bench-server.mjs`), which is deliberately *not* the e2e suite's 4173 so the two
+cannot collide.
+
+Both get that lifecycle from **`tools/sweep.mjs`** (`createSweep`), which since
+r154 restores the source **and the build**, and then checks that `apps/game/dist`
+is byte-identical to what it was when the sweep started. The check matters more
+than the restore: `tools/verify-deploy.sh` compares dist against the wire, so a
+sweep that leaves a mutated build behind makes the next round read "production
+is stale" about a production that is correct — and redeploying pushes a build
+assembled from whichever mutation was last. r154 reproduced exactly that through
+a **crash** path, where the `process.on('exit')` handler restored source over a
+mutated build. A sweep that ends dirty now throws, and a killed one warns to
+stderr and tells you to rebuild. Proved in `tools/sweep-mutation.sh`.
 
 Two modules in `apps/game/src` are the runtime half of the art story: **`artLoader.ts`** is the one
 door every generated texture comes through (it returns `null` and warns on a miss, so a missing file

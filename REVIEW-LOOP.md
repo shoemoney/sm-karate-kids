@@ -9012,3 +9012,176 @@ line — and that is now the only way I read one.
 
 That is the r141 shape, one level down: the evidence for a deploy was a status
 code, and the status code belonged to something else.
+
+---
+
+## Round 154 — two instruments reporting values they never took 📉
+
+r153 ended on the lesson that a harness which restores source and leaves the
+build behind manufactures the failure it exists to detect. It fixed that one
+instance. This round went looking for the others and found two, neither in the
+game — both in the tools this loop measures itself with, and both nine rounds
+old.
+
+### One, in `renderer-sweep.mjs` and `throttle-cliff.mjs`: source restored, build not
+
+r153's `keyhint-contrast-mutation.sh` restored `styles.css`, never rebuilt, and
+left `apps/game/dist` carrying mutation 4's deliberately dim value. Both of the
+sweep tools have the same shape — `restore()` on the way out, no rebuild, and
+their **last config is a mutated one** (`aa-off+post-off+pr-half` and
+`pixelratio-1`). So what each left in `dist` was a build of a tree that no
+longer existed.
+
+Their headers claim "the tree ends the run exactly as it started." That was
+false of the build output, which is the sixth box in the r150..r153 series where
+prose describes a contract the code does not keep.
+
+**Reproduced on the real tool**, not reasoned about, and not on the tidy path.
+`throttle-cliff.mjs` with a one-rung ladder and five frames:
+
+```
+before   git status clean   dist cfa754421f68694f…
+run      baseline row lands: frame med 970.1ms, click 13890ms, load 0->0
+         Error: browserContext.newPage: Target page, context or browser has been closed
+         exit handler -> restore() -> source restored, build NOT restored
+crash    git status clean   dist f0b0a8edc64b8f40…    <- describes a tree that is gone
+rebuild  git status clean   dist cfa754421f68694f…    <- back, byte for byte
+```
+
+The crash path is the worse one, because a crash is exactly when nobody re-reads
+`git status`. And it is the trap r153 described closing on itself: since
+`tools/verify-deploy.sh` compares **dist** against the wire, the next round reads
+*"production is stale"* about a production that is correct — and the obvious
+response, redeploying, pushes a build assembled from whichever mutation
+happened to be last. A gate that manufactures the failure it exists to detect,
+in two more tools.
+
+### The invariant, and why it is checkable rather than hopeful
+
+**The build a sweep leaves behind is byte-identical to the one it started with.**
+Vite's asset names are content hashes, so that is a measurement, not a wish.
+Measured before relying on it: two consecutive builds of one tree gave
+`index.html` sha `77c358a7d9aa25d1a9f2b3b2…` both times and the same asset names,
+and the digest came back to `cfa75442…` after the restore above.
+
+`tools/sweep.mjs` (`createSweep`) now owns that lifecycle for both tools: snapshot
+source, apply edits with the anchor check, restore **and rebuild**, then assert
+both that every source file matches its snapshot and that `dist` hashes to what
+it was at the start. It throws on the tidy path and, on the crash path, warns to
+stderr and tells you to rebuild before deploying.
+
+Proved in `tools/sweep-mutation.sh`, **5/5**, over real `vite build`s — a stubbed
+build cannot reproduce a disagreement between source and dist, which is the whole
+subject:
+
+| case | expected | got |
+|---|---|---|
+| honest sweep | clean | **clean** |
+| **stale dist** (source restored, no rebuild — the defect) | detected | **detected**, and `emergencyRestore` recovered it |
+| unrestored source, dist rebuilt | detected | **detected** (a build-only guard misses this one) |
+| moved anchor | throws | **throws** |
+| harness ends clean | real digest | **`e7e3a0d1…`**, clean source |
+
+The third case is why the guard checks source as well as dist: restoring the
+source and forgetting the build, and rebuilding and forgetting the source, look
+identical to a dist-only check in the second case and invisible in the third.
+
+### Two, in `renderer-bench.mjs`: the load column has read 0 since r145
+
+The reproduction above printed **`load 0->0`** on a box sitting at **26.4**.
+
+    sysctl -n vm.loadavg  ->  "{ 26.40 28.09 23.42 }"
+
+Strip the braces and you have a **leading space**. `split(/\s+/)` then yields
+`["", "26.40", …]`, `const [m1]` is `""`, and `Number("")` is **0**. `round(0)`
+is `0` — a number — so the `catch → null` safety net never fired, no branch was
+ever taken, and nothing anywhere looked broken.
+
+This is the column r145 added **after** three rounds of comparing frame times
+taken under different contention (56.6ms, then 77.1ms, then 161.9ms on an
+unmodified tree, because the loop's own Playwright suite was competing for
+cores). The column existed to make a frame-time number carry its conditions, and
+a caller was supposed to be able to refuse to compare rows taken at different
+loads. It has been printing `0` — which reads as *an idle machine* — since it was
+written. r151's standing instruction to print the load beside every result has
+been satisfied by a constant.
+
+**Proved able to fail** in `tools/host-load-mutation.sh`, **5/5**, and case 2 is
+the one that matters:
+
+| case | got |
+|---|---|
+| real read tracks `os.loadavg()` | **delta 0.00** |
+| **the r145 parse, verbatim, on live output** | **`R145=0` while the machine is loaded** |
+| garbage / empty / negative input | **`null`, never 0** |
+| no `sysctl` on `PATH` | **exit 7, `null`** — not a quiet 0 |
+| braced macOS form parses | **`26.4`** |
+
+Case 2 is the difference between "the reader was absent" and "the reader was
+wrong." It does not merely fail to find the defect — it runs the old code, on
+this machine's real output, and gets 0.
+
+### The shape both of them have
+
+**An instrument that reports a plausible value it never measured is worse than
+one that reports nothing**, because nothing is at least visibly nothing. This is
+the sixth time this loop has walked into it: rounds 90/93/95 each shipped a metric
+agreeing with a no-op, r152's own `Number('11_000')` was NaN, r153's awk `\b`
+audit reported "0 colour literals" for a stylesheet with thirteen in it, and
+r153 read two gate statuses out of a pipe where `$?` was `tail`'s. Every one of
+them was green, and every one of them was a number nobody took.
+
+### My own work, four times over
+
+This round produced more bad instruments than it fixed, which is the part worth
+recording:
+
+- **Read a gate out of a pipe again.** `PATH=/nonexistent node …` in case 4 of the
+  load harness gave `exit 127, "node: command not found"` — which reads exactly
+  like a red assertion and was my harness's own bug. Fixed by resolving
+  `node` to an absolute path first. r153 wrote a paragraph about this habit and
+  then did it again in the next round.
+- **Called a method that does not exist** — `sweep.buildGame()`, which returned
+  `TypeError: not a function` and printed as **two failed assertions about the
+  guard** when it was really a missing export in my own refactor. `buildGame` is
+  now a module-level import the call sites make themselves, so a missing name is
+  a load-time error rather than a call-time one wearing a verdict's clothes.
+- **Wrote the e2e result to `/tmp/e2e.out`** — a shared path. Another agent on
+  this box wrote its own "E2E review — agentdesk.shoemoney.ai" to that file
+  **while my run was in flight**, and my 38-line result was gone: zero karate
+  content, mode 600, 20 minutes stale. Had I read the tail of that file and
+  reported `13/14 checks passed, 1 FAILED` about a different project's dashboard,
+  it would have been a confident, entirely fictional regression. Re-run to a
+  unique path — and then the server restarted mid-run.
+- **Left my own CPU burners behind.** The interrupted run left a `vite preview` on
+  4173 and a Playwright worker tree (11 processes) alive, and my timed-out
+  `grep -rl /tmp/e2e.out ~/ …` left a `find` walking the entire home directory at
+  28.7% for a minute and a half. r151 lost half an hour to exactly this — stray
+  burners from its own reproduction poisoning every measurement after them. Load
+  reached **102** before I noticed I was the cause. Killed by PID, then verified
+  gone: 0 survivors.
+
+### Gates
+
+`check=0` (typecheck + 200 unit across 21 files + content + assets),
+`sweep-mutation=0` (5/5), `host-load-mutation=0` (5/5).
+
+**e2e: no verdict, and that is the honest report.** Not run to completion twice:
+once clobbered by the shared temp path, once by the server restart. Load was
+**23.6** at the first attempt and **89–102** at the second, against r151's
+documented band (red at 14–16, green at 8–10) — at that load an e2e number would
+be noise wearing a pass/fail costume. This diff touches `tools/` only: no
+`apps/game/src`, no rendering, no input adapter, which is the condition
+`AGENTS.md` actually requires e2e for. So the gate that covers this change is the
+two mutation harnesses, and both are green.
+
+Production: **no deploy needed and none performed.** `dist/index.html` is still
+`77c358a7d9aa25d1a9f2b3b2…`, unchanged from before this round, because nothing in
+the bundle moved. `tools/verify-deploy.sh` re-run at the end: `exit 0`, 2 assets
+sha256-matched. A tools-only commit that ships a deploy would be deploying a
+build identical to the one already live.
+
+One diff I did not cause and did not commit: `docs/preview/portrait.png` again,
+written by the e2e capture spec. Restored with `git checkout`, for r153's reason —
+refreshing a regenerated binary because a test produced it is the file-version of
+"it was already dirty when I got here".

@@ -11,8 +11,8 @@ has been improving.
 | Playable | yes — tournament + dojo, two sticks, point karate |
 | Deployed | `https://arcade.shoemoney.ai/smkk/`, verified playing a real bout |
 | Tests | 200 unit, 44 e2e, green locally |
-| Review loop | 153 rounds, 20 review frames, mutation-tested fences |
-| Commits | 280 |
+| Review loop | 154 rounds, 20 review frames, mutation-tested fences |
+| Commits | 289 |
 | Production | **byte-identical to the local build**, `tools/verify-deploy.sh` green |
 
 The game is not a prototype. What remains is a short list of specific, named
@@ -413,6 +413,38 @@ by performing the sentence and watching what the game did — `tap`, `wait`,
 that can settle it is a probe that does the sequence, and it needs a **positive
 control** (the `early` arm) or it would have been a constant-false instrument
 agreeing with itself.
+
+**r154 found the seventh drift, and it is not in the game at all — it is in the
+instruments this loop measures itself with.** Two of them had been reporting
+values they never took, for nine rounds:
+
+- **`tools/renderer-bench.mjs` read `load 0` on every row of every sweep.** A
+  brace-strip parse left a leading space, `split(/\s+/)` took `""`, and
+  `Number("")` is `0` — which is a number, so the `catch → null` safety net never
+  fired and nothing looked broken. `0` reads as *an idle machine*, not *no
+  reading*. So the one column r145 added after three rounds of comparing frame
+  times taken under different contention was **disarmed and still drawn on the
+  page**, and r151's standing instruction to print the load beside every result
+  was satisfied by a constant. Fixed: `tools/host-load.mjs`, where an unreadable
+  reading is `null` and stays `null`.
+- **`renderer-sweep.mjs` and `throttle-cliff.mjs` restored the source and never
+  the build.** r153 had already found this in
+  `keyhint-contrast-mutation.sh` and fixed that one instance; these two carried
+  it too, so what was left in `dist` after either was a build of its **last
+  mutated config**. Reproduced on the real tool, and not on the tidy path — the
+  run crashed (the bench's browser died mid-sweep), the `process.on('exit')`
+  handler restored source over a mutated build, and `git status` was clean
+  throughout:  before `dist cfa75442` → crash `dist f0b0a8ed` → rebuild
+  `dist cfa75442`. Since `verify-deploy.sh` compares **dist** against the wire,
+  that makes the next round read *"production is stale"* about a production that
+  is correct — and redeploying pushes whichever mutation happened to be last.
+  A gate that manufactures the failure it exists to detect, twice over.
+
+The generalisable form, which is the sixth time this loop has hit it: **an
+instrument that reports a plausible value it never measured is worse than one
+that reports nothing**, because nothing is at least visibly nothing. Both fixes
+are in `tools/`, so no game code and no bundle changed; production was already
+byte-identical and stayed that way, re-verified.
 
 One more thing r151 established about this box, because it changes how every gate
 here should be read: **it does not idle.** Load ~10-13 from other work at rest,
