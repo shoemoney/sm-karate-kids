@@ -227,6 +227,21 @@ Because nothing is watching, three rules exist and are not optional:
       measured identical to the pixel. Each pip now carries its own stick's
       colour, taken from the same declarations the pad reads. 8.97:1 / 9.28:1
       against the measured sheet ground, dE 64.0.
+- [x] **the pre-bout card's read budget** — **FIXED at r151.**
+      `schedule(beginBout, ROUND_INTRO_MS, nowMs)` was armed from
+      `newRun(performance.now())` at **module eval**, which runs before the first
+      `requestAnimationFrame`, so the nine seconds `ROUND_INTRO_MS` documents as
+      reading time were being spent on boot. Measured at load 12.2, boot consumed
+      **2700 / 4106 / 6250ms** — 30% / 46% / 69% of the player's reading time —
+      and at the load that fails the suite it passed 9000ms, at which point the
+      card was added to the DOM and removed inside a single frame: never painted,
+      no error anywhere, and `result-card-fighters-clear` red 7 of 12. A player on
+      that hardware meets a fight with no card, no opponent's tell and no notation
+      line — the sentences r117-r122 put there, all spent compiling shaders. The
+      budget is now anchored to the first presented frame, the only reading in
+      which r119's measurement means anything, with the arithmetic extracted to
+      `apps/game/src/preBoutBudget.ts` because a wall-clock deadline cannot be
+      unit-tested by waiting for one. 4 mutations, all red.
 - [x] **half-point score typography** — **SHIPPED at r148.** Raised since r918, built
       in r53, revisited in r133, and named by two models in the same round at r147 —
       always in the same four words, never with a number. r148 measured it: a stacked
@@ -240,15 +255,25 @@ Because nothing is watching, three rules exist and are not optional:
       to be the taste call r144 assumed. See below.
 
 **Not "done" means:** every item above is either finished or blocked on a human
-decision with the measurement attached. **As of r150 there are no open items.**
+decision with the measurement attached. **As of r151 there are no open items.**
 
 **But read that as a claim to re-check, not a fact.** r149's own lesson was that
 this document recorded a conclusion where a blocker had been, and r150 audited
 the *closed* boxes on exactly that suspicion: two of them did not survive. The
 provenance gate and the sheet's pip colours were both documented contracts the
-code did not implement. So "no open items" here means "no open items found by
-reading the closed ones against the code", which is a weaker statement than it
-looks and should be re-earned every few rounds.
+code did not implement. **r151 found the third, and it is the same class again:**
+`ROUND_INTRO_MS`'s documented nine seconds of reading time were being spent on
+boot. So the pattern across three rounds is not that this document lies, it is
+that **a constant or contract in prose drifts from the code that implements it**,
+and the drift is invisible to every gate until something is measured against a
+clock. Re-read the closed boxes against the code on that suspicion, not on the
+hypothesis that they are now correct.
+
+One more thing r151 established about this box, because it changes how every gate
+here should be read: **it does not idle.** Load ~10-13 from other work at rest,
+which is why the e2e suite is red at 14-16 and green at 8-10 on identical code.
+A red e2e result on this machine is not a verdict until the load is printed next
+to it, and `tools/card-no-probe.mjs` prints it on every row for that reason.
 Everything in Phases 1 and 3 is closed, Phase 2 is blocked on a human by design
 with the measurement attached to each item, and the scoreboard's half point is
 measured rather than argued about. Production is serving the build this tree

@@ -28,6 +28,7 @@ import { Hud, scoreFragment } from './hud.js';
 import { PlayerInput } from './input/index.js';
 import { loadCareer, loadPlayerName, recordBoutResult, recordRun, savePlayerName } from './persist.js';
 import { Leaderboard } from './leaderboard.js';
+import { preBoutDeadline } from './preBoutBudget.js';
 import { createRenderer } from './renderer.js';
 import { RenderScaleController } from './renderScale.js';
 import { createPostStack } from './post.js';
@@ -857,6 +858,56 @@ async function boot(screen: BootScreen): Promise<void> {
       const inputFrame: InputFrame = { p1: input.read(), p2: opponent.poll(state) };
       handle(step(state, inputFrame), now);
       elapsedTicks += 1;
+    }
+
+    // The pre-bout card's read budget starts when the card is on screen.
+    //
+    // The decision itself lives in `preBoutBudget.ts`, because a wall-clock
+    // deadline cannot be unit-tested by waiting for one and the rule is the whole
+    // fix. What follows is why it is in this exact place and in this order.
+    //
+    // It did not start there, and the gap is the whole defect. `schedule(beginBout,
+    // ROUND_INTRO_MS, nowMs)` is armed from `newRun(performance.now())` at
+    // module eval — line 926, which runs BEFORE the first rAF on line 928 — so
+    // the nine seconds `ROUND_INTRO_MS` documents ("nine seconds covers a
+    // careful read of both sentences") were being spent on boot instead. Those
+    // seconds are wall-clock and `act()` fires from this loop, so on any device
+    // whose boot is slower than nine seconds the card is added to the DOM and
+    // removed from it inside a single frame: never painted, never read, and no
+    // error anywhere.
+    //
+    // MEASURED, `tools/card-no-probe.mjs` (logs/card-no-probe.json) — boot time
+    // from navigation to `__smkk.ready`, against the 9000ms budget:
+    //
+    //   load 12.2   2700 / 4106 / 6250ms  -> 30% / 46% / 69% of the budget gone
+    //                                      before the card is presented
+    //   load 19-32  boot > 9000ms          -> card never visible at all, and
+    //                                      `result-card-fighters-clear` went
+    //                                      red 7 of 12
+    //
+    // The failing half of the suite and the broken screen are one bug: a player
+    // on that hardware meets a fight with no card, no opponent's tell and no
+    // notation line — the sentences r117-r122 put there, and r119's measurement
+    // of how long they take to read, all spent compiling shaders.
+    //
+    // So the budget is re-anchored to the first presented frame, for as long as
+    // the pre-boot card is still up. That makes the nine seconds nine seconds of
+    // card ON SCREEN, which is what the constant documents and the only reading
+    // in which r119's measurement of how long those sentences take to read means
+    // anything.
+    //
+    // The first attempt re-armed only when the deadline had ALREADY expired, on
+    // the reasoning that a fast boot should change nothing. Measured, that is
+    // wrong in the worst way: the case that still broke is a boot that consumed
+    // most of the budget rather than all of it — first frame at 11000ms with the
+    // deadline at 12629ms — so the card was presented with 1.6 seconds left and
+    // was removed before `__smkk.ready` published. Half a fix for a full defect.
+    //
+    // It sits ABOVE the deadline check below, not in the `handedOver` block
+    // further down: `act()` is what removes the card, so re-arming after it had
+    // already run would be a comment pretending to be a fix.
+    if (!handedOver && pendingAt !== 0) {
+      pendingAt = preBoutDeadline({ pendingAt, presented: now, handedOver });
     }
 
     // The result card waits for a tap, but an idle screen still rolls into

@@ -8428,3 +8428,143 @@ colour where it meant two.
 | new gates, each proved able to fail | **3** (8-case validator harness, 2 pip tests) |
 | findings chased to the floor and **not** claimed | **1** |
 | my own instruments that were wrong | **1** (inverted probe verdict) |
+
+---
+
+## Round 151 — the nine seconds were being spent on boot 🕰️
+
+r150 ended with one thing deliberately unclaimed: `result-card-fighters-clear`
+failed 3-in-6 on clean `main`, and r150 recorded that neither ordering had been
+shown to beat the other "under the conditions that produce the failure". That is
+the right place to stop and it leaves a named open item, which is what this round
+picked up.
+
+It was not r150's failure.
+
+### Reproduced, and it is a different failure
+
+Load generated deliberately (16 burners, load 19→32), same spec, phone-portrait:
+
+```
+waiting for locator('.result-reference') to be visible
+  24 × locator resolved to hidden <button type="button" class="result-reference">TECHNIQUES</button>
+  7 failed, 5 passed (14.2m)
+```
+
+Not a tick race. The button is in the DOM and never visible, because the element
+that owns it is `.result` and `hideResult()` is `classList.remove('show')`.
+
+### The chain, read off `main.ts`
+
+```
+line 926  if (tournament) newRun(performance.now())   <- the countdown starts here
+line 928  requestAnimationFrame(frame)                <- the first frame is AFTER it
+line 892  handedOver — first frame that reached the screen
+line 895  void screen.close().then(publishTestSurface)  <- ready waits on a fade too
+line 865  if (pendingAt !== 0 && now > pendingAt) act()  <- act() removes the card
+```
+
+`schedule(beginBout, ROUND_INTRO_MS, nowMs)` is armed at **module eval**. The
+nine seconds `ROUND_INTRO_MS` documents — "nine seconds covers a careful read of
+both sentences" — were being spent on boot.
+
+### Measured (`tools/card-no-probe.mjs`, no in-page instrumentation)
+
+Boot time from navigation to `__smkk.ready`, against the 9000ms budget:
+
+| load | boot | budget consumed |
+|---|---|---|
+| 12.2 | 2700 / 4106 / 6250ms | 30% / 46% / 69% |
+| 19–32 | > 9000ms | **100% — card never painted** |
+
+**The failing half of the suite and the broken screen are one bug.** A player on
+that hardware meets a fight with no card, no opponent's tell and no notation
+line — the sentences r117–r122 put there, and r119's measurement of how long they
+take to read, all spent compiling shaders. And it needs no error anywhere: the
+card is added to the DOM and removed from it inside a single frame.
+
+### The fix, and the half-fix that came first
+
+Re-anchor the budget to the first presented frame. The first attempt guarded with
+`pendingAt <= now` — re-arm only if the deadline had already expired — on the
+reasoning that a fast boot should change nothing. Measured, that is wrong in the
+worst way: the case that still broke is a boot that consumes **most** of the
+budget rather than all of it. First frame at 11000ms with the deadline at
+12629ms, so the card was presented with **1.6 seconds** left and removed before
+`ready` published. Half a fix for a full defect.
+
+The arithmetic is extracted to `apps/game/src/preBoutBudget.ts` because a
+wall-clock deadline cannot be unit-tested by waiting for one — the same reason
+`holdFloors.ts` exists.
+
+### Five instruments of mine were wrong, and one of them was the loudest
+
+**1. A probe that agreed with itself and nothing else.**
+`tools/card-window.mjs` polled with `setTimeout(tick, 10)` and reported
+`leftAtReadyMs: 0` on a run where the card was plainly up for nine seconds. 18s
+of observation produced **8 samples** — the timer had been starved to a 2.2s
+interval and both timestamps were written from the same one. Deleted rather than
+fixed: a measurement without a stated resolution is the thing rounds 90, 93 and
+95 shipped.
+
+**2. My own reproduction load, still running.** `trap ... EXIT` did not reap 16
+`yes` loops. Load sat at 24–29 for the next half hour, and every catastrophic
+number in that window — `navToReady_ms` 14.9s to 61.2s, "card never visible, 4 of
+4" — was *my own burners*. Standing rule 4, and the loudest failure of the
+round: an experiment that ruins its own control group. `load1` is now a column on
+every row of `card-no-probe.mjs` so this cannot recur silently. This machine does
+not idle; it runs ~10–13 from other work, which is why the suite is red at 14–16
+and green at 8–10 on identical code — and why r150's "load 14–16" and my "green
+at 8–10" bracket one threshold rather than disagreeing.
+
+**3. A stale server, silently serving an old bundle.** `reuseExistingServer` is
+on outside CI, and a preview server left over from my own earlier run held 4173
+serving `index-BUvzQSyD.js` while disk held `index-BShfkf3R.js`. Several gate
+results in between were against the wrong bytes — including a "fix does not
+work" that was a fix that was never served. r127's stale-frames trap in a new
+costume. Every gate read after this prints the bundle hash.
+
+**4. Three e2e harnesses, one mistake.** Delaying 3 rAF callbacks pushed `ready`
+to 33s, past the deadline the fix hands out, so it went red against the **fix**.
+Delaying 1 callback passed against the **old code**, because the first rAF is the
+boot screen's, not `frame()`. Delaying all of them also delayed the boot card's
+exit transition, so `screen.close()` never resolved, `__smkk.ready` never
+published, and the test timed out at 60s — a harness that delays the observer
+cannot tell "the game never got there" from "I never let it finish", and it fails
+in the costume of a game bug. The fourth attempt delays the game's **asset
+loads**, which is what `boot()` genuinely waits on (`await stage.ready`), and
+leaves timers, transitions and Playwright's own polling at full speed.
+
+**5. My own unit test arithmetic.** The case pinned `pendingAt = ROUND_INTRO_MS +
+1629 = 10629` against `boot = 11000` and asserted the deadline had not expired.
+It had. The real measured pair was 12629 against 11000.
+
+### The gates, in the order they must be read
+
+| | |
+|---|---|
+| check= | **190 unit** (was 184), content OK, assets OK, exit 0 |
+| mutations | **4**, all confirmed red on `preBoutBudget` |
+| e2e= | **25 passed** phone-portrait (4.8m), **19 passed / 6 skipped** desktop (3.7m), exit 0 |
+| production | gate correctly reported **stale**, then deployed |
+
+The mutation worth having is #4 — restoring the `pendingAt <= presented` guard
+from the first, broken version of the fix. It is the one that says this test is
+not just asserting the shape of the answer.
+
+### What this round was
+
+The card's read budget was anchored to module evaluation instead of to the moment
+the card is on screen, so the nine seconds r119 spent four rounds tuning were
+being spent on boot — measured at 30–69% of the budget at ordinary load, and
+**100%** at the load that fails the suite. A documented constant meaning something
+other than what its own comment says, which is the same class as r150's two, and
+the third one this document has produced in two rounds.
+
+| | |
+|---|---|
+| open item closed | **1** — r150's unclaimed flake, and it was not that flake |
+| defect class | budget anchored before the thing it budgets |
+| new gates, each proved able to fail | **2** (6 unit assertions + 4 mutations, 1 browser test) |
+| my own instruments that were wrong | **5** |
+| rounds where a red gate was the machine | **4** of 5 gate reads, before one settled |

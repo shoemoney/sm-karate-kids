@@ -1,0 +1,31 @@
+{
+  "ladder": [
+    1
+  ],
+  "rows": [
+    {
+      "cpu": 1,
+      "run": 1,
+      "load1": "10.89",
+      "navToReady_ms": 4229,
+      "readyPageClock": 4160.10000000149,
+      "cardVisible": true,
+      "readyToVisible_ms": 80,
+      "cardSeenPageClock": 4237.89999999851,
+      "cardHiddenNow": false,
+      "wall_ms": 4315
+    },
+    {
+      "cpu": 1,
+      "run": 2,
+      "load1": "10.18",
+      "navToReady_ms": 2315,
+      "readyPageClock": 2258.5,
+      "cardVisible": true,
+      "readyToVisible_ms": 53,
+      "cardSeenPageClock": 2302.4000000059605,
+      "cardHiddenNow": false,
+      "wall_ms": 2370
+    }
+  ]
+}
