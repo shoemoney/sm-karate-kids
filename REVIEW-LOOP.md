@@ -8970,3 +8970,45 @@ this round's edit, and would have silently stopped being so the moment the CSS
 bundle changed. `deploy.sh --yes` pushed 26 files and `verify-deploy.sh` returned
 2 assets sha256-matched, including the new `assets/index-B-_VGGXn.css`. The
 plan's standing claim is true again rather than merely still written down.
+
+### The harness left the tree lying about itself
+
+Wrote "Production is serving this build" above, and then ran the deploy gate at
+the end of the round the way I should have run it before writing it.
+
+    FAIL: served index.html is NOT the local build's index.html
+      served names: assets/index-2I1MoBw8.js assets/index-B-_VGGXn.css
+      local  names: assets/index-BQixKVFN.js assets/index-DHZ3mHw0.css
+
+Production was fine. **My own mutation harness was the defect.** It restores
+`styles.css` on the way out and never rebuilds, so the last assertion leaves
+`apps/game/dist` describing a tree that no longer exists — it was carrying
+`key-hint-ink:#4a4038`, mutation 4's deliberately dim value, while the source
+read `#b8a894`.
+
+The trap is nastier than a dirty tree. `tools/verify-deploy.sh` compares **dist**
+against the wire, so a harness that leaves a mutated dist makes the next round
+read "production is stale" about a production that is correct — and the obvious
+response, redeploying, pushes a build assembled from whichever mutation happened
+to be last. A gate that manufactures the failure it exists to detect.
+
+Fixed: `rebuild()` after `restore()`, and the harness now ends by asserting that
+`dist` carries the fixed build. Re-ran end to end — 5 assertions green, `dist`
+carries `key-hint-ink:#b8a894`, and `verify-deploy.sh` returns **exit 0** against
+sha256s identical to what `deploy.sh` reported at push time.
+
+**And the reason it went unnoticed for a minute is my own shell habit, twice in
+one round.** Both times I read a gate's status out of a pipe:
+
+    node tools/keyhint-contrast.mjs | tail -40; echo "EXIT=${PIPESTATUS[0]}"
+    bash tools/verify-deploy.sh | tail -8; echo "VERIFY_EXIT=$?"
+
+`$?` after a pipeline is the exit status of **`tail`**, which is always 0. In zsh
+`${PIPESTATUS[0]}` is bash syntax and expands to nothing, so the first printed
+the *previous* command's status. Both gates were being reported green by a
+process that could not fail. Every gate result in this round that I actually
+trusted was read with the output redirected to a file and `$?` taken on its own
+line — and that is now the only way I read one.
+
+That is the r141 shape, one level down: the evidence for a deploy was a status
+code, and the status code belonged to something else.

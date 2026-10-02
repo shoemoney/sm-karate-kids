@@ -25,6 +25,16 @@ cp "$CSS" "$BACKUP"
 restore() { [ -f "$BACKUP" ] && { cp "$BACKUP" "$CSS"; rm -f "$BACKUP"; }; return 0; }
 trap restore EXIT INT TERM
 
+# Restoring the source is not enough. The last assertion leaves `pnpm build`
+# output on disk from a MUTATED stylesheet, so apps/game/dist ends the run
+# describing a tree that no longer exists — and the next round reads dist as the
+# build, or hands it to tools/verify-deploy.sh, which then reports production as
+# stale when the truth is that dist is wrong. Measured: after a clean run of this
+# harness, dist carried `key-hint-ink:#4a4038` (mutation 4) while the source read
+# `#b8a894`, and verify-deploy.sh went red against a production that was in fact
+# correct. An instrument must leave the tree in the state it claims.
+rebuild() { pnpm build >/dev/null 2>&1 || { echo "FAIL  rebuild after restore"; fail=$((fail+1)); }; }
+
 pass=0 fail=0
 
 # substitute <needle> <replacement> — refuses to continue if the anchor is gone.
@@ -95,7 +105,17 @@ substitute '--key-hint-ink: #b8a894;' '--key-hint-ink: #4a4038;' \
   && expect "hint moves but fails AA in normal mode" 1 "CONTRAST"
 
 restore
+rebuild
 echo
 echo "=== $pass passed, $fail failed ==="
-[ "$fail" -eq 0 ] || exit 1
-echo "probe is falsifiable in both directions"
+if [ "$fail" -ne 0 ]; then exit 1; fi
+# The harness's own last word: does the build on disk match the source it claims
+# to describe? Cheap, and it is the assertion that would have caught the trap
+# above rather than leaving it for the next round to trip over.
+if grep -q -- "--key-hint-ink:#b8a894" apps/game/dist/assets/*.css 2>/dev/null; then
+  echo "probe is falsifiable in both directions"
+  echo "dist restored to the fixed build"
+else
+  echo "FAIL  dist does not carry the fixed build after restore"
+  exit 1
+fi
