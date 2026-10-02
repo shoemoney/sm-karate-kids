@@ -64,6 +64,15 @@
     the backend label is the only status text in the HUD and at the old value
     it measured 3.06:1 on the scoreline panel, under the 4.5:1 AA floor. */
 
+  /* The desktop keyboard legend. A token because the colour was inlined at the
+     one call site, which broke rule 3 and — the part that actually mattered —
+     pinned this one label out of high-contrast mode while every other faint
+     label re-pointed with it. Measured off pixels by tools/keyhint-contrast.mjs:
+     normal ink rgb(184,168,148) on a composited pad of rgb(16,11,8) = 8.45:1.
+     High-contrast re-points to --text-faint (rgb(220,220,220)), taking the same
+     glyph from 9.07:1 to 15.3:1 against the mode's black pad. */
+  --key-hint-ink: #b8a894;
+
   /* ---- Accents ------------------------------------------------------------ */
 
   --gold: #e8b95c; /* the lamp: clock, primary buttons, active technique stick */
@@ -1144,7 +1153,10 @@ body.show-perf #backend {
        black are the first thing to disappear on a dim monitor. Up a step, and
        a full step brighter than the wordmark it sits under. */
     font-size: var(--text-xs);
-    color: #b8a894; /* measured lift from #8e8071; one step under the wordmark */
+    /* Was #b8a894 inline, which put a colour literal outside :root (rule 3) and
+       left this label behind when high-contrast re-pointed every other faint
+       one. Same value, so the measured normal-mode contrast is unchanged. */
+    color: var(--key-hint-ink);
   }
 }
 
@@ -2265,6 +2277,11 @@ body.high-contrast {
   --text-muted: #f0f0f0;
   --text-faint: #dcdcdc;
   --text-ghost: #c8c8c8;
+
+  /* Joins the faint family rather than staying at its normal-mode value. The
+     whole point of this block is that every faint label lifts together; this one
+     did not, because its colour was a literal instead of a token. */
+  --key-hint-ink: var(--text-faint);
 
   --gold: #ffd400;
   --gold-bright: #fff3b0;
