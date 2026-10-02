@@ -8176,6 +8176,51 @@ r148's build went up, production served `index-D5kxXh1i.js` against a local
 build of `index-Ccf9hihb.js` — 200 OK the whole time, which is the entire r141
 lesson arriving again in a different costume.
 
+### Two more things, both found by using the tool twice
+
+A deploy script that has been run once has not been tested. The second run of
+this round, minutes after the first, refused to deploy:
+
+    FAIL: the build is older than .../packages/content/dist/tsconfig.tsbuildinfo
+
+The build was **two minutes old and byte-for-byte correct**. The guard is right
+in principle — a `dist` older than the tree it claims to represent is a deploy
+of history, which is the r141 shape arriving from the build side — and it was
+wrong in practice, because `pnpm check` runs `tsc -b`, and `tsc -b` writes
+`packages/*/dist/**` **after** the vite build. The ordinary order of operations
+is therefore:
+
+    pnpm build  ->  pnpm check  ->  tools/deploy.sh   =   refuse
+
+My first fix pruned `*.tsbuildinfo`. It looked right, and it was wrong: the
+compiled `dist/tests/replay.test.js` tripped the same guard on the very next
+run. The prune is now on the **directory**, because the rule is "build output is
+not evidence the build is old", not an enumeration of output extensions that will
+keep growing.
+
+That is worth stating as the general shape: **a guard that is always red is
+worse than no guard.** It teaches the next round to reach for the override, and
+an override is a gate disarmed by attrition — it converts a working check into a
+habit. Which is exactly why the harness now pins *both* halves:
+
+| case | asserts |
+|---|---|
+| 7b | touched `packages/*/dist/**` output must **not** refuse |
+| 7c | a touched real source file **must** refuse, naming the file |
+
+Case 7c is the one that earns the commit. Without it, "make 7b pass" has two
+solutions — fix the prune, or delete the guard — and the harness cannot tell
+which one landed.
+
+And the thing that actually proves the tool, on the real target rather than a
+fixture: **deploy, then immediately re-run.** It reports
+
+    already    production already matches this build byte for byte
+
+which is idempotency *detected from the wire* rather than assumed because the
+script exited 0. A tool that reports success without checking is the r141
+failure wearing a different hat, so the second run reads the target too.
+
 ### The gates, read before the commit, in that order
 
 | | |
@@ -8198,7 +8243,8 @@ is — one identity, refused — rather than the conclusion it invited.
 | open boxes at the start | **one**, invisible because the plan said zero |
 | open boxes now | zero, and the deploy is a command rather than a shrug |
 | probes that overturned a recorded conclusion | **1** (`shoemoney@` where the log said no credential) |
-| defects the harness found in itself | **1**, the rule-4 shape, in the tool enforcing rule 4 |
-| check= | **182 unit**, content OK, assets OK |
-| e2e= | **42 passed, 6 skipped**, exit 0 |
-| production | **byte-identical, verified over the wire** |
+| defects the harness found | **2** — the rule-4 false-regression shape, in the tool enforcing rule 4; and a staleness guard red on its own build order |
+| checks | **182 unit**, content OK, assets OK, exit 0 |
+| e2e | **42 passed, 6 skipped**, exit 0 (6.5m) |
+| mutations | **14 assertions**, all confirmed red |
+| production | **byte-identical, verified over the wire**, twice |
