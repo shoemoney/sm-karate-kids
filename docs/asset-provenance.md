@@ -15,6 +15,15 @@ what license it's under, and who approved it for runtime use. This document is t
    manifest is also consulted, so a root entry still covers a file a nearer manifest simply
    doesn't mention.
 
+   > **Enforced since r150.** This was documented twice and implemented as neither: the validator
+   > took the first manifest that happened to carry the key, over an unsorted `readdirSync`. Since
+   > there is no manifest at the public root, `brand/PROVENANCE.json` covers `fighters/` as a
+   > *fallback* rather than an ancestor — and `brand` sorts before `fighters`, so a nearer
+   > `fighters/PROVENANCE.json` marking an asset `approved: false` was silently ignored and
+   > `brand`'s `approved: true` won. Nearest-ancestor is now resolved explicitly, deepest first,
+   > with non-ancestors consulted afterwards in a stable order so the verdict is a property of the
+   > tree rather than of the filesystem. `tools/validate-assets-mutation.sh` proves it can fail.
+
    Two exist today: `apps/game/public/brand/PROVENANCE.json` (the root manifest — it also
    covers `fighters/`) and `apps/game/public/generated/PROVENANCE.json` (the generated dojo and
    juice art). **Adding an asset directory means adding one `PROVENANCE.json` next to it —

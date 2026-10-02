@@ -1,7 +1,7 @@
 # SM Karate Kids — completion plan
 
 Written at round 134, after a hundred and thirty-four rounds of review, and
-updated at r149. This is the plan for *finishing*, as distinct from the loop that
+updated at r150. This is the plan for *finishing*, as distinct from the loop that
 has been improving.
 
 ## Where the project actually stands
@@ -10,9 +10,9 @@ has been improving.
 |---|---|
 | Playable | yes — tournament + dojo, two sticks, point karate |
 | Deployed | `https://arcade.shoemoney.ai/smkk/`, verified playing a real bout |
-| Tests | 183 unit, 42 e2e, 6 skipped, green locally |
-| Review loop | 149 rounds, 20 review frames, mutation-tested fences |
-| Commits | 248 |
+| Tests | 184 unit, 42 e2e, 6 skipped, green locally |
+| Review loop | 150 rounds, 20 review frames, mutation-tested fences |
+| Commits | 278 |
 | Production | **byte-identical to the local build**, `tools/verify-deploy.sh` green |
 
 The game is not a prototype. What remains is a short list of specific, named
@@ -211,6 +211,22 @@ Because nothing is watching, three rules exist and are not optional:
       byte-identical over the wire. The `root`-only refusal that stalled r148
       was one identity short of a working deploy.
 - [x] every phase gated, logged, committed, deployed
+- [x] **provenance precedence** — **FIXED at r150.** `docs/asset-provenance.md`
+      states twice that the manifest governing an asset is the NEAREST ANCESTOR
+      and that a directory's own record wins. The code resolved the entry by
+      first-manifest-with-the-key over an unsorted `readdirSync`. Measured: a
+      nearer `fighters/PROVENANCE.json` saying `approved: false` was never read
+      because `brand/` sorts first — and `brand` is not an ancestor of
+      `fighters`. The gate that decides what may ship had a verdict a directory
+      name could change. Fixed, and proved able to fail in
+      `tools/validate-assets-mutation.sh` (8 cases, 3 mutations red).
+- [x] **the sheet's pips match the sticks** — **FIXED at r150.** The pad teaches
+      two sticks in two colours (`--cool` stance, `--gold` technique) and the
+      techniques sheet drew both its pips in one, so a row read `· + ▶` with both
+      circles cyan while the player held one cyan and one gold stick. Four pairs
+      measured identical to the pixel. Each pip now carries its own stick's
+      colour, taken from the same declarations the pad reads. 8.97:1 / 9.28:1
+      against the measured sheet ground, dE 64.0.
 - [x] **half-point score typography** — **SHIPPED at r148.** Raised since r918, built
       in r53, revisited in r133, and named by two models in the same round at r147 —
       always in the same four words, never with a number. r148 measured it: a stacked
@@ -224,7 +240,15 @@ Because nothing is watching, three rules exist and are not optional:
       to be the taste call r144 assumed. See below.
 
 **Not "done" means:** every item above is either finished or blocked on a human
-decision with the measurement attached. **As of r149 there are no open items.**
+decision with the measurement attached. **As of r150 there are no open items.**
+
+**But read that as a claim to re-check, not a fact.** r149's own lesson was that
+this document recorded a conclusion where a blocker had been, and r150 audited
+the *closed* boxes on exactly that suspicion: two of them did not survive. The
+provenance gate and the sheet's pip colours were both documented contracts the
+code did not implement. So "no open items" here means "no open items found by
+reading the closed ones against the code", which is a weaker statement than it
+looks and should be re-earned every few rounds.
 Everything in Phases 1 and 3 is closed, Phase 2 is blocked on a human by design
 with the measurement attached to each item, and the scoreboard's half point is
 measured rather than argued about. Production is serving the build this tree
