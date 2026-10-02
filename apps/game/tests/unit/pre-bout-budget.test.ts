@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { preBoutDeadline, ROUND_INTRO_MS } from '../../src/preBoutBudget.js';
+import { preBoutDeadline, heldDeadline, ROUND_INTRO_MS } from '../../src/preBoutBudget.js';
 
 /**
  * The pre-bout card's read budget is anchored to the first presented frame.
@@ -82,5 +82,79 @@ describe('preBoutDeadline', () => {
     // If `ROUND_INTRO_MS` ever moves, this moves with it and says so. The
     // harness, the comment in main.ts and this file all quote 9000.
     expect(ROUND_INTRO_MS).toBe(9_000);
+  });
+});
+
+/**
+ * A sheet opened over the card holds its countdown.
+ *
+ * `docs/COMPLETION-PLAN.md` item 1.2 has been closed since r136 with the accept
+ * line "pressing it opens the techniques sheet and returns to the card". The
+ * first half was true and measured. The second half was never true: the 9s
+ * deadline fired with no reference to sheet state, `beginBout()` ran, and
+ * `.result { display: none }` took the card away underneath the sheet.
+ *
+ * MEASURED, `tools/sheet-pause-probe.mjs` (load 8.5–10.2, 390x844), by walking
+ * the journey rather than reading the code:
+ *
+ *   open the sheet, close it at 3.0s   -> card SHOWN,  clock at 0
+ *   open the sheet, close it at 11.0s  -> card GONE,  clock running at 259
+ *   never open it,     wait 11.0s     -> card GONE,  clock running at 285
+ *
+ * The first row is the positive control, and it is what makes the other two
+ * mean something: the card survives the sheet, so the sheet is not what removes
+ * it. The deadline is, and the deadline could not see the sheet.
+ *
+ * The arithmetic lives in `src/preBoutBudget.ts` for the same reason
+ * `preBoutDeadline` does — a wall-clock deadline cannot be unit-tested by
+ * waiting for one, so the clock is an argument. The browser-level claim is
+ * `tools/sheet-pause-probe.mjs`, which exits non-zero while the claim is false.
+ */
+describe('heldDeadline', () => {
+  it('pushes the deadline out by exactly the time the sheet was open', () => {
+    // Measured pair from the failing probe: tapped at t=0 with the deadline at
+    // +9000, sheet closed 11s later. Without the hold the card was gone.
+    const deadline = heldDeadline(9_000, 11_000);
+    expect(deadline).toBe(20_000);
+    // The property that matters: the player is left with the budget they had at
+    // the moment they tapped, not the budget minus the time they read.
+    expect(deadline - 11_000).toBe(9_000);
+  });
+
+  it('gives back exactly the remaining budget, not a fresh one', () => {
+    // The tap happened 2.5s into the card's life, so 6.5s were left. Reading
+    // for 4s must leave 6.5s, not 9s — otherwise the hold becomes a way to
+    // buy extra reading time by opening the sheet twice.
+    const tappedAt = 2_500;
+    const armedAt = 0;
+    const heldFor = 4_000;
+    const remainingAtTap = armedAt + ROUND_INTRO_MS - tappedAt;
+    expect(remainingAtTap).toBe(6_500);
+    expect(heldDeadline(armedAt + ROUND_INTRO_MS, heldFor) - (tappedAt + heldFor)).toBe(remainingAtTap);
+  });
+
+  it('is a no-op when nothing is scheduled', () => {
+    // `pendingAt === 0` means "no deadline armed". Adding a hold to it would
+    // invent a deadline out of nothing, and `act()` would then fire against an
+    // action that is not there. This is the HUD's TECHNIQUES sheet during a live
+    // bout, which has no pre-bout countdown at all.
+    expect(heldDeadline(0, 11_000)).toBe(0);
+  });
+
+  it('leaves the deadline alone when no sheet is open', () => {
+    // The ordinary path — nothing has been tapped, `heldMs` is 0 — must be
+    // bit-identical, or every untouched round inherits a new arithmetic.
+    for (const pendingAt of [1, 4_242, 9_000, 86_400_000]) {
+      expect(heldDeadline(pendingAt, 0)).toBe(pendingAt);
+    }
+  });
+
+  it('never shrinks a deadline, however long the hold', () => {
+    // A negative hold is not reachable from the render loop (it is
+    // `performance.now()` at close minus at open), but the function must not be
+    // the thing that silently eats a budget if that ever stops being true.
+    for (const heldMs of [0, 1, 4_000, 60_000, 10 ** 9]) {
+      expect(heldDeadline(9_000, heldMs)).toBeGreaterThanOrEqual(9_000);
+    }
   });
 });

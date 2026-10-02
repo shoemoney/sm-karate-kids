@@ -58,3 +58,42 @@ export function preBoutDeadline(args: {
   if (pendingAt === 0) return pendingAt;
   return presented + ROUND_INTRO_MS;
 }
+
+/**
+ * A deadline, plus the wall-clock time a sheet has spent open on top of it.
+ *
+ * WHY. `docs/COMPLETION-PLAN.md` item 1.2 closed with the accept line
+ * "pressing it opens the techniques sheet and returns to the card", and the
+ * second half of that was never true. The card's own TECHNIQUES button opens a
+ * scrollable list of every move in the game, and the 9-second pre-bout deadline
+ * ran straight through underneath it: `act()` fires on `now > pendingAt` with no
+ * reference to sheet state anywhere, so `beginBout()` ran, which is
+ * `held = false` + `hud.hideResult()`, and `.result { display: none }`.
+ *
+ * MEASURED (`tools/sheet-pause-probe.mjs`, `logs/sheet-pause-probe.json`), by
+ * walking the journey rather than reading the code:
+ *
+ *   arm      tap TECHNIQUES   wait    card after close   bout clock
+ *   early       yes           3.0s         SHOWN            0        (inside budget)
+ *   tap         yes          11.0s         GONE           running    (past budget)
+ *   control     no           11.0s         GONE           running    (past budget)
+ *
+ * The `early` arm is what makes this a measurement rather than a constant: the
+ * card SURVIVES the sheet when the budget has not expired and does not when it
+ * has. So the sheet is not what takes the card — the deadline is, and it does
+ * not know the sheet is there. A player who opens the reference to learn the
+ * moves is dropped into a live fight mid-read, with the sheet still open over
+ * it, and closing it lands them in a bout they never saw start.
+ *
+ * WHY IT IS HERE. The same reason as `preBoutDeadline`: this is wall-clock
+ * arithmetic, and a wall-clock deadline cannot be unit-tested by waiting for
+ * one. `main.ts` accumulates the held time and calls this; the tests call it
+ * directly with the clock as an argument.
+ */
+export function heldDeadline(pendingAt: number, heldMs: number): number {
+  // No pending action means no deadline to push out. `pendingAt === 0` is also
+  // what keeps this from touching the rematch countdown's own timer
+  // (`REMATCH_AFTER_MS`), which is armed through the same field.
+  if (pendingAt === 0) return pendingAt;
+  return pendingAt + heldMs;
+}

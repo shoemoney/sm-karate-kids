@@ -28,7 +28,7 @@ import { Hud, scoreFragment } from './hud.js';
 import { PlayerInput } from './input/index.js';
 import { loadCareer, loadPlayerName, recordBoutResult, recordRun, savePlayerName } from './persist.js';
 import { Leaderboard } from './leaderboard.js';
-import { preBoutDeadline } from './preBoutBudget.js';
+import { preBoutDeadline, heldDeadline } from './preBoutBudget.js';
 import { createRenderer } from './renderer.js';
 import { RenderScaleController } from './renderScale.js';
 import { createPostStack } from './post.js';
@@ -108,22 +108,85 @@ function updateCareerSummary(): void {
   el.textContent = `Career — ${record.boutsPlayed} played · ${record.boutsWon} won · ${best}`;
 }
 
-/** Slides a sheet open/closed, skipping the transition wait when motion is reduced. */
-function toggleSheet(sheetEl: HTMLElement, open: boolean, reducedMotion: boolean): void {
+/**
+ * Page clock at which a sheet opened over a pending card, or 0. See
+ * `holdForSheet`.
+ *
+ * Module scope, not closure scope, because the card's button is wired in one
+ * place (`bindSettingsUI`, the shared sheet close) and its deadline lives in
+ * another (`startMatch`'s render loop). A hold the closer cannot see is a hold
+ * that is never paid back, which is the defect being fixed.
+ */
+let sheetOpenSince = 0;
+
+/**
+ * A wall-clock deadline the render loop must push out, set by `startMatch`.
+ *
+ * A function rather than a bare number so `holdForSheet` can reach the one
+ * deadline that exists without knowing anything about the tournament, the
+ * rematch timer, or what is currently scheduled. It returns the current
+ * deadline so the caller can write the held value back through the same seam.
+ */
+let pendingDeadline: { get: () => number; set: (ms: number) => void } | null = null;
+
+/**
+ * Called when a sheet over the card opens or closes.
+ *
+ * Opening only records the time. Closing pays it back, by pushing the deadline
+ * out by exactly the time the sheet was up: the player gets the budget they had
+ * left when they tapped, and the sheet reads for as long as they read it.
+ *
+ * Idempotent in both directions. A close with nothing held is a no-op, which is
+ * what makes it safe to wire the HUD's own TECHNIQUES sheet — reachable during a
+ * live bout, when there is no pre-bout deadline at all — to the same handler.
+ */
+function holdForSheet(open: boolean): void {
+  if (open) {
+    if (sheetOpenSince === 0) sheetOpenSince = performance.now();
+    return;
+  }
+  if (sheetOpenSince === 0) return;
+  if (pendingDeadline !== null) {
+    pendingDeadline.set(heldDeadline(pendingDeadline.get(), performance.now() - sheetOpenSince));
+  }
+  sheetOpenSince = 0;
+}
+
+/**
+ * Slides a sheet open/closed, skipping the transition wait when motion is reduced.
+ *
+ * `onOpenChange` fires with the new open state so a caller holding a wall-clock
+ * deadline can stop it running while the sheet is up. It exists because the
+ * pre-bout card's own TECHNIQUES button opens a full list of moves over the top
+ * of that card, and the 9s budget used to run straight through it — measured in
+ * `tools/sheet-pause-probe.mjs`. It is called for BOTH directions, because the
+ * close is the half that matters: that is where the held time is folded back in.
+ */
+function toggleSheet(
+  sheetEl: HTMLElement,
+  open: boolean,
+  reducedMotion: boolean,
+  onOpenChange?: (open: boolean) => void,
+): void {
   if (open) {
     sheetEl.hidden = false;
     requestAnimationFrame(() => sheetEl.classList.add('open'));
+    onOpenChange?.(true);
     return;
   }
+  const close = (): void => {
+    sheetEl.hidden = true;
+    onOpenChange?.(false);
+  };
   sheetEl.classList.remove('open');
   if (reducedMotion) {
-    sheetEl.hidden = true;
+    close();
     return;
   }
   const onEnd = (event: TransitionEvent): void => {
     if (event.propertyName !== 'transform') return;
-    sheetEl.hidden = true;
     sheetEl.removeEventListener('transitionend', onEnd);
+    close();
   };
   sheetEl.addEventListener('transitionend', onEnd);
 }
@@ -160,7 +223,13 @@ function bindSettingsUI(settings: SettingsStore, hud: Hud, audio: Audio): void {
     toggleSheet(techSheet, true, settings.get().reducedMotion);
   });
   byId<HTMLButtonElement>('tech-ref-close').addEventListener('click', () => {
-    toggleSheet(techSheet, false, settings.get().reducedMotion);
+    // No `holdForSheet` here, and that is correct: this is the HUD's sheet,
+    // reachable during a live bout. The card's own button is the one that
+    // opens a hold, and it is closed from here too while the card is up — so
+    // the close has to pay back whatever the open took. `holdForSheet` is
+    // idempotent and a no-op when nothing is held, which is what makes it safe
+    // to share this one handler.
+    toggleSheet(techSheet, false, settings.get().reducedMotion, holdForSheet);
   });
 
   settings.subscribe((value) => {
@@ -549,6 +618,27 @@ async function boot(screen: BootScreen): Promise<void> {
     pending = action;
     pendingAt = nowMs + delayMs;
   };
+
+  /**
+   * Page clock at which a sheet opened over a pending card, or 0.
+   *
+   * Deliberately a page clock and not a frame counter: the thing being stopped
+   * is a wall-clock deadline, so counting frames to stop it reintroduces exactly
+   * the unit error `renderScale.ts` documents — on the hardware that needs the
+   * fix, a frame is long enough that a 30-frame counter would itself overrun
+   * the budget it is protecting.
+   */
+  // Publish the deadline `holdForSheet` holds. Set on every `startMatch` so a
+  // second run never inherits the first one's schedule, and never cleared —
+  // `schedule()` is the only thing that changes what is pending, and the hold is
+  // a no-op while nothing is scheduled (`heldDeadline` returns 0 for 0).
+  pendingDeadline = {
+    get: () => pendingAt,
+    set: (ms: number) => {
+      pendingAt = ms;
+    },
+  };
+
   const act = (): void => {
     const action = pending;
     pending = null;
@@ -723,8 +813,14 @@ async function boot(screen: BootScreen): Promise<void> {
         // matched neither. It now says what it opens, in the same word the
         // player sees everywhere else.
         label: 'TECHNIQUES',
+        // Opens over THIS card, so it holds the card's countdown for as long as
+        // it is open. Without that the 9s budget ran underneath a sheet listing
+        // every move in the game and `beginBout()` hid the card mid-read —
+        // measured, `tools/sheet-pause-probe.mjs`. The HUD's own TECHNIQUES
+        // button does not pass `holdForSheet`, and must not: it is reachable
+        // during a live bout, where there is no pre-bout countdown to hold.
         onOpen: () =>
-          toggleSheet(byId<HTMLElement>('tech-ref'), true, settings.get().reducedMotion),
+          toggleSheet(byId<HTMLElement>('tech-ref'), true, settings.get().reducedMotion, holdForSheet),
       },
       rematch: () => act(),
     });
@@ -909,6 +1005,28 @@ async function boot(screen: BootScreen): Promise<void> {
     if (!handedOver && pendingAt !== 0) {
       pendingAt = preBoutDeadline({ pendingAt, presented: now, handedOver });
     }
+
+    // A sheet opened from the pre-bout card stops its countdown.
+    //
+    // The card's TECHNIQUES button opens a scrollable list of every move in the
+    // game, ON TOP of the card, and the 9s budget ran underneath it. Measured
+    // (`tools/sheet-pause-probe.mjs`, load 8.5-10.2, 390x844):
+    //
+    //   open the sheet, close it at 3s   -> card is still there, clock at 0
+    //   open the sheet, close it at 11s  -> card GONE, clock running at 259
+    //   never open it, wait 11s         -> card GONE, clock running at 285
+    //
+    // So the card survives the sheet and dies to the deadline, and the deadline
+    // could not see the sheet. A player learning the moves was dropped into a
+    // live fight mid-read, with the sheet still open over it, and closing it
+    // landed them in a bout they never saw start — while item 1.2 has been
+    // closed since r136 with the accept line "returns to the card".
+    //
+    // `sheetHeldMs` is folded into the deadline while the sheet is up and paid
+    // back on close, so the remaining budget after closing is what it was at
+    // the moment of the tap. Zero hold when nothing is open, which is why the
+    // ordinary path is untouched.
+    if (sheetOpenSince !== 0) pendingAt = heldDeadline(pendingAt, now - sheetOpenSince);
 
     // The result card waits for a tap, but an idle screen still rolls into
     // the next bout rather than sitting on it forever.

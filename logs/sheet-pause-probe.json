@@ -1,0 +1,218 @@
+{
+  "waitMs": 11000,
+  "runs": 1,
+  "verdict": "CLAIM-TRUE",
+  "why": "card still shown after close on all 1 tap runs",
+  "rows": [
+    {
+      "arm": "tap",
+      "run": 1,
+      "load1": "14.15",
+      "t0_clock": 4646.399999991059,
+      "t0": {
+        "cardInDom": true,
+        "cardHasShow": true,
+        "cardDisplay": "flex",
+        "cardBox": [
+          390,
+          531
+        ],
+        "sheetHidden": true,
+        "sheetOpen": false,
+        "tick": 0,
+        "phase": "ready",
+        "scores": [
+          0,
+          0
+        ],
+        "pageClock": 4649.29999999702
+      },
+      "tap_ms": 2460,
+      "sheetOpenWaited": true,
+      "afterTap": {
+        "cardInDom": true,
+        "cardHasShow": true,
+        "cardDisplay": "flex",
+        "cardBox": [
+          390,
+          759
+        ],
+        "sheetHidden": false,
+        "sheetOpen": true,
+        "tick": 0,
+        "phase": "ready",
+        "scores": [
+          0,
+          0
+        ],
+        "pageClock": 7159.5999999940395
+      },
+      "afterBudget": {
+        "cardInDom": true,
+        "cardHasShow": true,
+        "cardDisplay": "flex",
+        "cardBox": [
+          390,
+          759
+        ],
+        "sheetHidden": false,
+        "sheetOpen": true,
+        "tick": 0,
+        "phase": "ready",
+        "scores": [
+          0,
+          0
+        ],
+        "pageClock": 18225
+      },
+      "afterBudget_wallMs": 1790968650501,
+      "waited_ms": 11000,
+      "closeVisible": true,
+      "afterClose": {
+        "cardInDom": true,
+        "cardHasShow": true,
+        "cardDisplay": "flex",
+        "cardBox": [
+          390,
+          531
+        ],
+        "sheetHidden": true,
+        "sheetOpen": false,
+        "tick": 0,
+        "phase": "ready",
+        "scores": [
+          0,
+          0
+        ],
+        "pageClock": 19407.09999999404
+      }
+    },
+    {
+      "arm": "control",
+      "run": 1,
+      "load1": "15.56",
+      "t0_clock": 3508.6000000089407,
+      "t0": {
+        "cardInDom": true,
+        "cardHasShow": true,
+        "cardDisplay": "flex",
+        "cardBox": [
+          390,
+          531
+        ],
+        "sheetHidden": true,
+        "sheetOpen": false,
+        "tick": 0,
+        "phase": "ready",
+        "scores": [
+          0,
+          0
+        ],
+        "pageClock": 3569.1000000089407
+      },
+      "afterBudget": {
+        "cardInDom": true,
+        "cardHasShow": false,
+        "cardDisplay": "none",
+        "cardBox": [
+          0,
+          0
+        ],
+        "sheetHidden": true,
+        "sheetOpen": false,
+        "tick": 255,
+        "phase": "fight",
+        "scores": [
+          0,
+          0
+        ],
+        "pageClock": 14593.10000000894
+      },
+      "afterBudget_wallMs": 1790968668145,
+      "waited_ms": 11000
+    },
+    {
+      "arm": "early",
+      "run": 1,
+      "load1": "15.47",
+      "t0_clock": 2648.2999999970198,
+      "t0": {
+        "cardInDom": true,
+        "cardHasShow": true,
+        "cardDisplay": "flex",
+        "cardBox": [
+          411,
+          559
+        ],
+        "sheetHidden": true,
+        "sheetOpen": false,
+        "tick": 0,
+        "phase": "ready",
+        "scores": [
+          0,
+          0
+        ],
+        "pageClock": 2655.199999988079
+      },
+      "tap_ms": 624,
+      "sheetOpenWaited": true,
+      "afterTap": {
+        "cardInDom": true,
+        "cardHasShow": true,
+        "cardDisplay": "flex",
+        "cardBox": [
+          390,
+          759
+        ],
+        "sheetHidden": false,
+        "sheetOpen": true,
+        "tick": 0,
+        "phase": "ready",
+        "scores": [
+          0,
+          0
+        ],
+        "pageClock": 3334.8999999910593
+      },
+      "afterBudget": {
+        "cardInDom": true,
+        "cardHasShow": true,
+        "cardDisplay": "flex",
+        "cardBox": [
+          390,
+          759
+        ],
+        "sheetHidden": false,
+        "sheetOpen": true,
+        "tick": 0,
+        "phase": "ready",
+        "scores": [
+          0,
+          0
+        ],
+        "pageClock": 6373.699999988079
+      },
+      "afterBudget_wallMs": 1790968675364,
+      "waited_ms": 3000,
+      "closeVisible": true,
+      "afterClose": {
+        "cardInDom": true,
+        "cardHasShow": true,
+        "cardDisplay": "flex",
+        "cardBox": [
+          390,
+          531
+        ],
+        "sheetHidden": true,
+        "sheetOpen": false,
+        "tick": 0,
+        "phase": "ready",
+        "scores": [
+          0,
+          0
+        ],
+        "pageClock": 7895.79999999702
+      }
+    }
+  ]
+}
