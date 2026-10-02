@@ -257,6 +257,64 @@ describe('the glyph vocabulary is decided once', () => {
     ).not.toBe(right);
   });
 
+  test('each pip is painted in its own stick\'s colour, on the sheet and in every row', () => {
+    // The pad teaches a two-colour system — `--cool` on the stance stick,
+    // `--gold` on the technique stick — and the techniques sheet drew BOTH its
+    // pips in one colour. So the sheet was not neutral about the notation: a
+    // row read `· + ▶` with both circles the same cyan while the player held
+    // one cyan stick and one gold stick. Measured on the review frame, four
+    // pairs identical to the pixel: key stance/technique both rgb(137,123,108),
+    // row stance/technique both rgb(151,186,196).
+    //
+    // The point of the assertion is not that two colours exist. It is that the
+    // sheet's pip colour and the stick's accent are the SAME declaration — read
+    // from both stylesheets here — because "they look different" is a claim a
+    // future edit can break by recolouring one side only, which is precisely
+    // how r102/r105/r109 kept recurring.
+    const css = read('../../src/styles.css');
+
+    // The stance accent is the `.stick-zone` DEFAULT (`--cool`); only the
+    // technique one overrides it (`#zone-right` → `--gold`). Reading both from
+    // the override alone would quietly pass if the default were ever removed.
+    const base = css.match(/\.stick-zone \{([\s\S]*?)\}/);
+    expect(base, 'no .stick-zone rule').not.toBeNull();
+    const stanceStick = (base?.[1] ?? '').match(/--stick-accent:\s*var\((--[a-z-]+)\)/)?.[1] ?? '';
+    const techniqueRule = css.match(/#zone-right \{([\s\S]*?)\}/);
+    expect(techniqueRule, 'no #zone-right rule').not.toBeNull();
+    const techniqueStick = (techniqueRule?.[1] ?? '').match(/--stick-accent:\s*var\((--[a-z-]+)\)/)?.[1] ?? '';
+    expect(stanceStick, 'stance stick accent not found').not.toBe('');
+    expect(techniqueStick, 'technique stick accent not found').not.toBe('');
+    expect(stanceStick, 'both sticks use the same accent token').not.toBe(techniqueStick);
+
+    const pipColourFor = (stick: 'stance' | 'technique'): string => {
+      const rule = css.match(new RegExp(`\\.tech-pip--${stick} \\{([\\s\\S]*?)\\}`));
+      expect(rule, `no .tech-pip--${stick} rule`).not.toBeNull();
+      return (rule?.[1] ?? '').match(/color:\s*var\((--[a-z-]+)\)/)?.[1] ?? '';
+    };
+    expect(pipColourFor('stance'), 'stance pip does not use the stance stick token').toBe(stanceStick);
+    expect(pipColourFor('technique'), 'technique pip does not use the technique stick token').toBe(techniqueStick);
+  });
+
+  test('every pip on the sheet is stamped with the stick it belongs to', () => {
+    // The colour only exists if the class is actually applied. A rule that is
+    // correct and wired to nothing looks identical in a stylesheet — so the
+    // call sites are checked too, and both of the sheet's two pip builders are
+    // covered because the key and the rows are separate code paths.
+    //
+    // `item(glyph, word)` used to take no stick, and the row builder called a
+    // bare `pipFor(glyph)`. Both had to change; if either is reverted the sheet
+    // goes monochrome again while this rule stays green, which is the whole
+    // point of asserting on the call and not only the CSS.
+    expect(hud).toMatch(/const item = \(pip: string, word: string, pipStick: 'stance' \| 'technique'\)/);
+    expect(hud).toMatch(/for \(const \[glyph, word\] of words\) frag\.append\(item\(glyph, word, pipStick\)\)/);
+    expect(hud).toMatch(/const pipFor = \(glyph: string, stick: 'stance' \| 'technique'\)/);
+    expect(hud).toMatch(/pip\.className = `tech-pip tech-pip--\$\{stick\}`/);
+    expect(hud).toMatch(/pipFor\(QUALIFIER_GLYPH\[qualifier\], 'stance'\)/);
+    expect(hud).toMatch(/pipFor\(FAMILY_GLYPH\[family\], 'technique'\)/);
+    // And no bare, unstamped pip constructor is left behind.
+    expect(hud, 'an unstamped tech-pip is still being built').not.toMatch(/className = 'tech-pip'/);
+  });
+
   test('the + between the two legend halves spans the full row', () => {
     // r109: the two-column layout made the `+` a grid item, so it landed in
     // column two of the STANCE list's last row — inside one of the two lists it

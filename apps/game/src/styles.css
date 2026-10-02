@@ -2205,6 +2205,27 @@ body.high-contrast .setting-row input[type="checkbox"]:checked::before {
   opacity: 0.95;
 }
 
+/* A pip says WHICH STICK it belongs to, in the same colour that stick already
+   wears on the pad: `--cool` for stance, `--gold` for technique (#zone-left /
+   #zone-right). The sheet's key and every move row used to inherit a single
+   colour from `.tech-combo`, so both circles in a row were cyan while the
+   player held one cyan stick and one gold stick. Measured identical to the
+   pixel on the review frame — key stance/technique both rgb(137,123,108), row
+   stance/technique both rgb(151,186,196).
+
+   The plain `--cool` / `--gold` tokens are used deliberately: both are
+   redefined in the high-contrast block below, so these pips follow that block
+   with no extra rule. This is not the only cue — the key's STANCE / TECHNIQUE
+   headings and the word beside every pip carry it too, so a player who cannot
+   separate the hues is not stuck. */
+.tech-pip--stance {
+  color: var(--cool);
+}
+
+.tech-pip--technique {
+  color: var(--gold);
+}
+
 .tech-plus {
   padding-inline: 1px;
   opacity: 0.55;

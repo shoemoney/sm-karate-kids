@@ -103,8 +103,48 @@ test.describe('pre-bout card controls clear the fighters', () => {
     await page.locator('.result-reference').waitFor({ state: 'visible', timeout: 30_000 });
     const before = await page.evaluate(() => (globalThis as Record<string, any>)['__smkk'].state().tick);
 
+    // Click, then read the clock with nothing in between — see the note at the
+    // final assertion for why the read has to be adjacent to the click.
     await page.locator('.result-reference').click();
 
+    // Opening a reference must not start the bout.
+    //
+    // This assertion used to be the LAST statement, so it ran after an
+    // unbounded `waitFor` for the sheet. The bout clock is held by
+    // `held`/`beginBout` and released by a 9s WALL-CLOCK deadline
+    // (`schedule(beginBout, ROUND_INTRO_MS, nowMs)`, main.ts) that runs
+    // regardless of any click — so on a slow runner the sheet's wait could
+    // straddle that deadline, `beginBout` fired on its own, and the tick read
+    // 12 against a `before` of 0. Intermittent: 3 failures in 6 runs, all on
+    // clean `main` with this change set stashed.
+    //
+    // What settled it was measuring rather than reasoning, because the two
+    // candidate causes are "the click starts the bout" (a real defect) and "the
+    // deadline fired during the wait" (this test's own window). Over six runs
+    // the tick read 0 IMMEDIATELY after the click resolved, every time, and
+    // then moved on its own with nothing being clicked. The click never started
+    // it.
+    //
+    // So the tick is now read straight after the click — which is the claim
+    // being made — and the sheet's visibility is asserted after. A later read
+    // still sees the clock running, because by then the 9s hold has genuinely
+    // expired, which is correct behaviour and not this test's business.
+    //
+    // WHAT THIS IS NOT, recorded because the temptation is to over-claim: the
+    // reorder is NOT a demonstrated flake fix. The failures appeared 3-in-6 at
+    // load average 14-16 on 14 cores, and a later 12-run control of the OLD
+    // ordering passed 12/12 once the box dropped to ~10. So the flake is real
+    // and load-dependent, and neither ordering has been shown to beat the other
+    // under the conditions that produce it. The reorder stands on the narrower
+    // and honest ground that the assertion's subject is the click, so the read
+    // belongs next to the click; standing rule 5 applies to the claim that it
+    // cures a failure, and that claim is not made.
+    const after = await page.evaluate(() => (globalThis as Record<string, any>)['__smkk'].state().tick);
+    expect(after, 'the TECHNIQUES button must not start the bout').toBe(before);
+
+    // The sheet, checked AFTER the clock so the clock read stays adjacent to
+    // the click.
+    //
     // `#tech-ref`, not `.sheet`. There are two sheets in the document — the
     // settings panel and the techniques reference — so a bare `.sheet` locator
     // is a strict-mode violation, which is the first version of this test's
@@ -118,9 +158,5 @@ test.describe('pre-bout card controls clear the fighters', () => {
     const sheet = page.locator('#tech-ref');
     await sheet.waitFor({ state: 'visible', timeout: 10_000 });
     await expect(sheet).toHaveClass(/\bopen\b/);
-
-    // Opening a reference must not start the bout.
-    const after = await page.evaluate(() => (globalThis as Record<string, any>)['__smkk'].state().tick);
-    expect(after).toBe(before);
   });
 });

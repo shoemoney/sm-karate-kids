@@ -14,7 +14,7 @@
  * extension (.rom, .bin, .zip, .7z).
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative, extname, basename } from 'node:path';
+import { join, relative, extname, basename, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -61,6 +61,58 @@ function walk(dir: string): string[] {
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
+}
+
+/**
+ * Does `manifestDir` contain `assetDir`? A manifest at the public root has no
+ * directory name (`dirname` returns '.'), and it is an ancestor of everything.
+ */
+function isAncestorDir(manifestDir: string, assetDir: string): boolean {
+  if (manifestDir === '.' || manifestDir === '') return true;
+  return manifestDir === assetDir || assetDir.startsWith(`${manifestDir}/`);
+}
+
+/**
+ * Resolve the provenance entry that governs `key`, implementing the precedence
+ * docs/asset-provenance.md states twice: the NEAREST ANCESTOR manifest wins, and
+ * a manifest that is not an ancestor is still consulted as a fallback (which is
+ * how `brand/PROVENANCE.json` covers `fighters/`).
+ *
+ * This used to be `for (const m of manifests.values()) entry ??= m[key]` —
+ * "first manifest that happens to carry the key". That is a different rule, and
+ * it resolved by `readdirSync` order, which is neither alphabetical nor
+ * guaranteed. A sibling directory sorting earlier silently outranked the
+ * manifest that actually governs the asset: with `brand/` and `fighters/` both
+ * carrying `fighters/shiro-0.webp`, brand's `approved: true` won and
+ * fighters' `approved: false` was never read. Provenance is the gate that stands
+ * between generated art and shipping, so a resolution rule that can be talked
+ * out of by a directory name is the wrong rule for it.
+ *
+ * Nearest-ancestor also fails closed: the deeper manifest wins, so the entry
+ * closest to the asset is the one that has to approve it.
+ */
+function resolveEntry(
+  key: string,
+  manifests: Map<string, Record<string, ProvenanceEntry>>,
+): ProvenanceEntry | undefined {
+  const assetDir = dirname(key);
+  // Ancestors first, deepest directory first. Ties break on the manifest path
+  // so the answer is a property of the tree, not of the filesystem.
+  const ancestors = [...manifests.keys()]
+    .filter((manifest) => isAncestorDir(dirname(manifest), assetDir))
+    .sort((a, b) => dirname(b).length - dirname(a).length || a.localeCompare(b));
+  for (const manifest of ancestors) {
+    const hit = manifests.get(manifest)?.[key];
+    if (hit) return hit;
+  }
+  // Not an ancestor — still consulted, in a stable order, so which one wins can
+  // never depend on the sequence readdir happened to return.
+  for (const manifest of [...manifests.keys()].sort()) {
+    if (ancestors.includes(manifest)) continue;
+    const hit = manifests.get(manifest)?.[key];
+    if (hit) return hit;
+  }
+  return undefined;
 }
 
 interface ManifestRow {
@@ -219,8 +271,10 @@ function main(): void {
 
   // Provenance manifests are discovered, not hardcoded. Every directory under
   // public/ may carry its own PROVENANCE.json whose keys are relative to the
-  // public root (docs/asset-provenance.md). The root manifest covers everything
-  // with no nearer manifest, so brand/ and fighters/ keep working unchanged.
+  // public root (docs/asset-provenance.md). Today the two manifests are
+  // brand/ (which also carries the fighters/ keys) and generated/ — there is no
+  // manifest at the public root, so brand/ is the fallback rather than an
+  // ancestor for anything outside its own directory.
   const manifests = new Map<string, Record<string, ProvenanceEntry>>();
   const manifestPaths = new Set<string>();
 
@@ -254,14 +308,9 @@ function main(): void {
       fail(`${label} is under 512 KB`, `size=${stat.size} bytes`);
     }
 
-    // The manifest governing an asset is the NEAREST ancestor manifest, so a
-    // directory's own record takes precedence over the root one. Every manifest
-    // is also consulted, so a root entry still covers a file that a nearer
-    // manifest simply does not mention.
-    let entry: ProvenanceEntry | undefined;
-    for (const manifest of manifests.values()) {
-      entry ??= manifest[key];
-    }
+    // Nearest ancestor wins; a non-ancestor manifest is a fallback. See
+    // resolveEntry() for why this is not simply "first manifest with the key".
+    const entry = resolveEntry(key, manifests);
 
     if (!entry) {
       fail(`${label} has a PROVENANCE.json entry`, `no entry keyed "${key}"`);

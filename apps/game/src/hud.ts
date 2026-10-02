@@ -545,11 +545,11 @@ export class Hud {
     // was no key.
     const key = document.createElement('p');
     key.className = 'tech-key';
-    const item = (pip: string, word: string): HTMLElement => {
+    const item = (pip: string, word: string, pipStick: 'stance' | 'technique'): HTMLElement => {
       const span = document.createElement('span');
       span.className = 'tech-key-item';
       const dot = document.createElement('span');
-      dot.className = 'tech-pip';
+      dot.className = `tech-pip tech-pip--${pipStick}`;
       dot.setAttribute('aria-hidden', 'true');
       dot.textContent = pip;
       const label = document.createElement('span');
@@ -579,7 +579,11 @@ export class Hud {
       head.className = 'tech-key-label';
       head.textContent = label;
       frag.append(head);
-      for (const [glyph, word] of words) frag.append(item(glyph, word));
+      // The label IS the stick, so the pips under it take that stick's colour —
+      // which is what makes the key agree with the pad instead of quietly
+      // dropping the distinction the pad is teaching.
+      const pipStick = label === 'technique' ? 'technique' : 'stance';
+      for (const [glyph, word] of words) frag.append(item(glyph, word, pipStick));
       return frag;
     };
     // Words live beside the glyph maps rather than inside them: the maps are
@@ -752,9 +756,26 @@ export class Hud {
         // combination notation"; it is the cheapest real defect in this log and
         // it took ninety-two rounds to find, because it is invisible unless the
         // key and a row are read together.
-        const pipFor = (glyph: string): HTMLSpanElement => {
+        // The pip carries WHICH STICK it belongs to, because that is the one
+        // thing a colour can say faster than a word and the pad already says it
+        // with its own accent: `--cool` on the stance stick, `--gold` on the
+        // technique stick (see #zone-left / #zone-right).
+        //
+        // Both pips used to inherit one colour from `.tech-combo`, so a row read
+        // `· + ▶` with both circles the same cyan — while the pad the player is
+        // holding shows one cyan stick and one gold stick. The sheet was
+        // therefore not neutral, it was contradicting the control it documents.
+        // Measured on the review frame: key stance pip and key technique pip
+        // both `rgb(137,123,108)`, row stance pip and row technique pip both
+        // `rgb(151,186,196)` — identical to the pixel, four pairs.
+        //
+        // Colour alone is not allowed to carry it, though: high-contrast mode
+        // recolours both tokens, and a player who cannot separate the hues
+        // still has the key's STANCE / TECHNIQUE headings and the word beside
+        // each pip. The colour is the fast path, not the only one.
+        const pipFor = (glyph: string, stick: 'stance' | 'technique'): HTMLSpanElement => {
           const pip = document.createElement('span');
-          pip.className = 'tech-pip';
+          pip.className = `tech-pip tech-pip--${stick}`;
           pip.setAttribute('aria-hidden', 'true');
           pip.textContent = glyph;
           return pip;
@@ -763,7 +784,11 @@ export class Hud {
         plus.className = 'tech-plus';
         plus.setAttribute('aria-hidden', 'true');
         plus.textContent = '+';
-        combo.append(pipFor(QUALIFIER_GLYPH[qualifier]), plus, pipFor(FAMILY_GLYPH[family]));
+        combo.append(
+          pipFor(QUALIFIER_GLYPH[qualifier], 'stance'),
+          plus,
+          pipFor(FAMILY_GLYPH[family], 'technique'),
+        );
 
         const name = document.createElement('span');
         name.className = 'tech-name';
