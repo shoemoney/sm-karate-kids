@@ -8940,3 +8940,33 @@ CSS comment is accurate and the on-screen glyphs show one of the two working key
 sets because one is all that fits. r152's note had listed that as a defect; it
 is not one. Checking a claim before editing it is cheaper than reverting an edit,
 and this round had already found two of my own instruments reporting success.
+
+### One diff I did not cause, and did not commit
+
+`pnpm test:e2e` leaves `docs/preview/portrait.png` modified — the capture spec
+writes it, and its own header says the committed PNG is "only as current as the
+last local `pnpm test:e2e` whose output somebody committed", i.e. refreshing it
+is a deliberate manual step.
+
+The new file was **1,757,698 bytes against 1,468,315** committed, +20%. Large
+enough that "frame noise" was not an acceptable assumption, so I checked rather
+than waved it through:
+
+- `--key-hint-ink` has exactly one consumer, and it is inside
+  `@media (hover: hover) and (pointer: fine) and (min-width: 720px)`. At 390px
+  the token is unreachable.
+- Both frames were opened and compared. Neither shows a key hint — no `W A S D`,
+  no arrows. The differences are the bout clock (28s vs 30s), a different kick
+  phase, the fighters' positions and their floor shadows, and the shoji grid
+  behind the title card.
+
+So the change cannot have caused it, the pixels confirm it, and it was restored
+with `git checkout` rather than committed into a commit that is about a
+desktop-only token. Shipping an unrelated regenerated binary because a test
+produced it is the file-version of "it was already dirty when I got here".
+
+**Verified before deploying, not after:** production was byte-identical before
+this round's edit, and would have silently stopped being so the moment the CSS
+bundle changed. `deploy.sh --yes` pushed 26 files and `verify-deploy.sh` returned
+2 assets sha256-matched, including the new `assets/index-B-_VGGXn.css`. The
+plan's standing claim is true again rather than merely still written down.
