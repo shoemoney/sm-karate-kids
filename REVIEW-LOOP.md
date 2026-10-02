@@ -8568,3 +8568,164 @@ the third one this document has produced in two rounds.
 | new gates, each proved able to fail | **2** (6 unit assertions + 4 mutations, 1 browser test) |
 | my own instruments that were wrong | **5** |
 | rounds where a red gate was the machine | **4** of 5 gate reads, before one settled |
+
+---
+
+## Round 152 — the accept line was a journey nobody walked 🗺️
+
+r151 left its own instruction standing: *"Re-read the closed boxes against the code
+on that suspicion, not on the hypothesis that they are now correct."* Every closed
+box now has a sentence in it that claims something the code had better be true.
+This round audited them, and **one of them was not true.**
+
+### The finding
+
+`docs/COMPLETION-PLAN.md` item 1.2 has been closed since r136 with this accept
+line:
+
+> **Accept:** pressing it opens the techniques sheet and returns to the card.
+
+The first half held. The second half **had never been true**, and it was recorded
+as verified — "Verified by tap, not by stylesheet" — because the thing that was
+tapped is exactly the thing that worked.
+
+The button opens `#tech-ref`, a scrollable list of all 20 moves, over the top of
+the pre-bout card. And the card's 9-second deadline ran straight through it.
+`act()` fires on `now > pendingAt`, and **nothing in `main.ts` ever looked at
+sheet state**:
+
+```ts
+if (pendingAt !== 0 && now > pendingAt) act();   // no sheet check, no pause
+```
+
+So the sequence a player got was:
+
+1. card up, 9s budget running
+2. tap TECHNIQUES → sheet opens over the card
+3. 9s elapses → `beginBout()` → `held = false` + `hud.hideResult()`
+4. `.result { display: none }` — **the card is gone**, the bout clock starts, the
+   sheet is still open over a live fight
+5. tap ✕ → the player is in a bout they never saw start
+
+### Measured, not read
+
+Reading the code proves a mechanism. It does not prove a player hits it. So the
+journey was walked: `tools/sheet-pause-probe.mjs`, 390x844, load 7.4–9.7.
+
+| arm | taps TECHNIQUES | waits | card after closing | bout clock |
+|---|---|---|---|---|
+| **early** | yes | 3.0s | **shown** | 0 |
+| **tap** | yes | 11.0s | **gone** | running (259, 275) |
+| **control** | no | 11.0s | **gone** | running (285, 231) |
+
+**The `early` arm is the whole reason this is a finding.** A probe that answers
+"the card is gone" every single time is indistinguishable from one whose answer
+does not depend on what it measures — which is exactly how rounds 90, 93 and 95
+each shipped a metric that agreed with a no-op. `early` walks the *identical*
+journey and differs in one variable: whether the 9 seconds elapsed. The card
+**survives** the sheet when the budget has not run out and does not when it has.
+So the sheet is not what removes the card. The deadline is, and it cannot see the
+sheet.
+
+After the fix, `tap` **2/2** shows the card, and `control` still loses it 2/2 —
+which is the second half of the control: the hold is not swallowing every round.
+
+### The fix
+
+`heldDeadline()` in `preBoutBudget.ts`, because this is wall-clock arithmetic and
+a wall-clock deadline cannot be unit-tested by waiting for one — the same reason
+`preBoutDeadline` exists. Opening records the page clock; the frame loop extends
+the deadline on **every frame** the sheet is up; closing pays it back. The player
+gets the budget they had at the moment they tapped.
+
+The HUD's own TECHNIQUES button deliberately does **not** pass the hold: it is
+reachable during a live bout, where there is no pre-bout countdown. There is a
+mutation proving that distinction is real rather than a comment.
+
+### What this pattern actually is
+
+Three rounds of "prose drifts from code" and I had filed it as being about
+constants. It is not. This one is a **player journey** that nobody walked:
+
+| round | the claim | what drifted |
+|---|---|---|
+| r150 | "nearest ancestor wins" | `readdir` order decided it |
+| r150 | "each pip carries its stick colour" | both drawn cyan |
+| r151 | "nine seconds of reading time" | the seconds were boot |
+| **r152** | **"returns to the card"** | **the card never returned; a fight started** |
+
+The first three are a constant or a rule that meant something else. This is a
+sentence describing what happens **in sequence**, and no gate in the repo can see
+a sequence — the button did exactly what it was written to do. Where a claim
+describes a journey, the gate that settles it is a probe that walks the journey,
+**and that probe needs a positive control or it is a no-op with a verdict**.
+
+### My own instruments that were wrong
+
+Four, and two of them produced a confident answer first:
+
+1. **Sampled the sheet on the way out of the tap.** `toggleSheet` adds `.open`
+   inside a `requestAnimationFrame`, so there is a gap between the tap resolving
+   and the sheet being open. Read `sheetOpen: false` on 1 of 2 runs — which read
+   as "the button does not work", and would have been filed as a finding. Fixed
+   by waiting for the sheet with `waitForFunction`, which is what the e2e already
+   did.
+2. **`Number('11_000')` is `NaN`.** A JS numeric separator in a string. Every arm
+   "waited" for nothing, the probe reported **CLAIM-TRUE**, and the no-op agreed
+   with itself — rounds 90, 93 and 95, reproduced by accident on the way to the
+   real result. `numArg` now throws on a non-finite value instead of quietly
+   becoming a no-op, and `RUNS=abc` is rejected before the server starts.
+3. **The verdict branch caught its own duplicate.** An edit left two identical
+   `else if` arms; the first one's message named the wrong cause, so an
+   inconclusive run would have been filed as "the tap did not open the sheet".
+4. **A source guard that failed on its own anchor.** `main.slice(indexOf('reference: {'), indexOf('rematch: () => act()'))`
+   — `rematch:` appears **four times** in `main.ts` and the first one is 280 lines
+   earlier, so the slice was empty and the test reported "the block moved".
+   Anchored on the literal call instead. A guard that fails on its own anchor
+   cannot be trusted to fail on the defect.
+
+### A near-miss worth recording
+
+Port 4173 was held by **`ShoeMoneyDerby`'s** preview server, serving
+`index-CcBHi2t9.js` while this project had `index-BGuAGv8B.js` on disk. With
+`reuseExistingServer` on, the entire browser suite would have run against another
+project's bundle and reported a confident, meaningless pass. It was not the r151
+stale-server trap exactly — that one was our own leftover; this is a *different
+repo* squatting the port. Identical failure mode, different owner.
+
+Killed it and ran clean: **44 passed, 0 failed, exit 0**, at load 14.8→16.0 —
+above the band where this suite is usually red, and that load was mine (browser
+runs overlapping). Read the load next to the number or it means nothing.
+
+### The gates, in the order they must be read
+
+| | |
+|---|---|
+| unit | **200 passed** (was 190), exit 0 |
+| mutations | **6**, all red — including unwiring the button, wiring the hold to the *wrong* button, and removing the frame-loop extension |
+| probe | exit **1** on the broken build, exit **0** on the fixed build, same session |
+| e2e | **44 passed**, 0 failed, exit 0, load 14.8→16.0 |
+| served bytes | `index-BGuAGv8B.js`, and the fix read off the minified bundle: 3 `toggleSheet` call sites, 2 passing the hold |
+
+### Item 1.1, same audit, different failure
+
+The keyboard legend's `Do:` line says "beside the coach's direction labels". The
+glyphs are beside the `STANCE` / `TECHNIQUE` captions instead, and **cannot** be
+beside the coach legend: `.coach-legend` is built only under
+`(hover: none) and (pointer: coarse)` and `.key-hint` only under
+`(hover: hover) and (pointer: fine)`. Mutually exclusive. The feature is fine —
+the record described a design that was never built. Also found: the desktop rule
+hardcodes `#b8a894`, violating the stylesheet's own "no colour literal outside
+`:root` / `body.high-contrast`", pinning the hint out of high-contrast where
+`--text-faint` becomes `#dcdcdc`. **Not fixed**, because the honest fix needs a
+pixel measurement of the composited backdrop, which is a paint-time value no
+static read supplies — and shipping that on a hand-computed estimate is precisely
+what rule 3 forbids.
+
+| | |
+|---|---|
+| open item closed | **1** — item 1.2's accept line, which was false, not stale |
+| defect class | a journey nobody walked, on a button that worked |
+| new gates, each proved able to fail | **3** (5 arithmetic + 5 source guards + 1 browser probe) |
+| my own instruments that were wrong | **4**, two of which gave a confident wrong answer first |
+| the no-op that agreed with itself | **1** — `Number('11_000')`, the exact failure of rounds 90/93/95, reproduced by accident |

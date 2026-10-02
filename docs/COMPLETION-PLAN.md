@@ -10,9 +10,9 @@ has been improving.
 |---|---|
 | Playable | yes — tournament + dojo, two sticks, point karate |
 | Deployed | `https://arcade.shoemoney.ai/smkk/`, verified playing a real bout |
-| Tests | 184 unit, 42 e2e, 6 skipped, green locally |
-| Review loop | 150 rounds, 20 review frames, mutation-tested fences |
-| Commits | 278 |
+| Tests | 200 unit, 44 e2e, green locally |
+| Review loop | 152 rounds, 20 review frames, mutation-tested fences |
+| Commits | 279 |
 | Production | **byte-identical to the local build**, `tools/verify-deploy.sh` green |
 
 The game is not a prototype. What remains is a short list of specific, named
@@ -37,6 +37,28 @@ to the one label that exists to be read — and took them to **8.45:1** at 12px.
 Both viewports verified in the same pass: `display:block` at 1280, `display:none`
 at 390.
 
+> **The `Do:` line above describes a design that was never built — the feature is
+> fine, this note is about the record.** r152 audited this box against the code
+> and the glyphs are **not** "beside the coach's direction labels". They sit beside
+> the `STANCE` / `TECHNIQUE` stick captions in the pad footer, and they *cannot* be
+> beside the coach legend: the two are gated on **mutually exclusive** media
+> queries. `.coach-legend` is built only when `(hover: none) and (pointer: coarse)`
+> matches (`coach.ts:97`); `.key-hint` is shown only under
+> `(hover: hover) and (pointer: fine) and (min-width: 720px)`. On every viewport
+> where the key hints are visible, the coach strip is never in the DOM.
+>
+> Two smaller notes from the same pass, neither urgent: `min-width: 720px` is the
+> real cutoff rather than a stated desktop width, and the CSS comment advertises
+> "arrows (or IJKL)" while the markup only ever renders `↑ ← ↓ →`.
+>
+> **Also open, small and real:** the desktop rule hardcodes `#b8a894` instead of a
+> token (`styles.css:1147`), which violates the stylesheet's own rule 3 — "No
+> colour literal may appear outside `:root` / `body.high-contrast`" — and pins the
+> hint out of `body.high-contrast`, where `--text-faint` is redefined to `#dcdcdc`
+> and every other faint label re-points. Not fixed at r152: it needs a pixel
+> measurement of the composited high-contrast backdrop, which is a paint-time value
+> no static read can supply.
+
 ### 1.2 Pre-fight card opens the sheet it points at — `P1`
 **Found:** r125, r130. Round 118 put the notation on the card; the card says
 "the sheet lists every combination" and **offers no way to get there.**
@@ -48,6 +70,40 @@ under half the 44px floor, on the only route to the sheet from the screen that
 introduces the game — and fixed at r141 to **143x46**, relabelled REFERENCE →
 TECHNIQUES because the card's own copy never uses the word "reference" while the
 HUD calls the same sheet TECHNIQUES. Verified by tap, not by stylesheet.
+
+> **CORRECTED at r152: the `Accept:` line's second half was never true.** "returns
+> to the card" shipped and was recorded as done, and no gate in the repo could see
+> it. The button opened the sheet; **the 9-second pre-bout deadline ran straight
+> through underneath it.** Nothing in `main.ts` referenced sheet state when
+> `act()` evaluated `now > pendingAt`, so `beginBout()` ran — `held = false` plus
+> `hud.hideResult()` — and `.result { display: none }` took the card away while
+> the player was still reading a scrollable list of every move in the game.
+>
+> **Measured** (`tools/sheet-pause-probe.mjs`, 390x844, load 7.4–9.7), by walking
+> the journey rather than reading the code:
+>
+> | arm | taps TECHNIQUES | waits | card after closing | bout clock |
+> |---|---|---|---|---|
+> | early | yes | 3.0s | **shown** | 0 |
+> | tap | yes | 11.0s | **gone** | running (259) |
+> | control | no | 11.0s | **gone** | running (285) |
+>
+> The `early` arm is what makes that a measurement instead of a constant: the
+> card **survives** the sheet when the budget has not expired and does not when it
+> has. So the sheet was never what removed the card — the deadline was, and the
+> deadline could not see the sheet. A player learning the moves was dropped into a
+> **live fight** mid-read, with the sheet still open over it, and closing it landed
+> them in a bout they never saw start.
+>
+> **Fixed at r152.** `heldDeadline()` in `preBoutBudget.ts` pushes the deadline out
+> by exactly the time the sheet was up, and the frame loop extends it on every
+> frame the sheet is open. The player gets the budget they had at the moment they
+> tapped — verified **2/2** after the fix, with the control arm still losing the
+> card, so the hold is not swallowing every round.
+>
+> This is the **fourth** box in three rounds where prose described a contract the
+> code did not implement, and the first one where the prose was *actively wrong
+> about the behaviour*, not merely stale about a constant.
 
 ### 1.3 Coach labels on the sticks, not in a panel — `CLOSED, r138`
 **Found:** r113, r124, r132.
@@ -202,7 +258,11 @@ Because nothing is watching, three rules exist and are not optional:
 ## Done means
 
 - [x] 1.1 keyboard legend on desktop — shipped r135, contrast fixed r141 (8.45:1)
-- [x] 1.2 pre-bout card opens the sheet — shipped r136, target size fixed r141 (143x46)
+- [x] 1.2 pre-bout card opens the sheet — shipped r136, target size fixed r141 (143x46).
+      **The `Accept:` line's "returns to the card" was FALSE until r152**: the 9s
+      deadline ran underneath the sheet and dropped the player into a live fight
+      mid-read. Measured 2/2, fixed with `heldDeadline()`, verified by
+      `tools/sheet-pause-probe.mjs` (exit 1 before, 0 after).
 - [x] 1.3 coach labels on the sticks — playtested at r138 and closed, with the reason
 - [x] 2.1 and 2.2 raised with a recommendation — a human decides, the loop has done its part
 - [x] 3.1 unattended driver in place — `tools/loop-once.sh` on a launchd schedule
@@ -255,7 +315,11 @@ Because nothing is watching, three rules exist and are not optional:
       to be the taste call r144 assumed. See below.
 
 **Not "done" means:** every item above is either finished or blocked on a human
-decision with the measurement attached. **As of r151 there are no open items.**
+decision with the measurement attached. **As of r152 the open items are the two
+noted above and nothing else:** item 1.2's "returns to the card", which shipped
+broken and is now fixed and measured; and item 1.1's misplaced rationale, which is
+a record error rather than a behaviour error, plus one unfixed colour literal on
+the key hint.
 
 **But read that as a claim to re-check, not a fact.** r149's own lesson was that
 this document recorded a conclusion where a blocker had been, and r150 audited
@@ -268,6 +332,24 @@ that **a constant or contract in prose drifts from the code that implements it**
 and the drift is invisible to every gate until something is measured against a
 clock. Re-read the closed boxes against the code on that suspicion, not on the
 hypothesis that they are now correct.
+
+**r152 found the fourth, and it is the sharpest of the four.** Item 1.2's
+`Accept:` line said "returns to the card" and the card **did not return** — the
+deadline ran underneath the sheet and started a live fight underneath the player.
+The first three were a contract the code failed to keep or a constant that meant
+something else; this one is a sentence describing a *player journey* that had
+never once been walked. Nothing in the repo could see it, because **the button
+worked perfectly** — it opened the sheet, on the first tap, every time. The
+defect was entirely in what happened next.
+
+That generalises the pattern past constants and into **flows**: *a journey nobody
+walks cannot be wrong, and it will be recorded as working.* The three preceding
+drifts were all found by reading the code against a sentence. This one was found
+by performing the sentence and watching what the game did — `tap`, `wait`,
+`close`, `look`. Where a claim describes what a player does in sequence, the gate
+that can settle it is a probe that does the sequence, and it needs a **positive
+control** (the `early` arm) or it would have been a constant-false instrument
+agreeing with itself.
 
 One more thing r151 established about this box, because it changes how every gate
 here should be read: **it does not idle.** Load ~10-13 from other work at rest,
