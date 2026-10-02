@@ -11,8 +11,8 @@ has been improving.
 | Playable | yes — tournament + dojo, two sticks, point karate |
 | Deployed | `https://arcade.shoemoney.ai/smkk/`, verified playing a real bout |
 | Tests | 200 unit, 44 e2e, green locally |
-| Review loop | 152 rounds, 20 review frames, mutation-tested fences |
-| Commits | 279 |
+| Review loop | 153 rounds, 20 review frames, mutation-tested fences |
+| Commits | 280 |
 | Production | **byte-identical to the local build**, `tools/verify-deploy.sh` green |
 
 The game is not a prototype. What remains is a short list of specific, named
@@ -25,11 +25,12 @@ gaps — every one of them is in this document, and nothing else is.
 ### 1.1 Desktop keyboard legend — `P1`
 **Found:** r96, r98, r102, r132. Four reviewers, four rounds, never fixed.
 **Why it matters:** the game supports WASD for stance and arrows/IJKL for
-technique (`input/keyboard.ts`), and **nothing on screen says so.** A desktop
-player — the audience for a twin-stick twin-stick fighter — is told nothing about
-how to play and has to guess that a keyboard is even wired up.
-**Do:** render the key glyphs beside the coach's direction labels, on wide
-viewports only. Touch layout untouched.
+technique (`input/keyboard.ts` — all eight keys are really bound, confirmed at
+`keyboard.ts:5-19`), and **nothing on screen says so.** A desktop player — the
+audience for a twin-stick fighter — is told nothing about how to play and has to
+guess that a keyboard is even wired up.
+**Do:** render the key glyphs in the pad footer, under each stick's caption, on
+wide viewports only. Touch layout untouched.
 **Accept:** the keys appear on desktop and are absent on a 390px phone.
 **SHIPPED at r135.** r141 then measured the glyphs at **5.10:1** — `--text-2xs` in
 `--text-faint`, the smallest and dimmest pairing the design system offers, applied
@@ -37,27 +38,72 @@ to the one label that exists to be read — and took them to **8.45:1** at 12px.
 Both viewports verified in the same pass: `display:block` at 1280, `display:none`
 at 390.
 
-> **The `Do:` line above describes a design that was never built — the feature is
-> fine, this note is about the record.** r152 audited this box against the code
-> and the glyphs are **not** "beside the coach's direction labels". They sit beside
-> the `STANCE` / `TECHNIQUE` stick captions in the pad footer, and they *cannot* be
-> beside the coach legend: the two are gated on **mutually exclusive** media
-> queries. `.coach-legend` is built only when `(hover: none) and (pointer: coarse)`
+> **The `Do:` line above used to describe a design that was never built — the
+> feature is fine, this note is about the record, and r153 corrected the sentence.**
+> It said the glyphs go "beside the coach's direction labels". They do not, and
+> they **cannot**: the two are gated on **mutually exclusive** media queries.
+> `.coach-legend` is built only when `(hover: none) and (pointer: coarse)`
 > matches (`coach.ts:97`); `.key-hint` is shown only under
 > `(hover: hover) and (pointer: fine) and (min-width: 720px)`. On every viewport
 > where the key hints are visible, the coach strip is never in the DOM.
 >
-> Two smaller notes from the same pass, neither urgent: `min-width: 720px` is the
-> real cutoff rather than a stated desktop width, and the CSS comment advertises
-> "arrows (or IJKL)" while the markup only ever renders `↑ ← ↓ →`.
+> Where they actually are is the better place, and it is the same conclusion r138
+> reached about the stick labels: the glyphs sit under the `STANCE` / `TECHNIQUE`
+> captions in the pad footer, directly above the control they describe. That is
+> what a legend is for.
 >
-> **Also open, small and real:** the desktop rule hardcodes `#b8a894` instead of a
-> token (`styles.css:1147`), which violates the stylesheet's own rule 3 — "No
-> colour literal may appear outside `:root` / `body.high-contrast`" — and pins the
-> hint out of `body.high-contrast`, where `--text-faint` is redefined to `#dcdcdc`
-> and every other faint label re-points. Not fixed at r152: it needs a pixel
-> measurement of the composited high-contrast backdrop, which is a paint-time value
-> no static read can supply.
+> Two smaller notes from the same pass, neither a defect: `min-width: 720px` is
+> the real cutoff rather than a stated desktop width, and the hint renders only
+> `↑ ← ↓ →` while the CSS comment advertises "arrows (or IJKL)". The comment is
+> **correct** — `KeyI/J/K/L` are all bound — and one glyph set is all that fits,
+> so r153 checked `keyboard.ts` before "correcting" a non-problem.
+>
+> **The colour literal — FIXED at r153.** r152 closed this item and left the
+> desktop rule's hardcoded `#b8a894` standing, with the blocker stated: it "needs a
+> pixel measurement of the composited high-contrast backdrop, which is a paint-time
+> value no static read can supply."
+>
+> The measurement was built (`tools/keyhint-contrast.mjs`) and it did **not** return
+> the defect r152 expected. The hint was not failing legibility — at 9.07:1 in
+> high-contrast it clears AA comfortably, because the pad goes black underneath.
+> It was failing **intent**: high-contrast lifts the faint labels together, and this
+> was the only one left behind.
+>
+> | painted pixels, 1280x800 | normal | high-contrast |
+> |---|---|---|
+> | `.key-hint` (W A S D) | `rgb(184,168,148)` **8.45:1** | `rgb(184,168,148)` **9.07:1** — did not move |
+> | `.stick-label` (STANCE) | `rgb(177,162,144)` 7.90:1 | `rgb(232,232,232)` **17.14:1** — moved |
+>
+> The control is the neighbour, in the same stick-zone and the same frame, reading
+> `--text-muted`. Freezing *it* makes the probe exit 2 rather than reach a verdict.
+>
+> `--key-hint-ink` now lives on `:root` and re-points to `var(--text-faint)` in
+> `body.high-contrast` — what rule 3 of the stylesheet already demanded. Default
+> mode is unchanged and that is measured, not assumed: the probe re-reads the same
+> `rgb(184,168,148)` after the change. High-contrast 9.07:1 → **15.31:1**.
+> Proved able to fail in `tools/keyhint-contrast-mutation.sh` (5 assertions).
+>
+> **Corrected at r153 — twice.** This note said the plan had "one unfixed colour
+> literal." It had **eleven** outside `:root` and `body.high-contrast`, not 1.
+> r153 fixed the one that was named, leaving **ten**:
+>
+> | kind | count | rule it breaks |
+> |---|---|---|
+> | translucent black scrims (sheet, boot, focus ring, gradient fade) | 6 | rule 4 — a decorative alpha should be a token so contrast mode can flatten it |
+> | wood tones `#352a20`, `#3a2d22` | 2 | rule 3 |
+> | `color: #cfc4b4` | 1 | rule 3 |
+> | `text-shadow` alpha | 1 | rule 4 |
+>
+> Each is a look decision with a real backdrop to measure, so they are recorded
+> rather than folded silently into a commit about one of them.
+>
+> **The second correction is the interesting one.** r153's first audit reported
+> **13**, and its replacement reported **12** — both inflated by two lines that
+> are prose *inside a comment*, quoting measured RGB from an older review frame.
+> The filter skipped lines starting with `*` and missed the wrapped
+> continuation lines. A comment-stripping parse gives **10**, which is what the
+> table above says. The first two numbers were written into this plan and into
+> `REVIEW-LOOP.md` before the mistake was caught — see r153's closing note.
 
 ### 1.2 Pre-fight card opens the sheet it points at — `P1`
 **Found:** r125, r130. Round 118 put the notation on the card; the card says
@@ -315,11 +361,28 @@ Because nothing is watching, three rules exist and are not optional:
       to be the taste call r144 assumed. See below.
 
 **Not "done" means:** every item above is either finished or blocked on a human
-decision with the measurement attached. **As of r152 the open items are the two
-noted above and nothing else:** item 1.2's "returns to the card", which shipped
-broken and is now fixed and measured; and item 1.1's misplaced rationale, which is
-a record error rather than a behaviour error, plus one unfixed colour literal on
-the key hint.
+decision with the measurement attached. **As of r153 every behaviour defect this
+document knew about is closed**, including the two r152 left: item 1.2's "returns
+to the card", which shipped broken and is now fixed and measured, and item 1.1's
+colour literal, which shipped pinned out of high-contrast and is now fixed and
+measured.
+
+What remains in 1.1 was corrected this round: the `Do:` line now describes what
+actually shipped (the glyphs sit under the stick captions in the pad footer, and
+they cannot be beside the coach legend — the two media queries are mutually
+exclusive). The scoreboard's round and commit counts are current.
+
+Two things are **recorded, not fixed**, and neither is a defect in the game:
+
+- the remaining 10 colour literals outside `:root` / `body.high-contrast`
+  (six translucent scrims, two wood tones, one `color`, one text-shadow alpha),
+  counted and classified above. Each is a look decision with a real backdrop to
+  measure, and they do not belong in a commit about the one that was named.
+- r152's warning still stands as the standing instruction for anyone who reads
+  this next: re-read the closed boxes against the code on suspicion, not on the
+  hypothesis that they are now correct. r153 found the fifth drift — a **count**
+  in prose, thirteen against one — and it was in the *open* item's description,
+  not a closed contract. The suspicion applies to every number in this document.
 
 **But read that as a claim to re-check, not a fact.** r149's own lesson was that
 this document recorded a conclusion where a blocker had been, and r150 audited

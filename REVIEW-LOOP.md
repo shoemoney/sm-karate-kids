@@ -8729,3 +8729,214 @@ what rule 3 forbids.
 | new gates, each proved able to fail | **3** (5 arithmetic + 5 source guards + 1 browser probe) |
 | my own instruments that were wrong | **4**, two of which gave a confident wrong answer first |
 | the no-op that agreed with itself | **1** — `Number('11_000')`, the exact failure of rounds 90/93/95, reproduced by accident |
+
+---
+
+## Round 153 — the pixel measurement r152 said it needed 🔆
+
+r152 closed the plan's last open box and left one thing standing, with the
+blocker written down rather than hand-waved:
+
+> Not fixed at r152: it needs a pixel measurement of the composited
+> high-contrast backdrop, which is a paint-time value no static read can supply.
+
+That is the correct thing to be blocked on, and it is the only box in the plan
+whose unfixed remainder was a **measurement** rather than a decision. So this
+round built the measurement. `tools/keyhint-contrast.mjs`.
+
+### The measurement
+
+`.key-hint` is 12px mono with wide tracking, sitting on `#pad`, which layers
+`--pad-lip` and `--pad-wash` over an opaque gradient and carries an `opacity`
+transition. So the backdrop is a composite that is not even one number over
+time, and the ink is mostly antialiased edge. Both facts push the verdict onto a
+pixel. Local background is the modal colour of the darker pixels in the
+element's own box — the same correction `score-ink.mjs` records — and the box is
+clamped to the element so a neighbour can never contribute.
+
+1280x800, deviceScaleFactor 2, ink and backdrop read off the rendered frame:
+
+| | normal | high-contrast |
+|---|---|---|
+| `.key-hint` (W A S D) | `rgb(184,168,148)` **8.45:1** | `rgb(184,168,148)` **9.07:1** |
+| `.stick-label` (STANCE) — `--text-muted` | `rgb(177,162,144)` 7.90:1 | `rgb(232,232,232)` **17.14:1** |
+
+**The defect is not the one r152 predicted.** 9.07:1 clears AA with room to
+spare — the pad goes black underneath, so pinning the colour costs far less
+than it would over any other ground. The real failure is *intent*: high-contrast
+mode exists so the faint labels lift **together**, and this one was the only
+label on screen left behind by the lift. That is a worse bug than a contrast
+miss and a completely different fix, and no amount of reading the stylesheet
+distinguishes them.
+
+Two things the measurement settled that a static read could not have:
+
+- **r141's 8.45:1 is real.** Independently reproduced, to two decimals, on a
+  tree nobody had measured with this tool.
+- **The composited backdrop is not the token.** `rgb(16,11,8)` painted under
+  `#100b08`, and `rgb(0,0,0)` rather than `--surface-void` in high-contrast.
+  Both differ from the value the stylesheet declares, which is the whole reason
+  the note called for pixels.
+
+### The control, and why it is not a separate fixture
+
+`.stick-label` is in the **same `.stick-zone`** — same backdrop, same pad, same
+frame, same size class — and it reads `--text-muted`, which does re-point. So
+the control is the neighbour, measured by the same code on the same pixels.
+
+The probe **exits 2 INCONCLUSIVE** if the control does not move. A probe that
+reports "the ink did not move" for everything is not a pass and not a fail; it
+is an instrument that cannot see change, which is exactly how rounds 90, 93 and
+95 each shipped a metric agreeing with a no-op. The subject's verdict is only
+reachable through the control's movement.
+
+### The fix
+
+`--key-hint-ink` on `:root`, re-pointed to `var(--text-faint)` in
+`body.high-contrast` — which is what rule 3 of the stylesheet already demanded
+and what the inline literal had been breaking since r135.
+
+| | before | after |
+|---|---|---|
+| normal-mode ink | `rgb(184,168,148)` | `rgb(184,168,148)` — **unchanged** |
+| normal contrast | 8.45:1 | 8.45:1 |
+| high-contrast ink | `rgb(184,168,148)` | `rgb(220,220,220)` |
+| high-contrast contrast | 9.07:1 | **15.31:1** |
+
+"Unchanged" is a measurement, not an inference from having copied the same hex.
+The probe re-reads `rgb(184,168,148)` off the frame after the edit, so a default
+mode that had quietly moved would have failed the run.
+
+### Proved able to fail — `tools/keyhint-contrast-mutation.sh`, 5/5
+
+| mutation | expected | got |
+|---|---|---|
+| baseline, fixed tree | 0 CLAIM-TRUE | **0 CLAIM-TRUE** |
+| literal re-inlined at the call site (the r152 defect) | 1 PINNED | **1 PINNED** |
+| **token present, HC value == normal** | 1 PINNED | **1 PINNED** |
+| **control frozen (`--text-muted` HC == normal)** | 2 INCONCLUSIVE | **2 INCONCLUSIVE** |
+| hint moves but fails AA in normal mode | 1 CONTRAST | **1 CONTRAST** |
+
+Mutation 3 is the one that separates this from a lint rule: a **token** is wired
+up, the literal audit is clean, and `grep` finds nothing — but if the token's
+high-contrast value equals its normal value, the label still does not move, and
+only a pixel can see it. A grep-for-`var()` gate passes that tree.
+
+Mutation 4 catches the opposite mistake: a token that re-points *correctly* but
+lands the glyph under AA in the default mode. Being wired up is not the same as
+being right.
+
+### The plan was wrong about the count
+
+r152's note — and the plan's `Not "done" means` paragraph — both say the plan
+had **one** unfixed colour literal. It had **eleven** outside `:root` and
+`body.high-contrast`:
+
+| kind | count | rule |
+|---|---|---|
+| translucent black scrims (sheet, boot, focus ring, gradient fade) | 6 | rule 4 — a decorative alpha should be a token so contrast mode can flatten it |
+| wood tones `#352a20`, `#3a2d22` | 2 | rule 3 |
+| `color: #cfc4b4` | 1 | rule 3 |
+| `text-shadow` alpha | 1 | rule 4 |
+| key hint (fixed this round) | 1 | rule 3 |
+
+This is the pattern four rounds running, aimed at this document instead of at
+the code: a number in prose that had drifted from the count in the tree. r152's
+own warning was to "re-read the closed boxes against the code on that
+suspicion" — and the suspicion applies to the open boxes' *descriptions* too.
+Not fixed here: each is a separate look decision with a real backdrop to
+measure, and quietly sweeping ten literals into a commit about one of them is
+how a fix stops being reviewable. Recorded, counted, unfixed.
+
+### And then I got the corrected count wrong twice
+
+The table above says **eleven before, ten after**. My first two audits said
+**13** and **12**, and I wrote both numbers into `docs/COMPLETION-PLAN.md` and
+into this log before checking either one properly.
+
+The filter was `if s.startswith('/*') or s.startswith('*'): continue` — skip
+comment lines. That skips the opening delimiter and the lines that begin with
+`*`, and **misses the wrapped continuation lines inside a block comment**. Two
+of the thirteen were prose quoting measured RGB from an older review frame:
+
+```
+2225:    pixel on the review frame — key stance/technique both rgb(137,123,108), row
+2226:    stance/technique both rgb(151,186,196).
+```
+
+Neither is a colour literal. A real comment-stripping pass — tracking `/* */`
+state across the whole file rather than pattern-matching line starts — gives
+**10**.
+
+This is the round's own lesson, committed by the round, in the same commit:
+**a count I did not derive is a claim, and I put two wrong ones in the document
+whose whole subject is claims that drifted from the code.** The commit had not
+been pushed, so it was amended rather than left standing with a number I already
+knew to be wrong. Had this been the plan's count rather than my own, the next
+round would have inherited 13 and, being told 13 was measured, would have
+believed it.
+
+The generalisable bit: `grep -v` on a line prefix is a *comment heuristic*, not
+a comment parser, and the two agree only until someone wraps a line. Any audit
+whose subject is "count the things in this file" needs to parse the file.
+
+### My own instrument, wrong once more
+
+The first `grep`-for-literals audit used `awk` with `\b`:
+
+```awk
+if (lit.search(l)) ...
+```
+
+awk's POSIX ERE has no `\b`, so the pattern never matched a word boundary and
+the audit reported **"0 colour literals"** for a stylesheet with thirteen in it —
+on the very line I had just been told about. Green, wrong, and about to be
+written into the plan as "the key hint was the only one". Replaced with Python's
+`re`, which found 13 immediately. Same shape as rounds 90/93/95 and as r152's own
+`Number('11_000') === NaN`: an instrument that reports success because it never
+ran the branch.
+
+Two more, both caught before they produced a number:
+
+- The `box = locator.boundingBox()` returns `null` for a `display: none`
+  element, and a null box would have been measured as a zero-size crop and
+  reported as "contrast 1.00:1" rather than "nothing to measure". The probe now
+  asserts `display: block` **and** that the desktop media query matches, and
+  exits 2 otherwise.
+- The first run of the row assembly spread `{...side(normal)}` and
+  `{...side(highContrast)}` into one object, so the second silently overwrote
+  the first and the probe would have compared normal-mode ink against itself —
+  reporting "did not move" for a label that had moved, on every run, forever.
+
+### Reading the pixels as well as the numbers
+
+Screenshots of the stick zone, both modes, at the end. The numbers say the hint
+lifts 0.40 → 0.72 relative luminance; the crops say what a player sees, which is
+that `W A S D` now goes white with `STANCE` instead of staying tan in a frame
+where everything around it went white. Cheap, and it catches the case where the
+measurement is right and the result is still ugly.
+
+### Gates
+
+`check=0` (200 unit, 21 files) · `e2e=0` (44 passed, 6 skipped) at **load 11.6**,
+inside the 14–16 band r151 documented as unreliable on this machine, so the
+number is recorded next to the result rather than next to the claim.
+
+Deployed: `tools/deploy.sh --yes` → 26 pushed, 3 stale removed, and
+`tools/verify-deploy.sh` byte-identical over the wire, `assets/index-B-_VGGXn.css`
+sha256-matched. Production is serving this build.
+
+### One item closed, and it was a record
+
+The plan's last open item was 1.1's misplaced `Do:` line — the glyphs described
+as "beside the coach's direction labels", which they cannot be, because the coach
+strip and the key hints are gated on mutually exclusive media queries. Corrected
+this round to describe what shipped, with the mutually-exclusive-media-query
+reason attached so it cannot drift back.
+
+While in there, `min-width: 720px` and the arrow-vs-IJKL note were re-checked
+rather than "corrected". IJKL **is** genuinely bound (`keyboard.ts:16-19`), so the
+CSS comment is accurate and the on-screen glyphs show one of the two working key
+sets because one is all that fits. r152's note had listed that as a defect; it
+is not one. Checking a claim before editing it is cheaper than reverting an edit,
+and this round had already found two of my own instruments reporting success.
