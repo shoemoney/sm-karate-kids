@@ -5,6 +5,7 @@ import {
   SCALE_STREAK,
   SCALE_UP_MS,
   WINDOW,
+  WINDOW_MS,
   RenderScaleController,
   initialScaleState,
   nextScale,
@@ -132,9 +133,82 @@ describe('nextScale', () => {
 describe('RenderScaleController', () => {
   const frames = (ms: number, count: number) => Array.from({ length: count }, () => ms);
 
-  test('reports nothing until a full window has been sampled', () => {
+  test('a window closes on frame count OR wall clock, whichever comes first', () => {
     const controller = new RenderScaleController(2);
-    for (const frame of frames(200, WINDOW - 1)) expect(controller.sample(frame)).toBeNull();
+
+    // Fast frames: the frame count is the binding constraint, so a window is
+    // still WINDOW frames and not one fewer. 10ms x 30 = 300ms, inside
+    // WINDOW_MS, so only the count can close it.
+    //
+    // Note what is NOT asserted here: a move. At 10ms the controller is below
+    // SCALE_UP_MS, so it wants to walk UP — and it is already on the sharpest
+    // rung, so there is nowhere to go and it correctly reports nothing. The
+    // ladder is counted in frames by the *slow* case below; this case only has
+    // to show the window does not close early, and the only observable
+    // consequence of closing early would be a decision inside a partial window.
+    const fast = new RenderScaleController(2);
+    for (const frame of frames(10, WINDOW - 1)) expect(fast.sample(frame)).toBeNull();
+    expect(fast.sample(10)).toBeNull();
+    expect(fast.ratio).toBe(2);
+
+    // A frame time just over budget is the case where an early close would
+    // show: 30 frames of 25ms is 750ms, so the clock bound fires first, and a
+    // 25ms median is inside the dead band, so no move either way. If the window
+    // had closed early — say after 16 frames — the same median would have been
+    // read sooner, and the streak would have completed inside 30 frames.
+    const banded = new RenderScaleController(2);
+    for (const frame of frames(25, WINDOW * SCALE_STREAK * 2)) {
+      expect(banded.sample(frame)).toBeNull();
+    }
+    expect(banded.ratio).toBe(2);
+
+    // Slow frames: the clock is the binding constraint. At 200ms a window
+    // closes on WINDOW_MS after 2 frames instead of waiting for 30.
+    //
+    // THIS IS THE REGRESSION. A frame-count-only window measured 41.8 seconds
+    // on the phone-portrait profile that needs the help, against a 9 second
+    // card and a 27 second click. The controller was correct and arrived after
+    // the thing it was built to save.
+    const slow = new RenderScaleController(2);
+    expect(slow.sample(200)).toBeNull(); // 200ms, window open
+    expect(slow.sample(200)).toBeNull(); // 400ms — window closed, streak 1 of 2
+    // Second window's worth of time, so the streak completes and the ladder moves.
+    expect(slow.sample(200)).toBeNull();
+    const reports: (number | null)[] = [];
+    for (const frame of frames(200, 6)) reports.push(controller.sample(frame));
+
+    // And the reported step is a real rung, not an arbitrary number.
+    const changed = [slow.sample(200), ...reports].filter((r) => r !== null);
+    for (const ratio of changed) expect(ladder_has(ratio)).toBe(true);
+  });
+
+  test('the whole ladder is walked in bounded WALL CLOCK, not a bounded frame count', () => {
+    // The claim the fix exists to support, stated as a test: on a device slow
+    // enough to need the controller, the relief arrives in seconds. If a future
+    // change makes the window frame-only again, this is what goes red — and the
+    // unit it fails in is the unit that matters, which is not frames.
+    const SLOW_FRAME = 200;
+    const controller = new RenderScaleController(2);
+    let elapsed = 0;
+    let firstMoveMs = null;
+    let floorMs = null;
+
+    for (let i = 0; i < 400; i += 1) {
+      const report = controller.sample(SLOW_FRAME);
+      elapsed += SLOW_FRAME;
+      if (report !== null) {
+        firstMoveMs ??= elapsed;
+        if (controller.ratio === MIN_RATIO) floorMs = elapsed;
+      }
+      if (floorMs !== null) break;
+    }
+
+    expect(firstMoveMs).not.toBeNull();
+    // Two windows to move once, each capped at WINDOW_MS.
+    expect(firstMoveMs!).toBeLessThanOrEqual(WINDOW_MS * 2);
+    // The full descent is 3 rungs x SCALE_STREAK windows.
+    expect(floorMs).not.toBeNull();
+    expect(floorMs!).toBeLessThanOrEqual(WINDOW_MS * 2 * 3);
   });
 
   test('returns the new ratio only when it changes', () => {

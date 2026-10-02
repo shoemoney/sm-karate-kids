@@ -57,6 +57,27 @@ export const SCALE_STREAK = 2;
 /** Frames sampled per decision window. */
 export const WINDOW = 30;
 
+/**
+ * Wall-clock ceiling on a decision window, in ms.
+ *
+ * WHY A WINDOW NEEDS A STOPWATCH. `WINDOW` alone is a unit error waiting to
+ * happen, and the machine that needs this controller most is the one it fails.
+ * The decision is about whether frames are too slow, so counting SLOW FRAMES to
+ * decide that they are slow is circular: the worse the device, the longer it
+ * takes to notice. Measured on a phone-portrait context under software
+ * rasterization, one window of 30 frames cost **41.8 seconds**, so the two
+ * windows a single step needs cost ~83s — against a failure the controller
+ * exists to remove that arrives in 9s. At a fixed ratio the same device is fine
+ * (click 27003ms -> 2171ms at the cliff), so the lever is right and the timing
+ * was not.
+ *
+ * So a window also closes on elapsed time, whichever comes first. On a fast
+ * machine the frame count still wins and the median still rests on 30 samples.
+ * On a device rendering at 1fps the window closes after a few frames and the
+ * controller reacts in seconds, which is the entire point of having it.
+ */
+export const WINDOW_MS = 400;
+
 /** The lowest ratio the ladder will use. Below this it is all blur. */
 export const MIN_RATIO = 0.75;
 
@@ -153,6 +174,14 @@ export class RenderScaleController {
   private applied: number | null = null;
   /** Every frame ever handed in, including those inside an open window. */
   private fed = 0;
+  /**
+   * Wall-clock milliseconds held by the open window.
+   *
+   * Reset with the window, and it is the reason this controller can help the
+   * device it was written for. Counting frames alone meant a device rendering
+   * one frame per second needed 41.8s to accumulate a single window.
+   */
+  private windowMs = 0;
 
   constructor(devicePixelRatio: number | undefined) {
     this.ladder = renderScaleLadder(devicePixelRatio);
@@ -189,15 +218,21 @@ export class RenderScaleController {
    * Returning the same value every frame would be cheaper to read but would
    * make the caller re-apply a scale on every frame, and `setPixelRatio` is not
    * free — it reallocates the drawing buffer.
+   *
+   * A window closes on whichever comes first: `WINDOW` frames, or `WINDOW_MS`
+   * of wall clock. The second bound is what makes this work on the hardware
+   * that needs it — see `WINDOW_MS`.
    */
   sample(frameMs: number): number | null {
     this.fed += 1;
     this.samples.push(frameMs);
-    if (this.samples.length < WINDOW) return null;
+    this.windowMs += frameMs;
+    if (this.samples.length < WINDOW && this.windowMs < WINDOW_MS) return null;
 
     const sorted = [...this.samples].sort((a, b) => a - b);
     const median = sorted[Math.floor(sorted.length / 2)] ?? 0;
     this.samples = [];
+    this.windowMs = 0;
 
     const next = nextScale(this.ladder, this.state, median);
     if (next.index === this.state.index) {

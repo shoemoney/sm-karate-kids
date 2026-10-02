@@ -7493,3 +7493,124 @@ than none. Proven able to fail: removing the `sample` call from the render loop 
 should now clear with margin. Neither is failing and neither was edited; if either
 starts trending up again, the frame cost has moved and the number is where it shows
 first.
+
+---
+
+## Round 147 — the controller was correct, tuned in the wrong unit, and arrived after the thing it was saving
+
+Round 146 closed the last open box with a green gate, a mutation-proved test and a
+CI run. It was wrong about one thing, in the way this loop keeps being wrong: it
+shipped a number that had been measured on a *different thing* than the thing it
+claimed.
+
+### What 146 proved, and what it did not
+
+146's headline was `27003ms -> 2171ms` at the 30x throttle cliff — 12.4x, "at the rate
+that breaks it." That number is real, and it is in `logs/throttle-cliff.json`. Read the
+row labels:
+
+```
+baseline         27003 ms
+pixelratio-1      2171 ms     <- a FIXED ratio, patched into renderer.ts
+```
+
+`pixelratio-1` is `renderer.setPixelRatio(1)` — the lever, held still. It answers r144's
+objection ("does the lever work at the cliff?") and it answers it correctly. It is not a
+measurement of the controller, because the controller is the thing that has to *arrive*
+at that ratio by itself.
+
+So I measured the shipped controller directly, on the same profile, reading the ratio off
+the page:
+
+```
+cpu x1   frameMed 585.2ms  fps 1.7  click 5431ms   scale { ratio: 2, frames: 47, sinceReadyMs: 41808 }
+cpu x30  frameMed 824.9ms  fps 1.2  click 5898ms   scale { ratio: 2, frames: 47, sinceReadyMs: 64175 }
+```
+
+**`ratio: 2` at 1.2fps.** The controller never moved a single rung, on hardware that
+wanted it at the floor. The lever works; the thing that was supposed to pull the lever
+did nothing, and 146's gates were all green while it did nothing.
+
+### The bug is a unit error, and the arithmetic names it
+
+`WINDOW = 30` frames, `SCALE_STREAK = 2`, so one rung costs 60 frames. The harness says
+it took **41.8 seconds** to serve 47 frames on that profile. So the *first* step needed
+~53 seconds of wall clock — against a round card that dismisses at **9s** and a click
+that fails at **27s**.
+
+The decision is "are frames too slow?", and it was being made by *counting slow frames*.
+That is circular in the worst possible direction: **the worse the device, the longer it
+takes to notice.** The machine that needs the relief most is the machine that receives it
+last. 146 read the sweep table, saw `pixelRatio 1` at 27% of baseline, and shipped a
+controller to get there — without ever asking how long the getting takes.
+
+### The fix: a window also closes on a stopwatch
+
+`WINDOW_MS = 400`. A window now closes on whichever comes first, `WINDOW` frames or
+400ms. On a fast machine the frame count still binds and the median still rests on 30
+samples; on a 1fps device the window closes in two frames.
+
+| | before | after |
+|---|---|---|
+| window close | 30 frames, **41.8s** | 30 frames **or** 400ms |
+| first rung | **~53s** | 2 windows, **~1.6s** |
+| full descent to 0.75 | never | **2.4s** |
+| ratio on the device | **2** (never moved) | **0.75** |
+| click, cpu x1 | 5431ms | **1338ms** |
+| click, cpu x30 | 5898ms | **2389ms** |
+| frame median, x1 | 585.2ms | **108.1ms** |
+
+The descent is 2.4s because each window is now time-bounded: 2 windows per rung x 3
+rungs, 400ms each. Verified by replaying the controller logic outside the browser at
+200ms/frame — moves at frames 4, 8, 12, i.e. 800ms, 1600ms, 2400ms.
+
+### Three mutations, all red
+
+| mutation | result |
+|---|---|
+| remove the wall-clock bound (reintroduce 146's bug) | **red** — first move 12000ms vs an 800ms budget |
+| `MIN_RATIO` 0.75 -> 0.5 | **red** — ladder test |
+| unwire `sample()` from the render loop (e2e) | **red on both viewports** |
+
+The first is the one that matters. Its failure message is the whole round in one line:
+`expected 12000 to be less than or equal to 800`.
+
+### One of my own tests encoded the bug, and I want that on the record
+
+The existing test `reports nothing until a full window has been sampled` fed 29 frames of
+200ms and asserted `null`. With the clock bound it correctly returns `1.5`, so the test
+failed — and it was **right to fail**. It was pinning the frame-only rule, which is the
+defect. Replaced with two tests: one that pins the OR (a fast box still waits for 30
+frames; a slow one does not), and one that pins the descent in **wall clock**, because
+that is the unit the failure lives in.
+
+I also had to correct my own reasoning twice mid-round, both times by measuring instead
+of reasoning: I asserted 10ms frames should walk the ladder, and they correctly do
+nothing because the controller is already on the sharpest rung. I had assumed a
+`toBeNull()` was a bug before checking that the streak was only 1 of 2.
+
+### The round in one table
+
+| | |
+|---|---|
+| r146's headline number | **fixed-ratio row**, not the controller |
+| live controller, measured | `ratio: 2`, never moved, at 1.2fps |
+| the bug | window counted in **frames** — 41.8s to decide |
+| fix | window closes on frames **or** 400ms |
+| ratio after fix | **0.75** (full descent, 2.4s) |
+| click, cpu x1 / x30 | 5431 -> **1338ms** / 5898 -> **2389ms** |
+| mutations | **3/3 red** |
+| unit gate | **180 passed** (18 in the render-scale file) |
+| e2e gate | **37 passed, 5 skipped** |
+| open boxes | **zero** (unchanged) |
+
+### What 146 got right, and should not be lost
+
+The sweep was real and its conclusion holds: `antialias` is inside the noise, the post
+chain stays, pixel ratio is the only lever with a hard bound, and 0.5 buys nothing over
+1. The ladder, the median, the streak and the dead band are all correct and all still
+here. The only thing wrong was the clock the ladder walks on.
+
+**The generalisable finding:** a controller whose input is the thing it is trying to
+fix cannot count units of that thing. Frames-to-slow, ticks-to-stuck, retries-to-failing,
+bytes-to-full. Bound the window in the unit the *user* is waiting in.

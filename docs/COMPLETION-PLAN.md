@@ -221,16 +221,32 @@ cliff?** (`logs/throttle-cliff.json`, CPU throttled 30×.)
 **12.4× on the click, at the rate that breaks it.** That is the answer r144 said
 was unavailable.
 
+> **Corrected at r147.** The two rows above are a **fixed** `pixelRatio 1` patched into
+> `renderer.ts`, not the controller. They prove the *lever* works at the cliff, which is
+> what r144 asked. They do **not** measure the controller, which has to reach that ratio
+> by itself — and when r147 measured the shipped controller directly it read
+> `ratio: 2`, never having moved, because its decision window was counted in **frames**
+> and one window cost **41.8s** on that profile. r146's gates were all green while the
+> controller did nothing. See r147 in `REVIEW-LOOP.md`; the lever conclusion above
+> stands, the timing did not.
+
 ### What shipped
 
 `apps/game/src/renderScale.ts` — a controller the render loop feeds every frame
 after the first presented frame. It walks a **bounded ladder** of pixel ratios,
-using the **median** of each 30-frame window and requiring **two** agreeing
+using the **median** of each window and requiring **two** agreeing
 windows before it moves, so one shader compile cannot make the picture
 permanently worse. On a machine that can afford full sharpness the ladder never
 moves and nothing changes.
 
 Deliberately **one lever, bounded, no art changes.**
+
+**A window closes on `WINDOW` frames or `WINDOW_MS` (400ms), whichever comes first**
+— added at r147, and it is the part that makes the controller work at all. Counting
+frames alone meant one window cost 41.8s on the GPU-less profile, so the relief arrived
+at ~53s against a 9s card. After the fix the descent takes **2.4s** and the ratio
+genuinely reaches `0.75`. Any controller whose input is the thing it is trying to fix
+must be bounded in the unit the user is waiting in.
 
 ### The measurement, on the test that was red
 
