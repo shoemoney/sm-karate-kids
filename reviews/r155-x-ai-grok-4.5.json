@@ -1,0 +1,89 @@
+{
+  "model": "x-ai/grok-4.5",
+  "elapsed_s": 24.9,
+  "usage": {
+    "prompt_tokens": 17649,
+    "completion_tokens": 935,
+    "total_tokens": 18584,
+    "cost": 0.0110968,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 17536,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0110968,
+      "upstream_inference_prompt_cost": 0.0054868,
+      "upstream_inference_completions_cost": 0.00561
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "shots": [
+    "00-boot-loading.png",
+    "01-phone-title.png",
+    "02-phone-fight.png",
+    "03-phone-strike.png",
+    "04-phone-controls.png",
+    "05-phone-techref.png",
+    "06-phone-settings.png",
+    "07-phone-result.png",
+    "08-desktop-fight.png",
+    "09-phone-highcontrast.png",
+    "10-phone-tournament.png",
+    "11-phone-impact.png",
+    "12-phone-jump.png",
+    "13-phone-ladder.png",
+    "14-phone-returning.png",
+    "15-phone-settings-mixed.png",
+    "16-phone-in-play.png",
+    "17-phone-scored-result.png",
+    "18-phone-kick.png",
+    "20-phone-call.png",
+    "21-phone-kick-open.png"
+  ],
+  "dropped_for_cap": [],
+  "items": [
+    {
+      "id": "pre-fight-ui-clutter",
+      "title": "Qualifier overlay buries the fighters before FIGHT",
+      "what": "On the QUALIFIER vs HasanAbi pre-bout screen the large gold title, flavor text block, TECHNIQUES pill and FIGHT button sit directly over the upper bodies and heads of both fighters, leaving only legs and lower torsos clearly visible.",
+      "why": "The first impression of the match is text and chrome, not the characters or the dojo. Players cannot read body language or enjoy the production value they just downloaded, and the call-to-action feels secondary to the copy.",
+      "how": "Move the title + description into a compact top safe-area banner, shrink or relocate TECHNIQUES to a corner icon, and keep FIGHT as the sole large control in the lower third so the full fighter sprites remain unobstructed."
+    },
+    {
+      "id": "twin-stick-occlusion",
+      "title": "Virtual sticks cover the action on portrait phones",
+      "what": "In every in-bout portrait shot the two large circular STANCE/TECHNIQUE pads occupy the entire bottom ~30% of the 390\u00d7844 frame, cutting off the fighters\u2019 feet, the tatami edge and any low attacks (sweeps, crouches, front kicks).",
+      "why": "On the design-baseline device the player literally cannot see the contact point or footwork that decides a point-karate exchange, making timing and spatial reads guesswork.",
+      "how": "Shrink stick radius ~25%, add a \u2018Large controls\u2019\u2013off default that sits them lower and more transparent, and raise the camera framing so the fighters\u2019 full bodies sit in the clear upper 60% above the stick zone."
+    },
+    {
+      "id": "move-legend-collision",
+      "title": "Persistent input legend collides with sticks and mat",
+      "what": "The semi-transparent bar listing \u2018back / jump / in / crouch\u2019 and \u2018back\u00b7reverse / forward\u00b7punch / up\u00b7kick / down\u00b7sweep\u2019 sits immediately above the twin sticks and over the fighters\u2019 ankles in every combat frame.",
+      "why": "It adds visual noise exactly where the eye must track feet and range, and on a small phone it is both hard to read mid-bout and redundant once the player has opened TECHNIQUES once.",
+      "how": "Hide the legend after the first exchange or a short timer; show it only on a long-press of the TECHNIQUES button or as a one-time coach overlay that auto-dismisses."
+    },
+    {
+      "id": "result-overlay-vs-kick",
+      "title": "Win/loss text hides the decisive connecting attack",
+      "what": "On \u2018HASANABI WINS\u2019 and \u2018ASMONGOLD WINS\u2019 screens the massive gold title, score line and REMATCH button cover the upper half of the frame while the winning kick or punch is still posing underneath, so the actual ippon moment is almost invisible.",
+      "why": "The emotional peak of a point-karate bout is the clean connecting strike; burying it under UI removes the satisfaction and makes rematches feel like menu navigation instead of \u2018one more round\u2019.",
+      "how": "Delay the full result card 0.8\u20131 s, play a short camera push on the frozen impact pose first, then slide the win text and REMATCH up from the bottom so the strike remains the hero shot."
+    },
+    {
+      "id": "score-half-glyph",
+      "title": "Half-point scores render as awkward stacked fractions",
+      "what": "When a waza-ari is awarded the top bar shows \u20180\u00bd\u2019 or \u20182\u00bd\u2019 as a full-size digit jammed against a tiny vulgar fraction, visibly misaligned with the opposing integer score and the round timer.",
+      "why": "Scores are checked constantly in a first-to-two format; an ugly, hard-to-parse glyph makes the player doubt whether they actually scored and breaks the otherwise polished tungsten HUD.",
+      "how": "Replace the fraction with a clean \u2018\u00bd\u2019 old-style numeral or a small \u2018.5\u2019 in the same weight as the integer, optically centered in the score pill so both sides stay balanced."
+    }
+  ],
+  "raw": null
+}

@@ -9329,3 +9329,45 @@ comment citing the number that motivated it — and it had been passing a set
 containing no gameplay since it was written. The comment's own citation
 (`an unplayed run measures ~1.9`) describes a measurement that was never taken
 on these frames.
+
+### The review half, on the same fresh set — five findings, five refutations
+
+`x-ai/grok-4.5` on the r155c set, `reviews/r155-x-ai-grok-4.5.json`. The first
+attempt printed `NO-JSON` (a truncated response) and exited **1** — the harness
+is correctly fail-closed, `return 0 if parsed else 1`. I could not see that
+because I had piped it to `tail`; see below.
+
+Every one of the five was checkable, and none survived:
+
+| # | finding | verdict |
+|---|---|---|
+| 1 | `pre-fight-ui-clutter` — "the gold FIGHT button sits directly on top of their legs" | **refuted on pixels.** Red fighter's bottom edge is **y 494 CSS**; the FIGHT button's top edge is **y 550** — **56 CSS px below their feet**, 0.0% overlap. The only overlap anywhere is a **1 CSS px** graze from the TECHNIQUES pill. |
+| 2 | `twin-stick-occlusion` — sticks cover the bottom 30% | **deliberate**, and documented: the mobile-first ADR makes portrait 390×844 the baseline with touch primary. A look trade already decided, re-raised without new evidence. |
+| 3 | `move-legend-collision` — the persistent input legend collides | **closed at r138** on a playtest, with the reason recorded: the action words carry their own arrow, sitting directly above the chevron each one describes. Re-raising a closed decision. |
+| 4 | `result-overlay-vs-kick` — "the winning kick is almost invisible" | **contradicted by the frame it cites.** `07-phone-result.png` shows the kick fully framed in the lower half as the hero shot. |
+| 5 | `score-half-glyph` — "full-size digit jammed against a tiny vulgar fraction" | **stale; describes pre-r148 rendering.** The pixels show `2½` as one vulgar-fraction glyph beside the integer — the r148 measurement exactly (1.00 line, baseline flush, no reflow). |
+
+I nearly recorded finding 1 as a **hallucinated screen**. `13-phone-ladder.png`
+is named for the tournament ladder, and the capture comment says the shot exists
+to catch "the tournament ladder before a round card covers it" — so I read the
+name, concluded the pre-bout card was not in the set at all, and was about to
+write down that the model invented a screen it was never shown. Opening the PNG
+settled it in one look: it **is** the pre-bout card, QUALIFIER vs HasanAbi, with
+the blurb, TECHNIQUES, FIGHT and both sticks. The premise was true and my
+suspicion was wrong. Worth recording because the accusation was the more
+interesting claim, and it is exactly the kind a review log is supposed to
+refuse to publish unchecked.
+
+Two attempts to measure the fighter/UI overlap by colour mask both produced
+nonsense — 67.6% and then 100% "covered", on a figure that cannot span 95% of
+the frame. Neither number was published. The one clean measurement came from
+separating the one saturated red in the scene from the red scoreline label: two
+disjoint runs, y 19–35 (the `HASANABI` text) and y 356–494 (the red gi). The grey
+gi never resolved cleanly and no number for it is reported.
+
+**What this is.** A model with fresh frames and no stale cache produced five
+findings, and four of them fall to a pixel measurement or a documented closed
+decision. That is the loop's own r127 lesson arriving from a different direction:
+the reviewer is a good **generator of hypotheses** and a poor **authority on the
+game**. Nothing here is a defect, and the round's finding is the same one the
+instrument audit produced from a different end.
