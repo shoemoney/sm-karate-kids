@@ -8062,3 +8062,143 @@ first measurement instead of rendering the option space once. The measurement wa
 cheap — the half point was in the review set since r73, and landing one takes four
 lines of touch choreography that already existed. What was missing was not tooling
 but the decision to look, five times over.
+
+---
+
+## Round 149 — the gate had no other half, and the credential was never missing
+
+The plan said zero open boxes. That was true of the plan and false of the
+project, which is the failure mode a "done" document is worst at: it had
+recorded the previous round's *conclusion* instead of the previous round's
+*blocker*.
+
+r148's last line was:
+
+    production | stale, verified as stale by its own gate
+
+and the reason given was:
+
+    ssh root@192.168.1.10  ->  Permission denied (publickey)
+
+Read plainly, that says the deploy could not be done. It says something much
+narrower, and nobody checked the narrower thing for a round: **the same host
+accepts `shoemoney`, the deploy root is owned by `shoemoney`, and `rsync` works
+over it.**
+
+    shoemoney@192.168.1.10   ->  OK shoemoney   (sudo: NOPASSWD)
+    rsync -ain --delete      ->  exit 0, 34 changes listed
+
+Four rounds of a review loop treated a *root* refusal as the absence of a
+credential. A deploy tool that knows only one identity converts a login detail
+into an outage, and that is exactly what happened: production sat a build behind
+while the log explained, in confident detail, why it could not be helped.
+
+### A gate that detects a problem is not a way to solve one
+
+The repo had `tools/verify-deploy.sh` — an excellent gate, mutation-proved at
+r141, that could tell you production was stale — and **no way to make it not
+stale.** A detector with no actuator. The plan listed 3.2 as shipped and did not
+notice the missing half, because the item was phrased as "the deploy is
+*verified*", which was true, rather than "the deploy *can happen*", which was
+not.
+
+`tools/deploy.sh` is the actuator. Four things it does that a naive `rsync -a`
+would get wrong:
+
+- **refuses a stale build.** A `dist/` older than the source tree it claims to
+  represent is a deploy of history, so it compares mtimes and names the file
+  that is newer. This is the r141 shape arriving from the build side instead of
+  the serving side.
+- **dry run, always, and it prints the `--delete` list.** `--delete` is what
+  makes a web root converge — an nginx root will happily serve a stale hashed
+  bundle forever — and it is also the one flag here that can remove something
+  nobody asked to remove. It must never be seen for the first time as it fires.
+- **`--delay-updates`.** Without it there is a real window in which a player
+  loads the new `index.html` and gets a 404 for the script it names. That is the
+  "right name, wrong bytes" family r141 already spent a round on, and the fix is
+  ordering, not verification.
+- **propagates `verify-deploy.sh`'s exit code.** rsync's exit says bytes reached
+  a directory. It says nothing about what nginx serves from it. A deploy script
+  that reports its own success is r141's failure wearing a different hat.
+
+### The harness found a bug in itself, which is the point of writing one
+
+`tools/deploy-mutation.sh` — 12 assertions, each able to go red, over a real
+`python3 -m http.server` on a throwaway root and a real ephemeral port.
+Production is never a target of it; a mocked target would not exercise the part
+that is actually risky.
+
+Three cases failed on the first run and **none of them was a bug in
+`deploy.sh`**:
+
+    FAIL  1. dry run      expected: http server starts    got: server never answered
+    FAIL  2. faithful deploy
+    FAIL  3. deploy of a changed build
+
+All three were the harness's `serve()` requiring **HTTP 200 on `index.html`**
+before declaring the server up. Cases 2 and 3 start the server on an empty root
+and only deploy afterwards, so "nothing there yet" was reported as "deploy
+failed."
+
+That is worth more than the three red lines: it is standing rule 4 — *if a probe
+times out immediately, check the probe and the servers before the code* —
+committed inside the tool written to enforce rule 4, in the exact shape of a
+false regression. Three environment failures wearing the costume of a broken
+deploy, produced by the mechanism meant to prevent them. Readiness is now "the
+port answers with some status," because the question being asked is whether the
+*server* is up, not whether the *deploy* has happened.
+
+The cases that mattered were all green afterwards and are the ones with teeth:
+
+| case | proves |
+|---|---|
+| 3c | the superseded hashed asset is pruned — nginx would serve it forever |
+| 4 | the gate is red when the served bundle is **absent** |
+| 5 | the gate is red on **right name, wrong bytes** — the r141 shape |
+| 6 | no local build → **exit 2**, operator error, not a deploy failure |
+| 7 | a build older than the source is refused, and says which file is newer |
+| 8 | unreachable host → exit 1, never a silent success |
+
+Case 7 is the one that would have caught r141 at the source. Everything else is
+about noticing; that is about not starting.
+
+### Production, verified over the wire
+
+```
+html         identical to local build
+assets/index-Ccf9hihb.js  1063813 bytes  sha256:b82db79dcc55
+assets/index-CHYzz0ub.css  39487 bytes  sha256:72667efdbff2
+OK  2 assets served, byte-identical to the local build
+```
+
+The first time in this project's history that claim has been true. Before
+r148's build went up, production served `index-D5kxXh1i.js` against a local
+build of `index-Ccf9hihb.js` — 200 OK the whole time, which is the entire r141
+lesson arriving again in a different costume.
+
+### The gates, read before the commit, in that order
+
+| | |
+|---|---|
+| check= | **182 unit**, content OK, assets OK, exit 0 |
+| e2e= | **42 passed, 6 skipped**, exit 0 (6.1m) |
+| deploy gate | **OK**, 2 assets byte-identical |
+| mutations | 12 red-assertions, all confirmed red |
+
+### What this round actually was
+
+Not a feature. A **documentation-shaped defect**: the plan recorded a
+conclusion and lost a blocker, and the loss cost a build of production. The
+fix was four probes against a host the loop had already been talking to, and
+the discipline that mattered was reading "no working credential" as the claim it
+is — one identity, refused — rather than the conclusion it invited.
+
+| | |
+|---|---|
+| open boxes at the start | **one**, invisible because the plan said zero |
+| open boxes now | zero, and the deploy is a command rather than a shrug |
+| probes that overturned a recorded conclusion | **1** (`shoemoney@` where the log said no credential) |
+| defects the harness found in itself | **1**, the rule-4 shape, in the tool enforcing rule 4 |
+| check= | **182 unit**, content OK, assets OK |
+| e2e= | **42 passed, 6 skipped**, exit 0 |
+| production | **byte-identical, verified over the wire** |

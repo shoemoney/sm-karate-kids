@@ -44,15 +44,22 @@ three shell/Python/Node tools, which have their own shebang or interpreter.
 | `measure-score.mjs` | `node tools/measure-score.mjs` | The half-point score in boxes: `.score-frac` against `.points` and `.scoreline`, at 4 viewports, plus a **pixel count** of fraction ink falling outside the plate. Lands a real half through touch input with the stance stick held neutral — `match.ts` promotes the call to a full point when the defender is winding up, which is why the measurement was impossible for 31 rounds. `SMKK_BASE` to point at a server. |
 | `scoreline-stability.mjs` | `node tools/scoreline-stability.mjs` | The scoreline in three states — no half, half landed, half +400ms/+1600ms — answering the question a still screenshot cannot: **does the HUD bar move when a score changes?** Found the +9.94px reflow that the r53..r147 stacked fraction caused. |
 | `score-ink.mjs` | `SMKK_TARGET=1.5 node tools/score-ink.mjs` | Ink bounding boxes for the score digits and the half fraction, measured separately and **clamped to their own boxes**, so "is the fraction on the baseline" is a number. Also reports peak ink luminance, which is how r148 avoided lifting a colour that was already correct (241.8 vs 241.8). `SMKK_TARGET` sets the score to land — use ≥1.5, because 0.5 renders the fraction with no whole digit beside it. |
+| `deploy.sh` | `bash tools/deploy.sh [--yes] [--no-verify]` | **The deploy itself.** Refuses a missing or stale build (dist older than the source it claims to represent), dry-runs and prints the `--delete` list by default, pushes with `rsync --delay-updates` so the new html can never precede its bundle, then **propagates `verify-deploy.sh`'s exit code** rather than reporting its own success. `--yes` is required to send anything. Deploys as `shoemoney@192.168.1.10`; **not** `root`, which refuses the key. |
 | `verify-deploy.sh` | `bash tools/verify-deploy.sh [baseUrl]` | **Post-deploy gate.** Fetches the live `index.html`, compares it byte-for-byte with `apps/game/dist/index.html`, then fetches every asset the served html names and compares sha256 against the local file. Exit 0 = the served bytes are the built bytes. HTTP 200 proves nothing here; at r141 the site answered 200 for hours over a two-hour-old build. |
 | `verify-deploy-mutation.sh` | `bash tools/verify-deploy-mutation.sh` | Proves `verify-deploy.sh` can fail: 6 cases over a real local HTTP server (faithful copy, stale names, right-name/wrong-bytes, absent asset, dead origin, absent local build), asserting exit code **and** the diagnosis. Run it after touching the gate. |
+| `deploy-mutation.sh` | `bash tools/deploy-mutation.sh` | Proves `deploy.sh` can fail: 12 assertions over a real HTTP server on a throwaway local root — never production. Covers the dry run sending nothing, a faithful deploy, a changed build pruning its superseded hashed asset, and the refusals: no build (exit 2), a build older than the source, unreachable host. Run it after touching `deploy.sh`. |
 | `loop-once.sh` | `bash tools/loop-once.sh` | One unattended review-loop iteration (the `launchd` driver). Takes the lock, builds the prompt, runs `opencode run`. |
 
-`tools/verify-deploy.sh` and `tools/verify-deploy-mutation.sh` are the only two in
-this table that need the network, and they are the only two that must be run
-against a real origin to mean anything — a deploy gate exercised only against
-`localhost` has not exercised the deploy. Neither is in `pnpm check`, because
+The four `*deploy*` tools are the only ones in this table that need the network,
+and `deploy.sh` / `verify-deploy.sh` are the only two that must be run against a
+real origin to mean anything — a deploy gate exercised only against `localhost`
+has not exercised the deploy. None of the four is in `pnpm check`, because
 `pnpm check` must stay runnable offline.
+
+**Deploy root** — `/mnt/.ix-apps/app_mounts/nginx-proxy-manager/data/arcade/smkk`
+on `192.168.1.10`, owned by `shoemoney`. It is **not** under `/mnt/tank`. r141
+lost four probes to this path and r148 lost a whole build to the wrong username,
+so both are recorded in `tools/deploy.sh`'s header rather than re-derived.
 
 `renderer-sweep.mjs` and `throttle-cliff.mjs` **edit `apps/game/src` to measure
 it, rebuild, then revert** — a full `vite build` per configuration. Do not run

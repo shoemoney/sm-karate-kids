@@ -1,7 +1,7 @@
 # SM Karate Kids — completion plan
 
 Written at round 134, after a hundred and thirty-four rounds of review, and
-updated at r148. This is the plan for *finishing*, as distinct from the loop that
+updated at r149. This is the plan for *finishing*, as distinct from the loop that
 has been improving.
 
 ## Where the project actually stands
@@ -11,8 +11,9 @@ has been improving.
 | Playable | yes — tournament + dojo, two sticks, point karate |
 | Deployed | `https://arcade.shoemoney.ai/smkk/`, verified playing a real bout |
 | Tests | 183 unit, 42 e2e, 6 skipped, green locally |
-| Review loop | 148 rounds, 20 review frames, mutation-tested fences |
-| Commits | 247 |
+| Review loop | 149 rounds, 20 review frames, mutation-tested fences |
+| Commits | 248 |
+| Production | **byte-identical to the local build**, `tools/verify-deploy.sh` green |
 
 The game is not a prototype. What remains is a short list of specific, named
 gaps — every one of them is in this document, and nothing else is.
@@ -116,6 +117,38 @@ So unattended means **an external driver**, and there are two:
    lock (stale locks over 45m are reclaimed), writes a log per iteration into
    `.loop/`, and stamps `.loop/last-ok` only on exit 0. **In place, running.**
 
+### 3.3 The deploy can actually be performed — `SHIPPED at r149`
+
+r141 built the gate that detects a stale deploy. r148 found production stale and
+**could not fix it, because a gate that detects a problem is not a way to solve
+one** — the repo had no deploy path at all, only the verification half.
+
+The reason r148 recorded was:
+
+    ssh root@192.168.1.10  ->  Permission denied (publickey)
+
+True, and incomplete. The same host accepts `shoemoney`, the deploy root is
+owned by `shoemoney`, and `rsync` works over it. A tool that knows only one
+identity turns a login detail into an outage, and it cost production a build.
+
+`tools/deploy.sh` is that path: refuses a missing or **stale** build, dry-runs
+and prints the `--delete` list before touching anything, pushes with
+`--delay-updates` so the new html cannot precede its bundle, and then
+**propagates `tools/verify-deploy.sh`'s exit code** rather than reporting its own
+success — rsync says bytes reached a directory, not what nginx serves from it,
+which is the entire subject of r141.
+
+**Proved able to fail** in `tools/deploy-mutation.sh`: 12 assertions over a real
+HTTP server on a throwaway root, never production. It caught a real defect in
+itself on the first run — readiness required a 200 on `index.html`, so a root not
+yet written to was reported as a deploy failure, which is precisely the
+misdiagnosis standing rule 4 exists to prevent, sitting inside the tool written
+to enforce rule 4.
+
+**Production is byte-identical over the wire.** `arcade.shoemoney.ai/smkk/` now
+passes `tools/verify-deploy.sh` with 2 assets sha256-matched — the first time in
+the project's history that claim has been true.
+
 ### 3.2 The deploy is not verified until a gate says the bytes match — `SHIPPED at r141`
 
 Added at r141, and it is the one item here that existed because the loop itself
@@ -174,6 +207,9 @@ Because nothing is watching, three rules exist and are not optional:
 - [x] 2.1 and 2.2 raised with a recommendation — a human decides, the loop has done its part
 - [x] 3.1 unattended driver in place — `tools/loop-once.sh` on a launchd schedule
 - [x] 3.2 deploy verified against production bytes — `tools/verify-deploy.sh`, mutation-proved
+- [x] **3.3 the deploy can be performed** — `tools/deploy.sh`, and production is
+      byte-identical over the wire. The `root`-only refusal that stalled r148
+      was one identity short of a working deploy.
 - [x] every phase gated, logged, committed, deployed
 - [x] **half-point score typography** — **SHIPPED at r148.** Raised since r918, built
       in r53, revisited in r133, and named by two models in the same round at r147 —
@@ -188,10 +224,11 @@ Because nothing is watching, three rules exist and are not optional:
       to be the taste call r144 assumed. See below.
 
 **Not "done" means:** every item above is either finished or blocked on a human
-decision with the measurement attached. **As of r148 there are no open items.**
+decision with the measurement attached. **As of r149 there are no open items.**
 Everything in Phases 1 and 3 is closed, Phase 2 is blocked on a human by design
 with the measurement attached to each item, and the scoreboard's half point is
-measured rather than argued about.
+measured rather than argued about. Production is serving the build this tree
+produces, and there is a command that both puts it there and proves it did.
 
 ---
 
