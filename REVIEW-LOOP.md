@@ -8017,3 +8017,48 @@ rather than touching a line. Zero of the 42 was an assertion.
 The interesting part is that a *green* count can sit on top of it: one run reported
 `41 passed, 6 skipped` and still exited 1, and the next reported 42 failures of the
 same kind. A summary line is not a gate reading, which is rule 2's whole point.
+
+### Production is stale, and the gate says so in one line
+
+The change is committed and pushed. It is **not deployed**, and the reason is
+worth recording precisely rather than as a shrug:
+
+    ssh root@192.168.1.10  ->  Permission denied (publickey)
+
+The documented transfer path is `tar` + `scp` + remote extract — `rsync` over ssh
+is refused (no root key) — and `scp` has no working credential in this environment
+either. There is also no deploy *script* in the repo, only the verification gate,
+so the swap was never a single command that could have been run safely here.
+
+`tools/verify-deploy.sh` against production, which is the r141 gate doing the job
+it was built for:
+
+    http 200, 10159 bytes
+    served names: assets/index-D5kxXh1i.js  assets/index-DA3Jeuju.css
+    local  names: assets/index-Ccf9hihb.js  assets/index-CHYzz0ub.css
+    FAIL: served index.html is NOT the local build's index.html
+
+**200, and a different build.** That is precisely the pair r141 could not tell
+apart and this gate can. Production keeps serving the previous, internally
+consistent build, so nothing is broken for a player — it is stale, not broken,
+which is the benign failure and the honest one to leave behind.
+
+### Where round 148 ended
+
+| | |
+|---|---|
+| open boxes at the start | **one** — the half-point score |
+| open boxes now | **zero** |
+| notations shipped this round | **three** (stacked → one-line → glyph) |
+| notations rendered before choosing | **zero**, across five rounds |
+| reviews that flagged the half point | 3 in a row, then silence |
+| mutations | 3 red (stacked column, one-line row, separate element) |
+| check= | **182 unit**, content OK, assets OK |
+| e2e= | **42 passed, 6 skipped**, exit 0 |
+| production | **stale, verified as stale by its own gate** |
+
+Three notations in one round is not progress, it is the cost of shipping on the
+first measurement instead of rendering the option space once. The measurement was
+cheap — the half point was in the review set since r73, and landing one takes four
+lines of touch choreography that already existed. What was missing was not tooling
+but the decision to look, five times over.
