@@ -48,7 +48,7 @@ const QUALIFIERS: readonly Qualifier[] = ['neutral', 'up', 'down', 'forward', 'b
 
 
 /**
- * A score, as a stacked fraction where there is a half in it.
+ * A score, as a fraction where there is a half in it.
  *
  * The U+00BD glyph is not usable here. In this font stack — and in most system
  * sans faces on every platform this ships to — it renders as a *slashed*
@@ -60,9 +60,16 @@ const QUALIFIERS: readonly Qualifier[] = ['neutral', 'up', 'down', 'forward', 'b
  * glyph that is visually three characters wide and reads as three. A notation
  * chosen to be unambiguous turned out to be less so.
  *
- * Two stacked numerals are unambiguous on every platform, are not a glyph
- * anyone can misread, and are smaller than the slashed form, which also buys
- * back the width that made `10½` clip in round 43.
+ * Two real numerals with a bar are unambiguous on every platform, are not a
+ * glyph anyone can misread, and are smaller than the slashed form, which also
+ * buys back the width that made `10½` clip in round 43.
+ *
+ * They were **stacked** from r53 until r148, and the stacking was the defect
+ * the five rounds of "reads as a baseline drop" were describing all along: a
+ * column is two lines tall, so beside a one-line digit it hung 15px below the
+ * baseline and made the scoreline 9.94px taller every time a half landed. The
+ * three nodes are unchanged; only the CSS puts them on one line now. See
+ * `.score-frac` in `styles.css` for the measurement.
  */
 function renderScore(el: HTMLElement, score: number): void {
   el.replaceChildren(scoreFragment(score));
@@ -75,12 +82,12 @@ function renderScore(el: HTMLElement, score: number): void {
  * Round 66 measured why the text path had to die. Five models in five rounds
  * reported the half point as cramped, ambiguous, unreadable or as reading
  * `21/2` — all of them looking at the result card, because that is where the
- * score is a *string* and the HUD's stacked fraction is not used. So the fix
+ * score is a *string* and the HUD's fraction is not used. So the fix
  * that satisfied them in round 53 only ever reached the in-match HUD, and the
  * card kept the U+00BD glyph the comment above explains.
  *
  * One builder, two callers, so the notation cannot drift again: the same nodes
- * that render `2½` in the HUD render it on the card, with the thousands
+ * that render `1½` in the HUD render it on the card, with the thousands
  * separator preserved for a four-figure career total.
  */
 export function scoreFragment(n: number): DocumentFragment {

@@ -773,19 +773,36 @@ body.show-perf #backend {
 
 .score-frac {
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
-  /* Not `vertical-align: baseline`. For a column flex container the baseline it
-     aligns to is the FIRST item's — the 1 — so a stacked fraction sat up beside
-     the digits with its bar floating at cap height, reading as a superscript
-     rather than as a fraction. gpt-5.6-terra-pro put it as "keep half-point
-     scores on one readable baseline", and it is the first thing that reported
-     this: the frame that shows it is the played bout from round 55, because
-     every earlier frame in the set had the score at zero.
-     Dropped to the digit baseline instead. */
-  vertical-align: -0.3em;
-  line-height: 0.82;
-  margin-inline-start: 0.04em;
+  /* One line, not a column.
+   *
+   * Measured at round 148, at a 1.5 score on the 390px baseline:
+   *
+   *   digits   ink  y 15.0 .. 35.5      (the score digits' cap-to-baseline band)
+   *   fraction ink  y 17.0 .. 50.5      33.5px tall, centre 8.50px LOW
+   *   fraction's denominator vs the digit baseline:  15.00px BELOW it
+   *
+   * That last number is the whole finding. Five rounds have called this "reads
+   * as a baseline drop" — a stacked column is two lines tall, `vertical-align:
+   * -0.3em` pushed it down, and the denominator ended up hanging a full 15px
+   * under the baseline of the digit it belongs to. It was not a taste
+   * complaint; it was a subscript.
+   *
+   * The column also could not be rescued by shrinking it. Its ink is 33.5px
+   * against a 20.5px digit band, so fitting it would need the numerals at
+   * ~0.44em — below the 0.66em floor below, which two reviewers set for
+   * legibility at r73. A stacked fraction beside a single-line digit cannot be
+   * both. So the fraction is set on ONE line: numeral, bar, numeral, sharing a
+   * baseline with the score. That is how a fraction is set in running text, it
+   * is the same three nodes at the same 0.72em, and it removes the drop because
+   * there is no second line to drop.
+   *
+   * `vertical-align: baseline` on an inline-flex resolves to the FIRST item's
+   * baseline, which is the numerator — so the numerator sits on the digits'
+   * baseline and, both numerals being the same size, the denominator does too. */
+  vertical-align: baseline;
+  line-height: 1;
+  margin-inline-start: 0.06em;
   /* 0.52em of a 22px score is an 11px digit, and that is below the size at
      which a numeral can be told from a speck without effort. Two reviewers put
      it as "unreadable at HUD size" and "half-point display is tiny" once the
@@ -801,12 +818,15 @@ body.show-perf #backend {
 }
 
 .score-frac-bar {
-  /* Scaled with the numerals it separates, so the bar stays a rule rather than
-     becoming a hairline that disappears at a distance. */
-  inline-size: 0.66em;
+  /* A fraction bar, not a division sign: wider than it is tall, with a little
+     air either side so it cannot be read as touching the numeral it separates.
+     Kept at 0.13em block so it stays a rule at that size rather than
+     disappearing — `score-notation.test.ts` holds both numbers. */
+  inline-size: 0.5em;
   block-size: 0.13em;
   background: currentColor;
   border-radius: 1px;
+  margin-inline: 0.07em;
 }
 
 .side[data-side="0"] .points {

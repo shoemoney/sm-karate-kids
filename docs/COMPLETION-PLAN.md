@@ -1,7 +1,8 @@
 # SM Karate Kids — completion plan
 
-Written at round 134, after a hundred and thirty-four rounds of review. This is
-the plan for *finishing*, as distinct from the loop that has been improving.
+Written at round 134, after a hundred and thirty-four rounds of review, and
+updated at r148. This is the plan for *finishing*, as distinct from the loop that
+has been improving.
 
 ## Where the project actually stands
 
@@ -9,9 +10,9 @@ the plan for *finishing*, as distinct from the loop that has been improving.
 |---|---|
 | Playable | yes — tournament + dojo, two sticks, point karate |
 | Deployed | `https://arcade.shoemoney.ai/smkk/`, verified playing a real bout |
-| Tests | 163 unit, 35 e2e, 5 skipped, green locally |
-| Review loop | 144 rounds, 22 review frames, mutation-tested fences |
-| Commits | 246 |
+| Tests | 183 unit, 42 e2e, 6 skipped, green locally |
+| Review loop | 148 rounds, 20 review frames, mutation-tested fences |
+| Commits | 247 |
 
 The game is not a prototype. What remains is a short list of specific, named
 gaps — every one of them is in this document, and nothing else is.
@@ -174,21 +175,58 @@ Because nothing is watching, three rules exist and are not optional:
 - [x] 3.1 unattended driver in place — `tools/loop-once.sh` on a launchd schedule
 - [x] 3.2 deploy verified against production bytes — `tools/verify-deploy.sh`, mutation-proved
 - [x] every phase gated, logged, committed, deployed
+- [x] **half-point score typography** — **SHIPPED at r148.** Raised since r918, built
+      in r53, revisited in r133, and named by two models in the same round at r147 —
+      always in the same four words, never with a number. r148 measured it: a stacked
+      column is two lines tall, so beside a one-line digit the denominator hung
+      **15.00px below the baseline** and the scoreline grew **9.94px (+26%)** every
+      time a half landed. Shrinking it was not available — fitting it needs ~0.44em
+      against a 0.66em legibility floor. The fraction is now set on one line, same
+      three nodes, same 0.72em: **1.00 line**, baseline **flush**, scoreline
+      **does not move**. Two mutations, both red.
 - [x] **renderer frame cost on a GPU-less device** — closed at r146, and it turned out not
       to be the taste call r144 assumed. See below.
-- [ ] **half-point score typography** — reopened at r147. Two independent models
-      (`gemini-3.8-flash` and `glm-5.3-flash`) named it off the same fresh review set:
-      the stacked fraction reads as a baseline drop and is hard to parse. It has been
-      proposed since r918, built in r53 and revisited in r133, so this is the fifth time
-      it has been raised and the first time two models raised it in the same round.
-      Deliberately left unfixed at r147 rather than started half-way beside a shipped
-      fix. A typography change to a scoreboard, not a correctness bug.
 
 **Not "done" means:** every item above is either finished or blocked on a human
-decision with the measurement attached. As of r147 there is **one** open item —
-the half-point score typography — so the project is not "done" in the strict
-sense yet. Everything else in Phases 1 and 3 is closed, and Phase 2 is blocked
-on a human by design, with the measurement attached to each item.
+decision with the measurement attached. **As of r148 there are no open items.**
+Everything in Phases 1 and 3 is closed, Phase 2 is blocked on a human by design
+with the measurement attached to each item, and the scoreboard's half point is
+measured rather than argued about.
+
+---
+
+## Closed at round 148 — the half point was a 15px subscript, and five rounds of opinion cost more than the fix
+
+The last open box had been raised five times and described in the same four words
+every time: *reads as a baseline drop, hard to parse*. Nobody had a number. The
+number was four measurements away in a review frame that has existed since r73.
+
+At a 1.5 score on the 390px baseline:
+
+| | before | after |
+|---|---|---|
+| fraction ink height | 33.50px | **11.50px** |
+| fraction height / its own font-size | 1.77 lines | **1.00 line** |
+| denominator vs the digit baseline | **15.00px below** | **0.00px — flush** |
+| `.scoreline` with a half | 47.77px | **37.83px** = the no-half height |
+| `.points` with a half | 39.77px | **22px** = the no-half height |
+
+A stacked column is two lines tall, and `vertical-align: -0.3em` pushed it down, so
+the denominator hung a full 15px under the digit it belonged to — a subscript, and
+"baseline drop" was the literal name of it. Every half also grew the scoreline
+9.94px, reflowing the clock and both names mid-bout.
+
+**It could not be shrunk into place.** 33.5px of ink against a 20.5px digit band
+needs ~0.44em, below the 0.66em legibility floor r73 set. A stacked fraction beside
+a one-line digit cannot be both readable and aligned — so it became a running-text
+fraction on one line, same three nodes, same 0.72em.
+
+The gate measures **boxes in a browser**, not declarations, because r147's scar is
+a button that declared 44px while it sat on a fighter's face. Two mutations — the
+stacked column, against the e2e and against the unit tripwire — are both red.
+
+Full method, the two tools whose first runs were wrong, and three places I was
+wrong and measuring caught me, in `REVIEW-LOOP.md`, round 148.
 
 ---
 

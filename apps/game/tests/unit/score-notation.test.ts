@@ -6,7 +6,7 @@ import { describe, expect, test } from 'vitest';
  * A guard on the *shape* of score rendering, not on its output.
  *
  * Round 36 replaced a decimal with U+00BD on the result card and made it worse.
- * Round 53 built the correct stacked fraction — in `hud.ts` only. The card kept
+ * Round 53 built the correct fraction — in `hud.ts` only. The card kept
  * its string, five models reported the problem for five more rounds, and the
  * cause was always the same: two places rendering one concept by two different
  * mechanisms, and the mechanism that had regressed was the one nobody
@@ -61,7 +61,7 @@ describe('scores are rendered by one builder, not by strings', () => {
 });
 
 /**
- * The stacked fraction has to be a *readable* fraction, not just an
+ * The fraction has to be a *readable* fraction, not just an
  * unambiguous one.
  *
  * At 0.52em of a 22px score the numerator and denominator rendered at about
@@ -75,7 +75,7 @@ describe('scores are rendered by one builder, not by strings', () => {
  * rather than truncates), and does not fail any behavioural test. It just
  * quietly becomes too small to read again.
  */
-describe('the stacked fraction is sized to be read', () => {
+describe('the fraction is sized to be read', () => {
   const css = read('../../src/styles.css');
 
   test('the fraction is at least two thirds of the score it sits beside', () => {
@@ -96,6 +96,50 @@ describe('the stacked fraction is sized to be read', () => {
     const bar = css.match(/\.score-frac-bar \{[\s\S]*?block-size:\s*([\d.]+)em;/);
     expect(bar).not.toBeNull();
     expect(Number(bar![1])).toBeGreaterThanOrEqual(0.12);
+  });
+});
+
+/**
+ * A cheap tripwire, NOT the gate.
+ *
+ * The real gate is `tournament.spec.ts` — "a half point sits on the score
+ * baseline and does not reflow the scoreline" — which measures boxes in a
+ * browser. This one only reads the stylesheet, and r147 is the reason it cannot
+ * be trusted alone: `reference-tap-target.test.ts` asserted the button *declared*
+ * `min-height: 44px` and went green while the button rendered across a
+ * fighter's head. A declaration is not a layout.
+ *
+ * It stays because it costs nothing and fails in a second, on the two ways this
+ * regresses — someone reinstating the column, or reinstating the negative
+ * `vertical-align` that made "baseline drop" literal.
+ */
+describe('the fraction is set on one line, not stacked', () => {
+  const css = read('../../src/styles.css');
+  const block = css.match(/\.score-frac \{[\s\S]*?\n\}/)?.[0] ?? '';
+
+  test('the fraction is not a column', () => {
+    expect(
+      block,
+      '.score-frac is a column again — that is the r53..r147 stacked fraction, whose ' +
+        'denominator hung 15px below the digit baseline',
+    ).not.toMatch(/flex-direction:\s*column/);
+  });
+
+  test('the fraction is not dropped below the baseline', () => {
+    // The value can be a length (`-0.3em`, the r147 bug) or a keyword
+    // (`baseline`, correct). A regex that only matched numbers reported
+    // "no vertical-align" against a perfectly good `baseline` on the first run
+    // of this file, which is the same confident-wrong-answer shape as the
+    // stylesheet assertions r147 retired. So: read the value, and assert what
+    // it is not.
+    const va = block.match(/vertical-align:\s*([^;]+);/);
+    expect(va, '.score-frac declares no vertical-align').not.toBeNull();
+    const value = va![1]!.trim();
+    expect(
+      value.startsWith('-'),
+      `vertical-align: ${value} pushes the fraction below the digits' baseline. ` +
+        `The r147 value was -0.3em and the denominator landed 15px under it.`,
+    ).toBe(false);
   });
 });
 

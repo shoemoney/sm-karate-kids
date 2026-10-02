@@ -7727,3 +7727,160 @@ true and the thing the player sees was always wrong.
 **A model naming a retired model is not a broken reviewer.** `gemini-3.5-pro` returned
 `400` and for a moment the whole review path looked dead. It was one stale string in a
 docblock, and the credential was fine the whole time.
+
+## Round 148 — "reads as a baseline drop" was a 15px measurement, and the stacking could not be rescued
+
+Round 147 handed forward exactly one open item, raised by two models in the same
+round for the fifth time: **the half-point score typography**. Both models said the
+stacked fraction *reads as a baseline drop and is hard to parse*. That is the whole
+brief, and not one word of it was a measurement. This round turned it into four.
+
+### The finding, in pixels
+
+Landing a **1.5** score at the 390px baseline (two halves on side 0, because 0.5
+renders the fraction with no whole digit beside it and there is nothing to align
+against) and measuring the ink rather than the boxes:
+
+| | measured |
+|---|---|
+| digits ink band | y 15.0 … 35.5 |
+| fraction ink | y 17.0 … 50.5 — **33.50px tall** |
+| fraction's centre vs the digits' | **8.50px low** |
+| **fraction's denominator vs the digit baseline** | **15.00px BELOW it** |
+| `.scoreline` height, no half | 37.83px |
+| `.scoreline` height, half on the board | **47.77px  (+9.94px, +26%)** |
+
+So "reads as a baseline drop" was literal and it was worse than a taste complaint.
+It was a **subscript**: a stacked column is two lines tall, `vertical-align: -0.3em`
+pushed it down, and the denominator ended up hanging a full 15px under the baseline
+of the digit it belongs to. And every time a half landed, the scoreline grew 9.94px
+— the HUD reflowed, moving the clock and both names, under the player, mid-bout.
+
+### It could not be rescued by shrinking it, and that is what settled the fix
+
+The tempting move was to keep the column and shrink it to fit. The arithmetic
+forbids it: the fraction's ink is 33.5px against a 20.5px digit band, so fitting it
+needs the numerals at **~0.44em** — below the 0.66em floor that
+`score-notation.test.ts` holds and that two reviewers set for legibility at r73.
+**A stacked fraction beside a single-line digit cannot be both.**
+
+So the fraction is now set on **one line**: numeral, bar, numeral, on the digits'
+baseline, which is how a fraction is set in running text. The three nodes, the
+class names and the 0.72em size are all unchanged — only the CSS moved.
+
+| | before | after |
+|---|---|---|
+| fraction ink height | 33.50px | **11.50px** |
+| fraction height / its own font-size | **1.77 lines** | **1.00 line** |
+| denominator vs the digit baseline | 15.00px below | **0.00px — flush** |
+| centre offset | 8.50px low | **2.00px low** |
+| `.scoreline` with a half | 47.77px | **37.83px** (= no-half) |
+| `.points` with a half | 39.77px | **22px** (= no-half) |
+
+The residual 2.00px is **correct typography, not a leftover**: a running-text
+fraction sits on the baseline and therefore occupies the band from x-height to
+baseline, which is the lower part of the cap band. Centring it on the cap band
+would be the wrong answer. Recorded so a future round does not "fix" it.
+
+### Two gates, both proved able to fail
+
+| mutation | result |
+|---|---|
+| reinstate the r147 stacked column + `-0.3em` | **e2e red** — `1.7689` lines vs a 1.35 budget |
+| same, against the unit tripwire | **red** — "is a column again" |
+| `scoreline-stability.mjs` re-run under the mutation | 37.83 → **47.77px**, independently confirming the reflow |
+
+The e2e gate is `tournament.spec.ts` — *"a half point sits on the score baseline
+and does not reflow the scoreline"* — and it measures **boxes in a browser**. That
+is the point: r147 fixed a button that *declared* 44px while it rendered on a
+fighter's face, and `reference-tap-target.test.ts` read `styles.css` as text and
+went green through it. A declaration cannot see a 15px baseline drop, because
+`vertical-align: -0.3em` was present and looked correct the whole time.
+
+The unit test is explicitly labelled a **cheap tripwire, not the gate**, and it
+finds the same regression in a second.
+
+### Three places I was wrong, all caught by measuring
+
+**I read the frame as clipped. It was not.** A magnified crop of the scoreline
+looks like the denominator is sliced off by the plate. Pixel count says
+**0 bright fraction-ink pixels below the plate's bottom edge**, and the fraction's
+box sits 4–5px *inside* it. I nearly filed a clipping bug that does not exist.
+
+**I was about to change a colour that was already right.** The fraction renders
+visibly greyer than the digit beside it, and I was reaching for a token lift. Peak
+ink luminance is **241.8 vs 241.8** — identical. The greyness is stroke weight at
+a smaller size, not colour. Same trap as r141's 4.15:1 label, and the only reason
+I did not ship a wrong fix is that I sampled instead of looking.
+
+**My own new unit test failed on its first run, correctly.** `vertical-align:
+baseline` is a keyword, and my regex matched only numbers, so it reported
+"no vertical-align" against a perfectly good declaration. That is the same
+confident-wrong-answer shape the repo already has a scar for, one commit earlier.
+The assertion now reads the value and asserts what it is not.
+
+### The honest residual
+
+A horizontal bar between two same-size numerals **can** read as a minus sign. That
+is a real cost of the trade, and I am not going to claim the new notation is
+unambiguous the way the stacked one was. What I can say is measured: the stacked
+form is the one **two models independently called hard to parse**, and it carried a
+15px baseline drop and a 26% HUD reflow. The bar is at the fraction's mid-height
+and tight to both numerals, which is the standard convention — but if a reviewer
+reports "1-2 reads as one minus two", that is a real finding about this round's
+work and not a re-open of r147's.
+
+### Three tools, and why they are in the repo
+
+- `tools/measure-score.mjs` — the boxes: fraction vs `.points` vs `.scoreline`,
+  plus a pixel count of ink below the plate. Its first run found `<html>` as "the
+  plate" by walking ancestors for the first painted background, so every overhang
+  read 0; the plate is a named element, and naming it is the fix.
+- `tools/scoreline-stability.mjs` — the scoreline in three states, and the
+  question a still screenshot cannot answer: **does the bar move when a half
+  lands?**
+- `tools/score-ink.mjs` — ink bounding boxes with the bands **clamped to their own
+  boxes**. Its first version split the scoreline at the fraction's left edge, which
+  was correct for a column and wrong for a row: it swept the clock dial into the
+  "fraction" band and reported a 45.5px fraction that was mostly the clock.
+
+All three land a half through real touch input with the stance stick held NEUTRAL,
+because `match.ts` promotes the call to a full point when the defender is winding
+up — which is what made this measurement impossible for thirty-one rounds of review
+and is why the frame showing a half only entered the set at r73.
+
+### Environment, checked before code (rule 4)
+
+The 502s in the capture log are the documented `GET /api/games/karate-kids/runs`
+proxy to the arcade API on `:3784`, which is not running. `COMPLETION-PLAN.md`
+records that as a known soft-fail, out of scope, owned by whoever holds the arcade
+API contract. The dev server itself answers 200. Not a regression, and not mine.
+
+**The review set is 20 frames, not 22.** `18-phone-kick` and `21-phone-kick-open`
+did not write — both need an active kick *observed* in a polling window that the
+frame rate on this box (load 7.7–13.4 from other tenants) does not reliably provide.
+No assertion failed. Stating the count rather than the number the set used to be.
+
+### The round in one table
+
+| | |
+|---|---|
+| the open item, finally measured | denominator **15.00px below** the digit baseline |
+| second defect found en route | scoreline **+9.94px (+26%)** on every half |
+| why shrinking was not available | needs ~0.44em vs a 0.66em legibility floor |
+| the fix | one-line fraction, same 3 nodes, same 0.72em |
+| after | **1.00 line**, baseline **flush**, scoreline **does not move** |
+| peak luminance | 241.8 vs 241.8 — no colour change needed |
+| mutations | **2/2 red**, plus an independent tool confirming the reflow |
+| check= | typecheck, **183 unit / 19 files**, content OK, assets OK |
+| e2e= | **42 passed, 6 skipped** — twice, on the restored bytes |
+| open boxes | **zero** — the plan's last item is closed |
+
+### One thing a future round should not repeat
+
+**Five rounds of "it looks wrong" is a request to measure, not a sixth opinion.**
+This finding was raised at r918, built at r53, revisited at r133, named by two
+models at r147, and described in the same four words each time — because nobody had
+a number. Four rounds of that cost more than the fix did. When a review says a thing
+"reads as" something, that is a hypothesis about a measurement, and the measurement
+is a half point away in the review set that has existed since r73.
