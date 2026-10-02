@@ -27,7 +27,7 @@
  * Prints one JSON object so a driver can collect several configs in a row.
  */
 import { chromium, devices } from '@playwright/test';
-import { execFileSync } from 'node:child_process';
+import { hostLoad } from './host-load.mjs';
 
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -72,26 +72,15 @@ const percentile = (sorted, p) => sorted[Math.min(sorted.length - 1, Math.floor(
 const round = (n) => (typeof n === 'number' ? Math.round(n * 10) / 10 : n);
 
 /**
- * Host load, recorded with every row.
+ * Host load travels with every row, read by `tools/host-load.mjs`.
  *
- * This is not decoration. Round 145's first sweep returned 56.6ms of median
- * frame time for the baseline; a later sweep of the identical, unmodified tree
- * returned 77.1ms; another returned 161.9ms. Nothing in the tree changed. The
- * unattended review loop was running its own Playwright suite on the same CPU,
- * and the "renderer change" being evaluated was the machine's contention for
- * cores. A frame-time number without the load it was taken at is not a
- * measurement, it is a rumour — so the number travels with its conditions, and
- * a caller can refuse to compare rows taken at different loads.
+ * It used to be read here, and it read **0 on every row** — the brace-strip
+ * parse left a leading space, `split(/\s+/)` took `""`, and `Number("")` is 0.
+ * The rationale it answered is in that file; the short version is that r145
+ * shipped frame-time numbers that were the machine's contention for cores, and
+ * this column is the only thing standing between the next round and the same
+ * mistake. It was disarmed and still drawn on the page until r154.
  */
-function hostLoad() {
-  try {
-    const out = execFileSync('sysctl', ['-n', 'vm.loadavg'], { encoding: 'utf8' });
-    const [m1] = out.trim().replace(/[{}]/g, '').split(/\s+/);
-    return round(Number(m1));
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Generous by design.

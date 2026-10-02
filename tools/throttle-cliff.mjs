@@ -12,18 +12,17 @@
  * A lever that helps at 1x and does nothing at the cliff is not a fix.
  *
  * Patches the same two source anchors as renderer-sweep.mjs, rebuilds per row,
- * and reverts everything on exit.
+ * and reverts everything on exit — source AND the build, which is the part r154
+ * found missing in both of these tools. See `tools/sweep.mjs`.
  *
  * Usage: CPU_LADDER=1,4,8,16 node tools/throttle-cliff.mjs
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { startPreview } from './bench-server.mjs';
+import { GAME, REPO as root, buildGame, createSweep } from './sweep.mjs';
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const GAME = resolve(root, 'apps/game');
 const RENDERER = resolve(GAME, 'src/renderer.ts');
 const MAIN = resolve(GAME, 'src/main.ts');
 
@@ -31,18 +30,7 @@ const LADDER = (process.env['CPU_LADDER'] ?? '1,6,12,20').split(',').map(Number)
 const CLICKS = process.env['CLIFF_CLICKS'] ?? '3';
 const FRAMES = process.env['CLIFF_FRAMES'] ?? '60';
 
-const original = { renderer: readFileSync(RENDERER, 'utf8'), main: readFileSync(MAIN, 'utf8') };
-const restore = () => {
-  writeFileSync(RENDERER, original.renderer);
-  writeFileSync(MAIN, original.main);
-};
-process.on('exit', restore);
-for (const signal of ['SIGINT', 'SIGTERM']) {
-  process.on(signal, () => {
-    restore();
-    process.exit(1);
-  });
-}
+const sweep = createSweep({ label: 'throttle-cliff', files: { renderer: RENDERER, main: MAIN } });
 
 const DPR = 'renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio ?? 1, 2));';
 
@@ -52,9 +40,6 @@ const CONFIGS = [
   { label: 'pixelratio-1', edits: [[RENDERER, DPR, 'renderer.setPixelRatio(1);']] },
 ];
 
-const build = () =>
-  execFileSync('node', [resolve(GAME, 'node_modules/vite/bin/vite.js'), 'build'], { cwd: GAME, stdio: 'pipe' });
-
 // The harness owns the server. A preview process started in a background
 // subshell did not survive between tool calls, and the next run failed on
 // ERR_CONNECTION_REFUSED with nothing naming the cause.
@@ -63,13 +48,9 @@ process.on('exit', () => server.stop());
 
 const rows = [];
 for (const config of CONFIGS) {
-  restore();
-  for (const [path, from, to] of config.edits) {
-    const text = readFileSync(path, 'utf8');
-    if (!text.includes(from)) throw new Error(`${config.label}: patch anchor absent in ${path}`);
-    writeFileSync(path, text.replace(from, to));
-  }
-  build();
+  sweep.restoreSource();
+  sweep.applyEdits(config.edits);
+  buildGame();
   for (const cpu of LADDER) {
     const raw = execFileSync(
       'node',
@@ -98,7 +79,7 @@ for (const config of CONFIGS) {
     );
   }
 }
-restore();
 await server.stop();
+sweep.finish();
 writeFileSync(resolve(root, 'logs/throttle-cliff.json'), `${JSON.stringify({ ladder: LADDER, clicks: CLICKS, rows }, null, 2)}\n`);
 console.log('\nwrote logs/throttle-cliff.json');

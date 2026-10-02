@@ -13,35 +13,18 @@
  * Usage: node tools/renderer-sweep.mjs
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { startPreview } from './bench-server.mjs';
+import { GAME, REPO as root, buildGame, createSweep } from './sweep.mjs';
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const GAME = resolve(root, 'apps/game');
 const RENDERER = resolve(GAME, 'src/renderer.ts');
 const MAIN = resolve(GAME, 'src/main.ts');
 const GFX = process.env['SWEEP_GFX'] ?? 'webgl';
 const FRAMES = process.env['SWEEP_FRAMES'] ?? '80';
 const CLICKS = process.env['SWEEP_CLICKS'] ?? '5';
 
-const original = {
-  renderer: readFileSync(RENDERER, 'utf8'),
-  main: readFileSync(MAIN, 'utf8'),
-};
-
-const restore = () => {
-  writeFileSync(RENDERER, original.renderer);
-  writeFileSync(MAIN, original.main);
-};
-process.on('exit', restore);
-for (const signal of ['SIGINT', 'SIGTERM']) {
-  process.on(signal, () => {
-    restore();
-    process.exit(1);
-  });
-}
+const sweep = createSweep({ label: 'renderer-sweep', files: { renderer: RENDERER, main: MAIN } });
 
 /**
  * Each config is a list of [file, from, to]. A config whose `from` string is
@@ -68,22 +51,14 @@ const CONFIGS = [
   },
 ];
 
-const build = () =>
-  execFileSync('node', [resolve(GAME, 'node_modules/vite/bin/vite.js'), 'build'], { cwd: GAME, stdio: 'pipe' });
-
 const server = await startPreview(GAME);
 process.on('exit', () => server.stop());
 
 const results = [];
 for (const config of CONFIGS) {
-  restore();
-  for (const [file, from, to] of config.edits) {
-    const path = file === 'renderer' ? RENDERER : MAIN;
-    const text = readFileSync(path, 'utf8');
-    if (!text.includes(from)) throw new Error(`${config.label}: patch anchor absent in ${file}: ${from}`);
-    writeFileSync(path, text.replace(from, to));
-  }
-  build();
+  sweep.restoreSource();
+  sweep.applyEdits(config.edits);
+  buildGame();
   const raw = execFileSync(
     'node',
     [
@@ -110,7 +85,7 @@ for (const config of CONFIGS) {
       `released ${row.clickReleased}/${row.clicks}  [${row.clickSamples.join(', ')}]`,
   );
 }
-restore();
 await server.stop();
+sweep.finish();
 writeFileSync(resolve(root, 'logs/renderer-sweep.json'), `${JSON.stringify({ gfx: GFX, frames: FRAMES, results }, null, 2)}\n`);
 console.log('\nwrote logs/renderer-sweep.json');
