@@ -8248,3 +8248,183 @@ is — one identity, refused — rather than the conclusion it invited.
 | e2e | **42 passed, 6 skipped**, exit 0 (6.5m) |
 | mutations | **14 assertions**, all confirmed red |
 | production | **byte-identical, verified over the wire**, twice |
+
+---
+
+## Round 150 — two claims that were true in the document and false in the code 🧾
+
+The plan said zero open items at r149, and r149 had just proved that a "done"
+document is worst at exactly that: it recorded the previous round's conclusion
+instead of its blocker. So this round read the plan's **closed** boxes against
+the code, on the theory that a closed box is the one nobody re-opens.
+
+Two of them did not survive.
+
+### The provenance gate resolved by directory order, not by proximity
+
+`docs/asset-provenance.md` states the rule twice:
+
+> the one that governs an asset is the **nearest ancestor** manifest — a
+> directory's own record wins over the root one
+
+and again, in the list of what the validator checks:
+
+> it has a matching entry in a discovered `PROVENANCE.json` (nearest ancestor wins)
+
+The implementation was one line:
+
+```ts
+for (const manifest of manifests.values()) { entry ??= manifest[key]; }
+```
+
+That is "first manifest that happens to carry the key". The manifests are
+collected by `walk()`, which uses an unsorted `readdirSync`, so the winner was
+whatever order the filesystem returned.
+
+`brand/PROVENANCE.json` carries the `fighters/` keys — the real tree has **no
+root manifest at all**, so brand is a fallback for fighters, not an ancestor.
+And `brand` sorts before `fighters`. So I dropped a nearer manifest next to the
+asset, marked it `approved: false`, and ran the real validator:
+
+```
+lookup order: brand/PROVENANCE.json | fighters/PROVENANCE.json | generated/PROVENANCE.json
+winner approved=true
+✅ apps/game/public/fighters/shiro-0.webp (459120 bytes) — provenance OK
+exit=0
+```
+
+Provenance is the gate that stands between generated art and shipping, and its
+verdict could be talked out of by a directory name. Nearest-ancestor is also
+the fail-closed direction: the deepest manifest wins, so the entry closest to
+the asset is the one that has to approve it.
+
+`tools/validate-assets-mutation.sh` — 8 cases, throwaway fixture trees, the
+**real** validator, assets as one-byte stubs. Three mutations confirmed red:
+
+| mutation | went red |
+|---|---|
+| first-match resolution restored | cases 2, 3, 7 |
+| depth sort reversed | case 7 |
+| fallback loop dropped | cases 1, 5 |
+
+**A case I had to weaken, and why.** Case 4 asserts a root manifest governs a
+nested asset. Making the root a fallback instead of an ancestor leaves every
+case at the same exit code, because the fallback finds the key anyway — so no
+exit code distinguishes them. The case now says it pins that a root manifest is
+**consulted**, and no more. A mutation I applied (root no longer treated as an
+ancestor) did *not* turn it red, and the honest move was to rename the claim
+rather than leave a case implying coverage it does not have. Case 7 was added
+for the same reason: with a single ancestor, case 4 could not tell "nearest
+wins" from "any ancestor wins", so it needed two.
+
+Also found while reading: `hud.ts`'s own comment says "the root manifest
+covers everything", which has been false since there was no root manifest.
+
+### The techniques sheet was arguing with the sticks it documents
+
+`openai/gpt-6.1-sol` (via codex) returned `reference-colors-disagree-with-controls`:
+> Image #6 gives stance and technique input circles the same cyan styling,
+> whereas Image #5 distinguishes the stance stick with cyan and the technique
+> stick with gold
+
+Right, and the numbers are boring enough to be conclusive — pixel-counted off
+the regenerated frame:
+
+| | measured ink |
+|---|---|
+| pad STANCE knob | `rgb(158,195,205)` = `--cool` |
+| pad TECHNIQUE | `--gold` |
+| **key** stance pip | `rgb(137,123,108)` |
+| **key** technique pip | `rgb(137,123,108)` |
+| **row** stance pip | `rgb(151,186,196)` |
+| **row** technique pip | `rgb(151,186,196)` |
+
+Four pairs, identical to the pixel. The sheet was not neutral about its own
+notation: a row read `· + ▶` with both circles cyan while the player held one
+cyan and one gold stick.
+
+Fixed by making each pip carry its own stick's colour — and by reading those
+colours from the **same declarations** the pad uses (`--stick-accent` on
+`.stick-zone` / `#zone-right`), so the test can compare tokens rather than
+pixels. "They look different" is a claim a future edit breaks by recolouring
+one side only, which is the mechanism behind r102, r105 and r109.
+
+| | vs measured ground `rgb(36,27,21)` |
+|---|---|
+| stance `--cool` | 8.97:1 |
+| technique `--gold` | 9.28:1 |
+| high contrast | 11.44:1 / 11.81:1 |
+
+Hue separation dE 64.0 default, 112.6 high-contrast. Colour is the fast path,
+not the only one — the STANCE/TECHNIQUE headings and the word beside every pip
+carry it too.
+
+Five mutations on the two new unit tests, all red: swapped tokens, deleted
+rule, **classes correct but never applied**, only the rows stamped and the key
+left bare, and both stick accents recoloured to the same token. The third is
+the one worth having — a rule wired to nothing reads identically in a
+stylesheet.
+
+### An e2e failure I chased to the floor, and did not claim
+
+`result-card-fighters-clear` failed with tick 12 against a before of 0. My diff
+touches nothing in that path, and standing rule 4 says check the environment
+before the code. **Stashed the whole change set and ran it on clean `main`: 3
+failures in 6.** Pre-existing.
+
+Then the probe, because "the click starts the bout" and "a 9s deadline fired
+during the test's own wait" are both consistent with the number. `tick` only
+advances when `held` is false, and `beginBout` is scheduled on
+`ROUND_INTRO_MS = 9000` — wall-clock, indifferent to clicks. Six runs:
+
+| run | before | just after click | 4s later | click started it? |
+|---|---|---|---|---|
+| 1 | 0 | 0 | 0 | false |
+| 2 | 0 | 0 | **65** | false |
+| 3 | 0 | 0 | 0 | false |
+| 4 | 0 | 0 | **55** | false |
+| 5–6 | 0 | 0 | 0 | false |
+
+The tick is 0 immediately after the click every time, then moves with nothing
+being clicked. The click never started the bout.
+
+**And then the part that stops this from being a fix story.** The failures
+appeared at load average **14–16 on 14 cores**. Later, at load ~10, I ran a
+12-run control of the **old** ordering: 12/12 passed. So neither ordering has
+been shown to beat the other under the conditions that produce the failure,
+and per standing rule 5 that is not a result.
+
+I moved the clock read next to the click anyway, because the assertion's
+subject is the click and a read separated from it by an unrelated `waitFor` is
+measuring a wider window than the claim. That is a correctness argument, not a
+flake cure, and the test's comment says so in those words.
+
+One thing recorded against myself: my first probe printed
+`verdict: real defect` on every **fast** run. The condition was inverted. I had
+been about to read that as a confirmed regression on the reference button.
+
+### The gates, in the order they must be read
+
+| | |
+|---|---|
+| check= | **184 unit** (was 182), content OK, assets OK, exit 0 |
+| e2e= | **42 passed, 6 skipped**, exit 0 (7.8m) |
+| mutations | **8** validator cases, all confirmed red |
+| mutations | **5** pip mutations, all confirmed red |
+| production | **byte-identical over the wire**, deploy gate OK, idempotent on re-run |
+
+### What this round was
+
+Not a feature. **Two documented contracts that the code did not implement**, one
+of them in the gate that decides what may ship. Neither is exotic: a lookup
+that meant something other than it said, and a stylesheet that inherited one
+colour where it meant two.
+
+| | |
+|---|---|
+| boxes audited from the plan's closed set | 2 Phase-2 items + 3 shipped items |
+| Phase 2 blockers that were real | **2** — both genuinely need a human, atlas is proprietary and `approved: true` |
+| contracts found not implemented | **2** |
+| new gates, each proved able to fail | **3** (8-case validator harness, 2 pip tests) |
+| findings chased to the floor and **not** claimed | **1** |
+| my own instruments that were wrong | **1** (inverted probe verdict) |
