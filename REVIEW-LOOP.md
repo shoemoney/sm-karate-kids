@@ -7614,3 +7614,116 @@ here. The only thing wrong was the clock the ladder walks on.
 **The generalisable finding:** a controller whose input is the thing it is trying to
 fix cannot count units of that thing. Frames-to-slow, ticks-to-stuck, retries-to-failing,
 bytes-to-full. Bound the window in the unit the *user* is waiting in.
+
+### Then the review set, and what two models agreed on
+
+Standing rule 1 first: the set was regenerated, not reused. `review-codex.sh` **could not
+run** — `OPENROUTER_API_KEY` is unset in this environment and it correctly fails closed
+rather than reporting a broken run as findings. `vision-review.py` has a key-file
+fallback (`~/.config/openrouter/key`) and did run, and the model the loop's own header
+names, `gemini-3.5-pro`, is **retired** — `400 not a valid model ID`, confirmed against
+OpenRouter's live catalogue. Two current models instead:
+
+| | gemini-3.8-flash | glm-5.3-flash |
+|---|---|---|
+| fighter scale in portrait | fighters ~25% of screen height | same, independently |
+| TECHNIQUES button over the fighters | "floats on the fighters' heads" | "overlaps the fighters' heads" |
+| half-point score typography | baseline drop, stacked fraction | same, independently |
+| control legend / callout | 8-command strip too small | callout has no actor |
+| result screen | loading-bar contrast | only REMATCH, no way out |
+
+**Four findings converged. One was real and I fixed it. Three were re-opens.**
+
+**Fixed — the TECHNIQUES button was on the fighters.** Both models named it and the
+pixels confirmed it. On the qualifier card at 390x844 the button spanned CSS y **312–358**
+with the fighters' heads at **330–340** — 12 bright pixels per scanline rendering *through*
+the button's own box. The card's own stylesheet comment, three rules up, already named
+this hazard: centred result text across both heads is "the one thing on screen a player
+most wants to look at". One child of the card had no `margin-top: auto`; FIGHT had it.
+
+The obvious fix was wrong, and measuring is the only reason I know that. Giving the
+button the same auto margin moved it to **399–445** — clear of the heads, straight across
+their **torsos**, 8 more scanlines, both chest emblems hidden. Same bug, new geometry.
+So the fix is structural: `.result-actions` now groups the reference and FIGHT and owns
+the free space, and neither can be placed over the fighters however the text reflows.
+
+| | before | after |
+|---|---|---|
+| reference button | y 312–358 | y 494–540 |
+| fighter scanlines inside it | **12** | **0** |
+| inside FIGHT | 0 | **0** |
+| size / gap | 143x46, n/a | 143x46, **8px** |
+
+Verified at **360x640, 390x844, 430x932 and 1280x800** — every one: 46px tall, 143 wide,
+8px gap, both controls inside the group.
+
+**A stylesheet test could never have caught this.** `reference-tap-target.test.ts` reads
+`styles.css` as *text* and asserts the button declares a `min-height` — it went green
+while the button sat on a fighter's head. So the new test measures boxes, and
+`.result-actions` being present is itself the assertion, because that is the structure
+the fix rests on. **Proven able to fail:** renaming the class to `result-actions-NOT` turns
+both viewports red.
+
+**Rejected — portrait fighter scale (both models).** The plan settled the dead space at
+**39.7%** as arithmetic in r84 and reaffirmed in r140, and the whole point of that
+measurement is that the camera framing is deliberate. Two models noticing it is not two
+measurements. Not re-opened.
+
+**Rejected — result screen "no way out".** I looked at the frame before answering. It
+shows `REMATCH` with `REMATCH IN 7` beneath it — a visible countdown — and the code has
+one tournament mode by design (`REVIEW-LOOP.md:531`, `action: 'NEW TOURNAMENT'`). The
+countdown is exactly what r136 added so the player knows what they are waiting for. The
+finding describes a decision, not a defect.
+
+**Left — half-point score typography (both models).** Genuine convergence, and a real
+re-open: the stacked fraction was built in r53, revisited in r133, and has been proposed
+since r918. It is a typography change to a scoreboard nobody has settled, and I have
+spent this round's remaining budget on the thing with pixels behind it rather than start a
+second one. Recorded as the next open item.
+
+### The gate was unrunnable for most of this round, and that is the other result
+
+`pnpm test:e2e` failed **41 → 18 → 13 → 0** in that order across four attempts, every
+failure `page.goto: net::ERR_CONNECTION_REFUSED at 127.0.0.1:4173`. Not one was an
+assertion. Load average on this box was **10–17** from other tenants — a Godot test
+harness, an agentdesk build, Mail — and the preview server **dies on its own** at that
+load, which I proved directly rather than inferring: started a preview by hand, polled
+it, and watched it answer 200 four times and then return `000` with an empty log.
+
+Rule 4 exists for this. I did not touch the code, I did not raise a timeout, and I did
+not report any of those runs as a result. The last two attempts, once the load eased,
+were **41 passed / 5 skipped, twice**.
+
+One of my own mistakes hid in there. The first red run also failed my new test, and not
+for the reason it exists: I had run `playwright test` directly against `dist/`, which
+`pnpm test:e2e` builds first. My test was asserting on a **stale bundle** and reporting it
+as a layout failure. The suite's own docstring says exactly this. The second failure was
+mine too: `.sheet` matched **two** elements and Playwright's strict mode rejected it, so
+the locator is `#tech-ref`.
+
+### The round in one table
+
+| | |
+|---|---|
+| r146's headline | **fixed-ratio row**, not the controller |
+| live controller, measured | `ratio: 2`, never moved, at 1.2fps |
+| the bug | window counted in **frames** — 41.8s per window |
+| after fix | descent **2.4s**, ratio **0.75**, click 5431 → **1338ms** |
+| mutations, controller | **3/3 red** |
+| new finding (2 models + pixels) | TECHNIQUES on the fighters — **12 → 0** scanlines |
+| fixed by | `.result-actions` owns the free space, not a margin |
+| verified at | 360x640, 390x844, 430x932, 1280x800 |
+| new gate's mutation | **red both viewports** |
+| check= | typecheck, **181 unit/19 files**, content, assets OK |
+| e2e= | **41 passed, 5 skipped** — twice, after 4 environment-red runs |
+| open boxes | **one**: half-point score typography (both models, unfixed) |
+
+### Two things a future round should not repeat
+
+**A stylesheet assertion is not a layout assertion.** Reading CSS as text proved the
+button *declares* 44px while it rendered on a fighter's face. The declaration was always
+true and the thing the player sees was always wrong.
+
+**A model naming a retired model is not a broken reviewer.** `gemini-3.5-pro` returned
+`400` and for a moment the whole review path looked dead. It was one stale string in a
+docblock, and the credential was fine the whole time.

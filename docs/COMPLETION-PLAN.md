@@ -176,9 +176,19 @@ Because nothing is watching, three rules exist and are not optional:
 - [x] every phase gated, logged, committed, deployed
 - [x] **renderer frame cost on a GPU-less device** — closed at r146, and it turned out not
       to be the taste call r144 assumed. See below.
+- [ ] **half-point score typography** — reopened at r147. Two independent models
+      (`gemini-3.8-flash` and `glm-5.3-flash`) named it off the same fresh review set:
+      the stacked fraction reads as a baseline drop and is hard to parse. It has been
+      proposed since r918, built in r53 and revisited in r133, so this is the fifth time
+      it has been raised and the first time two models raised it in the same round.
+      Deliberately left unfixed at r147 rather than started half-way beside a shipped
+      fix. A typography change to a scoreboard, not a correctness bug.
 
 **Not "done" means:** every item above is either finished or blocked on a human
-decision with the measurement attached.
+decision with the measurement attached. As of r147 there is **one** open item —
+the half-point score typography — so the project is not "done" in the strict
+sense yet. Everything else in Phases 1 and 3 is closed, and Phase 2 is blocked
+on a human by design, with the measurement attached to each item.
 
 ---
 

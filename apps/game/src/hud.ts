@@ -330,14 +330,35 @@ export class Hud {
     // 0x0 behind the card and `elementFromPoint` at its centre returns the card,
     // not the button. The reference was named and unreachable on the one screen
     // every player reads.
-    const parts: HTMLElement[] = [kicker, headline, score, detail, button, count];
+    const parts: HTMLElement[] = [kicker, headline, score, detail];
     if (opts.reference !== undefined) {
       const ref = document.createElement('button');
       ref.type = 'button';
       ref.className = 'result-reference';
       ref.textContent = opts.reference.label;
       ref.addEventListener('click', opts.reference.onOpen, { once: true });
-      parts.splice(4, 0, ref);
+      // The actions travel together in one row, not as two siblings of a
+      // centred column.
+      //
+      // Measured at 390x844 on the qualifier card, this button was the only
+      // child of the card that did not take `margin-top: auto`, so it was laid
+      // out immediately after the note panel — straight across the fighters.
+      // As its own flex child it sat at CSS y 312–358 with their heads at
+      // 330–340, and 12 bright pixels per scanline rendered *through* its box.
+      // Adding the same auto margin moved it to 399–445, which cleared their
+      // heads and landed it across their torsos instead: 8 more scanlines, both
+      // chest emblems hidden. The card is three bands — identity, fighters, call
+      // to action — and both buttons belong to the third, so they go in one
+      // container that owns the free space. Neither can then be placed over the
+      // fighters no matter how the card's text reflows.
+      const actions = document.createElement('div');
+      actions.className = 'result-actions';
+      if (opts.reference !== undefined) actions.appendChild(ref);
+      actions.appendChild(button);
+      actions.appendChild(count);
+      parts.push(actions);
+    } else {
+      parts.push(button, count);
     }
     this.result.replaceChildren(...parts);
     this.banner.classList.remove('show');

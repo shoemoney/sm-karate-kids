@@ -2816,7 +2816,16 @@ body.high-contrast .result-score {
    44px is the floor; it gets 46 and a real secondary-button presence. */
 .result-reference {
   justify-self: center;
-  margin-block-start: var(--space-2);
+  /* No margin of its own any more: `.result-actions` carries `margin-top: auto`
+     and places this button and FIGHT as one group in the card's lower band.
+
+     Measured at 390x844 on the qualifier card, this control was the only child
+     of the card not taking `margin-top: auto`, so it laid out right after the
+     note panel — at CSS y 312–358 with the fighters' heads at 330–340, and 12
+     bright pixels per scanline rendering *through* its own box. Giving it the
+     same auto margin moved it to 399–445, clearing the heads and crossing their
+     torsos instead: 8 scanlines, both chest emblems hidden. Geometry is not the
+     fix; being in the same container as FIGHT is. */
   min-height: 46px;
   display: inline-flex;
   align-items: center;
@@ -2838,6 +2847,19 @@ body.high-contrast .result-score {
   border-color: var(--gold);
 }
 
+/* The call-to-action band.
+   One container owns the card's free space, so the controls below the fighters
+   are placed as a unit and neither can be laid across them. See the note on
+   `.result-reference` for the measurement that forced this. */
+.result-actions {
+  margin-block-start: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  inline-size: 100%;
+}
+
 .result-count {
   margin: var(--space-2) 0 0;
   min-block-size: 1em;
@@ -2854,13 +2876,12 @@ body.high-contrast .result-score {
 }
 
 .result-rematch {
-  /* `auto`, not a fixed space: the result card is three bands — identity at the
-     top, the fighters across the middle, the call to action on the mat below
-     their feet — and pushing this one child to the bottom of the flex column is
-     what opens the middle band up. A fixed top margin put the button straight
-     across both fighters' faces, which is the one thing this screen must not
-     do. */
-  margin-top: auto;
+  /* The `auto` margin this button used to need is now carried by
+     `.result-actions`, which groups it with the reference button. It was what
+     pushed this one control below the fighters when it was the card's only
+     child doing so; with two, it is the container's job and leaving it here
+     would compete for the same free space. */
+  margin-top: 0;
   min-width: 12rem;  min-height: 52px;
   padding: 0 var(--space-5);
   border: 1px solid var(--button-edge);
