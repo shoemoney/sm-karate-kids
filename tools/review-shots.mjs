@@ -6,7 +6,7 @@
  * Not a test harness — this exists to feed tools/vision-review.py.
  */
 import { chromium } from '@playwright/test';
-import { mkdirSync, rmSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 
 const OUT = process.argv[2] ?? '/tmp/smkk-review';
 const BASE = process.env.SMKK_BASE ?? 'http://127.0.0.1:5173';
@@ -734,6 +734,74 @@ await capture('21-phone-kick-open', phone, async (page) => {
   }
   if (!caught) console.warn('21-phone-kick-open: no active kick observed, frame not written');
 });
+
+/* ── The motion burst ───────────────────────────────────────────────────────
+ * Every shot above is a cold page load in its own browser context. No two
+ * frames in this set share a page, so sorting them by filename compares
+ * unrelated screens: `verify_shots.py`'s mean-luma "motion" over that order
+ * reads 12.08 on eight static menus containing no gameplay at all, and its
+ * largest contributors are a settings menu and a bracket — while the real
+ * gameplay pair, fight -> strike, scores 0.67. Adjacency in this set is not
+ * time, so no statistic over it can measure motion.
+ *
+ * The only frames where adjacency means time are frames taken back to back
+ * from ONE running bout. That is what the gate is given: a burst, plus the
+ * simulation tick and fighter positions at each frame, so it can ask whether
+ * the game was actually advancing instead of inferring it from pictures.
+ */
+const BURST = 8;
+rmSync(`${OUT}/burst`, { recursive: true, force: true });
+mkdirSync(`${OUT}/burst`, { recursive: true });
+
+const burstCtx = await browser.newContext({
+  viewport: phone,
+  deviceScaleFactor: 2,
+  isMobile: true,
+  hasTouch: true,
+});
+const burstPage = await burstCtx.newPage();
+await burstPage.goto(`${BASE}/?mode=dojo`, { waitUntil: 'networkidle' });
+await waitFight(burstPage);
+
+const burst = [];
+const tap = async (key, hold = 40) => {
+  await burstPage.keyboard.down(key);
+  await burstPage.waitForTimeout(hold);
+  await burstPage.keyboard.up(key);
+};
+
+// The burst has to be PLAYED. Captured idle, the simulation clock still runs
+// (measured: ticks 72..240) while the fighters stand at one position pair and
+// the last three frames come back 0.00% different — an unplayed bout that is
+// rich in colour, distinct frame to frame, and completely motionless. That is
+// the failure this burst exists to catch, so it has to be played to give the
+// gate a passing arm, and the mutation harness supplies the unplayed one.
+const script = [
+  async () => {},
+  async () => tap('ArrowRight', 220),
+  async () => {},
+  async () => tap('ArrowLeft', 260),
+  async () => { await burstPage.keyboard.down('ArrowUp'); await burstPage.waitForTimeout(230); await burstPage.keyboard.up('ArrowUp'); },
+  async () => tap('ArrowRight', 240),
+  async () => tap('ArrowLeft', 200),
+  async () => { await burstPage.keyboard.down('ArrowUp'); await burstPage.waitForTimeout(210); await burstPage.keyboard.up('ArrowUp'); },
+];
+
+for (let i = 0; i < BURST; i += 1) {
+  const s = await burstPage.evaluate(() => globalThis.__smkk?.state?.() ?? null);
+  await burstPage.screenshot({ path: `${OUT}/burst/${String(i).padStart(2, '0')}.png` });
+  burst.push({
+    file: `${String(i).padStart(2, '0')}.png`,
+    tick: s?.tick ?? null,
+    phase: s?.phase ?? null,
+    positions: s?.positions ?? null,
+  });
+  await script[i]();
+  await burstPage.waitForTimeout(90);
+}
+writeFileSync(`${OUT}/burst/frames.json`, `${JSON.stringify(burst, null, 2)}\n`);
+await burstCtx.close();
+console.log(`burst: ${BURST} frames, ticks ${burst[0]?.tick}..${burst.at(-1)?.tick}`);
 
 await browser.close();
 console.log(`shots in ${OUT}`);

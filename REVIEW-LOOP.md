@@ -9185,3 +9185,147 @@ One diff I did not cause and did not commit: `docs/preview/portrait.png` again,
 written by the e2e capture spec. Restored with `git checkout`, for r153's reason —
 refreshing a regenerated binary because a test produced it is the file-version of
 "it was already dirty when I got here".
+
+---
+
+## Round 155 — the gate that guarded rule 1 could not see a frozen game
+
+No open plan items. Per r151's standing instruction — re-read the closed boxes
+on suspicion — r154 took the suspicion to the **instruments** and found two
+reporting values they never measured. This round took it to the third
+instrument, the one standing directly behind standing rule 1.
+
+`tools/verify_shots.py` gates the review set itself: *"A set that fails here
+was never a review set."* Rule 1 exists because stale frames produced a false
+finding at r127. So this is the gate the whole review discipline rests on, and
+it had never been audited.
+
+### It passed a set with no gameplay in it
+
+Its motion check was the mean inter-frame luma delta over `sorted(glob("*.png"))`,
+thresholded at 2.6. Measured on the real 21-frame review set:
+
+| largest contributors to "motion" | |
+|---|---|
+| `15-phone-settings-mixed` | **32.32** — a settings menu |
+| `05-phone-techref` | **29.34** — a technique reference |
+| `16-phone-in-play` | 27.72 |
+| `02-phone-fight` | 21.58 |
+| `14-phone-returning` | 21.16 |
+| `03-phone-strike` | **0.67** — the actual game advancing |
+| `04-phone-controls` | **0.06** |
+
+Its biggest values were unrelated static menus being swapped. Its two smallest
+were the real thing happening. Then the decisive run — eight frames drawn from
+the game's own output, every one of them a static screen and none of them
+gameplay:
+
+    00-boot-loading  01-phone-title  05-phone-techref  06-phone-settings
+    09-phone-highcontrast  10-phone-tournament  13-phone-ladder  15-phone-settings-mixed
+
+    $ python3 tools/verify_shots.py /tmp/smkk-noplay
+    OK  8 frames, 8 distinct, motion 12.08        exit 0
+
+**4.6× its own threshold, on a set where the game never runs in any frame.**
+The docstring's third check is "no motion — real, distinct, richly-coloured
+frames of a game that is not being played." That is precisely this set.
+
+### The cause, from source rather than inference
+
+`capture()` opens a **fresh browser context and a fresh page load for every
+shot**. No two frames in the set share a page, so `sorted(glob())` adjacency has
+no relationship to time. The number was the brightness difference between 21
+unrelated cold loads.
+
+Per-pixel change does not rescue it — measured across unrelated static screens
+it read **76.67%** for two settings menus and **1.90%** for two brackets, against
+**37.26%** for genuine gameplay. The information is not in the pixels; it is in
+knowing two frames came from one continuous capture. No statistic over the set
+can recover it.
+
+**The constant was never the defect.** 2.6 computed over the right population
+would have worked. It was the right question asked about the wrong frames.
+
+### What shipped
+
+`review-shots.mjs` now writes `burst/` — 8 frames back to back from **one**
+played bout, with `tick`, `phase` and both fighter positions recorded per frame.
+`verify_shots.py` reads that instead of the set, and checks what only a burst
+can answer: ticks strictly increasing, frames distinct, fighters having
+**moved**, and mean per-pixel change.
+
+Both arms measured, three independent runs, all off pixels:
+
+| arm | mean px delta | distinct position pairs | ticks |
+|---|---|---|---|
+| **played** burst | **12.58 / 12.67 / 12.67%** | 6 / 8 | 72 → 274 |
+| **unplayed** burst | **0.59%** | 1 / 8 | 72 → 240 |
+
+A factor of **21** on per-pixel change. Threshold set at 4.0 — 6.8× above the
+unplayed arm, 3.2× below the played one.
+
+The ticks advance in **both** arms, which is the reason the clock alone is not
+evidence: the sim runs at 60Hz whether or not anyone is playing. My first burst
+was captured idle and measured 0.59% with the fighters at one position pair —
+the instrument working, catching exactly what it was built for.
+
+### `tools/verify-shots-mutation.sh` — 13/13
+
+Every branch gets a case: no burst, frozen ticks, a running clock on a still
+world, sub-threshold motion, byte-identical burst frames, a named-but-absent
+burst frame, duplicate/flat/too-few top-level frames, and a burst faked by a
+manifest that claims positions its pixels do not support.
+
+The case that matters runs **the old algorithm verbatim** on data shaped like
+the failure and gets `motion 6.79` — passing its own 2.6 threshold. That is the
+difference between "the reader was absent" and "the reader was wrong."
+
+### My own work, twice over
+
+- **Two bad fixtures in my own harness on the first run**, and both were the
+  r154 shape. `still-burst` built byte-identical frames, so the correct earlier
+  branch fired and my intended assertion never ran. And the "old metric
+  reproduces the defect" case read **0.00** — because my synthetic frames were
+  uniformly bright, and the real property that scored 12.08 is *large brightness
+  differences between unrelated screens*. A fixture that does not reproduce the
+  cause cannot demonstrate the cause. Both fixed; the second needed a `spread`
+  parameter that varies top-level brightness the way real screens do.
+- **Read a gate out of a pipe again.** `pnpm check 2>&1 | tail` printed
+  `check exit=` **empty**, because `${PIPESTATUS[0]}` is bash and this is zsh.
+  Empty is not zero. r153 wrote a paragraph about this habit, r154 did it again,
+  and I did it again in round 155. Re-run unpiped to a log: `check=0`. Three
+  rounds, same mistake — it is now a habit and not an accident, which is the
+  part that matters.
+
+### Gates
+
+`check=0` (typecheck + 200 unit across 21 files + content + assets, 20 assets
+against provenance), `verify-shots-mutation=0` (13/13), and the real captured
+set through the real gate:
+
+    OK  21 frames, 21 distinct; burst 8 frames, ticks 72..274, 6 positions, motion 12.58%
+
+**e2e: no verdict, deliberately.** Load reached **22.15** from work that is not
+mine — a Godot process at 100%, syncthing at 94.7%, Spotlight mdworkers — against
+r151's band (red at 14–16, green at 8–10). At that load an e2e number is noise
+wearing a pass/fail costume. The diff touches `tools/` only: no `apps/game/src`,
+no rendering, no input adapter, which is the condition `AGENTS.md` requires e2e
+for. The gates that cover this change are the mutation harness and a real
+capture.
+
+Load at the start of the round was **4.98** — inside the green band — so every
+number above was taken on a machine that could be trusted.
+
+Production: **no deploy needed and none performed.** `dist/index.html` is
+`77c358a7d9aa25d1a9f2b3b2…`, unchanged, because nothing in the bundle moved.
+`tools/verify-deploy.sh`: `exit 0`, html identical, 2 assets sha256-matched.
+
+### The shape, for the seventh time
+
+An instrument that reports a plausible value it never measured is worse than one
+that reports nothing, because nothing is at least visibly nothing. This one had
+a threshold, a name, a docstring explaining the reasoning behind it, and a
+comment citing the number that motivated it — and it had been passing a set
+containing no gameplay since it was written. The comment's own citation
+(`an unplayed run measures ~1.9`) describes a measurement that was never taken
+on these frames.

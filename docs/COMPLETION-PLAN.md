@@ -446,6 +446,28 @@ that reports nothing**, because nothing is at least visibly nothing. Both fixes
 are in `tools/`, so no game code and no bundle changed; production was already
 byte-identical and stayed that way, re-verified.
 
+**r155 found the eighth, and it was the instrument guarding standing rule 1.**
+`tools/verify_shots.py` — the gate that decides whether a review set is worth
+reviewing — computed "motion" as the mean luma delta over `sorted(glob())`
+across the whole set. But every shot is a cold page load in its own browser
+context, so **no two frames share a page and filename adjacency is not time**.
+Fed eight real frames from this game's own output, every one a static menu and
+none of them gameplay, it returned `motion 12.08` and **exit 0** — 4.6× its own
+threshold, on a set where the game never runs in any frame. Its largest
+contributors were a settings menu (32.32) and a bracket; the real gameplay pair
+`fight -> strike` scored **0.67**.
+
+Measured both arms of the fix off pixels, three runs: a **played** burst reads
+**12.6%** mean per-pixel change with 6 of 8 distinct fighter positions, an
+**unplayed** one reads **0.59%** with 1. A factor of 21. The harness also runs the
+old algorithm verbatim on shaped data and gets a passing `motion 6.79` — the
+defect reproduced, not merely its absence.
+
+**The constant was never wrong.** `2.6` computed over a burst would have worked.
+It was the right question asked about the wrong frames, which is the same shape
+as the six before it and the reason this round audited instruments rather than
+game code.
+
 One more thing r151 established about this box, because it changes how every gate
 here should be read: **it does not idle.** Load ~10-13 from other work at rest,
 which is why the e2e suite is red at 14-16 and green at 8-10 on identical code.
