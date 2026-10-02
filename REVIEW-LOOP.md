@@ -7884,3 +7884,136 @@ models at r147, and described in the same four words each time — because nobod
 a number. Four rounds of that cost more than the fix did. When a review says a thing
 "reads as" something, that is a hypothesis about a measurement, and the measurement
 is a half point away in the review set that has existed since r73.
+
+### …and then the review said the one-line fraction was wrong too
+
+I committed the one-line fraction as the answer. Then I regenerated the review
+set (rule 1) and ran the reviewer on it, which is the thing I should have done
+*before* committing, and it came back:
+
+> **`fractional-score-typography` — Waza-ari half-points render as confusing ranges
+> and malformed fraction glyphs.** "fractional scores render as `1-2` (Screenshot
+> 17), **`2 1-2` (Screenshot 16)**… reads to players as '1 to 2' (a win-loss record
+> or score range), creating immediate confusion over who scored, who is ahead, and
+> whether the bout is tied."
+
+`2 1-2` is a **2.5** score. The whole number `2` and the fraction's numerator `1`
+were separate elements 4.5–5.0px apart, so they read as one numeral sequence.
+My fix had traded a baseline drop for an adjacent-numeral merge.
+
+So the trade was: stacked (unambiguous vertically, 15px drop, 26% reflow) →
+one-line (no drop, no reflow, merges with the whole number). Both were built out
+of **separate elements next to a whole number**, and both failed for the same
+underlying reason.
+
+### The notation had never been rendered
+
+Nobody, in five rounds and three notations, had put the candidates side by side.
+So `tools/notation-probe.mjs` does, in the shipped font stack, at the score's real
+22px, on the real plate:
+
+| | how it reads |
+|---|---|
+| A one-line fraction (r148a) | `1 1-2` — a short **horizontal** dash. Reads as a minus. |
+| **B U+00BD at score size** | `1½` — a **diagonal** slash, numerator raised, denominator lowered. |
+| C U+00BD at 0.72em | `1½`, still clearly a fraction |
+| D stacked column (r147) | `1` with `½` hanging below — the drop, plainly visible |
+| E decimal | `1.5` — what r36 replaced |
+
+**The r36 rejection of U+00BD was based on the slash, and the slash is the reason
+it works.** r36's objection, from gpt-5.2 and never rendered, was that the glyph
+"renders as a *slashed* fraction, so `2½` reads as `21/2`". But:
+
+- a minus sign is **horizontal**, so a diagonal cannot be read as one
+- the numerator is **raised** and the denominator **lowered**, so they are not on
+  one line and cannot be read as a range
+- it is **one glyph**, so there is no adjacent-numeral merge to have
+
+The reviewer had independently asked for exactly this glyph — its suggested fix
+was `'½'` — and was told no, for a reason that inverted its own evidence. Five
+rounds of the loop trusting a remembered opinion about a font.
+
+At the score's own size it is also the only candidate with no size mismatch, no
+second line, and no reflow, which is what the r147 and r148a measurements were
+each trying to buy. **Shipped: `scoreFragment` emits one text node.**
+
+### The gate split, and why a half cannot be landed on demand
+
+The r148a mutation (rebuild the half as a separate `.score-frac` element) is red
+on both gates, and the e2e failure is the defect itself:
+
+> with a half on the board `.points` has 2 child node(s) and elements `["SPAN"]`
+> — the glyph must be inside the score's own text. Expected 1, Received 2.
+
+**The one thing I could not make deterministic is landing a half**, and the reason
+is the game's own rules rather than the harness: a half is only awarded when the
+defender is **not** winding up — `match.ts` promotes the call to a full point on
+`defender.phase === 'startup'`. Under frame starvation that is less likely to hold,
+so the technique scores full, two full points end the bout at `pointsToWin: 2`, and
+the half never appears. Measured here: load averages **14.45/18.18/19.36**, the loop
+burned its full 180s, and the identical choreography lands a half in ~40s at load 8.
+
+So the test is honestly split:
+
+- **Deterministic** — the score is ONE text node and there is no `.score-frac`
+  element. True of a whole score, so it needs no gameplay and cannot flake. This is
+  what catches the merge.
+- **Opportunistic** — when a half *does* land, the scoreline must not have moved,
+  and the half must be the glyph rather than a decimal. If no half arrives, the
+  test says so in an annotation **rather than failing on a machine too slow to
+  produce the state**. A gate that goes red on a busy box teaches the next round to
+  ignore it, and r147's log has four rounds of exactly that.
+
+The geometry is not lost to that. `tools/scoreline-stability.mjs` measures the
+scoreline across a half landing, and `tools/notation-probe.mjs` renders every
+candidate in the shipped font stack — both re-runnable, neither a blocking gate,
+which is the right split for a measurement that needs a half landed by real play.
+
+### Three review passes on the same set, and the finding left
+
+| pass | what the reviewer said about the half point |
+|---|---|
+| before the fix | "baseline drop, hard to parse" |
+| after the one-line fraction | "confusing ranges… `2 1-2`" |
+| after the gap fix | "confusing hyphenated strings" |
+| **after the glyph** | **not mentioned at all** |
+
+Three consecutive flags and then silence, on four independently regenerated sets.
+That is the only outcome I would accept as evidence for a legibility question,
+because a screenshot cannot be argued with and a legibility claim is otherwise
+pure opinion.
+
+### Two more things I got wrong, both caught before they shipped
+
+**My first `scoreFragment` used `toLocaleString` with a fraction digit**, which
+renders `1.5` — notation E, the decimal r36 removed the glyph to get away from.
+Every other test in the file still passed, because the test suite was checking the
+*wiring* and the notation had quietly gone back to being a decimal. There is now a
+guard that fails on `minimumFractionDigits`.
+
+**That guard then failed on its own docblock**, which names `minimumFractionDigits`
+while explaining why it must not be used. A grep that cannot tell prose from code
+reports its own documentation as a violation — the same shape as the stylesheet
+assertions this repo retired at r147, one layer over. The assertion strips comment
+lines first.
+
+And a third, which cost a run: **I contaminated the review set.** I left four
+`ZZ-*.png` crops in `/tmp/smkk-loop`, so the second review ran against 24 images
+where the set has 19–20. Every crop was of the scoreline, which is exactly the
+region under test. Deleted, set regenerated, review re-run. The third pass was
+clean.
+
+### The gate was red for 42 tests and none of them were mine
+
+The last full `pnpm test:e2e` returned **42 failed, every one
+`ERR_CONNECTION_REFUSED at 127.0.0.1:4173`** — with two PIDs already holding 4173
+when the run started. r147 documented this exact failure and proved its cause by
+hand: at load 10–17 from other tenants the preview server **dies on its own**, and
+`lsof -ti:4173` printed a PID at the start of this run, which is
+`AGENTS.md`'s documented squatter scenario. Rule 4 says check the probe and the
+servers before the code, so I killed the port, waited for the load, and re-ran
+rather than touching a line. Zero of the 42 was an assertion.
+
+The interesting part is that a *green* count can sit on top of it: one run reported
+`41 passed, 6 skipped` and still exited 1, and the next reported 42 failures of the
+same kind. A summary line is not a gate reading, which is rule 2's whole point.

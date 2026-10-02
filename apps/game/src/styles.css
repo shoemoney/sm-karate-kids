@@ -771,63 +771,28 @@ body.show-perf #backend {
   flex: 0 0 auto;
 }
 
-.score-frac {
-  display: inline-flex;
-  align-items: center;
-  /* One line, not a column.
-   *
-   * Measured at round 148, at a 1.5 score on the 390px baseline:
-   *
-   *   digits   ink  y 15.0 .. 35.5      (the score digits' cap-to-baseline band)
-   *   fraction ink  y 17.0 .. 50.5      33.5px tall, centre 8.50px LOW
-   *   fraction's denominator vs the digit baseline:  15.00px BELOW it
-   *
-   * That last number is the whole finding. Five rounds have called this "reads
-   * as a baseline drop" — a stacked column is two lines tall, `vertical-align:
-   * -0.3em` pushed it down, and the denominator ended up hanging a full 15px
-   * under the baseline of the digit it belongs to. It was not a taste
-   * complaint; it was a subscript.
-   *
-   * The column also could not be rescued by shrinking it. Its ink is 33.5px
-   * against a 20.5px digit band, so fitting it would need the numerals at
-   * ~0.44em — below the 0.66em floor below, which two reviewers set for
-   * legibility at r73. A stacked fraction beside a single-line digit cannot be
-   * both. So the fraction is set on ONE line: numeral, bar, numeral, sharing a
-   * baseline with the score. That is how a fraction is set in running text, it
-   * is the same three nodes at the same 0.72em, and it removes the drop because
-   * there is no second line to drop.
-   *
-   * `vertical-align: baseline` on an inline-flex resolves to the FIRST item's
-   * baseline, which is the numerator — so the numerator sits on the digits'
-   * baseline and, both numerals being the same size, the denominator does too. */
-  vertical-align: baseline;
-  line-height: 1;
-  margin-inline-start: 0.06em;
-  /* 0.52em of a 22px score is an 11px digit, and that is below the size at
-     which a numeral can be told from a speck without effort. Two reviewers put
-     it as "unreadable at HUD size" and "half-point display is tiny" once the
-     frame showing it finally existed — which is the first time anyone could see
-     it at all (round 73). They were reading the real thing, and it was too
-     small.
-     0.72em puts the fraction at ~16px against a 22px score: still plainly a
-     fraction and not a second digit, and legible. The scoreline cannot clip
-     this because `.points` is `flex: 0 0 auto` and the names beside it are the
-     part that ellipsises. */
-  font-size: 0.72em;
-  font-weight: var(--weight-bold);
-}
-
-.score-frac-bar {
-  /* A fraction bar, not a division sign: wider than it is tall, with a little
-     air either side so it cannot be read as touching the numeral it separates.
-     Kept at 0.13em block so it stays a rule at that size rather than
-     disappearing — `score-notation.test.ts` holds both numbers. */
-  inline-size: 0.5em;
-  block-size: 0.13em;
-  background: currentColor;
-  border-radius: 1px;
-  margin-inline: 0.07em;
-}
+/* The half point is a glyph now — U+00BD, at the score's own size.
+ *
+ * Three notations have been shipped here and every one of them was argued for
+ * and against without anyone rendering them. `tools/notation-probe.mjs` finally
+ * put all of them on screen together, in this font stack, at this size, on this
+ * plate, and the measurements are in REVIEW-LOOP.md round 148:
+ *
+ *   r53..r147  stacked column of three real numerals
+ *               1.77 lines, denominator 15.00px BELOW the digit baseline,
+ *               scoreline +9.94px (+26%) on every half
+ *   r148a      one-line fraction, same three nodes
+ *               1.00 line, baseline flush, no reflow — but a 2.5 tournament
+ *               total read as `2 1-2`, the whole number and the numerator
+ *               merging into one numeral sequence
+ *   r148b      U+00BD at 1em  (shipped)
+ *               one glyph, one line, no size mismatch, no reflow, and the
+ *               diagonal makes a minus or a range impossible
+ *
+ * So there is deliberately NO `.score-frac` rule any more. If one comes back, the
+ * notation is being built out of separate elements again, and the two measured
+ * failures of r147 and r148a are what it is choosing between.
+ */
 
 .side[data-side="0"] .points {
   color: var(--fighter-0);

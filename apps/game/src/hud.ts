@@ -48,68 +48,71 @@ const QUALIFIERS: readonly Qualifier[] = ['neutral', 'up', 'down', 'forward', 'b
 
 
 /**
- * A score, as a fraction where there is a half in it.
+ * A score, with the half in it as one glyph.
  *
- * The U+00BD glyph is not usable here. In this font stack — and in most system
- * sans faces on every platform this ships to — it renders as a *slashed*
- * fraction, so `2½` reads as "21/2" at a glance. gpt-5.2 said exactly that:
- * "fix half-point score rendering so it can't read as 21/2", and it is right.
+ * **The U+00BD glyph was rejected at r36 and r53, and is back at r148 on
+ * measurement.** The original objection was gpt-5.2's: the glyph "renders as a
+ * *slashed* fraction, so `2½` reads as `21/2` at a glance." No one had rendered
+ * it. `tools/notation-probe.mjs` puts every candidate notation side by side in
+ * the shipped font stack at the score's real 22px, and the slash turns out to be
+ * the reason the glyph works, not the reason it fails:
  *
- * It also made round 36's fix worse rather than better. That change replaced a
- * decimal `2.5` — ambiguous, but at least one character per digit — with a
- * glyph that is visually three characters wide and reads as three. A notation
- * chosen to be unambiguous turned out to be less so.
+ *   - a minus sign is HORIZONTAL, so a diagonal cannot be read as one
+ *   - the numerator is raised and the denominator lowered, so the two numerals
+ *     are not on one line and cannot be read as a range
+ *   - it is ONE glyph, so there is no adjacent-numeral merge. That merge was the
+ *     specific failure of the r148 one-line fraction, where a 2.5 tournament
+ *     total read as `2 1-2` (measured ink gap 4.5-5.0px between the groups, and
+ *     gemini-3.8-flash called it "confusing hyphenated strings" on two
+ *     independent fresh review sets)
  *
- * Two real numerals with a bar are unambiguous on every platform, are not a
- * glyph anyone can misread, and are smaller than the slashed form, which also
- * buys back the width that made `10½` clip in round 43.
+ * At the score's own size it is also the only candidate with no size mismatch, no
+ * second line and no reflow. r147's stacked column measured **1.77 lines** with
+ * its denominator **15.00px below** the digit baseline, and grew the scoreline
+ * **9.94px** every time a half landed.
  *
- * They were **stacked** from r53 until r148, and the stacking was the defect
- * the five rounds of "reads as a baseline drop" were describing all along: a
- * column is two lines tall, so beside a one-line digit it hung 15px below the
- * baseline and made the scoreline 9.94px taller every time a half landed. The
- * three nodes are unchanged; only the CSS puts them on one line now. See
- * `.score-frac` in `styles.css` for the measurement.
+ * What r36 got right, and is kept: **one builder, so the notation cannot
+ * drift.** For thirty-one rounds the HUD and the card rendered this concept by
+ * two different mechanisms, and five models reported the card for five rounds
+ * because the card was the one nobody screenshotted. That invariant is the
+ * entire reason this function exists, and it outlives the glyph choice.
  */
 function renderScore(el: HTMLElement, score: number): void {
   el.replaceChildren(scoreFragment(score));
-  el.setAttribute('aria-label', Number.isInteger(score) ? String(score) : `${Math.floor(score)} and a half`);
+  el.setAttribute(
+    'aria-label',
+    Number.isInteger(score) ? String(score) : `${Math.floor(score)} and a half`,
+  );
 }
 
 /**
  * A score, as a DocumentFragment, for anywhere that renders one.
  *
- * Round 66 measured why the text path had to die. Five models in five rounds
- * reported the half point as cramped, ambiguous, unreadable or as reading
- * `21/2` — all of them looking at the result card, because that is where the
- * score is a *string* and the HUD's fraction is not used. So the fix
- * that satisfied them in round 53 only ever reached the in-match HUD, and the
- * card kept the U+00BD glyph the comment above explains.
+ * Round 66 measured why this has to be one function rather than a formatting
+ * call at six call sites. Every score the player can see comes through here — the
+ * HUD scoreline, the result card, the tournament ladder, a career best, a run
+ * total — so a notation change cannot reach one and miss another, which is
+ * exactly what happened for thirty-one rounds.
  *
- * One builder, two callers, so the notation cannot drift again: the same nodes
- * that render `1½` in the HUD render it on the card, with the thousands
- * separator preserved for a four-figure career total.
+ * `toLocaleString` carries the thousands separator for a four-figure career
+ * total, and the half is appended as the U+00BD glyph — NOT as a decimal. My
+ * first attempt at this passed `minimumFractionDigits: 1` and rendered `1.5`,
+ * which is notation E in `tools/notation-probe.mjs`: the decimal that r36
+ * replaced precisely because "2.5" is ambiguous with a score. The glyph is the
+ * point, and a decimal quietly threw it away while every test still passed.
+ *
+ * The result is ONE text node. That is the property that removed the r148a
+ * failure, where the whole number and the half were separate elements sitting
+ * close enough to read as a single numeral sequence (`2 1-2` for a 2.5 total).
+ * There is no second element here to drift, to restyle out of step with the
+ * digits, or to merge with them.
  */
 export function scoreFragment(n: number): DocumentFragment {
   const frag = document.createDocumentFragment();
   const whole = Math.floor(n);
-  if (n === whole) {
-    frag.append(document.createTextNode(whole.toLocaleString()));
-    return frag;
-  }
-  if (whole > 0) frag.append(document.createTextNode(whole.toLocaleString()));
-  const frac = document.createElement('span');
-  frac.className = 'score-frac';
-  const top = document.createElement('span');
-  top.className = 'score-frac-num';
-  top.textContent = '1';
-  const bar = document.createElement('span');
-  bar.className = 'score-frac-bar';
-  const bottom = document.createElement('span');
-  bottom.className = 'score-frac-num';
-  bottom.textContent = '2';
-  frac.append(top, bar, bottom);
-  frag.append(frac);
+  const half = n - whole >= 0.5;
+  const text = half ? `${whole.toLocaleString()}½` : whole.toLocaleString();
+  frag.append(document.createTextNode(text));
   return frag;
 }
 

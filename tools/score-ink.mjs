@@ -204,12 +204,42 @@ for (const vp of VIEWPORTS) {
   );
 
   const toCss = (v) => (v === null ? null : +(v / S + clipY).toFixed(2));
+  // Horizontal gap between the two groups, measured on the same crop. A score
+  // of 2.5 rendered as "2 1-2" — the whole number and the fraction's numerator
+  // ~1px apart, reading as one numeral sequence. The gap is the thing that
+  // separates them, so it gets a number.
+  const gap = await decodePage.evaluate(
+    async ({ b64, fracX0 }) => {
+      const img = new Image();
+      img.src = `data:image/png;base64,${b64}`;
+      await img.decode();
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      const g = c.getContext('2d', { willReadFrequently: true });
+      g.drawImage(img, 0, 0);
+      const d = g.getImageData(0, 0, c.width, c.height);
+      let rightmostLeft = -1;
+      for (let y = 0; y < c.height; y += 1) {
+        for (let x = 0; x < fracX0; x += 1) {
+          const i = (y * c.width + x) * 4;
+          if (d.data[i + 3] < 60) continue;
+          const L = 0.2126 * d.data[i] + 0.7152 * d.data[i + 1] + 0.0722 * d.data[i + 2];
+          if (L < 70) continue;
+          if (x > rightmostLeft) rightmostLeft = x;
+        }
+      }
+      return rightmostLeft < 0 ? null : fracX0 - rightmostLeft - 1;
+    },
+    { b64: shot.toString('base64'), fracX0 },
+  );
   out.push({
     viewport: vp.name,
     landed: true,
     fontSize: geom.fontSize,
     fracFontSize: geom.fracFontSize,
     scorelineH: +geom.scoreline.height.toFixed(2),
+    groupGapCss: gap === null ? null : +(gap / S).toFixed(2),
     bgL: bands.bg,
     digitsInk: { top: toCss(bands.digits.top), bottom: toCss(bands.digits.bottom), px: bands.digits.ink, peak: bands.digits.peak, p95: bands.digits.p95 },
     fracInk: { top: toCss(bands.fraction.top), bottom: toCss(bands.fraction.bottom), px: bands.fraction.ink, peak: bands.fraction.peak, p95: bands.fraction.p95 },
@@ -238,5 +268,6 @@ for (const r of out) {
   const centre = (b) => (b.top + b.bottom) / 2;
   console.log(`  --> vertical centre: digits ${centre(d).toFixed(2)}, fraction ${centre(f).toFixed(2)}, offset ${(centre(f) - centre(d)).toFixed(2)}px`);
   console.log(`  --> ink peak luminance: digits ${d.peak}, fraction ${f.peak}  (p95: ${d.p95} vs ${f.p95})`);
+  console.log(`  --> gap between whole number and fraction: ${r.groupGapCss}px  (${(r.groupGapCss / parseFloat(r.fontSize)).toFixed(2)} of the score)`);
 }
 console.log(`\n${JSON.stringify(out, null, 2)}`);

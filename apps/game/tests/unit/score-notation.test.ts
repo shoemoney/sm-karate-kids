@@ -29,13 +29,18 @@ describe('scores are rendered by one builder, not by strings', () => {
     expect(hud).toMatch(/export function scoreFragment\(n: number\): DocumentFragment/);
   });
 
-  test('no score path in main.ts produces a string with a half-point glyph', () => {
-    // The only U+00BD left in the file may appear in a comment explaining why.
+  test('main.ts holds no hand-rolled half-point notation of its own', () => {
+    // r148: this inverted. It used to forbid a literal U+00BD in main.ts, on the
+    // strength of an unrendered report that the glyph reads as `21/2`. The glyph
+    // is back, and it lives in the BUILDER — so the invariant worth keeping is
+    // the one that was always real: main.ts must not hand-assemble a score out
+    // of digits and a mark. It may not contain a half-point glyph literal, and
+    // it may not call toLocaleString on a score either.
     const live = main
       .split('\n')
       .filter((line) => !line.trimStart().startsWith('*') && !line.trimStart().startsWith('//'))
       .filter((line) => line.includes('½'));
-    expect(live).toEqual([]);
+    expect(live, 'main.ts assembles a score itself instead of calling scoreFragment').toEqual([]);
   });
 
   test('the old string formatter is gone, and nothing calls it', () => {
@@ -54,9 +59,39 @@ describe('scores are rendered by one builder, not by strings', () => {
     }
   });
 
-  test('the builder keeps thousands separators on whole scores', () => {
-    // A four-figure career total must still read as one number.
+  test('the builder keeps thousands separators and uses the glyph, not a decimal', () => {
+    // A four-figure career total must still read as one number, and the half
+    // must be U+00BD. The `minimumFractionDigits` trap is the thing to hold:
+    // my first r148 attempt used it, rendered `1.5`, and every other test in
+    // this file still passed. A decimal is notation E in the probe, and it is
+    // the ambiguity r36 removed the glyph to fix.
     expect(hud).toMatch(/whole\.toLocaleString\(\)/);
+    expect(hud).toMatch(/½/);
+    // Comment lines are stripped first, and that is not fussiness: the first
+    // version of this assertion failed because the docblock above
+    // `scoreFragment` NAMES `minimumFractionDigits` while explaining why it must
+    // not be used. A grep that cannot tell prose from code reports its own
+    // documentation as a violation.
+    const code = hud
+      .split('\n')
+      .filter((line) => !line.trimStart().startsWith('*') && !line.trimStart().startsWith('//'))
+      .join('\n');
+    expect(
+      code,
+      'scoreFragment formats a fraction digit, which renders a decimal. The half must be the glyph.',
+    ).not.toMatch(/minimumFractionDigits/);
+  });
+
+  test('the half is a single glyph, not assembled from separate elements', () => {
+    // The r53..r147 notation was a column of three spans; r148a was a row of
+    // three spans. Both were separate elements next to a whole number and both
+    // merged with it — the r148a failure was a 2.5 total reading as `2 1-2`.
+    // One text node cannot merge with anything.
+    expect(
+      hud,
+      'scoreFragment builds DOM again. One text node is the property that removed ' +
+        'the adjacent-numeral merge; the CSS has no .score-frac rule to style it with.',
+    ).not.toMatch(/score-frac/);
   });
 });
 
@@ -75,71 +110,31 @@ describe('scores are rendered by one builder, not by strings', () => {
  * rather than truncates), and does not fail any behavioural test. It just
  * quietly becomes too small to read again.
  */
-describe('the fraction is sized to be read', () => {
+describe('the half point is one glyph, and the score never clips it', () => {
   const css = read('../../src/styles.css');
 
-  test('the fraction is at least two thirds of the score it sits beside', () => {
-    const frac = css.match(/\.score-frac \{[\s\S]*?font-size:\s*([\d.]+)em;/);
-    expect(frac, '.score-frac has no font-size').not.toBeNull();
-    const em = Number(frac![1]);
-    expect(
-      em,
-      `fraction is ${em}em of the score — below the 0.66em floor set after two reviewers reported it unreadable`,
-    ).toBeGreaterThanOrEqual(0.66);
+  test('there is no .score-frac rule to style a half out of separate elements', () => {
+    // The tripwire that matters now. `.score-frac` existed for r53..r148a across
+    // two different layouts; if a rule by that name is in the stylesheet again,
+    // the notation is being assembled from elements rather than set as a glyph,
+    // and the r148a merge (`2 1-2` for a 2.5 total) is the failure mode.
+    expect(css).not.toMatch(/^\.score-frac\s*\{/m);
+    expect(css).not.toMatch(/^\.score-frac-bar\s*\{/m);
   });
 
-  test('the score is 22px, so the floor is a real pixel floor', () => {
+  test('the score is 22px, so a glyph half is legible at the same size', () => {
+    // The glyph's whole advantage is that it is set at the score's own size. If
+    // --text-xl is shrunk the fraction shrinks with it, and r73's finding — two
+    // reviewers calling the half "unreadable at HUD size" — becomes reachable
+    // again through a token rather than through a rule.
     expect(css).toMatch(/--text-xl:\s*1\.375rem/);
   });
 
-  test('the bar is thick enough to survive at that size', () => {
-    const bar = css.match(/\.score-frac-bar \{[\s\S]*?block-size:\s*([\d.]+)em;/);
-    expect(bar).not.toBeNull();
-    expect(Number(bar![1])).toBeGreaterThanOrEqual(0.12);
-  });
-});
-
-/**
- * A cheap tripwire, NOT the gate.
- *
- * The real gate is `tournament.spec.ts` — "a half point sits on the score
- * baseline and does not reflow the scoreline" — which measures boxes in a
- * browser. This one only reads the stylesheet, and r147 is the reason it cannot
- * be trusted alone: `reference-tap-target.test.ts` asserted the button *declared*
- * `min-height: 44px` and went green while the button rendered across a
- * fighter's head. A declaration is not a layout.
- *
- * It stays because it costs nothing and fails in a second, on the two ways this
- * regresses — someone reinstating the column, or reinstating the negative
- * `vertical-align` that made "baseline drop" literal.
- */
-describe('the fraction is set on one line, not stacked', () => {
-  const css = read('../../src/styles.css');
-  const block = css.match(/\.score-frac \{[\s\S]*?\n\}/)?.[0] ?? '';
-
-  test('the fraction is not a column', () => {
-    expect(
-      block,
-      '.score-frac is a column again — that is the r53..r147 stacked fraction, whose ' +
-        'denominator hung 15px below the digit baseline',
-    ).not.toMatch(/flex-direction:\s*column/);
-  });
-
-  test('the fraction is not dropped below the baseline', () => {
-    // The value can be a length (`-0.3em`, the r147 bug) or a keyword
-    // (`baseline`, correct). A regex that only matched numbers reported
-    // "no vertical-align" against a perfectly good `baseline` on the first run
-    // of this file, which is the same confident-wrong-answer shape as the
-    // stylesheet assertions r147 retired. So: read the value, and assert what
-    // it is not.
-    const va = block.match(/vertical-align:\s*([^;]+);/);
-    expect(va, '.score-frac declares no vertical-align').not.toBeNull();
-    const value = va![1]!.trim();
-    expect(
-      value.startsWith('-'),
-      `vertical-align: ${value} pushes the fraction below the digits' baseline. ` +
-        `The r147 value was -0.3em and the denominator landed 15px under it.`,
-    ).toBe(false);
+  test('the score box never shrinks, so a wide total is not clipped', () => {
+    // Kept verbatim from the r43 clipping fix. `1250½` was measured clipped
+    // because `.points` was the flexible item in the scoreline row; `flex: 0 0
+    // auto` means the scoreline grows and the fighter NAMES ellipsise instead.
+    expect(css).toMatch(/\.points \{[\s\S]*?flex:\s*0 0 auto/);
   });
 });
 

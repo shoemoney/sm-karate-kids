@@ -195,38 +195,65 @@ measured rather than argued about.
 
 ---
 
-## Closed at round 148 — the half point was a 15px subscript, and five rounds of opinion cost more than the fix
+## Closed at round 148 — five rounds of opinion, and the answer had never been rendered
 
 The last open box had been raised five times and described in the same four words
-every time: *reads as a baseline drop, hard to parse*. Nobody had a number. The
-number was four measurements away in a review frame that has existed since r73.
+every time: *reads as a baseline drop, hard to parse*. Nobody had a number.
 
-At a 1.5 score on the 390px baseline:
+**First measurement (stacked column, r53..r147), at a 1.5 score, 390px baseline:**
 
-| | before | after |
-|---|---|---|
-| fraction ink height | 33.50px | **11.50px** |
-| fraction height / its own font-size | 1.77 lines | **1.00 line** |
-| denominator vs the digit baseline | **15.00px below** | **0.00px — flush** |
-| `.scoreline` with a half | 47.77px | **37.83px** = the no-half height |
-| `.points` with a half | 39.77px | **22px** = the no-half height |
+| | measured |
+|---|---|
+| fraction ink | 33.50px tall, centre 8.50px low |
+| **denominator vs the digit baseline** | **15.00px BELOW it** |
+| `.scoreline` with a half | 37.83 → **47.77px** (+26%) |
 
-A stacked column is two lines tall, and `vertical-align: -0.3em` pushed it down, so
-the denominator hung a full 15px under the digit it belonged to — a subscript, and
-"baseline drop" was the literal name of it. Every half also grew the scoreline
-9.94px, reflowing the clock and both names mid-bout.
+It was a subscript, and "baseline drop" was the literal name of it. It could not be
+shrunk into place — that needs ~0.44em against a 0.66em legibility floor — so it
+became a running-text fraction on one line, which measured 1.00 line, baseline
+flush, no reflow.
 
-**It could not be shrunk into place.** 33.5px of ink against a 20.5px digit band
-needs ~0.44em, below the 0.66em legibility floor r73 set. A stacked fraction beside
-a one-line digit cannot be both readable and aligned — so it became a running-text
-fraction on one line, same three nodes, same 0.72em.
+**Then the review said that was wrong too**: a 2.5 tournament total read as
+`2 1-2`, the whole number and the half's numerator 4.5–5.0px apart. Both attempts
+had the same underlying cause — the half was a separate element next to a whole
+number.
 
-The gate measures **boxes in a browser**, not declarations, because r147's scar is
-a button that declared 44px while it sat on a fighter's face. Two mutations — the
-stacked column, against the e2e and against the unit tripwire — are both red.
+**The decisive step was rendering what had only ever been argued about.**
+`tools/notation-probe.mjs` puts all five candidates side by side in the shipped
+font stack at the real 22px. The r36 rejection of U+00BD rested on the glyph being
+"slashed", and the slash is the reason it *works*: a minus is horizontal, and the
+raised numerator and lowered denominator are not on one line to be read as a
+range. It is also one glyph, so there is nothing to merge with.
 
-Full method, the two tools whose first runs were wrong, and three places I was
-wrong and measuring caught me, in `REVIEW-LOOP.md`, round 148.
+**Shipped: `scoreFragment` emits one text node** — the whole part with its
+thousands separator, then U+00BD.
+
+| | r53..r147 | r148a | shipped |
+|---|---|---|---|
+| lines | 1.77 | 1.00 | **1.00** |
+| denominator vs baseline | 15.00px below | flush | **flush** |
+| `.scoreline` on a half | +9.94px | no move | **no move** |
+| one node, or mergeable with the whole number | 3 elements | 3 elements | **1 text node** |
+
+Two mutations red on both gates. The e2e's failure message *is* the defect: "with a
+half on the board `.points` has 2 child node(s) and elements `["SPAN"]`".
+
+**Evidence of legibility, which a screenshot cannot supply and a claim cannot
+either:** three consecutive review passes flagged the half point —
+*baseline drop* → *confusing ranges, `2 1-2`* → *confusing hyphenated strings* —
+and the fourth, after the glyph, did not mention it. Four independently
+regenerated sets.
+
+One thing could not be made deterministic and is recorded rather than papered
+over: **landing a half is not guaranteed**, because a half is only awarded when the
+defender is not winding up. Under frame starvation the technique scores full and
+the bout ends at `pointsToWin: 2` first. Measured here at load 14.45/18.18/19.36
+against ~40s at load 8. The e2e therefore asserts the structural property
+deterministically and the geometry opportunistically, and the geometry lives in
+`tools/scoreline-stability.mjs` instead.
+
+Full method, four notations, and five more things I got wrong and measuring caught
+me, in `REVIEW-LOOP.md`, round 148.
 
 ---
 
