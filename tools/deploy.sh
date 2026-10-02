@@ -85,10 +85,23 @@ else
   BUILT="$(stat -c '%y' "$DIST/index.html" 2>/dev/null | cut -d. -f1)"
 fi
 
-# The build must be at least as new as the newest source file it was built from.
+# The build must be at least as new as the newest SOURCE file it was built from.
 # A dist older than the tree it claims to represent is a deploy of history, and
 # it is the shape that made r141's stale build possible in the first place.
-NEWEST_SRC="$(find "$REPO/apps/game/src" "$REPO/packages" "$REPO/apps/game/index.html" \
+#
+# The `-name dist` prune is load-bearing and was not foresight. `tsc -b` writes
+# `packages/*/dist/**` — compiled .js plus a .tsbuildinfo — on every typecheck
+# and every `pnpm check`, so a check run after the vite build makes the game
+# dist look stale forever and this guard refuses a perfectly fresh deploy. It
+# cost two real cycles to find, because the first fix pruned only `*.tsbuildinfo`
+# and the compiled test .js tripped it on the very next run.
+#
+# Build OUTPUT is not evidence that the build is old; only edited source is. And
+# a guard that is always red is worse than no guard: it teaches the next round
+# to reach for the override, which is a gate disarmed by attrition.
+NEWEST_SRC="$(find "$REPO/apps/game/src" "$REPO/apps/game/public" "$REPO/packages" \
+  "$REPO/apps/game/index.html" \
+  \( -type d \( -name node_modules -o -name dist -o -name .git \) -prune \) -o \
   -type f -newer "$DIST/index.html" -print -quit 2>/dev/null || true)"
 [[ -z "$NEWEST_SRC" ]] || die "the build is older than $NEWEST_SRC — run pnpm build first"
 

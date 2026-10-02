@@ -192,6 +192,47 @@ else
   bad "7. stale build" "exit 1" "exit $st"
 fi
 
+# ---------------------------------------------------------------- 7b build output is not staleness
+# `pnpm check` runs `tsc -b`, which rewrites `packages/*/dist/**` — compiled .js
+# and a .tsbuildinfo — AFTER the vite build. The mtime guard then read a fresh
+# build as stale and refused to deploy it. Two cycles to find, because the first
+# fix pruned only `*.tsbuildinfo` and the compiled test .js tripped it next.
+#
+# Every case below touches BUILD OUTPUT and must be allowed; the last touches
+# real source and must be refused. A guard that is always red is worse than no
+# guard: it teaches the next round to reach for the override.
+BUILD_OUTPUT_PROBE=0
+for probe in \
+  "$REPO/packages/content/dist/tsconfig.tsbuildinfo" \
+  "$REPO/packages/content/dist/tests/replay.test.js" \
+  "$REPO/packages/sim/dist/index.js"
+do
+  [[ -f "$probe" ]] || continue
+  touch "$probe"
+  BUILD_OUTPUT_PROBE=1
+done
+
+if [[ $BUILD_OUTPUT_PROBE -eq 1 ]]; then
+  st=$(SMKK_DIST="$SEED" DEPLOY_HOST=localhost DEPLOY_PATH="$WORK/t7b" bash "$DEPLOY" >"$WORK/out.txt" 2>&1; echo $?)
+  if [[ $st -eq 0 ]]; then
+    ok "7b. touched packages/*/dist output does NOT count as a stale build"
+  else
+    bad "7b. dist output ignored" "exit 0 (dry run proceeds)" "exit $st: $(grep -m1 FAIL "$WORK/out.txt")"
+  fi
+else
+  say "  SKIP  7b — no compiled dist present to touch"
+fi
+
+SRC_PROBE="$REPO/apps/game/src/.deploy-mutation-probe.ts"
+printf '// touched by tools/deploy-mutation.sh\n' >"$SRC_PROBE"
+st=$(SMKK_DIST="$SEED" DEPLOY_HOST=localhost DEPLOY_PATH="$WORK/t7c" bash "$DEPLOY" >"$WORK/out.txt" 2>&1; echo $?)
+rm -f "$SRC_PROBE"
+if [[ $st -eq 1 ]] && grep -q 'deploy-mutation-probe' "$WORK/out.txt"; then
+  ok "7c. a touched real source file IS reported as a stale build, by name"
+else
+  bad "7c. source edit detected" "exit 1 naming the file" "exit $st"
+fi
+
 # ---------------------------------------------------------------- 8 unreachable host
 st=$(DEPLOY_HOST=localhost DEPLOY_PATH="$WORK/t8" DEPLOY_BASE="http://127.0.0.1:$PORT/" \
   SMKK_DIST="$SEED" run_deploy --yes)
