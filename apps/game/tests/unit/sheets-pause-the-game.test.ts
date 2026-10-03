@@ -26,11 +26,11 @@ describe('an open sheet pauses the game', () => {
 
   it('gives the bout clock no time while a sheet is up', () => {
     expect(main).toMatch(/const sheetUp = openSheets\.size > 0;/);
-    expect(main).toMatch(/clock\.drain\(held \|\| sheetUp \? 0 :/);
+    expect(main).toMatch(/clock\.drain\(held \|\| sheetUp(?: \|\| paused)? \? 0 :/);
   });
 
   it('holds a pending card countdown while a sheet is up, every frame', () => {
-    expect(main).toMatch(/pendingAt = frameDeadline\(pendingAt, frameDt, sheetUp\)/);
+    expect(main).toMatch(/pendingAt = frameDeadline\(pendingAt, frameDt, sheetUp(?: \|\| paused)?\)/);
   });
 
   it('has no per-button opt-in left to forget', () => {

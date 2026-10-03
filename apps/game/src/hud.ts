@@ -508,6 +508,8 @@ export class Hud {
         }
         input.disabled = false;
         send.disabled = false;
+        // Disabling the field dropped the caret; put it back for the retry.
+        input.focus({ preventScroll: true });
       });
     });
     this.result.insertBefore(form, this.resultButton);

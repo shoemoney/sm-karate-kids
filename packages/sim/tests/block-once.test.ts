@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { NEUTRAL_FRAME, createMatch, step, type ContentBundle, type MoveSpec } from '@smkk/sim';
+import { NEUTRAL_FRAME, beginMove, createMatch, step, type ContentBundle, type MoveSpec } from '@smkk/sim';
 
 const lunge: MoveSpec = { id: 'lunge_punch', name: 'Lunge Punch', kind: 'strike', height: 'mid', posture: 'stand', startup: 6, active: 3, recovery: 10, reach: 1.55, value: 'half', advance: 0.25 };
 const block: MoveSpec = { id: 'high_block', name: 'High Block', kind: 'block', height: 'high', posture: 'stand', startup: 3, active: 12, recovery: 6, reach: 0.9, value: 'half', advance: 0 };
@@ -38,5 +38,17 @@ describe('a strike into a live block', () => {
     }
     expect(blocked).toBe(1);
     expect(contact).toBe(0);
+
+    // The latch is per strike: the next one into the same block is announced.
+    beginMove(attacker, lunge);
+    attacker.phase = 'active';
+    attacker.phaseTicks = 0;
+    defender.phase = 'active';
+    defender.phaseTicks = 0;
+    let again = 0;
+    for (let i = 0; i < lunge.active; i += 1) {
+      for (const event of step(state, NEUTRAL_FRAME)) if (event.type === 'blocked') again += 1;
+    }
+    expect(again).toBe(1);
   });
 });

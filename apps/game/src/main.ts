@@ -875,6 +875,40 @@ async function boot(screen: BootScreen): Promise<void> {
   // lifts then, and not a moment sooner: nothing underneath it should ever be
   // a blank canvas, and __smkk.ready is the e2e contract for "the game is
   // visible", so a test that screenshots on it must never find the card.
+  // Losing focus mid-bout pauses it (PRD FR-018): a notification, a call or an
+  // alt-tab used to leave the CPU scoring on a player who was not looking. Only
+  // a live bout pauses — the cards already wait, and a sheet already holds.
+  // Resuming takes the player's own tap or key, never the focus coming back,
+  // so nobody is dropped into a swing they did not see start.
+  const pauseEl = byId<HTMLButtonElement>('pause');
+  let paused = false;
+  let resumeKey: string | null = null;
+  const pause = (): void => {
+    if (paused || held || openSheets.size > 0 || state.phase === 'over') return;
+    paused = true;
+    resumeKey = null;
+    pauseEl.hidden = false;
+  };
+  const resume = (): void => {
+    if (!paused) return;
+    paused = false;
+    pauseEl.hidden = true;
+  };
+  window.addEventListener('blur', pause);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) pause();
+  });
+  pauseEl.addEventListener('click', resume);
+  // On the release of a key pressed while paused, so a key still held from
+  // before the pause cannot resume it, and the resuming press itself reaches
+  // no stick (the keyboard stands aside while `#pause` is up).
+  window.addEventListener('keydown', (event) => {
+    if (paused && !event.repeat) resumeKey = event.code;
+  });
+  window.addEventListener('keyup', (event) => {
+    if (paused && event.code === resumeKey) resume();
+  });
+
   let handedOver = false;
 
   const frame = (now: number): void => {
@@ -882,7 +916,7 @@ async function boot(screen: BootScreen): Promise<void> {
     // Hit-stop and slow motion only change how much time the clock is given.
     // Every tick that runs is the same tick it would have been.
     const sheetUp = openSheets.size > 0;
-    const ticks = clock.drain(held || sheetUp ? 0 : frameDt * juice.timeScale(now));
+    const ticks = clock.drain(held || sheetUp || paused ? 0 : frameDt * juice.timeScale(now));
     previous = now;
 
     for (let i = 0; i < ticks; i += 1) {
@@ -944,7 +978,7 @@ async function boot(screen: BootScreen): Promise<void> {
     // A card's countdown only runs while the card can be read: not under an
     // open sheet, and not across a gap with no frames (a hidden tab). See
     // `frameDeadline`. Before handover the line above owns the deadline.
-    if (handedOver) pendingAt = frameDeadline(pendingAt, frameDt, sheetUp);
+    if (handedOver) pendingAt = frameDeadline(pendingAt, frameDt, sheetUp || paused);
 
     // The result card waits for a tap, but an idle screen still rolls into
     // the next bout rather than sitting on it forever.

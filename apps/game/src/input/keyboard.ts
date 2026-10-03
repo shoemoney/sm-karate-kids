@@ -26,9 +26,12 @@ function isTyping(target: EventTarget | null): boolean {
   return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
 }
 
-/** An open techniques/settings sheet owns the keyboard so arrows can scroll it. */
-function sheetIsOpen(): boolean {
-  return typeof document !== 'undefined' && document.querySelector('.sheet:not([hidden])') !== null;
+/**
+ * An open techniques/settings sheet owns the keyboard so arrows can scroll it,
+ * and the pause screen owns it so the key that resumes cannot also throw.
+ */
+function overlayOwnsKeys(): boolean {
+  return typeof document !== 'undefined' && document.querySelector('.sheet:not([hidden]), .pause:not([hidden])') !== null;
 }
 
 /** Two four-direction key clusters, standing in for the cabinet's two sticks. */
@@ -45,7 +48,7 @@ export class KeyboardInput {
       // Typing a name must type the name. The controls listen to the whole
       // page and swallow these keys, so they stand aside for any text field.
       if (isTyping(event.target)) return;
-      if (sheetIsOpen()) return;
+      if (overlayOwnsKeys()) return;
       if (event.code in LEFT_KEYS || event.code in RIGHT_KEYS) {
         this.held.add(event.code);
         event.preventDefault();
