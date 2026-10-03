@@ -69,8 +69,8 @@ const SEEN = 'smkk:coach-seen-v1';
 /**
  * Build a page URL from a base that may carry a PATH.
  *
- * `new URL('/', 'https://arcade.shoemoney.ai/smkk/')` resolves to
- * `https://arcade.shoemoney.ai/` — the domain root, not the game — so the
+ * `new URL('/', 'https://arcade.shoemoney.com/karate-kids/')` resolves to
+ * `https://arcade.shoemoney.com/` — the domain root, not the game — so the
  * probe booted nothing, timed out, and reported a page error that had nothing
  * to do with the claim under test. Production itself was fine: it reaches
  * `__smkk.ready` in 1.5s, and its only failing request is the documented

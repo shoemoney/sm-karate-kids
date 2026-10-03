@@ -35,146 +35,79 @@
 # the one that made the claim.
 #
 # USAGE
-#   tools/deploy.sh                     # dry run, prints the plan, deploys nothing
-#   tools/deploy.sh --yes               # actually deploy
-#   tools/deploy.sh --yes --no-verify   # deploy without the gate (refused by
-#                                       #   default; only useful when the site
-#                                       #   is known-down and you want bytes up)
-#   SMKK_DIST=/some/other/dist tools/deploy.sh --yes
-#   DEPLOY_HOST=... DEPLOY_PATH=... tools/deploy.sh --yes
+#   tools/deploy.sh                     # explains the real path, deploys nothing
+#   SMKK_DIST=/some/other/dist tools/deploy.sh
 #
 # EXIT
-#   0  deployed and verify-deploy.sh returned 0
-#   1  deploy or verification failed
-#   2  usage / environment error (no local build, no rsync)
+#   0  nothing to do (see the retirement notice below)
+#   2  environment error
+#
+# ---------------------------------------------------------------------------
+# RETIRED at r159. This script no longer deploys anything, on purpose.
+# ---------------------------------------------------------------------------
+#
+# It used to rsync apps/game/dist to
+# shoemoney@192.168.1.10:/mnt/.ix-apps/.../arcade/smkk, which is the OLD arcade
+# on arcade.shoemoney.ai. That host still answers 200 and still serves `td/` and
+# `shoetris/`, so nothing about it looks broken — it just stopped being where
+# this game lives. The game ships now as:
+#
+#   https://arcade.shoemoney.com/karate-kids/
+#
+# and that host is owned by a different checkout, ~/Projects/SMA-arcade, which
+# deploys an ATOMIC RELEASE (tar to /var/www/arcade.shoemoney.com/releases/<id>,
+# then a `current` symlink flip, with the shared SQLite backed up first) behind a
+# privacy-gate clearance receipt.
+#
+# Why not just repoint the rsync at the new path? Because the two mechanisms are
+# not interchangeable. An rsync into `current/public/karate-kids/` would write
+# THROUGH a symlink that an atomic flip owns, so a failure mid-copy leaves a
+# half-written game live under a release that still claims to be good — and it
+# would skip the backup and the clearance receipt. That is a worse deploy than
+# no deploy, and it would be invisible until someone loaded the page.
+#
+# A tool that writes to one origin and verifies another is the r141 failure in a
+# new hat: green, over the wrong bytes. So this script refuses rather than
+# guessing, and the gate that still works — tools/verify-deploy.sh — is pointed
+# at the real route.
+#
+# THE REAL PATH, per the `upload-to-arcade` skill:
+#
+#   python3 ~/Projects/SMA-arcade/ops/build-release.py \
+#     --arcade-root ~/Projects/SMA-arcade
+#   python3 ~/Projects/SMA-arcade/ops/deploy.py \
+#     --payload <release-payload> --clearance <receipt.json> [--dry-run]
+#   bash tools/verify-deploy.sh          # same origin, same route, byte-compared
+#
+# `karate-kids` is already registered in both arcade registries and
+# ops/game-sources.json already points at this checkout's apps/game, so this is a
+# build-and-release, not an onboarding.
 set -uo pipefail
 
 REPO="/Users/shoemoney/Projects/sm-karate-kids"
 DIST="${SMKK_DIST:-$REPO/apps/game/dist}"
-HOST="${DEPLOY_HOST:-shoemoney@192.168.1.10}"
-# Recorded rather than discovered: r141 lost four probes to this path. It is not
-# under /mnt/tank, it is the NPM data mount's own arcade/smkk directory.
-REMOTE="${DEPLOY_PATH:-/mnt/.ix-apps/app_mounts/nginx-proxy-manager/data/arcade/smkk}"
-VERIFY="$REPO/tools/verify-deploy.sh"
-BASE="${DEPLOY_BASE:-https://arcade.shoemoney.ai/smkk/}"
+BASE="${DEPLOY_BASE:-https://arcade.shoemoney.com/karate-kids/}"
+ARCADE="${ARCADE_ROOT:-$HOME/Projects/SMA-arcade}"
 
-ASSUME_YES=0
-DO_VERIFY=1
-for arg in "$@"; do
-  case "$arg" in
-    --yes|-y) ASSUME_YES=1 ;;
-    --no-verify) DO_VERIFY=0 ;;
-    -h|--help) sed -n '2,45p' "$0"; exit 0 ;;
-    *) echo "unknown option: $arg" >&2; exit 2 ;;
-  esac
-done
+cat <<EOF
+deploy.sh is retired — arcade.shoemoney.ai/smkk is not where this game ships.
 
-die() { echo "FAIL: $*" >&2; exit 1; }
-usage_die() { echo "FAIL: $*" >&2; exit 2; }
+  live route   $BASE
+  arcade       $ARCADE (owns the atomic release deploy)
+  local build  $DIST
 
-# ---------------------------------------------------------------- preconditions
-# Resolved, not assumed, in the same order as the gate. A deploy that runs with
-# no dist uploads nothing, exits 0, and reads exactly like a successful deploy.
-command -v rsync >/dev/null 2>&1 || usage_die "no rsync on this machine"
-[[ -d "$DIST" ]] || usage_die "no local build at $DIST — run pnpm build first"
-[[ -f "$DIST/index.html" ]] || usage_die "no local build at $DIST — run pnpm build first"
+Deploy through the arcade checkout, which owns that host:
 
-if stat -f '%Sm' -t '%Y-%m-%d %H:%M:%S' "$DIST/index.html" >/dev/null 2>&1; then
-  BUILT="$(stat -f '%Sm' -t '%Y-%m-%d %H:%M:%S' "$DIST/index.html")"
-else
-  BUILT="$(stat -c '%y' "$DIST/index.html" 2>/dev/null | cut -d. -f1)"
-fi
+  python3 $ARCADE/ops/build-release.py --arcade-root $ARCADE
+  python3 $ARCADE/ops/deploy.py --payload <payload> --clearance <receipt.json> --dry-run
+  python3 $ARCADE/ops/deploy.py --payload <payload> --clearance <receipt.json>
 
-# The build must be at least as new as the newest SOURCE file it was built from.
-# A dist older than the tree it claims to represent is a deploy of history, and
-# it is the shape that made r141's stale build possible in the first place.
-#
-# The `-name dist` prune is load-bearing and was not foresight. `tsc -b` writes
-# `packages/*/dist/**` — compiled .js plus a .tsbuildinfo — on every typecheck
-# and every `pnpm check`, so a check run after the vite build makes the game
-# dist look stale forever and this guard refuses a perfectly fresh deploy. It
-# cost two real cycles to find, because the first fix pruned only `*.tsbuildinfo`
-# and the compiled test .js tripped it on the very next run.
-#
-# Build OUTPUT is not evidence that the build is old; only edited source is. And
-# a guard that is always red is worse than no guard: it teaches the next round
-# to reach for the override, which is a gate disarmed by attrition.
-NEWEST_SRC="$(find "$REPO/apps/game/src" "$REPO/apps/game/public" "$REPO/packages" \
-  "$REPO/apps/game/index.html" \
-  \( -type d \( -name node_modules -o -name dist -o -name .git \) -prune \) -o \
-  -type f -newer "$DIST/index.html" -print -quit 2>/dev/null || true)"
-[[ -z "$NEWEST_SRC" ]] || die "the build is older than $NEWEST_SRC — run pnpm build first"
+Then gate it here — this origin, this route, byte for byte:
 
-echo "deploy plan"
-echo "  build      $DIST (built $BUILT)"
-echo "  host       $HOST"
-echo "  path       $REMOTE"
-echo "  gate       $BASE"
+  bash $REPO/tools/verify-deploy.sh $BASE
 
-# ---------------------------------------------------------------- dry run
-# Always, and always printed. `--delete` is what makes the web root converge
-# (stale hashed bundles would otherwise be served forever), and it is also the
-# one flag here that can remove something nobody asked to remove.
-DRY="$(rsync -ain --delete -e ssh "$DIST/" "$HOST:$REMOTE/" 2>&1)"
-DRY_STATUS=$?
-[[ $DRY_STATUS -eq 0 ]] || die "rsync dry run failed (exit $DRY_STATUS):
-$DRY"
-
-DELETE_COUNT="$(printf '%s\n' "$DRY" | grep -c '^\*deleting' || true)"
-SEND_COUNT="$(printf '%s\n' "$DRY" | grep -c '^<f' || true)"
-
-if [[ "$SEND_COUNT" -eq 0 && "$DELETE_COUNT" -eq 0 ]]; then
-  echo "  already    production already matches this build byte for byte"
-else
-  echo "  would send $SEND_COUNT file(s), delete $DELETE_COUNT stale file(s):"
-  printf '%s\n' "$DRY" | sed 's/^/    /'
-fi
-
-if [[ $ASSUME_YES -eq 0 ]]; then
-  echo
-  echo "dry run only — nothing was sent. Re-run with --yes to deploy."
-  exit 0
-fi
-
-# ---------------------------------------------------------------- push
-# --delay-updates moves every changed file into place at the END of the
-# transfer, so the new index.html cannot become visible before the bundle it
-# names exists. Without it there is a real window where a player gets the new
-# document and a 404 for its script.
-# --delete-after is implied by --delete plus --delay-updates ordering in modern
-# rsync, but stated because a stale hashed asset left behind is served forever
-# by an nginx root and its name will never be requested again.
-RSYNC_OUT="$(rsync -a --delete --delay-updates -e ssh "$DIST/" "$HOST:$REMOTE/" 2>&1)"
-RSYNC_STATUS=$?
-if [[ $RSYNC_STATUS -ne 0 ]]; then
-  # Left deliberately in place: a failed --delete can remove assets the CURRENT
-  # served html still names, which breaks a site that was working a moment ago.
-  # Pruning by hand while reading the remote index.html is the repair.
-  echo "FAIL: rsync failed (exit $RSYNC_STATUS)" >&2
-  printf '%s\n' "$RSYNC_OUT" | sed 's/^/  /' >&2
-  echo "  the remote tree may now be partial; inspect $REMOTE before retrying" >&2
-  exit 1
-fi
-
-echo
-echo "pushed $SEND_COUNT file(s), removed $DELETE_COUNT stale file(s)"
-
-# ---------------------------------------------------------------- verify
-# The verdict is not this script's. rsync's exit code says the bytes were
-# written to a directory; it says nothing about what nginx serves from it, and
-# r141 is entirely about that gap.
-if [[ $DO_VERIFY -eq 0 ]]; then
-  echo "SKIPPED: tools/verify-deploy.sh (--no-verify) — this deploy is UNVERIFIED"
-  exit 0
-fi
-
-echo
-bash "$VERIFY" "$BASE"
-VERIFY_STATUS=$?
-if [[ $VERIFY_STATUS -ne 0 ]]; then
-  echo >&2
-  echo "FAIL: bytes were pushed but the served build does not match them" >&2
-  echo "  the deploy is NOT good. Inspect $REMOTE/assets — a partial --delete" >&2
-  echo "  can leave the served index.html naming files that are gone." >&2
-fi
-exit $VERIFY_STATUS
+Nothing was sent. The retired rsync path is documented in the header of this
+script rather than executed, on purpose: it writes through a symlink an atomic
+flip owns, and skips both the shared-DB backup and the clearance receipt.
+EOF
+exit 0

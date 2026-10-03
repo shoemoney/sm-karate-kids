@@ -52,12 +52,12 @@ three shell/Python/Node tools, which have their own shebang or interpreter.
 | `measure-score.mjs` | `node tools/measure-score.mjs` | The half-point score in boxes: `.score-frac` against `.points` and `.scoreline`, at 4 viewports, plus a **pixel count** of fraction ink falling outside the plate. Lands a real half through touch input with the stance stick held neutral — `match.ts` promotes the call to a full point when the defender is winding up, which is why the measurement was impossible for 31 rounds. `SMKK_BASE` to point at a server. |
 | `scoreline-stability.mjs` | `node tools/scoreline-stability.mjs` | The scoreline in three states — no half, half landed, half +400ms/+1600ms — answering the question a still screenshot cannot: **does the HUD bar move when a score changes?** Found the +9.94px reflow that the r53..r147 stacked fraction caused. |
 | `score-ink.mjs` | `SMKK_TARGET=1.5 node tools/score-ink.mjs` | Ink bounding boxes for the score digits and the half fraction, measured separately and **clamped to their own boxes**, so "is the fraction on the baseline" is a number. Also reports peak ink luminance, which is how r148 avoided lifting a colour that was already correct (241.8 vs 241.8). `SMKK_TARGET` sets the score to land — use ≥1.5, because 0.5 renders the fraction with no whole digit beside it. |
-| `deploy.sh` | `bash tools/deploy.sh [--yes] [--no-verify]` | **The deploy itself.** Refuses a missing or stale build (dist older than the source it claims to represent), dry-runs and prints the `--delete` list by default, pushes with `rsync --delay-updates` so the new html can never precede its bundle, then **propagates `verify-deploy.sh`'s exit code** rather than reporting its own success. `--yes` is required to send anything. Deploys as `shoemoney@192.168.1.10`; **not** `root`, which refuses the key. |
-| `verify-deploy.sh` | `bash tools/verify-deploy.sh [baseUrl]` | **Post-deploy gate.** Fetches the live `index.html`, compares it byte-for-byte with `apps/game/dist/index.html`, then fetches every asset the served html names and compares sha256 against the local file. Exit 0 = the served bytes are the built bytes. HTTP 200 proves nothing here; at r141 the site answered 200 for hours over a two-hour-old build. |
+| `deploy.sh` | `bash tools/deploy.sh` | **RETIRED at r159 — deploys nothing, on purpose.** It rsynced to `shoemoney@192.168.1.10:.../arcade/smkk`, the old `arcade.shoemoney.ai` host, which is still up and still serving `td/` and `shoetris/` and therefore never looked broken. This game now ships at `arcade.shoemoney.com/karate-kids/`, owned by `~/Projects/SMA-arcade`, which deploys an **atomic release** (tar + `current` symlink flip + SQLite backup) behind a privacy-gate clearance receipt. It is not repointed because an rsync into `current/public/` would write *through* that symlink and skip both the backup and the receipt. The script now prints the real pipeline and exits 0. `tools/deploy-mutation.sh` was deleted with it; `verify-deploy-mutation.sh` independently proves the gate still fails correctly. |
+| `verify-deploy.sh` | `bash tools/verify-deploy.sh [baseUrl]` | **Post-deploy gate. Defaults to `https://arcade.shoemoney.com/karate-kids/`** — repointed at r159 from the retired `arcade.shoemoney.ai/smkk/`, so it measures the origin this game actually ships from instead of scoring a host where it does not exist. Fetches the live `index.html`, compares it byte-for-byte with `apps/game/dist/index.html`, then fetches every asset the served html names and compares sha256 against the local file. Exit 0 = the served bytes are the built bytes. HTTP 200 proves nothing here; at r141 the site answered 200 for hours over a two-hour-old build. |
 | `sheet-pause-probe.mjs` | `RUNS=2 node tools/sheet-pause-probe.mjs` | Walks the pre-bout card's TECHNIQUES journey in three arms — `early` (close inside the budget), `tap` (close after it), `control` (never tap) — and reports `CLAIM-TRUE` / `CLAIM-FALSE`, exiting 1 while the claim is false. **The `early` arm is the positive control and is not optional:** without it a probe that always answers "the card is gone" is indistinguishable from one that measures nothing. Exits 1 on the un-fixed build, 0 on the fixed one. Starts its own preview on 4188; **`SMKK_BASE` is not read** — to check production use `verify-deploy.sh`, which proves byte-identity, so local behaviour carries over. |
 | `card-no-probe.mjs` | `CPU_LADDER=1 RUNS=4 node tools/card-no-probe.mjs` | How long boot takes from navigation to `__smkk.ready`, and whether the pre-bout card is still up when it lands. Loads **no in-page instrumentation at all** — every timestamp is taken from Node around Playwright's own waits, because the instrumented version of this probe (`card-window.mjs`, deleted) reported the card closed while it was plainly up for nine seconds: a `setTimeout(…,10)` poll starved to a 2.2s interval wrote both timestamps from one sample. **Prints `load1` on every row** and that column is load-bearing: this machine does not idle (~10–13 from other work), the e2e suite is red at load 14–16 and green at 8–10 on identical code, and r151 lost half an hour to 16 stray CPU burners from its own reproduction poisoning every measurement after them. Read the load before believing a row. |
 | `verify-deploy-mutation.sh` | `bash tools/verify-deploy-mutation.sh` | Proves `verify-deploy.sh` can fail: 6 cases over a real local HTTP server (faithful copy, stale names, right-name/wrong-bytes, absent asset, dead origin, absent local build), asserting exit code **and** the diagnosis. Run it after touching the gate. |
-| `deploy-mutation.sh` | `bash tools/deploy-mutation.sh` | Proves `deploy.sh` can fail: 12 assertions over a real HTTP server on a throwaway local root — never production. Covers the dry run sending nothing, a faithful deploy, a changed build pruning its superseded hashed asset, and the refusals: no build (exit 2), a build older than the source, unreachable host. Run it after touching `deploy.sh`. |
+
 | `coach-probe.mjs` | `node tools/coach-probe.mjs [baseUrl]` | **Does a first run actually get taught?** Walks the journey on a touch device across `/`, `?mode=tournament` and `?mode=dojo`, then the returning-player arm as a **control**. Exits 1 while a first run is not taught. Built at r157 after finding the coach had not rendered since r23 — `dismiss()` writes the "already seen" flag, and `clearBoutUi` calls it at boot. The positive arm matters: a probe that answers "no strip" about four different states has learned nothing. |
 | `coach-legend-probe.mjs` | `node tools/coach-legend-probe.mjs` | **Does the coach plate read as two legends, or as one 4-column table?** The strip could not render before r157, so nothing had ever measured its geometry; at r158 the two halves turned out to wrap in **different arrow orders** (`◀▲▶▼` vs `◀▶▲▼`) with no rule between them. Asserts one arrow order, a visible divider, no spill past the content box, and — as a **separate exit 2** — that the game reached `fight` at all, so an environment failure can never be read as a verdict about the plate. `SMKK_BASE` to point at a server. |
 | `coach-legend-mutation.sh` | `bash tools/coach-legend-mutation.sh` | Proves the probe can fail: 6 cases including **both control arms red separately** (strip never attached; strip permanent) and a baseline that must pass first. Mutates **source only** against a live dev server — no build, so it cannot leave `dist` describing a tree that no longer exists — and asserts its own files came back **byte-for-byte by checksum**, not by `git diff`, because the round's fix is uncommitted by design and `git diff` is red from the moment it starts. |
@@ -70,16 +70,34 @@ three shell/Python/Node tools, which have their own shebang or interpreter.
 | `keyboard-journey-mutation.sh` | `bash tools/keyboard-journey-mutation.sh` | Proves the probe above can fail: **9 cases, all red, each through an assertion** rather than an environment failure. Mutates **source only** against a live dev server (no build, so it cannot leave `dist` describing a tree that no longer exists) and restores by **checksum**, not `git diff` — the round's fix is uncommitted by design, so `git diff` is red from the moment it starts. Case 5b remaps walk to jump; case 7 swaps `KeyA`/`KeyD` so "walk toward the opponent" walks away, which **every single-key arm still passes** and only the journey arm catches; case 8 rebuilds the r159 defect (posture read from `phase`, which cannot express a jump or a crouch) and requires the probe to notice. Case 1 is a baseline that must pass first, or the harness is measuring a broken probe. |
 | `loop-once.sh` | `bash tools/loop-once.sh` | One unattended review-loop iteration (the `launchd` driver). Takes the lock, builds the prompt, runs `opencode run`. |
 
-The four `*deploy*` tools are the only ones in this table that need the network,
-and `deploy.sh` / `verify-deploy.sh` are the only two that must be run against a
-real origin to mean anything — a deploy gate exercised only against `localhost`
-has not exercised the deploy. None of the four is in `pnpm check`, because
-`pnpm check` must stay runnable offline.
+The three `*deploy*` tools are the only ones in this table that need the network,
+and **`verify-deploy.sh` is the only one that must be run against a real origin to
+mean anything** — a deploy gate exercised only against `localhost` has not
+exercised the deploy. None is in `pnpm check`, because `pnpm check` must stay
+runnable offline.
 
-**Deploy root** — `/mnt/.ix-apps/app_mounts/nginx-proxy-manager/data/arcade/smkk`
-on `192.168.1.10`, owned by `shoemoney`. It is **not** under `/mnt/tank`. r141
-lost four probes to this path and r148 lost a whole build to the wrong username,
-so both are recorded in `tools/deploy.sh`'s header rather than re-derived.
+**Where this game actually ships** — `https://arcade.shoemoney.com/karate-kids/`.
+Repointed at r159. It used to be `arcade.shoemoney.ai/smkk/`, a *different machine*
+(`68.185.216.69`) hosting the older arcade; that host is still up and still
+serving `td/` and `shoetris/`, so nothing about it ever looked broken and the
+gate just quietly measured the wrong bytes forever.
+
+**The deploy belongs to another checkout.** `~/Projects/SMA-arcade` owns
+`arcade.shoemoney.com` and deploys it atomically — payload → `public/` + `api/`,
+a privacy-gate clearance receipt, tar to
+`/var/www/arcade.shoemoney.com/releases/<id>`, a `current` symlink flip, and a
+`shared/scores.sqlite` backup first. Follow its `upload-to-arcade` skill and its
+`ops/build-release.py` + `ops/deploy.py`. `karate-kids` is already in both arcade
+registries and in `ops/game-sources.json`, so shipping an update is a build and a
+release, not an onboarding.
+
+**Do not hand-roll a deploy into that tree.** `current/public/` is behind a
+symlink an atomic flip owns; an rsync through it leaves a half-written game live
+under a release that still claims to be good, and skips the backup and the
+receipt. r141 lost four probes to the old root path and r148 lost a whole build to
+the wrong username, which is why both are written down rather than re-derived —
+but they now describe the *retired* path, kept in `tools/deploy.sh`'s header as
+history.
 
 `renderer-sweep.mjs` and `throttle-cliff.mjs` **edit `apps/game/src` to measure
 it, rebuild, then revert** — a full `vite build` per configuration. Do not run

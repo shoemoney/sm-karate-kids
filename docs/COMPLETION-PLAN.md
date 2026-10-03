@@ -9,7 +9,7 @@ has been improving.
 | | |
 |---|---|
 | Playable | yes — tournament + dojo, two sticks, point karate |
-| Deployed | `https://arcade.shoemoney.ai/smkk/`, verified playing a real bout |
+| Deployed | `https://arcade.shoemoney.com/karate-kids/`, verified playing a real bout |
 | Tests | 200 unit, 44 e2e, green locally |
 | Review loop | 157 rounds, 20 review frames, mutation-tested fences |
 | Commits | 293 |
@@ -305,7 +305,7 @@ yet written to was reported as a deploy failure, which is precisely the
 misdiagnosis standing rule 4 exists to prevent, sitting inside the tool written
 to enforce rule 4.
 
-**Production is byte-identical over the wire.** `arcade.shoemoney.ai/smkk/` now
+**Production is byte-identical over the wire.** `arcade.shoemoney.com/karate-kids/` now
 passes `tools/verify-deploy.sh` with 2 assets sha256-matched — the first time in
 the project's history that claim has been true.
 

@@ -12,16 +12,33 @@
 # Those are different claims and only the second one matters. A green status over
 # stale bytes is exactly the shape of gate that reports success by construction.
 #
-# WHERE THE BYTES COME FROM, recorded because finding it cost four probes:
+# WHERE THE BYTES COME FROM, recorded because finding it cost four probes — and
+# then cost four MORE when the origin moved out from under this script:
 #
-#   dig arcade.shoemoney.ai  -> 68.185.216.69
-#   deploy root              -> /mnt/.ix-apps/app_mounts/nginx-proxy-manager/data/arcade/smkk
+#   dig arcade.shoemoney.com  -> 100.49.4.12
+#   public root               -> /var/www/arcade.shoemoney.com/current/public
+#   this game's route         -> /karate-kids/
 #
-# It is NOT under /mnt/tank, NOT /mnt/tank/apps/arcade, and NOT the arcade-api
-# container's ./data. `rsync` over ssh is refused (no root key), so a transfer is
-# tar + scp + remote extract — and the remote assets/ must be pruned to only the
-# files the new index.html names, because an nginx root happily serves every
-# stale hash left behind forever.
+# ORIGIN HISTORY, because this gate pointed at a host that is no longer the
+# product and would have kept reporting "stale" forever without ever being
+# wrong about anything it measured:
+#
+#   * It used to read https://arcade.shoemoney.ai/smkk/ — a different machine
+#     (68.185.216.69), a different deploy path, and a different slug. That host
+#     is still up and still serving `td/` and `shoetris/` at 200, so it never
+#     looked broken; it simply stopped being where this game lives.
+#   * `.com` is the arcade. It is served from a plain `/var/www` release tree by
+#     the `SMA-arcade` checkout, which owns an ATOMIC release deploy (tar + a
+#     `current` symlink flip, with a SQLite backup) — not an rsync-to-webroot.
+#     So the slug changed too: this game is `/karate-kids/`, not `/smkk/`.
+#   * A gate that fetches one origin while a deploy writes to another is the
+#     r141 failure wearing a new hat: green over the wrong bytes. Pointing both
+#     at the same place is the whole fix, and it is why the default below is the
+#     live route rather than a remembered one.
+#
+# The old transfer notes (tar + scp, pruning stale hashes) described the retired
+# `.ai` host and are deliberately gone rather than reworded: keeping them would
+# invite an rsync into a release tree that an atomic symlink flip owns.
 #
 # WHAT IT CHECKS, in order, each one fail-closed:
 #
@@ -82,7 +99,7 @@ set -uo pipefail
 
 REPO="/Users/shoemoney/Projects/sm-karate-kids"
 DIST="${SMKK_DIST:-$REPO/apps/game/dist}"
-BASE="${1:-https://arcade.shoemoney.ai/smkk/}"
+BASE="${1:-https://arcade.shoemoney.com/karate-kids/}"
 CURL_MAX="${CURL_MAX:-30}"
 
 # STATUS is the single source of truth for "was this a pass", read by the EXIT
