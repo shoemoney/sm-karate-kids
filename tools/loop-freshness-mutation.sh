@@ -174,6 +174,24 @@ if has "$P" "MEASURED JUST NOW"; then ok "preflight runs with the lock held"
 else bad "preflight was blocked by an in-progress iteration"; fi
 rm -f "$LOGS/run.lock"
 
+# --- 11. the prompt is safe as a CLI argument -----------------------------
+# It is passed as `opencode run "$PROMPT"`. A prompt whose first byte is `-` is
+# parsed as a flag, and opencode exits 1 on "Unrecognized flag" before a model
+# is ever called. be20e71 opened the prompt with `--- MEASURED ...` and every
+# scheduled round from then on died in the argument parser.
+P="$(prompt "$STALE")"
+if [[ -n "$P" && "${P:0:1}" != "-" ]]; then ok "the prompt does not open with a dash"
+else bad "the prompt opens with '-' -- opencode will read it as a flag"; fi
+
+# --- 12. a green verdict clears a red marker --------------------------------
+# .loop/production-stale is the out-of-band signal. A marker that survives the
+# deploy that fixed it is a stale claim of staleness.
+printf 'STALE\n' > "$LOGS/production-stale"
+prompt "$(stub equal 0 "EQUAL  the origin is serving this tree's build")" >/dev/null
+if [[ ! -e "$LOGS/production-stale" ]]; then ok "an EQUAL verdict clears the stale marker"
+else bad "the stale marker survived an EQUAL verdict"; fi
+rm -f "$LOGS/production-stale"
+
 # --- 10. the real tools are byte-identical ----------------------------------
 AFTER="$(shasum -a 256 "$NOTE" "$DRIVER" | shasum -a 256)"
 if [[ "$BEFORE" == "$AFTER" ]]; then ok "the shipping driver and note are byte-identical"

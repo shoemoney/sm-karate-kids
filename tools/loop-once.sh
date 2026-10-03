@@ -92,14 +92,17 @@ mkdir -p "$LOG_DIR"
 # ---------------------------------------------------------------------------
 PROD_NOTE="$("$REPO/tools/prod-freshness-note.sh" 2>&1)"
 PROD_RC=$?
-[[ "$PROD_RC" -eq 3 ]] && rm -f "$LOG_DIR/production-stale"
+[[ "$PROD_RC" -eq 0 || "$PROD_RC" -eq 3 ]] && rm -f "$LOG_DIR/production-stale"
 [[ "$PROD_RC" -eq 1 ]] && printf '%s\n' "$PROD_NOTE" > "$LOG_DIR/production-stale"
 
 echo "=== production freshness (rc=$PROD_RC) ===" >&2
 echo "$PROD_NOTE" >&2
 
+# The prompt is one argv entry. Its first byte must not be `-`, or opencode
+# parses it as a flag and exits before a model is called (every round after
+# be20e71 did exactly that).
 PROMPT=$(cat <<EOF
---- MEASURED JUST NOW, NOT INHERITED FROM ANY DOCUMENT ---
+=== MEASURED JUST NOW, NOT INHERITED FROM ANY DOCUMENT ===
 $PROD_NOTE
 (exit $PROD_RC; re-read it above any claim in docs/COMPLETION-PLAN.md about
 production, deploy, or freshness. r160 spent a whole round proving the
