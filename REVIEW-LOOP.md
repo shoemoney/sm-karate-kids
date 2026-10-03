@@ -10403,3 +10403,164 @@ The standing instruction that falls out, and it is cheap: **when a gate's defaul
 or target changes, the round that changes it runs it once, against the new
 target, and the result goes in the same commit.** r159 changed a URL. r160 is what
 that URL cost.
+
+---
+
+## Round 161 — the gate nobody was obliged to run, and an hour lost blaming the machine
+
+r160 ended on this sentence about its own work:
+
+> The honest statement is that this repo has **no automatic path** from a local
+> build to a verified production, and r160 did not build one — it built the half
+> that reports.
+
+The deploy is still blocked on a human, so this round took the half that was
+missing and did not need one.
+
+### The blocker re-checked, because inherited claims are the failure class
+
+r160 recorded the deploy as blocked on `ops/build-release.py` building all eight
+arcade games with four trees dirty. Per r151's standing instruction that the
+suspicion applies to every number in these documents, I measured it rather than
+inheriting it. It still holds, and it is **worse**:
+
+| tree | r160 recorded | now |
+|---|---|---|
+| `shoeinator-web` | 14 files | 14 files |
+| `shoeateka` | 1 | **22** |
+| `survivaltd` | 1 | 1 |
+| `Skat3` | 1 | 1 |
+
+`build-release.py` has no subset flag — it builds every registered game
+unconditionally — and `deploy.py` requires a privacy-gate clearance receipt
+before it uploads. So the only supported path would still publish another
+agent's work-in-progress to a public host, unattended. **3.3 stays blocked, and
+the window is widening rather than closing.** Nothing in this repo can fix that.
+
+### What shipped
+
+`tools/prod-freshness-note.sh` and the driver wiring, so **every unattended
+round re-measures production and the next round's prompt leads with it.**
+
+The failure r159→r160 produced was not a wrong number. It was a reader assuming
+a previous reader had checked. So the guard is not another gate — the gate
+existed and was correct — it is putting a fresh measurement where the next round
+cannot reach the plan without looking past it.
+
+Three exits from the gate, four from the note:
+
+| code | meaning | why it is separate |
+|---|---|---|
+| 0 | EQUAL | — |
+| 1 | STALE | carries the commit distance, labelled an upper bound |
+| 2 | INCONCLUSIVE | unreachable origin **or** absent local build; never a deploy verdict |
+| 3 | NOT MEASURED | the gate is missing or returned an undocumented code |
+
+`3` exists so a failure cannot fall through to `0`. A note that cannot tell
+"equal" from "never measured" is the r154 shape with better manners.
+
+Deliberately **not** fatal to an iteration: production is blocked on a human, so
+this is red for as long as that is true, and a driver that refuses to work stops
+reporting. It is loud in three places instead — stderr, `.loop/production-stale`,
+and the prompt.
+
+### Proved able to fail — 12/12, twice
+
+`tools/loop-freshness-mutation.sh`. The first draft copied the tools into a
+throwaway fixture tree; that version is described below because how it failed is
+the round's real finding. What shipped runs **the shipping files** with the
+network boundary stubbed through `SMKK_PROD_GATE`:
+
+- baseline first, and it asserts the verdict reaches the **prompt**, not just the
+  note — so the wiring is load-bearing rather than present
+- STALE carries the distance *and* the upper-bound caveat
+- a dead origin and an absent local build both read INCONCLUSIVE, never STALE
+- **the r154 shape as input to the detector**: a note whose exit code no longer
+  tracks the gate, so a STALE origin reads EQUAL — required to be caught
+- a missing gate reads NOT MEASURED, not EQUAL
+- an undocumented exit code is refused, not taken at face value
+- preflight runs with the lock held, because this file must be safe to execute
+  while a scheduled round is live
+
+It does **not** mutate the driver, and that asymmetry is stated in the file
+rather than left for a reader to assume: launchd runs it every few minutes, and
+a killed harness leaving the driver broken is r159's lesson.
+
+### An hour lost proving the machine was innocent
+
+The first draft failed 10 of 12 cases with the note script insisting
+`production-freshness.py` was missing. Three explanations, in the order I reached
+for them:
+
+1. **The sandbox.** A script wrote a fixture tree, `ls` inside that same script
+   listed the file, and the copied script could not `stat` it. I went looking for
+   a macOS privacy artifact and moved the scratch directory, which changed
+   nothing, which I recorded as evidence.
+2. **The filename.** `production-freshness.py` vs `production_freshness.py`. A
+   dash where an underscore belonged. I "fixed" the note script to the wrong
+   spelling, which broke the one invocation that had been working, and only then
+   checked `ls -1 | od` instead of reading it.
+
+**Every one of those failures was mine, in a fixture I typed by hand.** The
+note script was correct the whole time; the `-f` test was correct the whole time;
+`rc=3` — the exit code I had added precisely so a missing gate could not read as
+equal — is what stopped it being swallowed. Standing rule 4 got applied backwards:
+I reached for "check the environment before the code", found an environment that
+*looked* wrong, and stopped looking.
+
+Two real bugs did come out of the same stretch, and both were mine in the
+shipping file rather than the fixture:
+
+- `loop-once.sh` had a stray `"` on the line closing a command substitution that
+  was never double-quoted, so everything after it parsed as a string and the
+  driver **was syntax-broken while launchd was executing it every few minutes**.
+  Caught by `bash -n` before commit, not by anything else.
+- `--preflight` was documented as running before the lock and did not, so it was
+  blocked by the live iteration — which is exactly when you want to test it.
+
+The redesign follows from the first failure and is a real improvement rather than
+a workaround: because the harness now runs the **real** scripts and stubs only the
+network boundary, what it tests is what ships. The copied-tree version could only
+ever have proved something about the copies.
+
+### Gates
+
+`check=0` — typecheck, **206 unit** (23 files), content, assets (20 against
+provenance). `e2e=0` — **44 passed, 6 skipped**, load **9.46 → 11.38** at the
+band edge r151 describes, printed beside the result because a red e2e on this
+machine is not a verdict until the load is.
+
+`loop-freshness-mutation` **12/12**, twice. Production re-measured twice during
+the round: **STALE, exit 1, pin `6b57a2b81`, 65 commits behind** (the count is
+live off HEAD and was 63 at r160), still exactly `--coach-plate` and
+`--leading-relaxed` undefined on the wire.
+
+**No reviewer round.** Standing rule 1 binds before `review-codex.sh` and this
+round changed no game code and no bundle, so there is no frame that could have
+gone stale.
+
+### `docs/preview/portrait.png` — measured, and not committed a fifth time
+
+`pnpm test:e2e` rewrites it via `capture.spec.ts`. No rendering code changed this
+round, so any difference is the capture landing on a different animation phase:
+
+    mean |delta|            2.95%     (r157 measured 1.85% on the same no-code-change)
+    after 3px blur          2.60%
+    after 8px blur          1.99%
+    >12/255                 11.44% of pixels, spread y 45 -> 1842 of 2532
+
+Blur barely moves it, so it is low-frequency rather than grain — consistent with
+a different frame, not a different asset. Reverted, as r156/r157 did.
+
+### The fourteenth shape
+
+Thirteen times, prose described something the code did not do. r161 adds the
+instrument version and it is the mirror of r154's: r154's problem was a check
+that **emits** success without measuring, and this is a check that **measures**
+correctly and whose result **reaches no one**. Neither shows up as a red light,
+because in both cases every component is individually fine.
+
+The guard that generalises is cheap and is now in the driver: *an instrument that
+is not consulted by a scheduled process is not a gate.* r141 built one and r159
+moved it; r160 found the drift; r161 made the consulting automatic, so the next
+occurrence is visible in the round it happens rather than nineteen rounds later.

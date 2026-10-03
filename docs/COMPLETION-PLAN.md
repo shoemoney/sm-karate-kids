@@ -61,6 +61,21 @@ and no round in between ever ran it against the truth.
 distance and names what is missing, plus an 8-case mutation harness proving it
 can fail. Both are outside `pnpm check` for the same reason.
 
+> **Added at r161 — the consulting half, which is what r160 said was missing.**
+> r160's own summary was that the repo had *"no automatic path from a local build
+> to a verified production"* and had built *"the half that reports."* The gate
+> existed and was correct; **no scheduled process was obliged to run it**, which
+> is why 63 commits of drift could sit here while this document still said
+> "byte-identical over the wire."
+>
+> `tools/loop-once.sh` now re-measures production **every iteration** and injects
+> the verdict at the **top of the next round's prompt** — above the plan, so a
+> reader has to look past it. `.loop/production-stale` is written when it is red.
+> Proved able to go quiet in `tools/loop-freshness-mutation.sh` (12/12).
+>
+> The failure it guards is not a wrong number — it is **an inherited unverified
+> claim**, and a fresh measurement is the only guard against that one.
+
 **What is blocked, and on what.** The deploy itself. `ops/build-release.py` builds
 **all eight** registered games from their local trees and `ops/deploy.py` then
 ships the whole arcade behind an atomic flip. Four of the seven other trees have
@@ -68,6 +83,12 @@ uncommitted work — `shoeinator-web` (14 files), `shoeateka`, `survivaltd`, `Sk
 Running the only supported path unattended would publish another agent's
 work-in-progress to a public host. That is a decision for a human, and it is the
 one open item left.
+
+> **Re-measured at r161, because that paragraph is inherited prose.** The blocker
+> holds and the window is **widening**: `shoeateka` went from **1 dirty file at
+> r160 to 22** now. `build-release.py` has no subset flag — it builds every
+> registered game unconditionally — and `deploy.py` demands a privacy-gate
+> clearance receipt before it uploads. Nothing in this repo can move it.
 
 ---
 
@@ -449,13 +470,21 @@ Because nothing is watching, three rules exist and are not optional:
 - [x] 2.1 and 2.2 raised with a recommendation — a human decides, the loop has done its part
 - [x] 3.1 unattended driver in place — `tools/loop-once.sh` on a launchd schedule
 - [x] 3.2 deploy verified against production bytes — `tools/verify-deploy.sh`, mutation-proved
-- [ ] **3.3 the deploy can be performed** — `tools/deploy.sh`, and production is
-      byte-identical over the wire. The `root`-only refusal that stalled r148
-      was one identity short of a working deploy. **REOPENED at r160** — the
-      script was retired at r159 and production is **63 commits stale** against
-      the origin this game ships from. Blocked on a human: the only supported
-      path rebuilds all eight arcade games and four of those trees have
-      uncommitted work. See the box at the top of this document.
+- [ ] **3.3 the deploy can be performed** — **STILL BLOCKED at r161**, and the
+      block was re-measured rather than inherited: `shoeateka` has gone from 1
+      dirty file at r160 to **22**, so the only supported path would publish more
+      another agent's work-in-progress than it would have an hour ago.
+      `tools/deploy.sh` was retired at r159 and production is **65 commits stale**
+      against the origin this game ships from. Blocked on a human: the only
+      supported path rebuilds all eight arcade games. See the box at the top of
+      this document.
+- [ ] **3.3a nothing is obliged to look at production** — **CLOSED at r161.**
+      r160 built the gate that reports; nothing ran it. `tools/loop-once.sh` now
+      re-measures production every iteration and injects the verdict above the
+      plan in the next round's prompt, with `.loop/production-stale` as a
+      greppable marker. Proved able to go quiet in
+      `tools/loop-freshness-mutation.sh` (12/12). Deliberately still outside
+      `pnpm check`, which must stay offline.
 - [ ] every phase gated, logged, committed, deployed
 - [x] **provenance precedence** — **FIXED at r150.** `docs/asset-provenance.md`
       states twice that the manifest governing an asset is the NEAREST ANCESTOR
