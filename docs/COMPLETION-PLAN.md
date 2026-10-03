@@ -11,8 +11,8 @@ has been improving.
 | Playable | yes — tournament + dojo, two sticks, point karate |
 | Deployed | `https://arcade.shoemoney.ai/smkk/`, verified playing a real bout |
 | Tests | 200 unit, 44 e2e, green locally |
-| Review loop | 154 rounds, 20 review frames, mutation-tested fences |
-| Commits | 289 |
+| Review loop | 157 rounds, 20 review frames, mutation-tested fences |
+| Commits | 293 |
 | Production | **byte-identical to the local build**, `tools/verify-deploy.sh` green |
 
 The game is not a prototype. What remains is a short list of specific, named
@@ -163,6 +163,64 @@ that reads as clutter.
 The answer to "the mapping is one screen away" is that it is **directly above**
 the control, aligned to its own glyphs, and that is the correct place for a
 legend. Refused on a playtest, like r108.
+
+> **CORRECTED at r157 — the count, and then the coach had no plate.**
+> r156 made the number reproducible with `tools/css-literals.py` and it stands at
+> **ten**, each transcribed into a token rather than deleted. But r157's
+> `tools/contrast-reach.py` added the half that count could never show — *can
+> `body.high-contrast` actually reach every one of them* — and the tenth one is
+> worth naming:
+>
+> | the site | the finding |
+> |---|---|
+> | `.coach-strip { background: var(--coach-plate) }` | **`--coach-plate` is declared nowhere.** A `var()` with no definition and no fallback resolves to nothing: measured `rgba(0,0,0,0)`, `background-image: none`. The first-run coach's lesson text sat directly on the tatami with no plate at all. |
+>
+> That is round 16's `--font-display` bug verbatim — the game's own name, the
+> round name and the result headline in the browser default for sixteen rounds —
+> and `css-literals.py` cannot see it, because an undefined token has no literal
+> to count. It is now declared, and **`tools/undefined-vars.py` is the gate for
+> the class** (9/9 in its mutation harness, negative control included). The same
+> gate immediately found two more latent no-ops: `--leading-relaxed` on
+> `.tech-rules` and `--text-dim` on `.tech-key-item`, both pre-existing, both
+> fixed by pointing at a token that already existed and rendered the same.
+>
+> `tools/pixel-identity.mjs` then verified the claim attached to the conversion —
+> *default mode unchanged pixel for pixel* — with two arms and a noise floor. It
+> is true for the seven transcription sites and **deliberately false for the
+> coach plate**, which is the fix. First run of the pixel arm reported "same" for
+> that site because the diff drew an already-cropped screenshot at a negative
+> offset and measured nothing; see REVIEW-LOOP.md r157.
+
+### 1.4 The first-run coach was dead for 133 rounds — `CLOSED, r157`
+**Found:** r157, by picking up a killed round and walking a journey nobody had
+walked. **Not** by a reviewer: no model has reported it in 156 rounds.
+**Why it matters:** it is the answer to *there was no onboarding at all*, added
+in round 3 and logged as the most productive round in the loop's history. It had
+not rendered for a single player since round 23.
+**Do:** `retire()` records the "already seen" flag only when the strip was
+actually shown.
+**Accept:** `tools/coach-probe.mjs` exits 1 while a first run is not taught, and
+0 once it is. It has a positive arm (`?mode=dojo`, where the strip does render)
+and a returning-player control, because a probe that answers "no strip" about
+four different states has learned nothing.
+
+| arm | flag at ready | strip | |
+|---|---|---|---|
+| first run `/` | true | **NO** | |
+| first run `?mode=tournament` | true | **NO** | |
+| first run `?mode=dojo` | null | yes, 2 halves | the positive control |
+| CONTROL returning `?mode=dojo` | true | no | correct — must stay silent |
+
+Mechanism: r23 added `coach.dismiss()` to `clearBoutUi` to stop the strip
+bleeding through the result card; `clearBoutUi` is also called by `startRound`,
+which runs at boot. `dismiss()` is `retire()`, and `retire()` writes the flag —
+so boot marked the coach seen before it had ever appeared.
+
+The e2e suite runs desktop, where `(hover: none) and (pointer: coarse)` never
+matches, so the strip could not have appeared even if it worked. r18's
+conclusion — *the first-run state was in every frame the loop ever showed a
+model* — was the exact inverse of the truth, and `14-phone-returning` was built
+to contrast two states that were identical because neither existed.
 
 ---
 
@@ -348,6 +406,21 @@ Because nothing is watching, three rules exist and are not optional:
       which r119's measurement means anything, with the arithmetic extracted to
       `apps/game/src/preBoutBudget.ts` because a wall-clock deadline cannot be
       unit-tested by waiting for one. 4 mutations, all red.
+- [x] **the first-run coach was dead for 133 rounds** — **FIXED at r157.**
+      `coach.dismiss()` is `retire()`, which *writes* the "already seen" flag, and
+      r23 added it to `clearBoutUi`, which `startRound` calls at boot. So boot
+      marked the coach seen before it had ever appeared and `show()` returned
+      early on every first run. The onboarding added in r3 — the answer to *there
+      was no onboarding at all* — could not render for a tournament player on any
+      run, ever. `retire()` now records the flag only `if (shown)`. Gated by
+      `tools/coach-probe.mjs` (exit 1 before, 0 after) with a positive arm and a
+      returning-player control, plus a unit fence run in both directions.
+- [x] **an undefined `var()` is invisible to every gate in the repo** —
+      **gated at r157** by `tools/undefined-vars.py`, 9/9 mutation cases with a
+      negative control. `--coach-plate` (the coach's plate — the strip had **no
+      background at all**), `--leading-relaxed` and `--text-dim` were all
+      resolving to nothing. Round 16 found the same class with `--font-display`
+      and nothing could see it then either.
 - [x] **half-point score typography** — **SHIPPED at r148.** Raised since r918, built
       in r53, revisited in r133, and named by two models in the same round at r147 —
       always in the same four words, never with a number. r148 measured it: a stacked

@@ -9,8 +9,21 @@
 # Each case mutates a THROWAWAY COPY of the stylesheet and points the tool at
 # it. Real repo file is never touched.
 #
+# r157 retuned this harness, because the code it tested against moved: the
+# baseline went 10 -> 0, and case 5's fixture anchor
+# (`body.high-contrast .setting-row input[...]{ background: #3a2d22 }`) was
+# DELETED by the very fix it was written for. It asserted a hardcoded line, 2033,
+# for a literal that is now a token on :root. A harness pinned to a line number
+# is a harness pinned to a moment — which is the drift this plan keeps finding in
+# prose, reproduced in the thing built to check the prose.
+#
+# The BRANCHES are unchanged and are still the ones that matter. Only the fixture
+# shapes and the baseline number moved: case 5 now injects into a high-contrast
+# descendant that still exists, and asserts the RAW line of the injected literal
+# instead of a hardcoded one.
+#
 # Branches covered, and what each one is the r15x shape of:
-#   1  honest baseline                    -> exit 0, 10
+#   1  honest baseline                    -> exit 0, 0
 #   2  a literal added outside the tokens -> count goes UP, exit 1
 #   3  a literal inside :root             -> excused, count UNCHANGED, exit 0
 #      (rule 3 permits :root; a tool that flagged it would be wrong)
@@ -68,12 +81,12 @@ CSSF="$WORK/apps/game/src/styles.css"
 
 echo "case 1 — honest baseline"
 C=$(count); E=$(exitof)
-[[ "$C" == "10" && "$E" == "0" ]] && ok "10 literals, exit 0" || bad "baseline" "count=$C exit=$E"
+[[ "$C" == "0" && "$E" == "0" ]] && ok "0 literals, exit 0" || bad "baseline" "count=$C exit=$E (expected the ratchet 0)"
 
 echo "case 2 — a NEW literal outside the token blocks must be flagged"
 printf '\n.probe-outside { color: #123456; }\n' >> "$CSSF"
 C=$(count); E=$(exitof)
-[[ "$C" == "11" && "$E" == "1" ]] && ok "count 10 -> 11, exit 1" || bad "added literal" "count=$C exit=$E"
+[[ "$C" == "1" && "$E" == "1" ]] && ok "count 0 -> 1, exit 1" || bad "added literal" "count=$C exit=$E"
 # undo
 sed -i '' '/\.probe-outside/d' "$CSSF"
 
@@ -85,7 +98,7 @@ s=s.replace(":root {\n  color-scheme: dark;", ":root {\n  color-scheme: dark;\n 
 open(p,'w').write(s)
 PY
 C=$(count); E=$(exitof)
-[[ "$C" == "10" && "$E" == "0" ]] && ok ":root literal excused, exit 0" || bad ":root allowance" "count=$C exit=$E"
+[[ "$C" == "0" && "$E" == "0" ]] && ok ":root literal excused, exit 0" || bad ":root allowance" "count=$C exit=$E"
 cp "$REPO/apps/game/src/styles.css" "$CSSF"
 
 echo "case 4 — a literal INSIDE bare body.high-contrast is permitted"
@@ -96,26 +109,34 @@ s=s.replace("body.high-contrast {\n", "body.high-contrast {\n  --probe-hc: #abcd
 open(p,'w').write(s)
 PY
 C=$(count); E=$(exitof)
-[[ "$C" == "10" && "$E" == "0" ]] && ok "high-contrast literal excused, exit 0" || bad "hc allowance" "count=$C exit=$E"
+[[ "$C" == "0" && "$E" == "0" ]] && ok "high-contrast literal excused, exit 0" || bad "hc allowance" "count=$C exit=$E"
 cp "$REPO/apps/game/src/styles.css" "$CSSF"
 
 echo "case 5 — a DESCENDANT of body.high-contrast must be FLAGGED (the r156 defect)"
-# Insert a literal into the existing `body.high-contrast .setting-row
-# input[type="checkbox"]` block. This is the exact shape the plan counts as
-# `#3a2d22`, and the shape both early drafts of the tool wrongly excused.
+# Inject a literal into a high-contrast DESCENDANT selector that still exists.
+# `body.high-contrast` is the first whitespace token of that selector, so both
+# early drafts of the tool excused it — by matching the allowance as a substring,
+# then as a whitespace token — which is how `#3a2d22` went uncounted until r156.
 python3 - "$CSSF" <<'PY'
 import sys
 p=sys.argv[1]; s=open(p).read()
-needle='body.high-contrast .setting-row input[type="checkbox"] {\n  background: #3a2d22;'
-assert needle in s, "fixture shape missing — the real file changed"
-s=s.replace(needle, 'body.high-contrast .setting-row input[type="checkbox"] {\n  background: #3a2d22;\n  color: #ff00ff;')
+needle='body.high-contrast .setting-row input[type="checkbox"] {\n  border-color: var(--text-ghost);'
+assert needle in s, "fixture anchor missing — the real file changed again"
+s=s.replace(needle, 'body.high-contrast .setting-row input[type="checkbox"] {\n  color: #ff00ff;\n  border-color: var(--text-ghost);')
 open(p,'w').write(s)
 PY
 C=$(count); E=$(exitof)
-[[ "$C" == "11" && "$E" == "1" ]] && ok "descendant literal flagged, exit 1" || bad "descendant not flagged" "count=$C exit=$E (the token-match bug)"
-# Also prove the tool still sees #3a2d22 itself as a violation at its raw line.
-L=$(lineof '#3a2d22')
-[[ "$L" == "2033" ]] && ok "#3a2d22 reported at raw line 2033" || bad "line position" "got '$L' want 2033"
+[[ "$C" == "1" && "$E" == "1" ]] && ok "descendant literal flagged, exit 1" || bad "descendant not flagged" "count=$C exit=$E (the token-match bug)"
+# The injected literal must land at its RAW line. This case used to assert a
+# hardcoded 2033, which the r157 fix made impossible — see the header.
+RAW=$(python3 - "$CSSF" <<'PY'
+import sys
+for i,l in enumerate(open(sys.argv[1]).read().splitlines(),1):
+    if '#ff00ff' in l: print(i); break
+PY
+)
+GOT=$(lineof '#ff00ff')
+[[ -n "$GOT" && "$GOT" == "$RAW" ]] && ok "descendant literal at raw line $RAW" || bad "line position" "tool said '$GOT', raw file says '$RAW'"
 cp "$REPO/apps/game/src/styles.css" "$CSSF"
 
 echo "case 6 — a colour literal inside a COMMENT must NOT be counted"
@@ -125,7 +146,7 @@ cat >> "$CSSF" <<'EOF'
    .thing { color: #ddeeff; }   <- prose, not code */
 EOF
 C=$(count); E=$(exitof)
-[[ "$C" == "10" && "$E" == "0" ]] && ok "comment literal ignored, exit 0" || bad "comment counted" "count=$C exit=$E (r153's 13-vs-10 bug)"
+[[ "$C" == "0" && "$E" == "0" ]] && ok "comment literal ignored, exit 0" || bad "comment counted" "count=$C exit=$E (r153's 13-vs-10 bug)"
 cp "$REPO/apps/game/src/styles.css" "$CSSF"
 
 echo "case 7 — comment stripping preserves RAW line numbers"

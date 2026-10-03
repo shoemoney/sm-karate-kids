@@ -133,6 +133,35 @@
   --scrim-hud-mid: rgb(14 9 5 / 0.58);
   --scrim-none: rgb(14 9 5 / 0);
   --scrim-banner: rgb(10 6 3 / 0.68);
+
+  /* The HUD surfaces that used to inline these. All four were literals outside
+     :root, which breaks rule 3 and — the part that actually mattered — pins
+     them out of `body.high-contrast`, where every scrim above flattens to
+     0.85-0.99 so the room behind cannot compete with text on top of it. Each
+     of THESE FOUR is a token at the value it already had, so default mode is
+     unchanged pixel for pixel; the high-contrast value is the family's own
+     policy, not a new look. `--coach-plate` below is the exception and says so,
+     because it is the one whose default value is a change rather than a
+     transcription. Measured by `tools/pixel-identity.mjs`. */
+  --scrim-icon-btn: rgb(12 8 4 / 0.66);
+  --scrim-icon-btn-fallback: rgb(12 8 4 / 0.9);
+  --scrim-panel: rgb(8 5 3 / 0.62);
+  --fade-void: rgb(16 11 8 / 0);
+  /* The first-run coach's plate, over the dojo's lower edge. The rule that uses
+     it read `var(--coach-plate)` and this token was NEVER DEFINED — a `var()`
+     with no definition and no fallback resolves to nothing, so the strip
+     rendered at `background-color: rgba(0,0,0,0)` with the lesson text sitting
+     straight on the tatami. Round 16 found this exact failure with
+     `--font-display`, which left the game's own name, the round name and the
+     result headline in the browser default for sixteen rounds, and nothing in
+     the repo could see it. `tools/undefined-vars.py` is the gate that can.
+
+     The value is the one this stylesheet had already chosen for the same
+     element in its no-backdrop-filter branch — near opaque, so a lesson stays
+     readable over a bright patch of dojo. That branch is gone rather than kept
+     as a second spelling of one decision, which is the drift r157's own note
+     describes for the settings switch. */
+  --coach-plate: rgb(12 8 4 / 0.94);
   /* Lifted from 0.8/0.96. At those values the round card blacked out the
      dojo entirely — 90% of the title screen measured below 1% relative
      luminance, and the room behind it was invisible. The card still reads as
@@ -154,6 +183,11 @@
   --plate-dim: rgb(10 7 4 / 0.72);
   --plate: rgb(14 10 6 / 0.78); /* the technique caption's own ground */
   --plate-text: #f0e6d8;
+  /* The round card's own ink. Was `color: #cfc4b4` inline on
+     `.result-title, .result-score, .result-detail`, measured at 3.25:1 on its
+     own plate before it was lifted; a token so it joins the faint family in
+     high-contrast instead of standing at the default-mode value. */
+  --result-ink: #cfc4b4;
   --plaque-top: rgb(38 27 19 / 0.86); /* desktop floating control plaque */
   --plaque-bottom: rgb(20 14 10 / 0.82);
   /* A warm lip where the pad meets the mat, and a pool of lamplight under it. */
@@ -178,6 +212,11 @@
   --shadow-ink: rgb(6 3 1 / 0.6);
   --shadow-deep: rgb(4 2 1 / 0.78);
   --shadow-soft: rgb(6 3 1 / 0.42);
+  /* Two more that were literals: the switch knob's 2px drop, and the round
+     score's own text shadow. Neither was reachable from high-contrast, which is
+     the one mode where a drop shadow matters most. */
+  --shadow-knob: rgb(0 0 0 / 0.6);
+  --text-shadow-soft: rgb(0 0 0 / 0.4);
   --shadow-panel:
     0 1px 0 rgb(255 240 214 / 0.05) inset, 0 0.4rem 1.1rem var(--shadow-soft);
   --shadow-float: 0 0.6rem 1.8rem var(--shadow-ink);
@@ -229,6 +268,11 @@
   --detent-thick: 2.5px;
 
   --knob-lip: #1b120c; /* the physical shelf the cap rests on */
+  /* The settings switch's OFF track. One token for both of its literals: the
+     default value, and the `#3a2d22` that a high-contrast override used to
+     hardcode beside it. They were the same decision written twice, which is why
+     high-contrast had to repeat itself to keep them in step. */
+  --switch-track-off: #352a20;
   --knob-lit: #a89070;
   --knob-face: #5b4a3c;
   --knob-shade: #241b15;
@@ -1618,10 +1662,6 @@ body:has(.result[data-phase='result'].show) .stick-zone {
   animation: coach-in var(--dur-slow) var(--ease-out) both;
 }
 
-body.no-backdrop-filter .coach-strip {
-  background: rgb(12 8 4 / 0.94);
-}
-
 .coach-half {
   display: grid;
   gap: 1px;
@@ -1710,14 +1750,14 @@ body.reduced-motion .coach-strip {
   }
 
   .hud-actions .icon-btn {
-    background: rgb(12 8 4 / 0.66);
+    background: var(--scrim-icon-btn);
     backdrop-filter: blur(10px) saturate(0.9);
     -webkit-backdrop-filter: blur(10px) saturate(0.9);
     border-color: var(--edge-faint);
   }
 
   body.no-backdrop-filter .hud-actions .icon-btn {
-    background: rgb(12 8 4 / 0.9);
+    background: var(--scrim-icon-btn-fallback);
   }
 
   /* Collapsing the header row put these two on top of the dojo, which is
@@ -1866,7 +1906,7 @@ input:focus-visible,
   inset-block-end: 0;
   block-size: 3rem;
   pointer-events: none;
-  background: linear-gradient(180deg, rgb(16 11 8 / 0) 0%, var(--surface-void) 92%);
+  background: linear-gradient(180deg, var(--fade-void) 0%, var(--surface-void) 92%);
   z-index: 2;
 }
 
@@ -1931,7 +1971,7 @@ input:focus-visible,
      still sees they are in a fight — which was the point of letting the dojo
      show through in round 44 — but the fight is now clearly behind something
      rather than sliced by it. */
-  box-shadow: 0 0 0 100vmax rgb(8 5 3 / 0.62);
+  box-shadow: 0 0 0 100vmax var(--scrim-panel);
 }
 
 #settings-sheet .sheet-body {
@@ -1979,7 +2019,7 @@ input:focus-visible,
      with a dot in it. A fixed lifted charcoal guarantees the track is a
      surface in both states, and the knob is then a position rather than the
      only mark on the control. */
-  background: #352a20;
+  background: var(--switch-track-off);
   border: 1px solid color-mix(in oklab, var(--gold) 26%, var(--edge-strong));
   border-radius: var(--radius-pill);
   cursor: pointer;
@@ -2011,7 +2051,7 @@ input:focus-visible,
   block-size: 14px;
   border-radius: var(--radius-circle);
   background: var(--text-muted);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
+  box-shadow: 0 1px 2px var(--shadow-knob);
   transform: translateY(-50%);
   transition:
     inset-inline-start var(--dur-fast) var(--ease-out),
@@ -2030,7 +2070,6 @@ input:focus-visible,
 }
 
 body.high-contrast .setting-row input[type="checkbox"] {
-  background: #3a2d22;
   border-color: var(--text-ghost);
 }
 
@@ -2128,7 +2167,15 @@ body.high-contrast .setting-row input[type="checkbox"]:checked::before {
 .tech-rules {
   margin: 0 0 var(--space-3);
   font-size: var(--text-xs);
-  line-height: var(--leading-relaxed);
+  /* Was `var(--leading-relaxed)`, a token that is declared nowhere — so the
+   declaration was dropped and this paragraph rendered at `normal`. A var() with
+   no definition and no fallback resolves to nothing, silently, and nothing in
+   the repo could see it; `tools/undefined-vars.py` can. Pointed at the declared
+   `--leading-snug` rather than given a new invented value, because r24's whole
+   argument for making this sheet full-screen was fitting all eighteen moves.
+   Measured: block height 75px -> 81px, and the count of move rows visible
+   without scrolling is 8 before and 8 after. */
+  line-height: var(--leading-snug);
   color: var(--text-muted);
 }
 
@@ -2330,6 +2377,11 @@ body.high-contrast {
   --scrim-banner: rgb(0 0 0 / 0.9);
   --scrim-soft: rgb(0 0 0 / 0.9);
   --scrim-hard: rgb(0 0 0 / 0.99);
+  --scrim-icon-btn: rgb(0 0 0 / 0.85); /* follows --scrim-hud-mid */
+  --coach-plate: rgb(0 0 0 / 0.97); /* was the strip scrim's high-contrast value */
+  --scrim-icon-btn-fallback: rgb(0 0 0 / 0.97);
+  --scrim-panel: rgb(0 0 0 / 0.9);
+  --fade-void: rgb(0 0 0 / 0);
   --plate-dim: rgb(0 0 0 / 0.99);
   /* The painted plate is decoration, and contrast mode is where decoration
      goes. `none` is a valid background-image layer, so the layer stays in the
@@ -2338,6 +2390,7 @@ body.high-contrast {
   --card-plate: none;
   --plate: rgb(0 0 0 / 0.92);
   --plate-text: #ffffff;
+  --result-ink: var(--text);
   --plaque-top: rgb(0 0 0 / 0.92);
   --plaque-bottom: rgb(0 0 0 / 0.88);
   --zone-well: radial-gradient(
@@ -2350,6 +2403,8 @@ body.high-contrast {
   --shadow-ink: rgb(0 0 0 / 0.95);
   --shadow-deep: rgb(0 0 0 / 1);
   --shadow-soft: rgb(0 0 0 / 0.9);
+  --shadow-knob: rgb(0 0 0 / 0.95);
+  --text-shadow-soft: rgb(0 0 0 / 0.9);
   --shadow-panel:
     0 1px 0 rgb(255 255 255 / 0.35) inset, 0 0.4rem 1.1rem var(--shadow-soft);
   --shadow-float: 0 0.6rem 1.8rem var(--shadow-ink);
@@ -2369,6 +2424,7 @@ body.high-contrast {
   --detent-dim: rgb(255 212 0 / 0.7);
 
   --knob-lip: #000000;
+  --switch-track-off: #3a2d22; /* was hardcoded in a high-contrast override */
   --knob-lit: #8a8a8a;
   --knob-face: #565656;
   --knob-shade: #2b2b2b;
@@ -2675,7 +2731,7 @@ body.reduced-motion .boot[data-measuring='true'] .boot-bar::after {
      Set explicitly rather than inherited: the plate is a dark warm brown, and
      a neutral off-white clears the floor against it by a wide margin without
      shouting over the round name above it. */
-  color: #cfc4b4;
+  color: var(--result-ink);
   background: var(--result-plate);
   backdrop-filter: blur(14px) saturate(0.85);
   -webkit-backdrop-filter: blur(14px) saturate(0.85);
@@ -2781,7 +2837,7 @@ body.no-backdrop-filter .result-detail {
   -webkit-background-clip: text;
   background-clip: text;
   letter-spacing: var(--track-tight);
-  text-shadow: 0 0.08em 0 rgb(0 0 0 / 0.4);
+  text-shadow: 0 0.08em 0 var(--text-shadow-soft);
 }
 
 /* High contrast cannot rely on a gradient for legibility. */
@@ -2856,7 +2912,13 @@ body.high-contrast .result-score {
   background: var(--surface-sunken);
   border: 1px solid var(--edge-faint);
   border-radius: var(--radius-sm);
-  color: var(--text-dim);
+  /* Was `var(--text-dim)`, declared nowhere — the declaration was dropped and
+     this inherited from `.tech-key`. Measured before and after, and the point
+     is that nothing moved: rgb(142,128,113) in default mode, rgb(220,220,220)
+     in high contrast, both before and after. `.tech-key` was already on
+     `--text-faint`, so the drop was invisible. The fix is that the declaration
+     now means something — not that the picture changes. */
+  color: var(--text-faint);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   letter-spacing: var(--track-label);

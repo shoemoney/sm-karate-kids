@@ -83,8 +83,19 @@ export function createControlCoach(): ControlCoach {
   };
 
   const retire = (): void => {
+    // "Already seen" is only a true statement about a lesson that was actually
+    // shown. `dismiss()` is not only the end of a lesson — it is also how the
+    // pad gets cleaned at the START of one, because `clearBoutUi` calls it and
+    // `startRound` calls `clearBoutUi`, and `startRound` runs at boot on the
+    // tournament routes. Writing the flag there recorded the coach as seen
+    // before it had ever appeared, so `show()` took its early return on every
+    // first run and the first-run coach could not render — for a tournament
+    // player, on any run, ever. r23 added that call to stop the strip bleeding
+    // through the result card, and it killed the onboarding r3 built.
+    //
+    // `shown` is read before `clear()`, which resets it.
+    if (shown) saveValue(SEEN_KEY, true);
     clear();
-    saveValue(SEEN_KEY, true);
   };
 
   return {

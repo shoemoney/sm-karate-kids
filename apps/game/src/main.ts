@@ -506,9 +506,7 @@ async function boot(screen: BootScreen): Promise<void> {
               // ends up wondering what it is out of. It is a round time.
               : `fastest round ${(record.bestWinTicks / 60).toFixed(1)}s`;
           // The lesson belongs to a live bout. See clearBoutUi.
-        coach.dismiss();
-        // The lesson belongs to a live bout. See clearBoutUi.
-    coach.dismiss();
+          coach.dismiss();
     hud.showResult({
             headline: winner === null ? 'DRAW' : `${state.fighters[winner].spec.name} WINS`,
             tone: winner === null ? 'neutral' : 'full',

@@ -9568,3 +9568,233 @@ harness that could not see the mutation it existed to test. Four wrong numbers,
 all caught by the same move — check the claim against the file before believing
 the tool that made it. The one thing that did not need catching was the plan's
 ten, which was correct the whole way through.
+
+## Round 157 — the onboarding was dead for a hundred and thirty-three rounds 🎓
+
+Started by finding a killed round-157 in the tree: a half-finished conversion of
+ten colour literals into tokens, two new tools, and a throwaway probe at the
+repo root. I verified it rather than trusting it, and the verification turned up
+four things — one of them the largest defect this loop has found.
+
+### The first-run coach never rendered, for anyone, ever
+
+Round 3 added the coach and logged it as the most productive round in the loop's
+history: *there was no onboarding at all*. Round 23 found the strip legible
+through the result card's REMATCH button and fixed it by adding
+`coach.dismiss()` to `clearBoutUi`.
+
+`clearBoutUi` is also called by `startRound`, and `startRound` runs at boot.
+`dismiss()` is `retire()`, and `retire()` **writes the "already seen" flag**. So
+boot marked the coach seen before it had ever appeared, `show()` took its early
+return on every first run, and the onboarding could not render — for a
+tournament player, on any run, forever.
+
+`tools/coach-probe.mjs`, 390x844, one arm per route plus a control:
+
+| arm | flag at ready | strip |
+|---|---|---|
+| first run `/` | **true** | **NO** |
+| first run `?mode=tournament` | **true** | **NO** |
+| first run `?mode=dojo` | null | **yes, 2 halves** |
+| CONTROL returning `?mode=dojo` | true | no — correct |
+
+The **dojo arm is what makes it a defect and not a design choice**: the identical
+code path renders there. The only difference is that dojo does not call
+`startRound` at boot (`main.ts` — `if (tournament) newRun(...)`).
+
+The **returning-player arm is why the probe was worth building**. If all four
+arms had answered "no strip" it would have passed on a build where onboarding is
+simply gone — which is the shape of r155's `verify_shots.py`, and the reason
+every control here has a positive arm.
+
+Fix: `retire()` writes the flag only `if (shown)`. You cannot have already seen
+something that was never shown. After: all three first-run routes teach, the
+control still stays silent. Also removed a duplicate, mis-indented
+`coach.dismiss()` pair r23 left at `main.ts:509`/`511` — the same patch, the
+same carelessness.
+
+Fence in `apps/game/tests/unit/coach-recorded-only-after-teaching.test.ts` —
+red on the reverted fix, green on the fixed one, both directions run.
+
+**Why 133 rounds missed it.** The e2e suite runs desktop, so
+`(hover: none) and (pointer: coarse)` never matches and the strip could not have
+appeared even if it worked. The review set's phone frames never contained the
+first-run state — r18 concluded the opposite ("the first-run state was in every
+frame the loop ever showed a model"), and `14-phone-returning` was built to show
+the difference between two states that were identical because neither existed.
+
+### `--coach-plate` was never declared either
+
+Fixing the first thing made the strip render for the first time, and it rendered
+**with no background at all**:
+
+```css
+.coach-strip { background: var(--coach-plate); }   /* --coach-plate: nowhere */
+```
+
+A `var()` with no definition and no fallback resolves to nothing — measured
+`rgba(0, 0, 0, 0)`, `background-image: none`. The lesson text sat directly on
+the tatami. That is round 16's `--font-display` bug verbatim — the game's own
+name, the round name and the result headline in the browser default for sixteen
+rounds — and nothing in the repo could see it, because an undefined token has no
+literal for `css-literals.py` to count.
+
+Declared at `rgb(12 8 4 / 0.94)`, the value this stylesheet had already chosen
+for the same element in its `no-backdrop-filter` branch. That branch is gone
+rather than kept as a second spelling of one decision.
+
+### `tools/undefined-vars.py` — the gate for the class
+
+Every `var()` checked against the union of every custom property the file
+declares, on any selector, `@property` included. Exit 1 on any fallback-less read
+of an undeclared token. **`tools/undefined-vars-mutation.sh`, 9/9**, including
+the negative control.
+
+It immediately found two more latent no-ops, both pre-existing:
+
+| site | was | now | measured |
+|---|---|---|---|
+| `.tech-rules` | `var(--leading-relaxed)` — undeclared, so `line-height` was `normal` | `--leading-snug` | block 75px → **81px**; move rows visible without scrolling **8 → 8** |
+| `.tech-key-item` | `var(--text-dim)` — undeclared, so it inherited | `--text-faint` | `rgb(142,128,113)` **identical before and after**, default *and* high contrast |
+
+Neither needed a new value invented for it, which is the point: the declarations
+were dead, not wrong, so the fix restores what already rendered.
+
+**My own tool was wrong twice before it was right.** The first draft reported all
+**612** var() uses as undefined, including `--text`, which line 60 declares — a
+gate that can only ever say FAIL, and it exited 1 correctly while being wrong
+about everything. The second flagged `var(--peak, 0.5)`, a **working fallback**,
+as a defect. An instrument that cries wolf on a correct line teaches its reader
+to ignore it, which is how the real pair at 2168 and 2905 would have been
+dismissed beside it.
+
+### `pixel-identity` said "same" about a change that had happened
+
+Built to settle the killed round's claim that the token conversion left default
+mode "unchanged pixel for pixel". Two arms: computed used values (exhaustive,
+deterministic) and pixels (sampled, **with a noise floor** from two loads of the
+same build, because the arena behind an overlay is frame-counter driven).
+
+The pixel arm reported **zero changed pixels for the coach plate** — whose
+background had just gone from transparent to `0.94` opaque. The two PNGs hashed
+differently on disk.
+
+```js
+g.drawImage(img, -clip.x * 2, -clip.y * 2)   // cv is clip.width × clip.height
+```
+
+`page.screenshot({clip})` returns an image **already cropped** to that
+rectangle, so its pixel space starts at (0,0). Subtracting the clip offset put
+the entire canvas window at negative source coordinates, nothing was drawn, both
+images came back empty — and the tool reported `same` for a whole run. The
+canvas is now sized from the PNG's own `naturalWidth`, both images are drawn at
+the origin, and `blank` is asserted on: **a crop that came back empty is not a
+crop that matched.** I found this by reading two screenshots, not by reading the
+tool — the same move that resolved r155's `verify_shots.py`.
+
+Also fixed while in there: the probe read the **first** settings checkbox, which
+is `reducedMotion` and therefore **checked** in a probe context, so it measured
+the gold ON track instead of the OFF one the change is about — and reported "no
+movement" for a reason unrelated to the change.
+
+Final reading, exit 0:
+
+| | default mode | high contrast |
+|---|---|---|
+| 7 transcription sites | used value and pixels **identical** | 4 move, knob shadow moves in the shared switch crop |
+| `--switch-track-off` | `rgb(53,42,32)` → `rgb(53,42,32)` | `rgb(58,45,34)` → `rgb(58,45,34)` — held, as it must |
+| `--coach-plate` | **declared** default-mode change | `rgba(0,0,0,0.97)` |
+| `--fade-void` | alpha 0 both sides — not paintable, listed and not asserted | same |
+
+### I destroyed my own stylesheet with one command
+
+Swapping the stylesheet to build the "before" bundle, I ran
+`git checkout -- apps/game/src/styles.css`. That discarded every CSS edit in the
+working tree — the coach plate, the token conversions, the two undefined-token
+fixes. Recovered from a `/tmp` copy taken eleven minutes earlier and re-applied
+the four edits since it; `dist` rebuilt and verified **byte-identical** to the
+build that had been there.
+
+Recorded because the whole shape of this round's danger is a killed round leaving
+wreckage behind, and here I *created* the wreckage with the single command whose
+entire purpose is to discard uncommitted work. The recovery was lucky: the copy
+existed. There is no reason it had to.
+
+### The killed round's work, verified rather than trusted
+
+Its harness had a **vacuous case**. `contrast-reach-mutation.sh` case 5 patched
+the tool's `decl` regex to require `var(` after the colon — which removed its
+capture group, so `m.group(1)` raised `IndexError`, the tool died, and the case's
+`exit == 1` half was earned by a **traceback**. The `-ge 4` half is what caught
+it, reading `gone=0`.
+
+> **A harness case whose two halves disagree is telling you which one you
+> actually tested.** The exit-code half passed on a crash.
+
+Moved the mutation to the check rather than the regex. Now 12/12, and case 5
+reports exactly the four sites its own comment predicted.
+
+### Gates
+
+`check=0` — typecheck, **203 unit** (was 200, +3), content, assets (20 against
+provenance). `e2e=0` — **44 passed, 6 skipped**, **load 2.9** before and 5.9
+after, inside r151's green band.
+
+`css-literals-mutation` 8/8 · `contrast-reach-mutation` 12/12 ·
+`undefined-vars-mutation` 9/9 incl. its negative control · `coach-probe` **exit 1
+before the fix, 0 after** · `pixel-identity` exit 0.
+
+**Deployed.** `verify-deploy.sh` was red first — served `index-B-_VGGXn.css`,
+local `index-BZvF4V6E.css`, the gate correctly detecting that the bundle moved.
+After `deploy.sh --yes`: html identical, 2 assets sha256-matched, exit 0.
+
+`docs/preview/portrait.png` was rewritten by the e2e, which r156 reverted as a
+capture side-effect. **Kept this time, and looked at both first**: the committed
+frame has no coach strip in it, because for 133 rounds there was none to have.
+The new one is the first time this artefact has ever shown the onboarding, plate
+and all.
+
+### The shape, for the tenth time
+
+Every finding here is a claim in prose that the code did not keep: *one-time
+captions inside each stick ring* (dead since r23), `background: var(--coach-plate)`
+(a token that never existed), *"default mode unchanged pixel for pixel"* (true
+for seven of eight and false for the one that mattered). And three instruments
+reporting values they never measured — including one that said "same" about a
+background that had just appeared.
+
+The generalisation r152 reached, now with the strongest evidence yet: **a
+journey nobody walks cannot be wrong, and it will be recorded as working.** A
+gate that answers "no strip" about four different states is a gate that has
+learned nothing. So the coach has a probe with a positive arm, and it exits
+non-zero while the claim is false.
+
+### Then it was verified against production, and the probe was wrong
+
+`coach-probe.mjs` timed out on `https://arcade.shoemoney.ai/smkk/` with a 404 in
+the console. Standing rule 4 says check the probe and the servers before the
+code, and the server was fine: production reaches `__smkk.ready` in **1.5s** and
+its only failing request is the leaderboard 404 r156 documented, failing soft by
+design.
+
+```js
+new URL('/', 'https://arcade.shoemoney.ai/smkk/')  // -> https://arcade.shoemoney.ai/
+```
+
+The probe was navigating to the **domain root**, not the game — because the base
+carries a path and `new URL` resolves a leading `/` against the origin. A probe
+that cannot address the deployed sub-path is measuring the wrong server, which
+is exactly what rule 4 exists to prevent.
+
+One `urlFor(base, route)` helper now, and the same probe against the deployed
+bundle:
+
+| arm | flag at ready | strip | |
+|---|---|---|---|
+| first run `/` | null | **yes, 2 halves** | |
+| first run `?mode=tournament` | null | **yes, 2 halves** | |
+| first run `?mode=dojo` | null | **yes, 2 halves** | |
+| CONTROL returning `?mode=dojo` | true | no | correct |
+
+**exit 0.** The onboarding is live on production for the first time in its
+history, and the control proves the probe is not simply always saying yes.

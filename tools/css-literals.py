@@ -2,9 +2,11 @@
 """
 Count the colour literals that live outside :root and body.high-contrast.
 
-The completion plan records **ten** (r153), after r153's own audit reported
-thirteen, then twelve, then ten — two of the extras being prose inside a CSS
-comment quoting measured RGB from an older review frame.
+The completion plan recorded **ten** (r153). **Zero as of r157** — nine tokens,
+because the settings switch's OFF track was written twice: once as a default and
+once as a high-contrast override. Each token sits on :root at the value it
+already had, so default mode is unchanged pixel for pixel, and each re-points
+inside `body.high-contrast`, which is the half the count could never show.
 
 r153's stated lesson was that the filter had to skip comment lines and had
 missed the wrapped continuations. Skipping lines is the wrong tool: a wrapped
@@ -27,6 +29,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CSS = ROOT / "apps/game/src/styles.css"
+
+# The ratchet. Ten until r157, zero since — the count was always a ratchet and
+# not a target. A new literal anywhere outside the two allowed blocks exits 1,
+# which is the half of rule 3 a reviewer can see; the other half, that
+# `body.high-contrast` can now actually REACH all ten, is proven separately by
+# tools/contrast-reach.py. Only css-literals-mutation.sh moves this number.
+EXPECTED = 0
 
 # Only the BARE token definition and the BARE contrast block are allowed to
 # hold literals.
@@ -126,8 +135,8 @@ def main() -> int:
         kind = "alpha" if f.lower().startswith(("rgb", "hsl")) else "hex"
         print(f"  {n:5d}  {kind:5s} {f:10s} {text}")
     print()
-    print(f"  plan records 10; this run says {len(hits)}")
-    return 0 if len(hits) == 10 else 1
+    print(f"  ratchet expects {EXPECTED}; this run says {len(hits)}")
+    return 0 if len(hits) == EXPECTED else 1
 
 
 if __name__ == "__main__":
