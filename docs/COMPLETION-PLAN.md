@@ -10,10 +10,10 @@ has been improving.
 |---|---|
 | Playable | yes — tournament + dojo, two sticks, point karate |
 | Deployed | `https://arcade.shoemoney.com/karate-kids/`, verified playing a real bout |
-| Tests | 206 unit, 44 e2e, green locally |
-| Review loop | 160 rounds, 20 review frames, mutation-tested fences |
+| Tests | 210 unit, 54 e2e (+6 phone-only skips on desktop, by design), green locally at r163 |
+| Review loop | 163 rounds, 20 review frames, mutation-tested fences |
 | Commits | 300 |
-| Production | ⚠️ **STALE — 63 commits behind, measured r160.** Was recorded here as "byte-identical to the local build" until then; that was true of the *retired* `.ai` host and was never true of the origin this game ships from. |
+| Production | ✅ **EQUAL at r163** — release `20261003173539-ade9a7`; `verify-deploy.sh` 0, `production-freshness.py` 0. Was 63 commits stale at r160, fixed at r162. |
 
 The game is not a prototype. What remains is a short list of specific, named
 gaps — every one of them is in this document, and nothing else is.
@@ -1047,3 +1047,16 @@ them as regressions or quietly start one.
 Local Versus is the largest gap and the one a player would name first. It is a
 product decision (four sticks on one phone does not fit; desktop needs a second
 pad or a split keyboard), so it is raised here, not started.
+
+### Deployed at r163
+
+Release `20261003173539-ade9a7`, via `build-release.py --release karate-kids`
+after a fresh `capture-live.sh`. Payload diffed against the live tree by sha256
+before upload: **nothing changed outside `public/karate-kids/`**, and inside it
+only the bundle, the stylesheet and `index.html`. The release also dropped a
+`.js.map` that r162 had shipped against the no-sourcemaps convention (now 404).
+Privacy gate cleared 429 files (426 carried forward by hash from the live
+release, 3 reviewed). After: `verify-deploy.sh` 0, `production-freshness.py` 0,
+all nine arcade routes 200, `/api/health` ok, `coach-probe` 0 and
+`keyboard-journey` 0 against production, and the focus pause verified live on a
+390px touch viewport (froze 73 -> 73, covers the technique stick, a tap resumed).
