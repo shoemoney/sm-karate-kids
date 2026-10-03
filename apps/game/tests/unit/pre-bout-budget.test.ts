@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { preBoutDeadline, heldDeadline, ROUND_INTRO_MS } from '../../src/preBoutBudget.js';
+import { preBoutDeadline, frameDeadline, MAX_FRAME_MS, ROUND_INTRO_MS } from '../../src/preBoutBudget.js';
 
 /**
  * The pre-bout card's read budget is anchored to the first presented frame.
@@ -110,51 +110,55 @@ describe('preBoutDeadline', () => {
  * waiting for one, so the clock is an argument. The browser-level claim is
  * `tools/sheet-pause-probe.mjs`, which exits non-zero while the claim is false.
  */
-describe('heldDeadline', () => {
-  it('pushes the deadline out by exactly the time the sheet was open', () => {
-    // Measured pair from the failing probe: tapped at t=0 with the deadline at
-    // +9000, sheet closed 11s later. Without the hold the card was gone.
-    const deadline = heldDeadline(9_000, 11_000);
-    expect(deadline).toBe(20_000);
-    // The property that matters: the player is left with the budget they had at
-    // the moment they tapped, not the budget minus the time they read.
-    expect(deadline - 11_000).toBe(9_000);
+describe('frameDeadline', () => {
+  // Every frame of the render loop calls this once, so the properties that
+  // matter are the ones a frame-by-frame sum has. The r152 hold was written as
+  // a one-shot ("pushed out by the time the sheet was up") and then applied on
+  // every frame, so a 3s read added ~4.5 MINUTES to the card — the per-frame
+  // sum below is the test that version could not pass.
+  const run = (pendingAt: number, frames: number[], frozen: boolean): number =>
+    frames.reduce((deadline, dt) => frameDeadline(deadline, dt, frozen), pendingAt);
+  const sixtyHz = (ms: number): number[] => Array.from({ length: Math.round(ms / 16) }, () => 16);
+
+  it('a sheet held for 3s pushes the deadline out by exactly 3s, frame by frame', () => {
+    expect(run(9_000, sixtyHz(3_000), true)).toBe(9_000 + 3_008);
   });
 
   it('gives back exactly the remaining budget, not a fresh one', () => {
-    // The tap happened 2.5s into the card's life, so 6.5s were left. Reading
-    // for 4s must leave 6.5s, not 9s — otherwise the hold becomes a way to
-    // buy extra reading time by opening the sheet twice.
+    // Tapped 2.5s into the card's life, so 6.5s were left. Reading for 4s must
+    // leave 6.5s, not 9s, or opening the sheet becomes a way to buy time.
     const tappedAt = 2_500;
-    const armedAt = 0;
-    const heldFor = 4_000;
-    const remainingAtTap = armedAt + ROUND_INTRO_MS - tappedAt;
-    expect(remainingAtTap).toBe(6_500);
-    expect(heldDeadline(armedAt + ROUND_INTRO_MS, heldFor) - (tappedAt + heldFor)).toBe(remainingAtTap);
+    const held = sixtyHz(4_000);
+    const heldFor = held.reduce((a, b) => a + b, 0);
+    expect(run(ROUND_INTRO_MS, held, true) - (tappedAt + heldFor)).toBe(ROUND_INTRO_MS - tappedAt);
+  });
+
+  it('leaves the deadline alone on ordinary frames', () => {
+    for (const pendingAt of [1, 4_242, 9_000, 86_400_000]) {
+      expect(run(pendingAt, sixtyHz(5_000), false)).toBe(pendingAt);
+      // A slow frame the sim still accepts in full is still time on screen.
+      expect(frameDeadline(pendingAt, MAX_FRAME_MS, false)).toBe(pendingAt);
+    }
+  });
+
+  it('does not spend the budget while the page was not presenting frames', () => {
+    // A hidden tab gets no requestAnimationFrame, so its first frame back has a
+    // frameDt as long as the absence. Only the part the sim clock would also
+    // accept counts; the card was not on screen for the rest of it.
+    expect(frameDeadline(9_000, 60_000, false)).toBe(9_000 + 60_000 - MAX_FRAME_MS);
   });
 
   it('is a no-op when nothing is scheduled', () => {
-    // `pendingAt === 0` means "no deadline armed". Adding a hold to it would
-    // invent a deadline out of nothing, and `act()` would then fire against an
-    // action that is not there. This is the HUD's TECHNIQUES sheet during a live
-    // bout, which has no pre-bout countdown at all.
-    expect(heldDeadline(0, 11_000)).toBe(0);
+    // `pendingAt === 0` means "no deadline armed"; adding to it would invent one.
+    expect(frameDeadline(0, 16, true)).toBe(0);
+    expect(frameDeadline(0, 60_000, false)).toBe(0);
   });
 
-  it('leaves the deadline alone when no sheet is open', () => {
-    // The ordinary path — nothing has been tapped, `heldMs` is 0 — must be
-    // bit-identical, or every untouched round inherits a new arithmetic.
-    for (const pendingAt of [1, 4_242, 9_000, 86_400_000]) {
-      expect(heldDeadline(pendingAt, 0)).toBe(pendingAt);
+  it('never shrinks a deadline', () => {
+    for (const dt of [0, 1, 16, 250, 60_000]) {
+      for (const frozen of [true, false]) expect(frameDeadline(9_000, dt, frozen)).toBeGreaterThanOrEqual(9_000);
     }
-  });
-
-  it('never shrinks a deadline, however long the hold', () => {
-    // A negative hold is not reachable from the render loop (it is
-    // `performance.now()` at close minus at open), but the function must not be
-    // the thing that silently eats a budget if that ever stops being true.
-    for (const heldMs of [0, 1, 4_000, 60_000, 10 ** 9]) {
-      expect(heldDeadline(9_000, heldMs)).toBeGreaterThanOrEqual(9_000);
-    }
+    // A negative frame delta is not reachable from rAF, but must not eat a budget.
+    expect(frameDeadline(9_000, -500, true)).toBe(9_000);
   });
 });

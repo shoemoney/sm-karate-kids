@@ -60,40 +60,32 @@ export function preBoutDeadline(args: {
 }
 
 /**
- * A deadline, plus the wall-clock time a sheet has spent open on top of it.
- *
- * WHY. `docs/COMPLETION-PLAN.md` item 1.2 closed with the accept line
- * "pressing it opens the techniques sheet and returns to the card", and the
- * second half of that was never true. The card's own TECHNIQUES button opens a
- * scrollable list of every move in the game, and the 9-second pre-bout deadline
- * ran straight through underneath it: `act()` fires on `now > pendingAt` with no
- * reference to sheet state anywhere, so `beginBout()` ran, which is
- * `held = false` + `hud.hideResult()`, and `.result { display: none }`.
- *
- * MEASURED (`tools/sheet-pause-probe.mjs`, `logs/sheet-pause-probe.json`), by
- * walking the journey rather than reading the code:
- *
- *   arm      tap TECHNIQUES   wait    card after close   bout clock
- *   early       yes           3.0s         SHOWN            0        (inside budget)
- *   tap         yes          11.0s         GONE           running    (past budget)
- *   control     no           11.0s         GONE           running    (past budget)
- *
- * The `early` arm is what makes this a measurement rather than a constant: the
- * card SURVIVES the sheet when the budget has not expired and does not when it
- * has. So the sheet is not what takes the card — the deadline is, and it does
- * not know the sheet is there. A player who opens the reference to learn the
- * moves is dropped into a live fight mid-read, with the sheet still open over
- * it, and closing it lands them in a bout they never saw start.
- *
- * WHY IT IS HERE. The same reason as `preBoutDeadline`: this is wall-clock
- * arithmetic, and a wall-clock deadline cannot be unit-tested by waiting for
- * one. `main.ts` accumulates the held time and calls this; the tests call it
- * directly with the clock as an argument.
+ * The longest frame the simulation accepts in full. Mirrors the clamp in
+ * `FixedClock.drain` (`packages/sim/src/clock.ts`), so the card's deadline and
+ * the bout clock agree on what counts as time that was on screen.
  */
-export function heldDeadline(pendingAt: number, heldMs: number): number {
+export const MAX_FRAME_MS = 250;
+
+/**
+ * The deadline after one rendered frame of `frameDt` milliseconds.
+ *
+ * A pending card's countdown is reading time, so it only runs while the card
+ * can be read:
+ *
+ *   - `frozen` (a sheet is open over it): the whole frame is held. The player
+ *     gets back exactly the budget they had when they opened the sheet.
+ *   - otherwise, only the part of the frame the sim clock would also accept
+ *     counts. A hidden tab gets no requestAnimationFrame, so its first frame
+ *     back carries the whole absence; without this the card the player left
+ *     to answer a text was gone, and they came back into a live bout.
+ *
+ * Called once per frame. r152's version was a one-shot ("push it out by the
+ * time the sheet was up") applied every frame, which re-added the entire hold
+ * on each one: a 3s read pushed the card out by about four and a half minutes.
+ */
+export function frameDeadline(pendingAt: number, frameDt: number, frozen: boolean): number {
   // No pending action means no deadline to push out. `pendingAt === 0` is also
-  // what keeps this from touching the rematch countdown's own timer
-  // (`REMATCH_AFTER_MS`), which is armed through the same field.
-  if (pendingAt === 0) return pendingAt;
-  return pendingAt + heldMs;
+  // what keeps this from touching a rematch countdown nobody armed.
+  if (pendingAt === 0 || frameDt <= 0) return pendingAt;
+  return pendingAt + (frozen ? frameDt : Math.max(0, frameDt - MAX_FRAME_MS));
 }

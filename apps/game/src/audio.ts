@@ -11,13 +11,21 @@ export class Audio {
   private master: GainNode | null = null;
   private muted = false;
 
+  /**
+   * Safe to call on every user gesture. iOS rejects a resume() that is not
+   * inside an activation event and a phone call can suspend a live context, so
+   * the first call is not the only one that matters.
+   */
   unlock(): void {
-    if (this.context !== null) return;
+    if (this.context !== null) {
+      if (this.context.state !== 'running') this.context.resume().catch(() => undefined);
+      return;
+    }
     const Ctor = globalThis.AudioContext;
     if (Ctor === undefined) return;
     const context = new Ctor();
     this.context = context;
-    void context.resume();
+    context.resume().catch(() => undefined);
 
     const length = Math.floor(context.sampleRate * 0.6);
     this.noise = context.createBuffer(1, length, context.sampleRate);

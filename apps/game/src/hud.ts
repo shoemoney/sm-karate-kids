@@ -467,9 +467,9 @@ export class Hud {
 
   /**
    * Offer a name for the leaderboard inside the result card, above its main
-   * button. `submit` resolves to the line to show afterwards.
+   * button. `submit` resolves to the line to show afterwards; on `ok: false` the form stays open to retry.
    */
-  offerNameEntry(opts: { initial: string; prompt: string; submit: (name: string) => Promise<string> }): void {
+  offerNameEntry(opts: { initial: string; prompt: string; submit: (name: string) => Promise<{ ok: boolean; message: string }> }): void {
     if (this.result === null) return;
     const form = document.createElement('form');
     form.className = 'result-entry';
@@ -500,9 +500,14 @@ export class Hud {
       input.disabled = true;
       send.disabled = true;
       status.textContent = 'Saving…';
-      void opts.submit(name).then((message) => {
+      void opts.submit(name).then(({ ok, message }) => {
         status.textContent = message;
-        send.hidden = true;
+        if (ok) {
+          send.hidden = true;
+          return;
+        }
+        input.disabled = false;
+        send.disabled = false;
       });
     });
     this.result.insertBefore(form, this.resultButton);
