@@ -20,10 +20,15 @@ const RIGHT_KEYS: Record<string, Dir4> = {
 };
 
 function isTyping(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
+  if (typeof HTMLElement === 'undefined' || !(target instanceof HTMLElement)) return false;
   if (target.isContentEditable) return true;
   const tag = target.tagName;
   return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+}
+
+/** An open techniques/settings sheet owns the keyboard so arrows can scroll it. */
+function sheetIsOpen(): boolean {
+  return typeof document !== 'undefined' && document.querySelector('.sheet:not([hidden])') !== null;
 }
 
 /** Two four-direction key clusters, standing in for the cabinet's two sticks. */
@@ -40,9 +45,13 @@ export class KeyboardInput {
       // Typing a name must type the name. The controls listen to the whole
       // page and swallow these keys, so they stand aside for any text field.
       if (isTyping(event.target)) return;
+      if (sheetIsOpen()) return;
       if (event.code in LEFT_KEYS || event.code in RIGHT_KEYS) {
         this.held.add(event.code);
         event.preventDefault();
+        // Latch on the press itself: a tap can end before the next read().
+        const right = RIGHT_KEYS[event.code];
+        if (right !== undefined) this.latch.press({ left: this.resolve(LEFT_KEYS), right });
       }
     };
     const up = (event: KeyboardEvent): void => {
