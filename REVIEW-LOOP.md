@@ -9981,3 +9981,208 @@ describing a plate they could not see, and the ones this round found were in
 the same category. The generalisation is the cheapest one in this log: the
 review set is the loop's instrument, and an instrument extended to cover a new
 state is not extended until someone has actually read what comes out of it.
+
+---
+
+## Round 159 — the closed box nobody had walked, and an instrument that agreed with an inert keyboard 🎹
+
+**Picked up a killed round.** `.loop/iter-20261003-002853.log` ended mid-command
+with `docs/preview/portrait.png` modified, two untracked tools, and `main.ts`
+carrying a 27-line addition. It had got as far as `check=0`, `e2e=0` and a green
+probe, then died trying to regenerate the review set. A green number from a dead
+round is not a result, so all of it was re-measured from zero.
+
+### Box 1.1's `Accept:` line is a sentence about a player, and nothing had ever done it
+
+Item 1.1 is **closed**. It shipped at r135; r141 raised its contrast; r153
+corrected its description. Its `Accept:` line reads:
+
+> the keys appear on desktop and are absent on a 390px phone
+
+That was verified the way the box was closed — by reading `display:block` and
+`display:none` off two viewports. **A stylesheet fact, not a behaviour fact.**
+
+This is r152's lesson applied to a closed box, and r152's was the sharpest one
+in the log: item 1.2's `Accept:` line said "returns to the card" and the card did
+not return. The button worked perfectly; the defect was entirely in what happened
+next, so nothing could see it. "The glyphs render" is the button working
+perfectly. Whether **WASD walks, whether the arrows throw, and whether IJKL —
+which a stylesheet comment advertises and the hint does not print — reaches the
+simulation** had never been walked by anything in this repo.
+
+It had never been walked because there was no reason to suspect it. `keyboard.ts`
+binds all eight keys and `grammar.ts` maps a bare left stick to jump/crouch/walk.
+Read that, and the box is closed. **Only pressing the keys distinguishes "bound
+in source" from "wired to the game."**
+
+17 arms, all walked against `__smkk.state()` on a clean server:
+
+| arm | measured |
+|---|---|
+| hints at 1280 | `"W A S D"` and `"↑ ← ↓ →"`, both `block`, 66px |
+| hints at 390 | both `display:none`, **0px** |
+| `KeyZ` / `KeyX` (**negative control**) | no move, posture stays `stand` |
+| `D` / `A` | travelled 1.56 / 1.51, net +1.61 / −1.56 |
+| `W` / `S` | posture `air` / `crouch` |
+| arrows ×4 | `front_kick` `foot_sweep` `reverse_punch` `lunge_punch` |
+| IJKL ×4 | the **same four ids** as the arrows |
+| the journey | `0.5 → 1`, `lastCall {scorer:0, value:"half", moveId:"front_kick"}` |
+
+The negative control is the arm that makes the rest mean anything. Without it, a
+probe watching a fighter move during a bout can be satisfied by the opponent's
+CPU, the hit-stop juice, or a bout that ended. r155 fed eight real frames to a
+gate and it returned "motion 12.08" on a set where the game never ran in any
+frame. It is dojo, so the partner never attacks and no bout ends underneath the
+measurement.
+
+**The journey arm earns its place.** Mutation 7 swaps `KeyA` and `KeyD`, so
+"walk toward the opponent" walks away. Every single-key arm still passes — both
+keys still walk, both directions exist — and only the journey arm catches it.
+
+### The surface could not describe half of the left stick, and cost a false pass
+
+`state()` published `p1Phase`, and `Phase` is `neutral | startup | active |
+recovery | frozen`. **There is no jump phase and no crouch phase** — the grammar
+routes those to `fighter.airborne` and `fighter.crouching`. So the whole left
+half of the stance stick was reachable by a player and **invisible to the
+instrument**: `state()` could report a technique coming out and could not report
+W jumping or S crouching.
+
+That is not cosmetic. `postureOf` decides which height bands a fighter can be hit
+at (`VULNERABLE`), so crouch-under is the game's core defensive read, and the
+replay checksum has hashed both fields since the checksum existed. The simulation
+was right; the surface describing it was not.
+
+`state().postures` now publishes it. And it **cost a real false result the first
+time round**: the probe's original assertion was
+`phases.some(p => p.includes('/'))`, which is true of the string `neutral/-`, so
+it reported **W and S working while neither key had done anything.**
+
+> A condition that cannot fail is not a weak check. It is the r155 shape with a
+> prettier costume: not an instrument reporting a value it never took, but one
+> asserting a property that is true of the resting state.
+
+### The gate r159 died before running: 9/9, and the ninth is the interesting one
+
+`tools/keyboard-journey-mutation.sh` mutates **source only**, against a live dev
+server, restoring by **checksum** — never `git diff`, because this round's fix is
+uncommitted by design and `git diff` is red from the moment the harness starts
+(r158 passed all six of its cases and still exited 1 for exactly that).
+
+| # | mutation | |
+|---|---|---|
+| 1 | baseline | must pass, or the harness measures a broken probe |
+| 2 | `KeyZ` bound | an unbound key starts working |
+| 3 | `display:none` dropped from the phone query | hints leak to 390 |
+| 4 | `LEFT_KEYS`/`RIGHT_KEYS` emptied | every arm red |
+| 5a | jump/crouch dropped from the grammar | W and S inert |
+| 5b | `left === 'right'` remapped to `jump` | D jumps instead of walking |
+| 6 | IJKL rebound to the wrong technique | set-of-ids comparison |
+| 7 | `KeyA`/`KeyD` swapped | **only the journey arm catches it** |
+| 8 | `state()` reports posture from `phase` | **the r159 trap, rebuilt** |
+
+`=== 9 passed, 0 failed ===`, and each case was required to be red **through an
+assertion** — a probe that dies on an environment failure has to read differently
+from one that caught the defect, or the harness would accept the first as the
+second.
+
+Case 8 is the one worth keeping: it rebuilds the exact defect this round hit and
+requires the probe to notice. **A gate for a bug you just fixed, that reproduces
+the bug, is the cheapest possible proof the fix was real.**
+
+Reproduced before trusting: **17/17 green on two independent runs**, same four
+move ids, same score path (`0.5 → 1`, half, `front_kick`). The tick moved
+771 → 777, which is the clock and is supposed to.
+
+Verified before trusting: the harness restores all four touched files
+**byte-for-byte** against a pre-run checksum, and `git status` afterwards showed
+only the round's own work.
+
+### The instruments were lying in two different ways, in one round
+
+Worth recording because they look nothing alike and share one cause — **neither
+was reading the thing it claimed to read.**
+
+- **r159's `phases.some(p => p.includes('/'))`** asserted on a property true of
+  the *resting* state. Never moved off true. (Caught above.)
+- **A dev server from the killed round was still listening on 5173**, started
+  23:28, with a module graph from whatever the round was mid-way through. Every
+  measurement I was about to take would have been taken against a tree I could not
+  account for. Killed and replaced before anything was measured.
+
+And a third, caught live: mid-harness I read `keyboard.ts` for its anchors and got
+`KeyI: 'down'` — **that was mutation 6 in flight, not a defect.** A source read
+taken while a mutation harness is running is a measurement of the harness.
+
+### The tool table had drifted by four tools
+
+Auditing the AGENTS.md table — which claims to be "what is actually in there" —
+against the directory found **four real tools undocumented**: this round's two,
+and r153's `keyhint-contrast.mjs` + `keyhint-contrast-mutation.sh`. All four are
+now in the table. Reproduce with:
+
+    for f in tools/*; do b=$(basename "$f"); grep -q "$b" AGENTS.md || echo "$b"; done
+
+The same class this log keeps meeting, one level up: not a contract the code
+failed to keep, but **a document that stopped being true while nothing read it.**
+
+### `docs/preview/portrait.png` — measured, and not committed again
+
+`pnpm test:e2e` rewrites it (`capture.spec.ts` says refreshing is "a manual
+step, and deliberately so"). r157 measured it content-identical and did not
+commit it; r158 committed it because the coach plate had genuinely changed.
+So: measured again, the same way.
+
+    raw pixels differing          57.48%      <- the number that looks alarming
+    after 3px blur                56.12%      <- not high-frequency grain
+    after 8px blur                54.81%      <- not structural
+    mean |delta|                   4.72 / 255  (1.85%)
+    best vertical shift            0px  (HUD, move call, bottom quarter)
+    bottom quarter                 0.00       <- pixel-identical
+
+Then I looked, per r157: **scoreline identical** (`0½`, clock `30s`, U+00BD flush
+on the baseline — r148's fix holding in a live capture), **move call identical**
+(`WAZA-ARI / ASMGOLD / FRONT KICK`), fighters caught at a different frame of the
+same kick.
+
+My first read of the side-by-side was that the overlays sat ~1px lower in the new
+capture. **Cross-correlating says the shift is 0px** — it is subpixel rasterisation
+phase on text, not layout. That is r157's coordinate-frame trap and I walked into
+it anyway, from a resized crop this time instead of a re-cropped one.
+
+No content change, so it is restored rather than committed. 1.7MB of churn is not
+a deliverable.
+
+### Gates
+
+`check=0` — typecheck, **206 unit** (23 files), content, assets (20 against
+provenance). `e2e=0` — **44 passed, 6 skipped**, load **3.23 → 5.42**, inside
+r151's green band. Both read before the commit line.
+
+`keyboard-journey` **exit 0** · `keyboard-journey-mutation` **9/9** ·
+source restored byte-for-byte · `bash -n` clean.
+
+**No reviewer round.** Standing rule 1 binds *before* running `review-codex.sh`,
+and this round ran no reviewer, so there is nothing to have gone stale. `state()`
+is a debug surface and `postures` is invisible in a frame; regenerating 20 frames
+to look at an identical picture would be the r127 mistake wearing a costume.
+
+### The shape, for the twelfth time — and it is the first one about a CLOSED box
+
+Eleven times this loop has caught **prose describing a contract the code did not
+implement.** Every one of them was an *open* item. This is the first time the
+sentence and the walk disagreed inside a box that had been closed for **24 rounds**
+and re-verified, corrected and re-corrected three times in between.
+
+The difference is worth stating, because it is the cheapest rule in this log:
+**a box is closed when someone did the thing it describes, not when someone
+agreed with its description.** Three rounds audited those closed boxes against the
+code on suspicion and found a count, a colour literal, and a deadline. This round
+did not read item 1.1 at all — it pressed W, and the instrument that pressed it
+had to be built from scratch, because the left half of the stance stick had never
+been observable in the first place.
+
+Read that as the next standing instruction, next to r152's: **when an item closes,
+the gate that can settle its `Accept:` line must exist in the same round.** A
+`Do:` and an `Accept:` with no instrument behind them are a hypothesis with a
+checkbox, and the checkbox is the part that survives.

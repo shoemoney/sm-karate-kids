@@ -10,6 +10,7 @@ import {
   scoreBout,
   tallyCall,
   heightOf,
+  postureOf,
   beginMove,
   createFighter,
   createMatch,
@@ -1135,6 +1136,32 @@ async function boot(screen: BootScreen): Promise<void> {
           p1Move: state.fighters[0].move?.id ?? null,
           lastStarted,
           p1Phase: state.fighters[0].phase,
+          /**
+           * Both fighters' posture: `stand` / `crouch` / `air`.
+           *
+           * Added at r159, and it was missing for a reason worth recording.
+           * `Phase` is `neutral | startup | active | recovery | frozen` — there
+           * is no jump phase and no crouch phase, because the grammar routes
+           * those to `fighter.airborne` and `fighter.crouching` instead. So the
+           * whole left half of the stance stick was reachable by a player and
+           * invisible here: `state()` could report a technique coming out and
+           * could not report W jumping or S crouching.
+           *
+           * That is not a cosmetic gap. `postureOf` decides which height bands
+           * a fighter can be hit at (`VULNERABLE`), so crouch-under is the
+           * game's core defensive read, and the replay checksum has hashed
+           * both fields since the checksum existed. The simulation was right;
+           * the surface describing it was not.
+           *
+           * It cost a real false result the first time round: the probe
+           * asserted `phases.some(p => p.includes('/'))`, which is true of
+           * `neutral/-`, so it reported W and S working while neither key had
+           * done anything. A condition that cannot fail is not a weak check.
+           */
+          postures: [
+            postureOf(state.fighters[0]),
+            postureOf(state.fighters[1]),
+          ] as ['stand' | 'crouch' | 'air', 'stand' | 'crouch' | 'air'],
           p2Move: state.fighters[1].move?.id ?? null,
           p2Phase: state.fighters[1].phase,
           /** The anchor the last impact effect was given. See `lastImpact`. */
