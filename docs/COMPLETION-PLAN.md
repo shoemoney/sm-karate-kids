@@ -10,13 +10,64 @@ has been improving.
 |---|---|
 | Playable | yes — tournament + dojo, two sticks, point karate |
 | Deployed | `https://arcade.shoemoney.com/karate-kids/`, verified playing a real bout |
-| Tests | 200 unit, 44 e2e, green locally |
-| Review loop | 157 rounds, 20 review frames, mutation-tested fences |
-| Commits | 293 |
-| Production | **byte-identical to the local build**, `tools/verify-deploy.sh` green |
+| Tests | 206 unit, 44 e2e, green locally |
+| Review loop | 160 rounds, 20 review frames, mutation-tested fences |
+| Commits | 300 |
+| Production | ⚠️ **STALE — 63 commits behind, measured r160.** Was recorded here as "byte-identical to the local build" until then; that was true of the *retired* `.ai` host and was never true of the origin this game ships from. |
 
 The game is not a prototype. What remains is a short list of specific, named
 gaps — every one of them is in this document, and nothing else is.
+
+---
+
+## ⚠️ Read this first — the deploy is a real gap, and it was closed by accident
+
+**Added at r160.** Item 3.3 below reads "SHIPPED at r149 … production is
+byte-identical over the wire." **That was true of `arcade.shoemoney.ai/smkk/` and
+is false of `arcade.shoemoney.com/karate-kids/`.** The gate built for this was
+correct the whole time; it had simply never been run against the origin the game
+ships from. r159 deployed to `.ai`, verified `.ai`, and then — in the same commit
+— repointed the gate at `.com` and committed without running it once.
+
+Measured at r160, off the wire, by `tools/production-freshness.py`:
+
+    served markup pins to apps/game/index.html at 6b57a2b81 (2026-09-30)
+    63 commit(s) behind HEAD — an UPPER BOUND on the drift
+    served css: 154 tokens declared
+    READ BUT NEVER DECLARED, no fallback: --coach-plate, --leading-relaxed
+
+What a player on `arcade.shoemoney.com` is actually running:
+
+| shipped | live? |
+|---|---|
+| r135 desktop keyboard legend (item 1.1) | **no** — no `.key-hint` markup, no `.key-hint` rule |
+| r148 one-line `½` score fraction | **no** — still the pre-r148 stacked column, and `½` appears nowhere in the served bundle |
+| r152 the sheet holds the pre-bout card open | **no** |
+| r157 `--coach-plate` declared | **no** — `var(--coach-plate)` is read once and declared zero times, so the coach strip has **no background at all** |
+| r157 `--leading-relaxed` declared | **no** — same class |
+| r157 the first-run coach renders at all | **no** — the `retire()`-writes-the-flag bug is live, so a first run is never taught |
+| r159 the sheet-pause fix, `postures` on `state()` | **no** |
+
+**And 3.3's `Do:` line is false.** It says `tools/deploy.sh` is the deploy path.
+r159 retired that script on purpose — it rsynced through a symlink an atomic flip
+owns. The real path lives in `~/Projects/SMA-arcade`.
+
+**Why nothing caught it:** `pnpm check` must stay runnable offline, so it cannot
+call a network gate, and no round is *obliged* to run one. The gate was right and
+never consulted. That is r141 one level up — r141 built the gate, r159 moved it,
+and no round in between ever ran it against the truth.
+
+**What is now in place:** `tools/production-freshness.py`, which reports the
+distance and names what is missing, plus an 8-case mutation harness proving it
+can fail. Both are outside `pnpm check` for the same reason.
+
+**What is blocked, and on what.** The deploy itself. `ops/build-release.py` builds
+**all eight** registered games from their local trees and `ops/deploy.py` then
+ships the whole arcade behind an atomic flip. Four of the seven other trees have
+uncommitted work — `shoeinator-web` (14 files), `shoeateka`, `survivaltd`, `Skat3`.
+Running the only supported path unattended would publish another agent's
+work-in-progress to a public host. That is a decision for a human, and it is the
+one open item left.
 
 ---
 
@@ -291,6 +342,26 @@ True, and incomplete. The same host accepts `shoemoney`, the deploy root is
 owned by `shoemoney`, and `rsync` works over it. A tool that knows only one
 identity turns a login detail into an outage, and it cost production a build.
 
+> **CORRECTED at r160 — this box's `Do:` line describes a tool that no longer
+> deploys anything, and its closing sentence was never true of the origin the
+> game ships from.**
+>
+> `tools/deploy.sh` was **retired at r159**. It rsynced to
+> `shoemoney@192.168.1.10:/mnt/.../arcade/smkk`, and pointing it at the current
+> host would be worse than leaving it: `current/public/` sits behind a symlink an
+> atomic flip owns, so an rsync through it leaves a half-written game live under a
+> release that still claims to be good, and skips both the SQLite backup and the
+> privacy-gate clearance receipt. It now prints the real pipeline and exits 0.
+> The path that actually deploys is `~/Projects/SMA-arcade` —
+> `ops/build-release.py` + `ops/deploy.py` — which builds **all eight** games and
+> ships them behind an atomic flip.
+>
+> The sentence below claimed `.com` "passes `tools/verify-deploy.sh` with 2 assets
+> sha256-matched". It never did. The gate was repointed at `.com` in r159 and
+> **first run against it at r160, where it failed**: production is 63 commits
+> behind and the served stylesheet still carries two undefined `var()` reads. See
+> the box at the top of this document.
+
 `tools/deploy.sh` is that path: refuses a missing or **stale** build, dry-runs
 and prints the `--delete` list before touching anything, pushes with
 `--delay-updates` so the new html cannot precede its bundle, and then
@@ -305,9 +376,16 @@ yet written to was reported as a deploy failure, which is precisely the
 misdiagnosis standing rule 4 exists to prevent, sitting inside the tool written
 to enforce rule 4.
 
-**Production is byte-identical over the wire.** `arcade.shoemoney.com/karate-kids/` now
-passes `tools/verify-deploy.sh` with 2 assets sha256-matched — the first time in
-the project's history that claim has been true.
+> **Both of those paragraphs are history.** The script was retired at r159 and its
+> mutation harness deleted with it; `verify-deploy-mutation.sh` independently
+> proves the surviving gate can still fail.
+
+> **Corrected at r160.** This paragraph read "`arcade.shoemoney.com/karate-kids/`
+> now passes `tools/verify-deploy.sh` with 2 assets sha256-matched — the first time
+> in the project's history that claim has been true." **It did not, and had never
+> been run against that host.** What was true at r149 was the `.ai` host. When
+> r160 finally ran the gate against `.com` it returned **rc=1**: served
+> `index-DtpNUeIJ.js` against local `index-Bd4cT_Iw.js`, **63 commits behind**.
 
 ### 3.2 The deploy is not verified until a gate says the bytes match — `SHIPPED at r141`
 
@@ -371,10 +449,14 @@ Because nothing is watching, three rules exist and are not optional:
 - [x] 2.1 and 2.2 raised with a recommendation — a human decides, the loop has done its part
 - [x] 3.1 unattended driver in place — `tools/loop-once.sh` on a launchd schedule
 - [x] 3.2 deploy verified against production bytes — `tools/verify-deploy.sh`, mutation-proved
-- [x] **3.3 the deploy can be performed** — `tools/deploy.sh`, and production is
+- [ ] **3.3 the deploy can be performed** — `tools/deploy.sh`, and production is
       byte-identical over the wire. The `root`-only refusal that stalled r148
-      was one identity short of a working deploy.
-- [x] every phase gated, logged, committed, deployed
+      was one identity short of a working deploy. **REOPENED at r160** — the
+      script was retired at r159 and production is **63 commits stale** against
+      the origin this game ships from. Blocked on a human: the only supported
+      path rebuilds all eight arcade games and four of those trees have
+      uncommitted work. See the box at the top of this document.
+- [ ] every phase gated, logged, committed, deployed
 - [x] **provenance precedence** — **FIXED at r150.** `docs/asset-provenance.md`
       states twice that the manifest governing an asset is the NEAREST ANCESTOR
       and that a directory's own record wins. The code resolved the entry by
@@ -577,8 +659,13 @@ A red e2e result on this machine is not a verdict until the load is printed next
 to it, and `tools/card-no-probe.mjs` prints it on every row for that reason.
 Everything in Phases 1 and 3 is closed, Phase 2 is blocked on a human by design
 with the measurement attached to each item, and the scoreboard's half point is
-measured rather than argued about. Production is serving the build this tree
-produces, and there is a command that both puts it there and proves it did.
+measured rather than argued about.
+
+> **Corrected at r160.** This paragraph ended "Production is serving the build
+> this tree produces, and there is a command that both puts it there and proves
+> it did." **Both halves were false.** Production was 63 commits stale, and the
+> proving half existed only as a script no round was obliged to run — which is
+> the whole of this round.
 
 ---
 

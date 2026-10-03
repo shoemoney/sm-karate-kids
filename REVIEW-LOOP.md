@@ -10226,3 +10226,172 @@ not an oversight — deploy to the arcade host, keep the history here. Pushing i
 an irreversible public action on a repository the plan describes as public, and
 no round has authorised it unattended. Four rounds of work now want a single
 deliberate `git push` from a human who has looked at it.
+
+---
+
+## Round 160 — the gate was right for nineteen rounds and nobody ran it 🚦
+
+Phase 1 and Phase 3 were both closed when this round started, so per the standing
+instruction the work was to re-read a **closed** box against the code on
+suspicion. Item 3.3 says, in bold, that production is byte-identical over the
+wire. That is a checkable sentence. It took one command.
+
+    $ bash tools/verify-deploy.sh
+    deploy gate: https://arcade.shoemoney.com/karate-kids/
+      served names: assets/index-DtpNUeIJ.js assets/index-DYEQX951.css
+      local  names: assets/index-Bd4cT_Iw.js assets/index-DKQOo3fd.css
+    FAIL: served html is NOT the local build's index.html
+    === verify-deploy rc=1 ===
+
+**Production was 63 commits and three days stale.** The gate was not broken, and
+it was not lying. It was correct, and it had **never once been run against the
+origin this game ships from.**
+
+### The shape is new, and it took nineteen rounds to produce
+
+r141 built this gate because CI and a manual spot-check had both been fooled by a
+200. r158 deployed and ran it. r159 deployed to `arcade.shoemoney.ai/smkk`,
+verified `.ai` green, and then **in the same commit** repointed the default at
+`arcade.shoemoney.com/karate-kids/` — and committed without running it once.
+
+So the plan's headline claim, "byte-identical over the wire", was carried across a
+host migration by a reader who assumed the reader had checked. It had not. The
+document is not lying in the r153 sense either — nobody wrote a false sentence.
+**Nobody wrote a true sentence about a host that was never measured.** That is a
+thirteenth variant, and the cheapest to guard against: the one this loop keeps
+missing is not prose that is wrong, it is prose that is *unverified and inherited*.
+
+### What a player is actually running
+
+The served CSS is the interesting artifact. Running the repo's own
+`undefined-vars.py` grammar over it:
+
+    declared 154 tokens, 149 bare reads
+    READ BUT NEVER DECLARED, no fallback: --coach-plate, --leading-relaxed
+
+Those are **exactly the two findings r157 fixed**, live. `.coach-strip` has
+`background: var(--coach-plate)` and `--coach-plate` is declared nowhere, so the
+first-run coach's plate computes to `rgba(0,0,0,0)` — the r16 `--font-display`
+bug, shipped to production and still there. And `.score-frac` in the served
+stylesheet is `flex-direction:column` with `vertical-align:-.3em`: the **pre-r148
+stacked column**, whose denominator hangs 15px below the baseline. `½` appears
+**zero** times in the served bundle. r148's fix, r152's card-hold, r157's coach,
+r159's `postures` — none of it is there.
+
+My first scan reported a **third** undefined token, `--peak`. It was wrong: that
+read is `var(--peak,.5)`, it has a fallback, and it resolves. The repo's gate had
+the fallback rule right and my quick script did not. Third instrument error this
+loop has logged where a scratch script, not the product, was the thing that lied.
+
+### Two of my own instruments were wrong before the tool was right
+
+Both worth recording, because the pattern is now unmistakable and both were caught
+the same way — by reading the residual diff instead of re-guessing:
+
+- **The markup pin matched nothing.** It compared the served *built* html against
+  the *source* html while neutralizing only the asset hash, so vite's injected
+  `<script type="module">`/`<link>` tags and a blank line it shifts meant every
+  revision "differed". A tool that reports "production matches no revision of
+  this file" for every origin ever deployed is worse than no tool.
+- **Arm 3 filtered served asset names to the ones present locally.** On a stale
+  deploy the served bundle has a *different hash*, so the filter removed every
+  name and the tool printed `the served html names none that exist locally — run
+  the build first`. **The one case the tool exists to catch was the one case it
+  could not describe.** That is r154's exact shape — a gate manufacturing a
+  failure — committed by me, caught by running it against a genuinely stale
+  origin before shipping it.
+
+### The gate, and why it is not in `pnpm check`
+
+`tools/production-freshness.py`. `verify-deploy.sh` answers *are the bytes equal*;
+it cannot answer *how far behind, and what is missing*, so its red result is
+actionable only by a human who goes and looks. Five arms, and each is allowed to
+claim only what it measured:
+
+| arm | claims |
+|---|---|
+| reachability + a local build | that there is something to compare against |
+| served html vs local, sha256 | equality of the document |
+| every asset the served html names | equality of the bytes, over the wire |
+| served markup → newest `index.html` revision | **an upper bound** on the drift |
+| served css `var()` reads | the no-ops live in production |
+
+Arm 4 prints its own limit on its face, because the number is tempting:
+`index.html` is nine revisions deep and unchanged across stretches of dozens of
+commits, so a pin bounds the release from above. It is **not** a claim that
+production is commit `6b57a2b81`.
+
+Exit codes carry the r141/r154 lesson: **0** equal, **1** STALE, **2**
+INCONCLUSIVE. Unreachable is not stale, and exit 2 stops a dead host being
+reported as a deploy problem the operator does not have.
+
+It is not in `pnpm check` and will not be: `pnpm check` must stay runnable
+offline, which is exactly why 63 commits could pass a round without anyone being
+obliged to look. That constraint is correct and it is also the hole. The honest
+statement is that this repo has **no automatic path** from a local build to a
+verified production, and r160 did not build one — it built the half that reports.
+
+### Proved able to fail — 8/8, twice
+
+`tools/production-freshness-mutation.sh`, over a real local HTTP server, never the
+network. Baseline runs **first**. The cases worth naming:
+
+- **asset body differs under a correct html** — the r141 shape, where
+  `index.html` landed and the bundle it names is the old one. Only arm 3 catches
+  it, so it must be load-bearing.
+- **the pin reports a number**, and **labels itself an upper bound** — a probe that
+  can only say "differs" has not measured how far behind.
+- **dead origin → INCONCLUSIVE, not STALE**, and **absent local build →
+  INCONCLUSIVE**.
+- The stale-markup fixture is not synthetic: it is this build's `index.html` with
+  the two `.key-hint` spans removed, which is byte-for-byte the markup that has
+  been live since before r135.
+
+Two harness bugs of my own, both caught by reading output instead of trusting the
+count: case 3 first reused the no-assets fixture and so exited 2 having proved
+nothing, and a stray `python3 … --origin http://127.0.0.1:1/` line was left in
+where it asserted nothing.
+
+### Gates
+
+`check=0` — typecheck, **206 unit** (23 files), content, assets (20 against
+provenance). `e2e=0` — **44 passed, 6 skipped**, load **9.5 → 10.5**, inside
+r151's green band with the load printed beside it, because a red e2e on this
+machine is not a verdict until it is.
+
+`production-freshness` **exit 1** against production, as it must.
+`production-freshness-mutation` **8/8**, twice. Reproduced: same pin, same 63,
+same two tokens.
+
+**No reviewer round.** Standing rule 1 binds before `review-codex.sh`, and this
+round changed no game code and no bundle — `apps/game/dist` is byte-identical to
+what r159 built. There is no frame that could have gone stale.
+
+### Not deployed, and the reason is a number
+
+`ops/build-release.py` builds **all eight** registered games from their local
+trees; `ops/deploy.py` then ships the whole arcade behind an atomic flip. Four of
+the seven other trees have uncommitted work:
+
+    shoeinator-web  14 files     shoeateka  1
+    survivaltd       1          Skat3      1
+
+Running the only supported path would publish another agent's work-in-progress to
+a public host, unattended, with nobody to notice until it was indexed. So the
+deploy is a human decision this round, and it is handed back as one question
+rather than described as a task.
+
+### The thirteenth shape
+
+Twelve times, prose described a contract the code did not implement. This one is
+narrower and nastier: **the contract was implemented, correct, mutation-proved,
+and green — against a host that stopped being the product.** A gate is only
+evidence about the thing it was pointed at. r159 moved the gate and the evidence
+inherited; nothing about the gate changed, and nothing about production did
+either, and the plan said "byte-identical" for a whole round after the world moved
+underneath it.
+
+The standing instruction that falls out, and it is cheap: **when a gate's default
+or target changes, the round that changes it runs it once, against the new
+target, and the result goes in the same commit.** r159 changed a URL. r160 is what
+that URL cost.
