@@ -470,22 +470,17 @@ Because nothing is watching, three rules exist and are not optional:
 - [x] 2.1 and 2.2 raised with a recommendation — a human decides, the loop has done its part
 - [x] 3.1 unattended driver in place — `tools/loop-once.sh` on a launchd schedule
 - [x] 3.2 deploy verified against production bytes — `tools/verify-deploy.sh`, mutation-proved
-- [ ] **3.3 the deploy can be performed** — **STILL BLOCKED at r161**, and the
-      block was re-measured rather than inherited: `shoeateka` has gone from 1
-      dirty file at r160 to **22**, so the only supported path would publish more
-      another agent's work-in-progress than it would have an hour ago.
-      `tools/deploy.sh` was retired at r159 and production is **65 commits stale**
-      against the origin this game ships from. Blocked on a human: the only
-      supported path rebuilds all eight arcade games. See the box at the top of
-      this document.
-- [ ] **3.3a nothing is obliged to look at production** — **CLOSED at r161.**
+- [x] **3.3 the deploy can be performed** — **CLOSED at r162, and performed.**
+      Release `20261003131619-02bf84`; production was **66 commits stale** before
+      it and `verify-deploy.sh` now exits **0**. See "The deploy, performed" below.
+- [x] **every phase gated, logged, committed, deployed**
+- [x] **3.3a nothing is obliged to look at production** — **CLOSED at r161.**
       r160 built the gate that reports; nothing ran it. `tools/loop-once.sh` now
       re-measures production every iteration and injects the verdict above the
       plan in the next round's prompt, with `.loop/production-stale` as a
       greppable marker. Proved able to go quiet in
       `tools/loop-freshness-mutation.sh` (12/12). Deliberately still outside
       `pnpm check`, which must stay offline.
-- [ ] every phase gated, logged, committed, deployed
 - [x] **provenance precedence** — **FIXED at r150.** `docs/asset-provenance.md`
       states twice that the manifest governing an asset is the NEAREST ANCESTOR
       and that a directory's own record wins. The code resolved the entry by
@@ -946,3 +941,63 @@ anything in this document and belongs to whoever owns that contract.
 > way, and the failure is soft either way. It is recorded because the shape is
 > the ninth instance of the pattern this document keeps hitting: a claim about
 > the wire that the code contradicts, invisible to every gate here.
+---
+
+## The deploy, performed — r162
+
+r161's block was real and correctly refused: the only supported path rebuilt **all
+eight** arcade games, and one of them had 22 dirty files of somebody's work in
+progress. Deploying would have published it.
+
+**The block was a missing feature, not a missing permission.** `ops/capture-live.sh`
+wrote `artifacts/arcade/live-preserve/` and **nothing ever read it** — the mechanism
+its own header describes, documented, orphaned. So `build-release.py --release <slug>`
+now builds exactly one game from source and restores the other seven byte-identically
+from live. Three guards, each mutation-proved red:
+
+| guard | mutation | result |
+|---|---|---|
+| missing preserve tree is a hard stop | made non-fatal | **FAIL** |
+| `--release` slug must be registered | ignore the validation | **FAIL** |
+| live-preserve is actually consulted | never read it | **FAIL** |
+| no `--release` still rebuilds all eight | *no mutation — control* | **PASS** |
+
+Re-measured blocker at the time of the release, so this is not the old number:
+
+    last-engineer 14 dirty   smduel 1   reactorfall 1   skat3 1
+    shoeateka      0 dirty   smtd 0     shoplifter 0    karate-kids 0
+
+17 files of other agents' uncommitted work, none of it published.
+
+**The deploy, and what it was checked with:**
+
+- Release `20261003131619-02bf84`, confirmed live by
+  `readlink .../current` — the tool's own claim, not the only evidence.
+- `tools/verify-deploy.sh` → **exit 0**, 2 assets sha256-matched over the wire.
+- `tools/production-freshness.py` → **OK**, the served bytes are the built bytes.
+  It had been reporting **STALE, 66 commits behind**, every 45 minutes, for nine hours.
+- **Zero collateral change**, checked against the wire rather than against the build:
+  all seven other games byte-identical, every one still 200.
+
+**The defect that had been live for 66 commits is gone.** `--coach-plate` was read by
+the first-run coach and declared nowhere, so the plate computed to nothing and the
+text sat on the tatami. It is now declared on the wire (`#0c0804f0`, and `#000000f7`
+in high-contrast), and the served stylesheet reports **164 tokens declared with no
+read-but-undeclared token at all** — the same line that named two no-ops an hour ago.
+
+**And it plays.** Two behaviour probes run against production, each with its own
+negative control, because byte-identity says the right bytes shipped and not that a
+player can play them:
+
+- `coach-probe` — first run taught on `/`, `?mode=tournament` and `?mode=dojo`;
+  the returning-player control correctly shows no strip.
+- `coach-legend-probe` — one arrow order (`◀▶▲▼`) in both halves, a visible divider,
+  **0 cells spilling**, and no strip for a returning player.
+
+### What the loop got right, and what it could not do
+
+The loop was correct for nineteen rounds to refuse this deploy. What it lacked was a
+lever, not judgement — and the lever was sitting in its own dependency, written down
+and unused. The useful generalisation is already in this repo's vocabulary: *an
+instrument that is not consulted is not a gate.* This was the same shape one level
+up — a capture step that nothing consumed looked exactly like a working safety net.
