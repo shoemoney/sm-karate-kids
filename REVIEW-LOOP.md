@@ -9950,6 +9950,23 @@ catches a reorder without a browser), content, assets (20 against provenance).
 `contrast-reach` exit 0 · review set regenerated before the look, and
 `verify_shots.py` green at **motion 14.04%** over an 8-frame burst.
 
+**Deployed.** `deploy.sh --yes`, then `verify-deploy.sh` **exit 0** — html
+byte-identical to the local build, 2 assets sha256-matched. And the probe run
+against **production** rather than the dev server, the same way r157 verified
+the coach:
+
+```
+SMKK_BASE=https://arcade.shoemoney.ai/smkk/ node tools/coach-legend-probe.mjs
+  arrow order   stance ◀▶▲▼   technique ◀▶▲▼
+  divider       1px on the second half
+  plate         366px wide, content 342.0px, 0 cell(s) spilling
+  returning player: no strip — correct
+  OK — the plate reads as two legends
+```
+
+A byte-identical deploy says the fix is on the wire. Running the gate against
+the wire says the game behaves like it.
+
 ### The shape, for the eleventh time, and it is the eleventh *kind*
 
 r157 found the onboarding was dead. This round found that **fixing it did not
