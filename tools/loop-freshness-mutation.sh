@@ -52,7 +52,7 @@ bad() { echo "  FAIL  $1"; fail=$((fail + 1)); }
 # printed a commit distance on an inconclusive result would make case 8 pass for
 # the wrong reason -- the fixture lying, not the tool.
 stub() {
-  local path="$STUB_DIR/$1.py" code="$2" verdict="$3"
+  local path="$STUB_DIR/$1.py" code="$2" verdict="$3" extra="${4:-}"
   {
     echo 'import sys'
     printf 'print(%s)\n' "\"$verdict\""
@@ -63,6 +63,12 @@ stub() {
       echo "print('  css     index-XXXX.css: 154 tokens declared')"
       echo "print('          READ BUT NEVER DECLARED, no fallback: --coach-plate, --leading-relaxed')"
     fi
+    # Arms 5 and 6 run on ANY verdict the tool reaches, so a byte-identical
+    # origin can carry a live no-op or a dangling reference. That is the whole
+    # point of the case below: those lines used to be dropped unless there was
+    # drift to print them beside, which is how a real defect on a real origin
+    # reached nobody.
+    [[ -n "$extra" ]] && echo "print('$extra')"
     echo "sys.exit($code)"
   } > "$path"
   printf '%s' "$path"
@@ -104,6 +110,26 @@ OUT="$(note "$(stub equal 0 "EQUAL  the origin is serving this tree's build")")"
 if [[ $RC -eq 0 ]] && has "$OUT" "EQUAL" && ! has "$OUT" "STALE"; then
   ok "an equal origin reads EQUAL, not STALE"
 else bad "an equal origin did not read EQUAL (rc=$RC)"; fi
+
+# --- 1b. a served-artifact defect on an EQUAL origin must still reach the note
+# Added at r164. The note used to print the live-no-op and drift lines ONLY when
+# a commit distance was present, i.e. only when the origin was STALE. So the one
+# situation in which a served-artifact defect is most misleading -- bytes that
+# match perfectly, and a shipped artifact pointing at a file it does not ship --
+# was the one situation that reported nothing. Measured live at r164: the served
+# bundle ended in a sourceMappingURL for a map the origin 404s.
+OUT="$(note "$(stub equal_dangling 0 "EQUAL  the origin is serving this tree's build" \
+  "  DANGLING assets/index-CEpXIazX.js references index-CEpXIazX.js.map, which the origin does not serve")")"; RC=$?
+if [[ $RC -eq 0 ]] && has "$OUT" "live dangling reference" && has "$OUT" "index-CEpXIazX.js.map" \
+   && ! has "$OUT" "STALE"; then
+  ok "a dangling reference on an EQUAL origin reaches the note"
+else bad "a dangling reference on an equal origin did NOT reach the note (rc=$RC)"; fi
+
+# and the other direction: the note must not manufacture the line.
+OUT="$(note "$(stub equal_clean 0 "EQUAL  the origin is serving this tree's build")")"
+if ! has "$OUT" "live dangling reference" && ! has "$OUT" "live no-op"; then
+  ok "an equal origin with no defect reports no defect"
+else bad "the note printed a defect that the report does not contain"; fi
 
 # --- 2. stale, with the actionable number ----------------------------------
 OUT="$(note "$STALE")"

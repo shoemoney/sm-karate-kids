@@ -27,6 +27,16 @@ ARMS, and what each is allowed to claim:
   4. the served markup pinned to the newest revision of apps/game/index.html it
      matches, and the commit distance from there to HEAD
   5. `var()` reads in the SERVED css with no declaration and no fallback
+  6. `//# sourceMappingURL=` references in the SERVED bundles, resolved against
+     the origin, so a shipped artifact that points at a file it does not ship
+     is visible
+
+ARMS 5 AND 6 DO NOT CHANGE THE EXIT CODE, deliberately. Both report defects in
+a served artifact whose bytes may be perfectly current, and "STALE" means
+something specific here — the origin disagrees with the local build. Calling a
+dangling reference stale would be a lie, and calling the run OK without saying
+so is the r141 shape. So they print loudly, and tools/prod-freshness-note.sh
+carries them into the next round's prompt.
 
 HONEST LIMIT OF ARM 4, stated here because the number is tempting and wrong to
 overclaim: this pins the served **markup**, not the served **bundle**. index.html
@@ -80,6 +90,13 @@ ASSET = re.compile(r'(?:"|\'|=|,)(?:\./)?assets/([A-Za-z0-9_.-]+)')
 # instrument that flags working fallbacks cries wolf and gets deleted.
 TOKEN_DECL = re.compile(r'(--[\w-]+)\s*:')
 TOKEN_USE = re.compile(r'var\(\s*(--[\w-]+)\s*([,)])')
+
+# Arm 6. Vite appends `//# sourceMappingURL=<name>` to a bundle when it is built
+# with sourcemaps, and that pointer is the ONLY way the bundle names its map —
+# the served html never does. So a release that strips the map leaves a shipped
+# artifact referencing a file it does not ship, and neither arm 2 nor arm 3 can
+# see it: the bytes match the build exactly, which is the whole point.
+SOURCE_MAP_REF = re.compile(r'//[#@]\s*sourceMappingURL=(\S+)')
 
 
 def sha256(data: bytes) -> str:
@@ -179,6 +196,7 @@ def main() -> int:
         print('  assets  the served html names no assets at all — that is not a deploy, that is a page')
         return 2
     asset_rows, asset_ok = [], True
+    served_js: dict[str, bytes] = {}
     for name in names:
         served = fetch(origin + 'assets/' + name)
         local_file = build / 'assets' / name
@@ -189,6 +207,11 @@ def main() -> int:
         local = local_file.read_bytes()
         same = served is not None and sha256(served) == sha256(local)
         asset_ok &= same
+        # Kept for arm 6. The served body is the only place a bundle's
+        # sourceMappingURL can be read from, and re-fetching it later would be a
+        # second request that could answer differently from the one compared.
+        if same and name.endswith('.js'):
+            served_js[name] = served
         asset_rows.append((name, len(local), sha256(local)[:12], same))
     for name, size, digest, same in asset_rows:
         print(f'  asset   assets/{name} {"?" if size is None else f"{size:>8}"} bytes '
@@ -221,6 +244,24 @@ def main() -> int:
             if undefined:
                 print(f'          READ BUT NEVER DECLARED, no fallback: {", ".join(undefined)}')
                 print('          each computes to nothing — these are live no-ops in production')
+
+    # --- arm 6: a shipped artifact that points at a file the origin does not serve
+    #
+    # Measured at r164, off the wire: the served bundle ended in
+    # `//# sourceMappingURL=index-CEpXIazX.js.map` and that URL answered 404. The
+    # build emitted both the map and the pointer; the release removed the file;
+    # nothing in either tree owns the disagreement. Byte-identity could not see
+    # it, because the bytes were identical — that is what made it worth an arm.
+    for name, blob in sorted(served_js.items()):
+        for ref in SOURCE_MAP_REF.findall(blob.decode('utf-8', 'replace')):
+            target = ref.split('?')[0].split('#')[0]
+            if not target or target.startswith('data:'):
+                continue  # an inline map travels inside the bundle and resolves
+            url = target if target.startswith('http') else origin + 'assets/' + target
+            if fetch(url) is None:
+                print(f'  DANGLING assets/{name} references {target}, which the origin does not serve')
+                print('          the served bytes match the build, so no other arm can see this:')
+                print('          the artifact ships a pointer to a file it does not ship')
 
     verdict_ok = html_match and asset_ok
     if git_dirty(repo):

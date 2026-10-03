@@ -10592,3 +10592,133 @@ was mutated back to the broken placement and went red.
 remapping, mix/assist settings, extra arenas, challenge stages and PWA shell
 unbuilt. They are recorded in `docs/COMPLETION-PLAN.md` as decided-out-of-this-
 release, not as findings to rediscover.
+
+## Round 164 — the feature that shipped and was never photographed 📷
+
+No reviewer round, and the reason is the round's second finding.
+
+### The PAUSED overlay, live for a release and in no frame
+
+r163 shipped PRD FR-018: losing focus mid-bout pauses it behind a full-viewport
+scrim that only the player dismisses. `#pause` is `hidden` in every other frame
+in the review set, so all twenty-one frames the models had been shown were the
+same game to them.
+
+This is r158's own sentence landing one release later — *a state that becomes
+reachable is not a state that has been reviewed* — and the loop had just written
+it. r158 found that fixing the onboarding had not meant anyone looked at it. The
+instrument had been pointed at the coach for twenty rounds while describing a
+plate it could not see. Here the instrument had been pointed at the game for
+twenty-two rounds and could not see a state that took over the entire viewport.
+
+Shot 22 raises it from a real `blur` event on a live bout. `pause()` returns
+early unless a bout is running, so a capture posed on a menu would photograph no
+overlay and be indistinguishable from a regression — hence the assertion before
+the screenshot, and hence writing nothing if it does not come up.
+
+**Read it, then looked at it.** Full-viewport scrim at `rgb(10 7 4 / 0.86)`, PAUSED
+in `--gold`, hint in `--text-muted`, pad covered, bout frozen mid-stance. It
+works. One thing is a *measurement* question rather than an opinion and is left
+open: `--scrim-hard` is translucent, so the backdrop under `--text-muted` varies
+with whatever is behind it — the white gi and the dark ceiling are not the same
+number. A static stylesheet read cannot settle that; the paint-time probe for it
+does not exist yet (`keyhint-contrast.mjs` covers the pad, a different viewport
+and a different state). **Not claimed either way.**
+
+### The advisory reviewer is dead, and reported itself as codex
+
+`review-codex.sh` exited 1 with a wall of MCP auth noise (vercel, github-copilot)
+and no findings. Standing rule 4 says check the probe and the environment before
+the code, so:
+
+| probe | result |
+|---|---|
+| `launchctl getenv OPENROUTER_API_KEY` | **exit 0, empty string** |
+| `GET /api/v1/models` with the key | **200** |
+| `POST /api/v1/chat/completions` with the key | **401 "User not found"**, twice |
+
+The first row is the r154 shape one level down, and it caught me in it: I read
+`launchctl getenv` exiting 0 as "launchctl has it" and acted on it. Exit status
+is not a value, and `0` for "empty" is exactly the kind of plausible reading
+that agrees with a no-op.
+
+The second row is the trap that cost the round. The catalogue endpoint does not
+authenticate inference, so **any probe that stops there reports a working key.**
+The script's empty-bearer check cannot see this case, and codex exits 1 for it
+exactly as it exits 1 for itself — so the round diagnoses codex. That is the
+misdiagnosis the empty-bearer check was written to prevent, in the one case it
+does not cover.
+
+Now exit 4, distinct from 2 (no bearer) and 3 (no binary), naming the credential.
+**Only the red arm is proven**, because only a dead key exists here: the green arm
+cannot be demonstrated on this machine, and the round says so rather than
+implying the check works in both directions.
+
+`vision-review.py` is out for the same reason, and it also failed for a second
+reason worth keeping: `openai/gpt-5.2` is not in the OpenRouter catalogue, and the
+tool surfaced that as `IncompleteRead: 0 bytes read` rather than as a 404. A
+dropped stream reported as a transport error is r155's shape again.
+
+### The capture died on a busy machine, producing no frames at all
+
+First run died at `08-desktop-fight`: `Timeout 30000ms exceeded: taking page
+screenshot`, after fonts had loaded. Playwright's default action timeout applies
+to `screenshot`, and a software-rendered WebGL canvas on a loaded machine does not
+hand the compositor a frame inside it. Seven frames written, then nothing.
+
+This is not "red", it is "absent", and absent is the failure r151's standing
+instruction warns about from the other side: a verdict read off a machine whose
+load was never printed. Load at that moment: **18.9**. Action timeout is now 120s
+and the load is printed beside the frame count, because an unattended round cannot
+wait for an idle machine and this one demonstrably did not get one — 87, then 223,
+then 38, then 13.5 across one round.
+
+### Gates
+
+`check=0` — typecheck, **210 unit** (25 files), content, assets (20 against
+provenance), load 10.1. Review set regenerated from scratch before any reading of
+it: **20 frames, 20 distinct**, burst 8 frames / 6 positions / **motion 15.98%**,
+`verify_shots.py` exit 0. Three shots wrote nothing rather than writing a false
+frame — `18-kick`, `19-half-point`, `21-kick-open` all need the fight to reach a
+state, and under load it did not; each printed `frame not written` and exited.
+
+`pnpm test:e2e` **not run**: no file under `apps/game/src` changed, which is the
+only condition its guidance attaches to.
+
+Production re-measured at the top of the round and again after r163's deploy:
+**exit 0 both times**, served bytes are the built bytes, new asset hashes
+(`index-CEpXIazX.js`, `index-Buq5MQDb.css`) so the r163 release is confirmed live.
+
+### Two things a stranger needs to know about this machine
+
+**Another writer is in this repo.** Mid-round, six files changed that I did not
+touch — `apps/game/vite.config.ts`, `tools/production-freshness.py`,
+`tools/prod-freshness-note.sh`, and both mutation harnesses — between 18:30 and
+18:35, while I was working. Only one `opencode run` exists and it is mine
+(PID 19789, holding `.loop/run.lock` from 18:24), so it is another session, not
+the scheduler. `git add` was scoped to my two files and the index was verified
+empty first, so the commit is only mine. **Those six files are uncommitted and are
+not mine to explain.** `pnpm check` passed with them in the tree.
+
+**The dev server is required and is not running by default.**
+`review-shots.mjs` reads `SMKK_BASE`, defaulting to `127.0.0.1:5173`, and spawns
+nothing. Its first invocation died with `ERR_CONNECTION_REFUSED` — correctly, and
+not the frames' fault.
+
+### The sixteenth shape, and a cheap generalisation
+
+Fifteen times prose described something the code did not do. r164 adds the
+instrument half again, and this time there are three of them in one round, which
+is the part worth recording:
+
+- an instrument **extending to cover a state is not extended** until someone
+  reads what comes out (the overlay, photographed at last);
+- an instrument **reporting a plausible value it never took** (`launchctl` exit 0
+  read as a value; `/api/v1/models` 200 read as a working key);
+- an instrument **dying quietly into absence** (a capture that produces no frames
+  is indistinguishable from a run that was never attempted).
+
+The generalisation that covers all three: *a probe must be able to report that it
+did not measure.* `host-load.mjs` returns `null` rather than `0` for an unreadable
+load, and that is the shape to copy. The bearer check now names which layer failed
+instead of exiting 1 and letting the reader guess.

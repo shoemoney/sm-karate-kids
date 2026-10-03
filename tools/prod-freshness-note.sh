@@ -85,7 +85,22 @@ esac
 # limit on its face because the number is tempting.
 drift="$(grep -oE '[0-9]+ commit\(s\) behind HEAD' "$REPORT" | tail -1)"
 [[ -n "$drift" ]] && echo "  $drift -- an UPPER BOUND; index.html is unchanged across stretches of commits."
-[[ -n "$drift" ]] && grep -oE 'READ BUT NEVER DECLARED.*' "$REPORT" | sed 's/^/  live no-op: /'
+
+# Served-artifact defects. These used to be printed only when there was drift to
+# print alongside them, which meant a live defect on a byte-identical origin
+# reached nobody -- the r161 shape exactly, one level in: this script is the
+# thing that makes a measurement visible, and it was making half of them
+# invisible. Guarded on rc 0/1 rather than on drift, because the tool returns
+# early on INCONCLUSIVE and never emits these lines at all, so on a real gate the
+# guard and the report agree.
+if [[ "$rc" -eq 0 || "$rc" -eq 1 ]]; then
+  while IFS= read -r line; do
+    [[ -n "$line" ]] && echo "  live no-op: ${line#READ BUT NEVER DECLARED, no fallback: }"
+  done < <(grep -oE 'READ BUT NEVER DECLARED.*' "$REPORT")
+  while IFS= read -r line; do
+    [[ -n "$line" ]] && echo "  live dangling reference: ${line#assets/}"
+  done < <(grep -oE 'DANGLING assets/.*' "$REPORT")
+fi
 
 echo "  full report: $REPORT"
 exit "$rc"

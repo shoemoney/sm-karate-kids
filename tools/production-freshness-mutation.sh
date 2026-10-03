@@ -86,14 +86,61 @@ open(p, 'w', encoding='utf-8').write(
     re.sub(r'^\s*<(script|link)\b.*?\b(module|stylesheet)\b.*?>\s*$', '', text, flags=re.M))
 PY
                 }
-# Reproduces the ACTUAL r160 production condition, offline: the served markup is
-# this build's with the two .key-hint spans removed, which is byte-for-byte the
-# markup that has been live since before r135 (verified against the real origin).
-# It keeps its asset tags, so arm 4's pin is reached instead of the exit-2 branch.
+# Reproduces a REAL historical revision BY CONSTRUCTION.
+#
+# This fixture used to delete the .key-hint spans from the CURRENT markup and
+# assume the remainder was the revision that predated them. That was true while
+# the newest revision of apps/game/index.html was the one that introduced
+# .key-hint. r163 then added a focus-pause block on top of it, so "current minus
+# .key-hint" stopped being any revision that ever existed, and arm 4 correctly
+# reported "matches NO revision" — a true statement about a fixture that had
+# gone stale, not about the probe. Found at r164, still red on the pristine
+# probe from HEAD, which is how it was attributed rather than guessed at.
+#
+# The delta is now read out of git instead of assumed, so the next revision of
+# index.html cannot break it. The asset tags are carried over from the built
+# html so arm 3 still has names to fetch (a page naming no assets exits 2).
 stale_markup()  { cp -R "$SRC/." "$WORK/build/"; cp -R "$SRC/." "$WORK/served/"
-                  grep -v 'class="key-hint"' "$WORK/served/index.html" > "$WORK/i.$$" \
-                    && mv "$WORK/i.$$" "$WORK/served/index.html"; }
+                  python3 - "$WORK/served/index.html" "$ROOT" <<'PY'
+import re, subprocess, sys
+served, repo = sys.argv[1], sys.argv[2]
+def git(*a):
+    return subprocess.run(['git', '-C', repo, *a], capture_output=True, text=True).stdout
+old = None
+for sha in git('log', '--format=%H', '--', 'apps/game/index.html').split():
+    text = git('show', f'{sha}:apps/game/index.html')
+    if text and 'class="key-hint"' not in text:
+        old = text
+        break
+if old is None:
+    sys.exit('harness: no pre-key-hint revision of apps/game/index.html exists')
+current = open(served, encoding='utf-8').read()
+injected = [l for l in current.splitlines()
+            if re.match(r'^\s*<(script|link)\b.*\b(module|stylesheet)\b.*>\s*$', l)]
+open(served, 'w', encoding='utf-8').write(old.rstrip('\n') + '\n' + '\n'.join(injected) + '\n')
+PY
+                }
+
 no_build()      { cp -R "$SRC/." "$WORK/served/"; }
+
+# r164's shape: a bundle that names a source map the origin does not serve. The
+# pointer is appended to BOTH sides so the bytes stay identical — that is the
+# whole point. Byte-identity is green here, which is exactly why this defect
+# needed its own arm instead of being left to arms 2 and 3.
+dangling_ref()  { cp -R "$SRC/." "$WORK/build/"; cp -R "$SRC/." "$WORK/served/"
+                  local rel
+                  rel="$(cd "$WORK/served" && ls assets/*.js | head -1)"
+                  printf '\n//# sourceMappingURL=index-GONE.js.map\n' >> "$WORK/served/$rel"
+                  printf '\n//# sourceMappingURL=index-GONE.js.map\n' >> "$WORK/build/$rel"
+                }
+# The negative control for the same arm: the pointer resolves, so there is
+# nothing to report. Without this the arm would pass by flagging every bundle
+# that has a sourceMappingURL, which is a working configuration.
+resolvable_ref() { dangling_ref
+                  printf '{"version":3,"sources":[],"mappings":""}\n' \
+                    > "$WORK/served/assets/index-GONE.js.map"
+                  cp "$WORK/served/assets/index-GONE.js.map" "$WORK/build/assets/index-GONE.js.map"
+                }
 
 echo "production-freshness mutation harness"
 echo "  port $PORT, fixtures under $WORK"
@@ -109,7 +156,13 @@ run_case "asset body differs under a correct html" 1 "MISMATCH" stale_asset
 # 3. markup from another revision — must PIN it and print a commit distance, not
 #    merely say "differs". This is the positive control for arm 4: a probe that
 #    can only report "differs" has not measured how far behind.
-run_case "stale markup is pinned to a revision" 1 "pinned" stale_markup
+#    The grep used to be the single word "pinned", which appears in BOTH the
+#    success and the failure line — arm 4 prints "pinned  served markup matches
+#    NO revision ..." too, so this assertion passed on a probe that had pinned
+#    NOTHING. It is now the success line specifically. That weakness is why the
+#    stale fixture above went unnoticed for a round.
+run_case "stale markup is pinned to a revision" 1 "matches apps/game/index.html at" stale_markup
+
 # arm 4 must produce a NUMBER, not just a verdict — assert the distance is printed
 rm -rf "$WORK/served" "$WORK/build"; mkdir -p "$WORK/served" "$WORK/build"; stale_markup
 start_server
@@ -132,6 +185,35 @@ else bad "dead origin is INCONCLUSIVE, not STALE" "exit $rc"; printf '%s\n' "$ou
 # 6. no local build -> INCONCLUSIVE. A gate pointed at an absent dist must not
 #    report the origin as stale.
 run_case "absent local build" 2 "no local build" no_build
+
+# 7. a served bundle pointing at a file the origin does not serve (r164). The
+#    exit code stays 0 on purpose: the bytes ARE the built bytes, and "STALE"
+#    means the origin disagrees with the build, which is false. What must not
+#    happen is silence.
+run_case "dangling sourceMappingURL is reported" 0 "DANGLING" dangling_ref
+
+# 8. the negative control for arm 6 — the arm must not fire on a pointer that
+#    resolves, or it is just "bundle has a sourceMappingURL" wearing a costume.
+rm -rf "$WORK/served" "$WORK/build"; mkdir -p "$WORK/served" "$WORK/build"; resolvable_ref
+start_server
+res_out="$(python3 "$PROBE" --origin "http://127.0.0.1:$PORT/" --build "$WORK/build" --repo "$ROOT" 2>&1)"
+stop_server
+if printf '%s' "$res_out" | grep -q "OK  the served bytes"; then
+  ok "resolvable sourceMappingURL stays silent"
+else bad "resolvable sourceMappingURL stays silent" "not OK on a byte-identical origin"; printf '%s\n' "$res_out" | sed 's/^/         | /'; fi
+if printf '%s' "$res_out" | grep -q "DANGLING"; then
+  bad "arm 6 ignores a pointer that resolves" "reported DANGLING for a served map"; printf '%s\n' "$res_out" | sed 's/^/         | /'
+else ok "arm 6 ignores a pointer that resolves"; fi
+
+# 9. and the other direction: a healthy build must produce NO dangling line at
+#    all, so the arm is not reporting something on every single run.
+rm -rf "$WORK/served" "$WORK/build"; mkdir -p "$WORK/served" "$WORK/build"; faithful
+start_server
+base_out="$(python3 "$PROBE" --origin "http://127.0.0.1:$PORT/" --build "$WORK/build" --repo "$ROOT" 2>&1)"
+stop_server
+if printf '%s' "$base_out" | grep -q "DANGLING"; then
+  bad "a faithful build reports nothing dangling" "DANGLING on an untouched build"; printf '%s\n' "$base_out" | sed 's/^/         | /'
+else ok "a faithful build reports nothing dangling"; fi
 
 echo
 if [ "$FAIL" -eq 0 ]; then echo "=== $PASS passed, 0 failed ==="; exit 0; fi
