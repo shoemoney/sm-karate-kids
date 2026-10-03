@@ -10321,6 +10321,14 @@ Arm 4 prints its own limit on its face, because the number is tempting:
 commits, so a pin bounds the release from above. It is **not** a claim that
 production is commit `6b57a2b81`.
 
+> The count is **live**: it read 63 when measured and **64** after this round's
+> own commit landed, because it counts from HEAD. A reader who runs the tool and
+> sees a different number is not looking at a regression — and the pin itself,
+> `6b57a2b81`, did not move across three runs. Logged because r153's standing
+> instruction is that the suspicion applies to every number in these documents,
+> and a count that moves under you is exactly the one that gets "corrected"
+> later by someone who assumes it drifted.
+
 Exit codes carry the r141/r154 lesson: **0** equal, **1** STALE, **2**
 INCONCLUSIVE. Unreachable is not stale, and exit 2 stops a dead host being
 reported as a deploy problem the operator does not have.
