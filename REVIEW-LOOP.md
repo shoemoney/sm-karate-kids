@@ -10186,3 +10186,43 @@ Read that as the next standing instruction, next to r152's: **when an item close
 the gate that can settle its `Accept:` line must exist in the same round.** A
 `Do:` and an `Accept:` with no instrument behind them are a hypothesis with a
 checkbox, and the checkbox is the part that survives.
+
+### Deployed, and the gate run against the wire
+
+Production was stale when this round started committing, and the gate that exists
+for exactly that said so — served `index-6tl2X_FS.js`, local `index-Bd4cT_Iw.js`,
+`rc=1`. (A first reading of `rc=0` was **my** error, not the script's: I piped it
+through `tail`, so `$?` was `tail`'s. The number was wrong because of how I
+collected it, which is rule 3 wearing a different hat.)
+
+`deploy.sh` dry run: 26 sent, 2 stale pruned. Then `--yes`, and it propagated its
+own verify gate:
+
+    html         identical to local build
+    assets/index-Bd4cT_Iw.js 1064379 bytes  sha256:c469116efd05
+    assets/index-DKQOo3fd.css 40251 bytes   sha256:8f40040bc99b
+    OK 2 assets served, byte-identical to the local build
+    verify-deploy rc=0
+
+Byte-identical says the change is **on the wire**. It does not say the game
+**behaves** like it, so the gate ran against production instead of the dev
+server, the way r157 and r158 verified theirs:
+
+    SMKK_BASE=https://arcade.shoemoney.ai/smkk node tools/keyboard-journey.mjs
+      arrows x4    front_kick foot_sweep reverse_punch lunge_punch
+      IJKL  x4     the same four ids
+      journey      0.5 -> 1  (lastCall {scorer:0, value:"half",
+                                        moveId:"front_kick", tick:766})
+      OK — the key hints describe a keyboard that drives the game
+
+Three independent runs of the journey arm now agree on the substance and differ
+only in the tick — **771, 777, 775** — which is the clock, and is supposed to.
+
+### Not pushed, and that is deliberate
+
+`main` is **4 ahead** of `origin/main`: r156's `1178d18` is the last thing on
+GitHub, so r157, r158 and this round are all local. That is the loop's practice,
+not an oversight — deploy to the arcade host, keep the history here. Pushing is
+an irreversible public action on a repository the plan describes as public, and
+no round has authorised it unattended. Four rounds of work now want a single
+deliberate `git push` from a human who has looked at it.
