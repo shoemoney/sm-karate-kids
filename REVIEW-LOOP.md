@@ -10564,3 +10564,31 @@ The guard that generalises is cheap and is now in the driver: *an instrument tha
 is not consulted by a scheduled process is not a gate.* r141 built one and r159
 moved it; r160 found the drift; r161 made the consulting automatic, so the next
 occurrence is visible in the round it happens rather than nineteen rounds later.
+
+## Round 163 — a finishing pass, and two killed rounds put back together ⏸️
+
+Not a scheduled round. Two unattended rounds had died mid-work (the second
+because `be20e71` opened the prompt with `---` and opencode parsed it as a flag,
+so **every scheduled round from 13:38 on exited 1 before a model ran**), leaving
+fifteen uncommitted files and a stale `run.lock`. The scheduler was unloaded for
+the length of the pass so a tick could not land mid-edit.
+
+**What the killed rounds had built, verified before committing:** every sheet
+pauses the bout; `frameDeadline` replacing r152's per-frame re-add of the whole
+hold; a keydown tap latch; `blocked` announced once per strike; iOS audio unlock
+on every gesture; leaderboard retry. An Opus review found no defects. Each new
+unit test was mutated red. `pnpm check` 0, e2e 48 passed + 6 skipped by design.
+
+**New this round:** losing focus mid-bout pauses it (PRD FR-018), behind a
+full-viewport PAUSED screen only the player can dismiss. The first build passed
+its e2e with the CSS spliced **into the middle of another selector** — the insert
+anchor `.sheet {` also matched inside `body:has(.sheet:not([hidden])) .sheet {` —
+so the overlay rendered unstyled and covered nothing, while "is it visible"
+stayed green. A source guard (`sheet-covers-viewport`) caught it, and the e2e now
+asserts the overlay is what a tap on the technique stick lands on. That assertion
+was mutated back to the broken placement and went red.
+
+**Scope:** a PRD-vs-code survey found the PRD's Local Versus, client replay,
+remapping, mix/assist settings, extra arenas, challenge stages and PWA shell
+unbuilt. They are recorded in `docs/COMPLETION-PLAN.md` as decided-out-of-this-
+release, not as findings to rediscover.

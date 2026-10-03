@@ -553,6 +553,28 @@ Because nothing is watching, three rules exist and are not optional:
 - [x] **renderer frame cost on a GPU-less device** — closed at r146, and it turned out not
       to be the taste call r144 assumed. See below.
 
+- [x] **every sheet pauses the bout** — **FIXED at r163.** Every sheet hides
+      `#pad`, but only the pre-bout card's TECHNIQUES button held anything, so
+      SETTINGS or the HUD's TECHNIQUES mid-bout left the CPU fighting a player
+      with no controls. And r152's `holdForSheet` re-added the whole cumulative
+      hold on every frame: a 3s read pushed the card out ~4.5 minutes. One
+      `openSheets` set now freezes the sim clock, and `frameDeadline` holds the
+      card per frame. `sheets-pause.spec.ts`, freeze AND resume per sheet.
+- [x] **losing focus mid-bout pauses it (PRD FR-018)** — **SHIPPED at r163.** A
+      blur or a hidden tab freezes a live bout behind a full-viewport PAUSED
+      screen; only the player's tap or key resumes it, and the resuming key
+      cannot throw. `focus-pause.spec.ts`; every arm proved red by mutation,
+      including the coverage check, which caught a real misplaced CSS block
+      that a visibility-only assertion had passed.
+- [x] **a keyboard tap inside one frame did nothing** — **FIXED at r163**, latched
+      on keydown. `keyboard-tap.test.ts`, red without the latch.
+- [x] **one parry announced two or three times** — **FIXED at r163**, `blocked`
+      latches per strike. `block-once.test.ts`, red without the latch and red
+      without the reset.
+- [x] **the unattended loop died in argv parsing** — **FIXED at r163.** Since
+      `be20e71` the prompt opened with `---` and opencode read it as a flag;
+      every scheduled round exited 1 before a model ran.
+
 **Not "done" means:** every item above is either finished or blocked on a human
 decision with the measurement attached. **As of r153 every behaviour defect this
 document knew about is closed**, including the two r152 left: item 1.2's "returns
@@ -1001,3 +1023,27 @@ lever, not judgement — and the lever was sitting in its own dependency, writte
 and unused. The useful generalisation is already in this repo's vocabulary: *an
 instrument that is not consulted is not a gate.* This was the same shape one level
 up — a capture step that nothing consumed looked exactly like a working safety net.
+
+---
+
+## r163 — the PRD scope this release does not cover, decided rather than forgotten
+
+A survey of `smkk.md` (the PRD, gitignored) against the code, verified in source.
+The PRD was written desktop-first; ADR 0001 made the game phone-first, and this
+document has been the finishing scope since r134. These PRD items are **not built
+and are not ship blockers.** They are listed so a future round does not report
+them as regressions or quietly start one.
+
+| PRD | Item | State | Size |
+|---|---|---|---|
+| FR-010 | Local Versus | `p2` is always the CPU or the dummy; one input chain | M-L |
+| FR-011 | Replay save/load/scrub in the client | the sim has `replay.ts`; no client UI | M |
+| FR-013 | Key and gamepad remapping | bindings hardcoded in `keyboard.ts`/`gamepad.ts` | M |
+| FR-013/016 | Separate music/SFX mix, shake slider, flash reduction, single-stick assist | one master gain + mute | M |
+| Phase 2 | Three arenas, classic challenge stages | one arena; no bonus stages | M / L |
+| Phase 2 | PWA shell (manifest, offline) | none | S-M |
+| FR-006 | Dojo timeline, "why that scored", slow-mo drill | dummy + coach only | M-L |
+
+Local Versus is the largest gap and the one a player would name first. It is a
+product decision (four sticks on one phone does not fit; desktop needs a second
+pad or a split keyboard), so it is raised here, not started.
