@@ -16,6 +16,8 @@ export interface FighterState {
   /** Set while the left stick asks to crouch; drives posture next tick. */
   score: number;
   previousRight: Dir4;
+  /** True once this strike's block has been announced; cleared when a move begins. */
+  blockReported: boolean;
 }
 
 export const JUMP_TICKS = 34;
@@ -33,6 +35,7 @@ export function createFighter(spec: FighterSpec, x: number, facing: 1 | -1): Fig
     crouching: false,
     score: 0,
     previousRight: 'neutral',
+    blockReported: false,
   };
 }
 
@@ -76,6 +79,7 @@ export function beginMove(fighter: FighterState, move: MoveSpec): void {
   fighter.move = move;
   fighter.phase = 'startup';
   fighter.phaseTicks = 0;
+  fighter.blockReported = false;
 }
 
 export function resetToStance(fighter: FighterState, x: number, facing: 1 | -1): void {
@@ -87,4 +91,5 @@ export function resetToStance(fighter: FighterState, x: number, facing: 1 | -1):
   fighter.airborne = 0;
   fighter.crouching = false;
   fighter.previousRight = 'neutral';
+  fighter.blockReported = false;
 }

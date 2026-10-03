@@ -298,10 +298,13 @@ export function step(state: MatchState, frame: InputFrame): readonly MatchEvent[
   const p1Blocked = p1Hits && p1.move !== null && blocksBand(p2, p1.move.height);
   const p2Blocked = p2Hits && p2.move !== null && blocksBand(p1, p2.move.height);
 
-  if (p1Hits && p1Blocked) {
+  // A strike stays active for several ticks; announce its block once.
+  if (p1Hits && p1Blocked && !p1.blockReported) {
+    p1.blockReported = true;
     state.events.push({ type: 'blocked', player: 0, moveId: p1.move?.id ?? '' });
   }
-  if (p2Hits && p2Blocked) {
+  if (p2Hits && p2Blocked && !p2.blockReported) {
+    p2.blockReported = true;
     state.events.push({ type: 'blocked', player: 1, moveId: p2.move?.id ?? '' });
   }
 
