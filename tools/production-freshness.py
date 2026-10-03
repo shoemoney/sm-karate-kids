@@ -199,6 +199,20 @@ def main() -> int:
     served_js: dict[str, bytes] = {}
     for name in names:
         served = fetch(origin + 'assets/' + name)
+        # Arm 6 reads the SERVED bundle, so it must NOT be gated on the bundle
+        # agreeing with the local build — and the first draft gated it on
+        # exactly that. Found by running this against the real origin rather
+        # than trusting 12 green fixtures: production was STALE, so the served
+        # bundle was skipped, and the arm printed nothing while a plain curl
+        # showed the bundle still naming a map that 404s. That is the r160
+        # shape this tool's own header warns about — a result skipped for a
+        # reason that has nothing to do with the result — and it blanks the arm
+        # on precisely the deploys most likely to carry the defect, because a
+        # stale origin is serving the OLDER build, which is the one that emitted
+        # the map. Recorded before the local-existence check on purpose: a
+        # bundle that is absent locally is still a bundle the origin serves.
+        if served is not None and name.endswith('.js'):
+            served_js[name] = served
         local_file = build / 'assets' / name
         if not local_file.is_file():
             asset_ok = False
@@ -207,11 +221,6 @@ def main() -> int:
         local = local_file.read_bytes()
         same = served is not None and sha256(served) == sha256(local)
         asset_ok &= same
-        # Kept for arm 6. The served body is the only place a bundle's
-        # sourceMappingURL can be read from, and re-fetching it later would be a
-        # second request that could answer differently from the one compared.
-        if same and name.endswith('.js'):
-            served_js[name] = served
         asset_rows.append((name, len(local), sha256(local)[:12], same))
     for name, size, digest, same in asset_rows:
         print(f'  asset   assets/{name} {"?" if size is None else f"{size:>8}"} bytes '

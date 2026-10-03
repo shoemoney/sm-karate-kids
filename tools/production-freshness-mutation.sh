@@ -205,6 +205,33 @@ if printf '%s' "$res_out" | grep -q "DANGLING"; then
   bad "arm 6 ignores a pointer that resolves" "reported DANGLING for a served map"; printf '%s\n' "$res_out" | sed 's/^/         | /'
 else ok "arm 6 ignores a pointer that resolves"; fi
 
+# 8b. THE REGRESSION THIS ROUND SHIPPED. Arm 6's first draft only inspected a
+#     served bundle that MATCHED the local build, so it printed nothing on a
+#     stale origin — which is exactly when the old, sourcemap-emitting build is
+#     still live and the reference is dangling. Twelve green fixtures missed it
+#     because every fixture that carried a pointer was byte-equal by
+#     construction. Found by running the probe against the real origin, where a
+#     plain curl showed the pointer and a 404 while the arm said nothing.
+#     So: the pointer is on the SERVED side only, so the bundle MISMATCHES.
+mismatched_dangling() { cp -R "$SRC/." "$WORK/build/"; cp -R "$SRC/." "$WORK/served/"
+                  local rel
+                  rel="$(cd "$WORK/served" && ls assets/*.js | head -1)"
+                  printf '\n//# sourceMappingURL=index-GONE.js.map\n/* an older body */\n' >> "$WORK/served/$rel"
+                }
+run_case "a dangling pointer is reported on a MISMATCHING bundle" 1 "DANGLING" mismatched_dangling
+# ...and the arm is still not just "the bundle differs": same mismatch, resolvable.
+mismatched_resolvable() { mismatched_dangling
+                  printf '{"version":3,"sources":[],"mappings":""}\n' \
+                    > "$WORK/served/assets/index-GONE.js.map"
+                }
+rm -rf "$WORK/served" "$WORK/build"; mkdir -p "$WORK/served" "$WORK/build"; mismatched_resolvable
+start_server
+mres_out="$(python3 "$PROBE" --origin "http://127.0.0.1:$PORT/" --build "$WORK/build" --repo "$ROOT" 2>&1)"
+stop_server
+if printf '%s' "$mres_out" | grep -q "MISMATCH" && ! printf '%s' "$mres_out" | grep -q "DANGLING"; then
+  ok "a mismatched bundle with a resolvable pointer is not flagged"
+else bad "a mismatched bundle with a resolvable pointer is not flagged" "arm 6 flagged a resolvable reference"; printf '%s\n' "$mres_out" | sed 's/^/         | /'; fi
+
 # 9. and the other direction: a healthy build must produce NO dangling line at
 #    all, so the arm is not reporting something on every single run.
 rm -rf "$WORK/served" "$WORK/build"; mkdir -p "$WORK/served" "$WORK/build"; faithful

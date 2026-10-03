@@ -98,7 +98,7 @@ if [[ "$rc" -eq 0 || "$rc" -eq 1 ]]; then
     [[ -n "$line" ]] && echo "  live no-op: ${line#READ BUT NEVER DECLARED, no fallback: }"
   done < <(grep -oE 'READ BUT NEVER DECLARED.*' "$REPORT")
   while IFS= read -r line; do
-    [[ -n "$line" ]] && echo "  live dangling reference: ${line#assets/}"
+    [[ -n "$line" ]] && echo "  live dangling reference: ${line#DANGLING }"
   done < <(grep -oE 'DANGLING assets/.*' "$REPORT")
 fi
 

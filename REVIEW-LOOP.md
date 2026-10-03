@@ -10722,3 +10722,152 @@ The generalisation that covers all three: *a probe must be able to report that i
 did not measure.* `host-load.mjs` returns `null` rather than `0` for an unreadable
 load, and that is the shape to copy. The bearer check now names which layer failed
 instead of exiting 1 and letting the reader guess.
+
+## Round 164b — the shipped bundle pointed at a source map the release deletes 🗺️
+
+A second round ran concurrently with r164 in this same checkout (see "Two rounds,
+one tree" below). Both numbered themselves 164. This is the other half.
+
+### Found: production ships a reference to a file it does not ship
+
+Measured off the wire, not inferred:
+
+    served bundle tail   //# sourceMappingURL=index-CEpXIazX.js.map
+    GET that URL         http=404  (nginx/1.28.3)
+
+So every browser devtools opened on the live game asks for a map that does not
+exist. Nothing was visibly broken and nothing said so, because the question
+"do the served bytes match the built bytes" **cannot see a reference that
+resolves to nothing** — the bytes were identical, which was the whole problem.
+
+### The tenth drift, and a shape none of the other nine had
+
+Not a constant that means something else, not a contract the code failed to keep.
+**Two components that are each individually correct**, in two different repos:
+
+| component | does |
+|---|---|
+| `apps/game/vite.config.ts` — `sourcemap: true` | emits a 6.28MB `.map` **and** the pointer naming it |
+| `SMA-arcade ops/build-release.py` `copy_static` | copies every file in `dist`, filtering only symlinks, `.sqlite`, `.db` |
+
+Neither is wrong. The convention "no sourcemaps on the public host" was being
+held by **a person deleting the file after a deploy**, not by any script — and a
+real payload still carries one:
+
+    artifacts/arcade/release-payload/public/karate-kids/assets/index-Bd4cT_Iw.js.map
+
+So r163's note, "the release also dropped a `.js.map`", describes a manual step
+that no automated path performs. Nothing would have stopped the next release
+putting it straight back. Fixed **at the build**, where it cannot be forgotten:
+`sourcemap: false`. No map for a release to forget, no pointer for it to leave
+dangling. 43 bytes and 6.28MB out of every build.
+
+### Measured beside it: the hashed filename does not cover the comment
+
+Three builds, two byte streams, one name:
+
+    sourcemap:false -> index-CEpXIazX.js  sha=401bc0af7280
+    sourcemap:true  -> index-CEpXIazX.js  sha=0bb7d9bc4447
+    restored false  -> index-CEpXIazX.js  sha=401bc0af7280
+
+Vite appends the `sourceMappingURL` comment **after** hashing, so a
+metadata-only change cannot bust the cache key. Bounded here — the origin sends
+no `Cache-Control` at all, so nothing serves that URL immutable, and the ETag
+tracks the bytes — but it is not the guarantee a hashed filename appears to
+offer, and it is written down before someone relies on it.
+
+### Arm 6, and the instrument half again
+
+`production-freshness.py` now resolves every served `sourceMappingURL` against
+the origin. It reports and **does not change the exit code**: the bytes really
+are current, and `STALE` means the origin disagrees with the build, which would
+be a lie.
+
+Which is exactly why it needed surfacing. `prod-freshness-note.sh` printed
+served-artifact defects **only when there was drift to print them beside** — so
+the most misleading case, perfect bytes plus a broken reference, was the one case
+that reported nothing. That is r161's shape one level in: an instrument that
+measures correctly and reaches no one. Now guarded on rc 0/1, which is where the
+tool emits those lines at all. Against the real origin it now says:
+
+    production freshness: STALE
+      live dangling reference: assets/index-CEpXIazX.js references index-CEpXIazX.js.map, which the origin does not serve
+
+### Found red by r163 and left that way: the harness had rotted
+
+`production-freshness-mutation.sh`'s stale-markup fixture deleted the `.key-hint`
+spans and **assumed** the remainder was the revision that predated them. r163
+added a focus-pause block on top, so "current minus key-hint" stopped being any
+revision that ever existed and arm 4 correctly printed `matches NO revision`.
+
+The assertion missed it because it grepped the single word **`pinned`** — which
+appears in the failure line too. It was passing on a probe that had pinned
+nothing, which is r159's shape in a harness. Attributed rather than guessed:
+the same three cases fail on the **pristine probe from HEAD**.
+
+Fixed both ways: the fixture derives its target from git, and the assertion greps
+the success line. Proven — with the old fixture restored, three cases go red.
+
+### And my own arm was wrong, which the fixtures could not see
+
+Twelve green cases, then run against the real origin: arm 6 printed **nothing**
+while `curl` showed the pointer and the 404. The first draft only inspected a
+served bundle that **matched** the local build — so it went silent on precisely
+the deploys most likely to carry the defect, because a stale origin is serving
+the *older*, sourcemap-emitting build. That is this tool's own header warning
+(r160: a result skipped for a reason unrelated to the result).
+
+Every fixture carrying a pointer was byte-equal by construction, so the gap was
+invisible to the harness. Two cases added — dangling on a **mismatching** bundle,
+and a mismatched bundle whose pointer resolves — and the first is proven by
+re-gating the arm on byte-agreement, where it goes red.
+
+**The generalisation is the sixteenth's, applied to my own work:** green
+fixtures only prove the paths the fixtures take. The arm was correct on every
+path I had thought to write down.
+
+### Two rounds, one tree
+
+At 18:33 and 18:43 — during this round — `tools/review-shots.mjs` and
+`tools/review-codex.sh` were modified by something that was not this round, and
+the diffs said "Measured r164". A live `loop-once.sh` held `.loop/run.lock`
+(18:24:34) and ran `opencode run` with this byte-identical prompt, so both
+invocations were told they were round 164.
+
+At 18:44:47 and 18:45:31 that round committed **twice**. The second commit,
+`a668ae9`, absorbed all five of this round's staged files under its own message.
+Nothing was lost — content verified intact in `HEAD` — but the attribution is
+wrong, and this round's commit is `a668ae9`'s.
+
+The lock did its job for the round that took it. It cannot protect against an
+invocation that does not: **an unattended round that is not started by
+`loop-once.sh` holds no lock and commits whatever is staged.** That is worth
+knowing before two rounds are ever scheduled again.
+
+### Gates
+
+`check=0` — typecheck, unit, content, assets (20 against provenance).
+`e2e=0` — **54 passed, 6 skipped**, load **21.26 -> 11.35**. Note that the
+suite was green at 21, well above the "red at 14-16" band r151 recorded, so that
+heuristic does not forecast the verdict in either direction. Printing the load
+beside the result is still right; treating the number as a predictor is not.
+
+`production-freshness-mutation` **14/14** (9 passed / 3 failed on HEAD).
+`loop-freshness-mutation` **16/16** (14 on HEAD), both re-run after the final
+edit. Machine load ran **41 -> 21 -> 11** across the round, so no frame-time or
+throttle measurement was taken at all this round.
+
+### Why this was not deployed
+
+Deliberately, and it is the r161 refusal rather than an oversight: **there is
+another agent writing to this tree**, and deploying publishes whatever the tree
+contains. r161 refused for exactly this reason, over another agent's 22 dirty
+files, and was right.
+
+So production keeps serving the dangling reference until the next deploy. The
+cost is bounded and honest: the map was already a 404 before this round, no
+player sees it, and `production-freshness.py` now reports **STALE, exit 1** —
+which the driver injects at the top of the next round's prompt. The next round
+is *told* to deploy rather than left to notice. That is the r161 mechanism doing
+its job, and it is the reason leaving the gate red is better than racing a peer
+to publish.
