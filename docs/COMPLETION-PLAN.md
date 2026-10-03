@@ -697,7 +697,34 @@ Nothing in Phase 1 or 3. Phase 2 is blocked on a human by design, with the
 measurement attached to each item.
 
 One thing deliberately **not** done, recorded so it is not re-opened: the
-pre-existing `GET /api/games/karate-kids/runs` 404 on load. It fails soft by
-design (`leaderboard.ts` — "no board this run, never an error on screen") and
-fires no page error. Wiring a game id into the arcade API is a different change
-from anything in this document and belongs to whoever owns that contract.
+pre-existing **404** on the leaderboard API. It fails soft by design
+(`leaderboard.ts` — "no board this run, never an error on screen") and fires no
+page error. Wiring a game id into the arcade API is a different change from
+anything in this document and belongs to whoever owns that contract.
+
+> **Corrected at r156: the verb was wrong.** This said
+> `GET /api/games/karate-kids/runs`. The code **POSTs** it —
+> `leaderboard.ts:44` calls `post('runs', {})`, and `post()` is the only path
+> that sets a method. So for every round this document was describing a
+> request the game never makes.
+>
+> Measured, both environments, so the number is not inferred:
+>
+> | request | local (dev) | production |
+> |---|---|---|
+> | `POST /api/games/karate-kids/runs` | **502** | **404** |
+> | `GET /api/games/karate-kids/scores` | — | **404** |
+>
+> The 502 is **not** a new defect and is not in any review frame: it is Vite's
+> `/api` proxy pointing at `127.0.0.1:3784` (`vite.config.ts:5`), where the
+> arcade API is not running on this machine. It fires only on `/` and
+> `?mode=tournament` — the two routes that render the board — and never on
+> `?mode=dojo`, which is why it shows up in three captures and looks like a
+> game bug. **Nothing is listening on 3784.** Production is the honest number:
+> 404 on all three endpoints, i.e. the whole leaderboard is absent, not merely
+> its run token.
+>
+> The drift is small and harmless in itself — the endpoint is missing either
+> way, and the failure is soft either way. It is recorded because the shape is
+> the ninth instance of the pattern this document keeps hitting: a claim about
+> the wire that the code contradicts, invisible to every gate here.

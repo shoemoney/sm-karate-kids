@@ -52,6 +52,7 @@ successive rounds are not five variants of the same opinion.
 | 13 | `amazon/nova-2-lite-v1` | Amazon | pending |
 | 14 | `inclusionai/ling-3.0-flash-vl` | InclusionAI | landed `36c4b3e` |
 | 15 | `nex-agi/nex-n2.5-pro` | Nexa | provider returns empty content, 2 tries |
+| 16 | `sakana/fugu-ultra-v2` | Sakana | **next** — r64/r65 were `fugu-max`/`fugu-ultra`, this is the current slug. Verified answering on OpenRouter at r156. |
 
 ## Log
 
@@ -9371,3 +9372,199 @@ decision. That is the loop's own r127 lesson arriving from a different direction
 the reviewer is a good **generator of hypotheses** and a poor **authority on the
 game**. Nothing here is a defect, and the round's finding is the same one the
 instrument audit produced from a different end.
+
+## Round 156 — the tenth drift, and two instruments that had to be fixed before they could find it
+
+No open plan items. r151's standing instruction: re-read the closed boxes
+against the code **on suspicion**, not on the hypothesis that they are correct.
+r154 took the suspicion to the instruments, r155 took it to the third one. This
+round took it to a number the plan has been quoting for three rounds.
+
+### The 502 in the capture log that nobody had opened
+
+Rule 1 first: the review set was regenerated, not reused. `/tmp/smkk-loop` was
+**14 hours stale** (04:31 against a 19:2x round) — which is exactly what rule 1
+exists for, and worth noting that the set had survived untouched across rounds.
+
+The fresh capture printed three console errors:
+
+    01-phone-title: Failed to load resource: the server responded with a status of 502
+    10-phone-tournament: ... 502
+    13-phone-ladder: ... 502
+
+The completion plan documents a **404** on the leaderboard and calls it soft.
+502 is not 404. Two different causes, two different fixes, so the first job was
+to name the request rather than let the plan's number stand — the r154 shape,
+where a plausible reading of a signal replaces the thing that produced it.
+
+Measured across all three routes, because the pattern in the three failing
+names was that they are exactly the routes that render the board:
+
+| route | result |
+|---|---|
+| `/` | `502 POST /api/games/karate-kids/runs` |
+| `?mode=tournament` | `502 POST .../runs` |
+| `?mode=dojo` | **clean — no failing responses** |
+
+**Not a defect.** `vite.config.ts:5` proxies `/api` at `127.0.0.1:3784`, and
+nothing is listening on 3784 on this machine. It fires only where the board
+renders and never on the dojo, which is what made it look like a game bug in
+three frames. Production is the honest reading:
+
+| request | local | production |
+|---|---|---|
+| `POST /api/games/karate-kids/runs` | 502 | **404** |
+| `GET /api/games/karate-kids/scores` | — | **404** |
+
+### And the verb in the plan was wrong
+
+The plan says `GET /api/games/karate-kids/runs`. **The code POSTs it** —
+`leaderboard.ts:44` is `post('runs', {})`, and `post()` is the only function in
+the file that sets a method. So the plan described a request the game has never
+made, and has done since the note was written.
+
+Small and harmless on its own — the endpoint is missing either way and the
+failure is soft either way. Recorded because it is the **ninth** instance of the
+pattern this document keeps hitting: a claim about the wire that the code
+contradicts, and that no gate here can see. The plan's own standing note says
+"the suspicion applies to every number in this document"; it applies to every
+*verb* too.
+
+### The number the plan has been quoting for three rounds
+
+`docs/COMPLETION-PLAN.md` records **ten** colour literals outside the token
+blocks, with a table breaking them down (6 scrims, 2 wood tones, 1 `color`, 1
+text-shadow). r153 wrote that number after its own audit reported **13**, then
+**12**, then 10 — the extras being prose inside CSS comments quoting measured
+RGB from an older review frame.
+
+A number quoted three rounds running, with a known history of being wrong, and
+no way to reproduce it. `tools/css-literals.py` is that way.
+
+**Answer: 10.** Confirmed, and the breakdown matches the plan's table exactly:
+
+| line | literal | kind |
+|---|---|---|
+| 1622 | `rgb(12 8 4 / 0.94)` | sheet scrim |
+| 1713 | `rgb(12 8 4 / 0.66)` | scrim |
+| 1720 | `rgb(12 8 4 / 0.9)` | scrim |
+| 1869 | `rgb(16 11 8 / 0)` | gradient fade |
+| 1934 | `rgb(8 5 3 / 0.62)` | focus ring |
+| 1982 | `#352a20` | wood tone |
+| 2014 | `rgb(0 0 0 / 0.6)` | knob shadow |
+| **2033** | **`#3a2d22`** | **wood tone (high-contrast override)** |
+| 2678 | `#cfc4b4` | `color` |
+| 2784 | `rgb(0 0 0 / 0.4)` | text-shadow |
+
+The plan was right about all ten, including the one that is easy to miss.
+
+### Two drafts of my own instrument were wrong, and both were caught by checking against the file
+
+Worth the space, because both are the exact shape this loop keeps finding — and
+the first one produced a number that *looked* like a finding.
+
+**Draft 1 emitted comment content as code.** It "skipped comment lines" the way
+r153's filter did, and reported **201 literals, all attributed to line 1** — a
+file where `#352a20` is on line 1982. Obviously wrong, and it was wrong in the
+direction that reads as a big alarming number, which is worse than being
+silently wrong.
+
+**Draft 2 got line numbering subtly wrong.** Comments are *deleted*, not
+skipped, and a comment span usually ends mid-line — so replacing a span with
+only the newlines it contains **deletes the line it was written on**, and every
+literal after the first comment is attributed to the wrong line. I "fixed" this
+by adding a newline for spans not ending at a boundary, which made it worse
+(the count grew by 200 and every position slid the other way).
+
+The technique was settled by checking against the raw file rather than by
+reading the code: internal newlines only keeps 2987 lines in, 2987 out, and
+puts `#3a2d22` at 2033, `#352a20` at 1982, `#cfc4b4` at 2678 — all three
+matching the raw file exactly. **That check is now in the tool**: it refuses to
+print positions if the line count moved.
+
+### Then the tool reported 9, and it was the tool
+
+With comments handled, it still said 9 — missing `#3a2d22` at line 2033. Two
+wrong explanations were available and both were wrong:
+
+- `#3a2d22` was **deleted** from the stylesheet. It was not: `grep -n` puts it
+  at 2033.
+- The plan's count is stale. It was not: the file has ten.
+
+The actual cause was my own allowance test. Rule 3 says *"No colour literal
+may appear outside `:root` / `body.high-contrast`"*, and
+`body.high-contrast .setting-row input[type="checkbox"] { background: #3a2d22 }`
+is a **descendant** of that block — outside it, which is exactly why the plan
+counts it. My matcher allowed the allowance as a **substring**, and
+`body.high-contrast` is the first whitespace token of that selector, so the
+selector matched and the literal was excused. Switching to a token test changed
+nothing, because for this selector the substring and the token test agree —
+which is the moment the bug became visible rather than arguable.
+
+**The number in the plan was right and I was wrong**, three drafts into a tool
+built to check it. Worth stating plainly: I went looking for drift with a tool
+that produced drift, and the first thing I found was mine.
+
+### `tools/css-literals-mutation.sh` — 8/8, and it is self-locating
+
+Every branch, one assertion each: a new literal flagged; one inside `:root`
+excused; one inside bare `body.high-contrast` excused; **one in a descendant
+flagged** (the defect above); one inside a comment ignored (r153's 13-vs-10);
+and comment-stripping proven not to move a line number.
+
+The harness had its own version of the same disease, twice:
+
+- **It exited 0 while printing "0 passed, 8 failed."** Every assertion was
+  `[[ ... ]] && ok || bad` and nothing turned the tally into a status. A
+  mutation harness that prints failures and reports success is the worst
+  available shape for one.
+- **It could not see its own subject.** It hardcoded `REPO` to the absolute
+  repo path and copied the tool from there, so reverting the token-match bug in
+  a scratch copy left all 8 cases **green** — it reached past the mutation and
+  tested the pristine tool. Now self-locating via `BASH_SOURCE`, so a mutated
+  copy of the harness tests the mutated tool beside it.
+
+Both bugs in the harness were found by running the negative control, which is
+the only reason I know they were there:
+
+| control | result |
+|---|---|
+| token-match reverted to substring | **7 of 8 red**, case 1 reports **9** — the exact development failure, reproduced |
+| line-drift reintroduced | **8 of 8 red**, tool exits **2** and refuses to print positions |
+
+Case 1 reproducing `9` under mutation is the difference between "the reader
+was absent" and "the reader was wrong".
+
+### Gates
+
+`check=0` (typecheck + 200 unit + content + assets, 20 assets against
+provenance). `css-literals-mutation=0` (8/8), both negative controls red.
+`e2e=0` — **44 passed, 6 skipped** at **load 6.75**, inside r151's green band,
+and the load was printed before the run rather than after. Load at round start
+was 7.71.
+
+Production: **no deploy needed and none performed.** `dist/index.html` is
+`77c358a7d9aa25d1a9f2b3b2…`, unchanged, because nothing in the bundle moved —
+two new files in `tools/` and two documentation edits. `verify-deploy.sh`:
+`exit 0`, html identical, 2 assets sha256-matched.
+
+### One thing I nearly committed that was not mine
+
+`pnpm test:e2e` rewrites `docs/preview/portrait.png` as a side effect
+(`capture.spec.ts:69`), and the fresh frame differed from the committed one in
+**26.48%** of pixels. My change is `tools/`-only, so that delta is capture
+timing, not an update. Looked at both: the committed frame catches the kick
+**more** extended and frames the fighters better; the fresh one is a worse
+proof of the thing that file exists to prove. Reverted — a tools round should
+not silently degrade a committed artefact, and the spec is explicit that
+freshness is a manual step.
+
+### The shape, for the ninth time
+
+An instrument that reports a plausible value it never measured is worse than
+one that reports nothing. This round it was **me**: 201 literals on line 1, then
+9 where the file has 10, then a harness that exited 0 on eight failures, then a
+harness that could not see the mutation it existed to test. Four wrong numbers,
+all caught by the same move — check the claim against the file before believing
+the tool that made it. The one thing that did not need catching was the plan's
+ten, which was correct the whole way through.
