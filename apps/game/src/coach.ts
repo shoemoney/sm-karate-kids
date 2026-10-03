@@ -50,7 +50,27 @@ const LESSONS: ReadonlyArray<{
   // 'back' from 'forward'" — the same class as rounds 102-105, a decision made
   // in one surface and not the other. The words now match the sheet's legend:
   // retreating and lunging.
-  { zone: 'zone-left', title: 'Stance', pairs: ['◀ back', '▲ jump', '▶ in', '▼ crouch'] },
+  // ORDER MATTERS AND IT IS NOT COSMETIC. `.coach-legend` is a 2-column grid
+  // filled row-major from this array, and the two halves sit on one baseline
+  // grid with no divider, so the array order IS the reading order of the plate.
+  //
+  // This list shipped as `back, jump, in, crouch` while the technique half
+  // below reads `back, forward, up, down`. Rendered, that is `◀▲/▶▼` on the
+  // left and `◀▶/▲▼` on the right: a player who learns the scan pattern from
+  // one half mis-scans the other, and the word "back" then appears twice on the
+  // first line with nothing saying which stick owns which.
+  //
+  // Unobservable until r157 — `retire()` wrote the seen flag at boot, so the
+  // strip could not render at all and no frame in 157 rounds of review ever
+  // contained it. `tools/coach-legend-probe.mjs` reads the order off the live
+  // DOM; it is the gate, because this file's order and the stylesheet's grid
+  // are two decisions in two files, and that pair is what has now drifted
+  // twice (r102-r105 and r103/r104 before it).
+  //
+  // Sideways first, then up/down, which is also how the technique half was
+  // already ordered: the two horizontals share the top line and the two
+  // verticals the bottom one.
+  { zone: 'zone-left', title: 'Stance', pairs: ['◀ back', '▶ in', '▲ jump', '▼ crouch'] },
   // The Moves sheet groups every technique under RIGHT STICK FORWARD / BACK /
   // UP / DOWN. The legend used to say reverse/forward/high/low for the same
   // four directions, so a player who learned the controls from the coach and

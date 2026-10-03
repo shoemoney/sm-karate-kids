@@ -421,6 +421,20 @@ Because nothing is watching, three rules exist and are not optional:
       background at all**), `--leading-relaxed` and `--text-dim` were all
       resolving to nothing. Round 16 found the same class with `--font-display`
       and nothing could see it then either.
+- [x] **the first-run coach's plate was two legends stacked on one baseline grid** —
+      **FIXED at r158.** `.coach-legend` is a 2-column grid filled row-major from
+      the `pairs` array in `coach.ts`, and the two halves sit side by side, so
+      the array order **is** the reading order of the plate. The stance half
+      shipped `[back, jump, in, crouch]` (`◀▲`/`▶▼`) and the technique half
+      `[back, forward, up, down]` (`◀▶`/`▲▼`) — so a player who learned the scan
+      on one half mis-scanned the other, "back" appeared **twice on line one**
+      with nothing marking which stick owned which, and the 4px difference
+      between the inter-half and intra-half gutters was not a boundary. Fixed by
+      reordering the stance array to `[back, in, jump, crouch]` (both halves now
+      scan sideways-then-vertical) and adding a 1px `--edge-faint` rule between
+      them. Gated by `tools/coach-legend-probe.mjs` (exit 1 before, 0 after,
+      **6/6** in its mutation harness with both control arms red separately) and
+      statically by `coach-legend-order.test.ts`.
 - [x] **half-point score typography** — **SHIPPED at r148.** Raised since r918, built
       in r53, revisited in r133, and named by two models in the same round at r147 —
       always in the same four words, never with a number. r148 measured it: a stacked
@@ -439,6 +453,21 @@ document knew about is closed**, including the two r152 left: item 1.2's "return
 to the card", which shipped broken and is now fixed and measured, and item 1.1's
 colour literal, which shipped pinned out of high-contrast and is now fixed and
 measured.
+
+**r158 added the eleventh box, and it came from a different direction than the
+other ten.** Those were a constant or a contract that drifted, or an instrument
+reporting a value it never took. This one is: **a state that becomes reachable
+is not a state that has been reviewed.** r157 made the first-run coach render
+for the first time in 133 rounds; this round regenerated the review set, looked
+at the plate, and found its two halves wrapping in different arrow orders — a
+disagreement that had been in `coach.ts` since r3 and that four rounds had
+already reported in four different words, none of them about the geometry.
+
+Which is the honest summary of item 1.4: **fixing the onboarding did not mean
+anyone had looked at it.** The review set is this loop's instrument, and it had
+been pointed at the coach for twenty rounds while describing a plate it could
+not see. An instrument extended to cover a new state is not extended until
+someone has read what comes out of it.
 
 What remains in 1.1 was corrected this round: the `Do:` line now describes what
 actually shipped (the glyphs sit under the stick captions in the pad footer, and

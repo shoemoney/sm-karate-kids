@@ -9798,3 +9798,169 @@ bundle:
 
 **exit 0.** The onboarding is live on production for the first time in its
 history, and the control proves the probe is not simply always saying yes.
+
+---
+
+## Round 158 — the onboarding had been visible for one round and nobody had looked at it 🧭
+
+r157 fixed the first-run coach so it could render for the first time in 133
+rounds. Nothing in the plan was left open, so this round did the next real
+thing: **regenerated the review set and looked at the plate.**
+
+It is in there. `02-phone-fight` has carried it since r157 — the harness
+captures first runs by default — and it had never been in a frame in any
+reviewable state, because before r157 there was nothing to frame.
+
+### The two halves wrap in different arrow orders
+
+`.coach-legend` is a 2-column grid filled row-major from the `pairs` array in
+`coach.ts`, and the two `.coach-half` blocks sit side by side on one baseline
+grid. So the array order IS the reading order of the plate:
+
+| half | shipped | |
+|---|---|---|
+| stance | `['◀ back', '▲ jump', '▶ in', '▼ crouch']` | renders `◀▲` / `▶▼` |
+| technique | `['◀ back·reverse', '▶ forward·punch', '▲ up·kick', '▼ down·sweep']` | renders `◀▶` / `▲▼` |
+
+Read across the plate, the first line was `◀ back  ▲ jump  ◀ back·reverse  ▶
+forward·punch`. **"back" appears twice on line one** — once per stick, with
+nothing marking which is which — and a player who learns the scan on one half
+mis-scans the other. There was a 12px gutter between halves against an 8px
+gutter inside them: a 4px difference, which is not a boundary.
+
+r124 had already fixed the *wording* of this disagreement and left the
+*geometry* alone, because the wording was what the reviewer could read off a
+screenshot. Nobody had read the geometry.
+
+Fix: the stance array reordered to `[◀ back, ▶ in, ▲ jump, ▼ crouch]` so both
+halves scan sideways-then-vertical, and a 1px `--edge-faint` rule between the
+halves.
+
+### Measured, not eyeballed — `tools/coach-legend-probe.mjs`
+
+390x844, off `getBoundingClientRect`:
+
+| | before | after |
+|---|---|---|
+| arrow order | stance `◀▲▶▼` · technique `◀▶▲▼` | `◀▶▲▼` · `◀▶▲▼` |
+| boundary between halves | 4px more than the intra-half gutter | **1px rule** |
+| plate | 366x46, 0 cells spilling | 366x46, 0 cells spilling |
+| returning player | no strip | no strip |
+
+**6/6** in `tools/coach-legend-mutation.sh`, and the two cases that matter
+most are the control arms going red separately — strip never attached, strip
+permanent — because a probe whose arms cannot fail has learned nothing.
+
+### The assertion I threw away after measuring it
+
+The probe's first version also asserted that same-direction arrows share an x.
+They do not: **121.1px apart**, and it was right to say so.
+
+Fixing it is what took the round's time, and the answer is that it cannot be
+fixed cheaply. Two grid items occupy the same column tracks only if they are in
+different **rows**, so aligned arrows across the halves means stacking the two
+legends into a four-line plate — measured **79.7px against 47.8px today**, and
+r131 established the pad's clearance at **29px**. It would buy column alignment
+by pushing a taller strip into the arena on a screen whose layout was tuned to
+that number.
+
+So the assertion was **removed, not satisfied**, and the number (now 141.3px)
+is printed rather than checked. What the probe asserts instead is what a
+player needs and what is a contract: one arrow order, a visible boundary, no
+spill. The reasoning is in the probe's header, because a gate should not encode
+a hypothesis about how a plate is read — the cost of being wrong is a layout
+decision nobody asked for.
+
+The first attempt at this was also wrong in an instructive way: it gave
+449px → 288px and I shipped that arithmetic into a comment. It assumed merging
+columns takes a max, which is true, and forgot that merging requires *stacking*
+first. 59ch of hand-math versus 47.8px measured is how a plausible number
+gets written down.
+
+### The README hero image has been showing it since r3
+
+`docs/preview/portrait.png` is the README's first image, and the committed
+copy is a first-run capture, so **the defect was the project's public face**:
+
+    HEAD   ◀ back   ▲ jump    ◀ back · reverse  ▶ forward · punch
+           ▶ in     ▼ crouch  ▲ up · kick       ▼ down · sweep
+
+    r158   ◀ back  ▶ in    ┃  ◀ back · reverse  ▶ forward · punch
+           ▲ jump  ▼ crouch┃  ▲ up · kick       ▼ down · sweep
+
+Five rounds' worth of this log is about the coach and the sheet disagreeing
+over **wording**, and every one of them was reading this image. Nobody read the
+two halves as a **table** — which is what it is, because the grid that renders
+them is one grid, and the array that orders them is two arrays that never
+agreed. Kept the new capture, as r157 did after looking at both.
+
+### Two guards that cried wolf, and a check that could never pass
+
+**Wrong coordinate frame, twice.** A clearance assertion read `-13.0px` — the
+plate overlapping the rings. `#pad` is 9px taller than its own rings because it
+has padding. Re-anchored on the rings: `-4.0px`. Still red. Then I read the
+frame: the plate's bottom is at 629.1 and the up chevrons paint around 655, so
+the affordance r131 moved the strip to protect has ~26px to spare. What
+overlapped was a **padding box, not paint**. Dropped, with the numbers kept so a
+real growth shows as a trend. r157's `pixel-identity` arm made exactly this
+mistake — measuring a crop that had already been cropped — and the tell is the
+same both times: a red gate about something that does not exist.
+
+**A check wired to nothing.** The probe waited on `waitForSelector('.coach-strip')`
+and *then* read it, which made its own "no strip — the positive control did not
+fire" branch **unreachable**: the wait throws at 10s and the process dies first.
+Case 4 of the harness reported `exit 1` and read as a pass on the diagnosis.
+Now it polls for the plate, and a page that never reaches `fight` gets its own
+**exit 2** — rule 4, so an environment failure can never be read as a verdict.
+
+**The harness could not pass.** Its closing check was `git diff --quiet` on the
+two files it mutates — and this round's fix is uncommitted by design, so the
+check was red from the moment the harness started. It passed all six cases and
+still exited 1. Now a checksum taken at entry.
+
+### Case 4 was not the case I wrote
+
+Case 4 was meant to be the r157 regression — restore `retire()`'s unconditional
+flag write — and it **passed when it should have failed**. The mutation left
+the strip rendering perfectly, because this probe uses `?mode=dojo` and **dojo
+never calls `startRound` at boot**. The route that made the flag write early is
+not reachable from here at all. That is precisely why r157's probe uses dojo as
+its positive arm, and it means the r157 regression is covered on the tournament
+arm by `coach-probe.mjs` and not here. Two gates over two routes is the right
+shape; the harness says so instead of implying coverage it does not have.
+
+### The tenth drift, in a comment
+
+`tools/review-shots.mjs` said the coach strip "was present in EVERY frame the
+loop ever showed a model". True r3–r22, **false r23–r156**, and true again from
+r157 — so it was wrong in both directions at once, describing a harness whose
+captures have flipped twice. Corrected, with both directions spelled out.
+
+### Gates
+
+`check=0` — typecheck, **206 unit** (was 203, +3 in
+`coach-legend-order.test.ts`, which fences the order statically so `pnpm check`
+catches a reorder without a browser), content, assets (20 against provenance).
+`e2e=0` — **44 passed, 6 skipped**, **load 4.24**, inside r151's green band.
+
+`coach-legend-probe` **exit 1 on the un-fixed tree, 0 on the fixed one** ·
+`coach-legend-mutation` **6/6** · unit fence proven red in 3 mutations ·
+`css-literals-mutation` 8/8 · `contrast-reach-mutation` 12/12 ·
+`undefined-vars-mutation` 9/9 · `css-literals` **0 literals** ·
+`contrast-reach` exit 0 · review set regenerated before the look, and
+`verify_shots.py` green at **motion 14.04%** over an 8-frame burst.
+
+### The shape, for the eleventh time, and it is the eleventh *kind*
+
+r157 found the onboarding was dead. This round found that **fixing it did not
+mean anyone had looked at it** — and the first look turned up a disagreement
+that had been in the source since r3 and that four rounds had already reported
+in four different words. Not a constant that drifted, not a contract the code
+failed to keep, not an instrument reporting a value it never took.
+
+**A state that becomes reachable is not a state that has been reviewed.** r157
+made a screen exist; the reviews that had been reporting it for 20 rounds were
+describing a plate they could not see, and the ones this round found were in
+the same category. The generalisation is the cheapest one in this log: the
+review set is the loop's instrument, and an instrument extended to cover a new
+state is not extended until someone has actually read what comes out of it.

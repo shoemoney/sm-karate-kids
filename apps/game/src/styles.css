@@ -1649,8 +1649,25 @@ body:has(.result[data-phase='result'].show) .stick-zone {
   inset-inline: var(--space-3);
   z-index: 3;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
+  /* Two content-sized halves with the free space between them, rather than
+     1fr 1fr. The stance half is far narrower than the technique half (its cells
+     carry no action gloss), so equal columns leave a hole in the middle of the
+     plate; sizing to content and pushing the groups apart does not.
+
+     The obvious next step was to give the plate four shared tracks, one per
+     direction, and subgrid the halves onto them — which WOULD put the stance
+     half's `◀` under the technique half's `◀` instead of 121px away. It does
+     not work without stacking the halves: two grid items occupy the same
+     tracks only if they are in different rows, so shared columns means a
+     four-line plate. Measured at 79.7px against 47.8px today, and r131
+     established the pad's clearance is 29px. It would buy column alignment by
+     pushing into the arena on a screen whose layout was tuned to that number,
+     so this keeps the halves side by side and the divider does the work.
+     `tools/coach-legend-probe.mjs` asserts what is actually a contract —
+     one arrow order, a visible boundary, no spill, no pad overlap. */
+  grid-template-columns: repeat(2, auto);
+  column-gap: var(--space-4);
+  justify-content: space-between;
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-md);
   background: var(--coach-plate);
@@ -1664,9 +1681,18 @@ body:has(.result[data-phase='result'].show) .stick-zone {
 
 .coach-half {
   display: grid;
-  gap: 1px;
   justify-items: center;
-  text-align: center;
+  align-content: center;
+}
+
+/* Two legends, painted as two. The gap alone did not say so: the plate had a
+   12px gutter between halves against an 8px gutter inside them, a 4px
+   difference, and it read as one four-column table with "back" appearing twice
+   on the first line and nothing marking which stick owned which. A rule is
+   unambiguous in a way that 4px is not. */
+.coach-half + .coach-half {
+  border-left: 1px solid var(--edge-faint);
+  padding-left: var(--space-3);
 }
 
 .coach-half strong {

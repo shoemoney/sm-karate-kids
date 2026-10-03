@@ -307,16 +307,29 @@ await capture('13-phone-ladder', phone, async (page) => {
 
 /* The state every returning player sees, and the state reviewers had been
    judging as if it were the only one.
- *
- * Every capture in this harness runs in a fresh browser context with an empty
-   localStorage, so the first-run coach strip was present in EVERY frame the
-   loop ever showed a model. Three separate rounds reported it as "a permanent
-   instruction wall" that "never clears between moves". It clears on the first
-   bout once both sticks have been used — but no reviewer could have known that
-   from a screenshot, because no screenshot showed the other state.
- *
- * This seeds the seen flag, so the review set contains both first-run and
- * returning-player views of the same screens. */
+   *
+   * CORRECTED at r158 — this comment was wrong in BOTH directions.
+   *
+   * It said the first-run coach strip "was present in EVERY frame the loop ever
+   * showed a model". True r3-r22. False r23-r156, because r23 added
+   * `coach.dismiss()` to `clearBoutUi`, `dismiss()` is `retire()`, and
+   * `retire()` wrote the "already seen" flag — so boot marked the coach seen
+   * before it had appeared, and no frame after r23 could contain it. r157 fixed
+   * that, which makes the sentence true AGAIN, and every capture below is a
+   * first run with the strip up.
+   *
+   * So both halves of this set are first-run on purpose now: this one seeds the
+   * flag, so the set also carries the view a returning player has. The strip
+   * clears once both sticks have been used — which no reviewer could have
+   * known from one screenshot, because until this round no screenshot showed
+   * the other state. Three rounds had called it "a permanent instruction wall"
+   * that "never clears between moves"; they were describing a plate they had
+   * only ever seen un-retired.
+   *
+   * r158 is also the first round whose review set carries this plate in a
+   * legible state, and the first look anyone has given it found the two halves
+   * wrapping in different arrow orders. A frame nobody captured cannot be
+   * reviewed, and a frame nobody LOOKED at is the same thing in a better hat. */
 await capture('14-phone-returning', phone, async (page) => {
   await page.addInitScript(() => {
     try {
