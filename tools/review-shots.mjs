@@ -6,6 +6,7 @@
  * Not a test harness — this exists to feed tools/vision-review.py.
  */
 import { chromium } from '@playwright/test';
+import { execFileSync } from 'node:child_process';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 
 const OUT = process.argv[2] ?? '/tmp/smkk-review';
@@ -20,6 +21,9 @@ const browser = await chromium.launch({
 
 const errors = [];
 
+/** Action timeout for a cold page load on a machine that may be busy. */
+const SHOT_TIMEOUT_MS = 120_000;
+
 async function capture(name, viewport, steps) {
   const ctx = await browser.newContext({
     viewport,
@@ -28,6 +32,17 @@ async function capture(name, viewport, steps) {
     hasTouch: viewport.width < 700,
   });
   const page = await ctx.newPage();
+  // Playwright's default action timeout is 30s, and it applies to `screenshot`.
+  // On a loaded machine that is not enough for a software-rendered WebGL canvas to
+  // hand the compositor a frame, and the whole run dies with no frames written at
+  // all — measured at load 18.9, `08-desktop-fight`, `Timeout 30000ms exceeded:
+  // taking page screenshot` after fonts had loaded.
+  //
+  // r151's standing instruction is that a red result on this machine is not a
+  // verdict until the load is printed beside it, and the same applies to a dead
+  // one: the fix is more headroom plus a visible load, not a tighter timeout.
+  // Waiting for an idle machine is not available to an unattended round.
+  page.setDefaultTimeout(SHOT_TIMEOUT_MS);
   page.on('console', (m) => {
     if (m.type() === 'error') errors.push(`${name}: ${m.text()}`);
   });
@@ -748,6 +763,57 @@ await capture('21-phone-kick-open', phone, async (page) => {
   if (!caught) console.warn('21-phone-kick-open: no active kick observed, frame not written');
 });
 
+/* ---------- r164: the PAUSED overlay (PRD FR-018) ---------- */
+
+/* The overlay r163 shipped has never been in a review set.
+ *
+ * This is round 158's lesson landing again, verbatim and one release later. r158
+ * found that fixing the onboarding did not mean anyone had looked at it: the
+ * review set is this loop's instrument, and it had been pointed at the coach for
+ * twenty rounds while describing a plate it could not see. r163 made the PAUSED
+ * state reachable — losing focus mid-bout raises a full-viewport scrim and only
+ * the player dismisses it — and a state that becomes reachable is not a state
+ * that has been reviewed.
+ *
+ * So for one release the loop reviewed a game with a feature it never once
+ * photographed. `#pause` is `hidden` in every other frame in this set, so all
+ * twenty-one previous frames and this one are the same game to a reviewer.
+ *
+ * The frame is taken mid-bout on the phone viewport, because that is the state
+ * that triggers it: `pause()` returns early unless a bout is live, so a capture
+ * posed on a menu would show no overlay and be indistinguishable from a
+ * regression. Hence the assertion below rather than a bare screenshot — a frame
+ * that cannot fail on the defect is not a frame of this feature. */
+await capture('22-phone-paused', phone, async (page) => {
+  await page.goto(`${BASE}/?mode=dojo`, { waitUntil: 'networkidle' });
+  await waitFight(page);
+
+  // A real focus loss, not a class toggle. `pause()` is a `window` blur handler
+  // and `pauseEl.hidden` is what it sets, so un-hiding the element by hand would
+  // photograph a state the game never reaches.
+  await page.evaluate(() => window.dispatchEvent(new Event('blur')));
+  await page.locator('#pause').waitFor({ state: 'visible', timeout: 3000 });
+  await page.waitForTimeout(250);
+
+  // Confirm the thing the frame exists to show is actually in the frame. Without
+  // this the shot is written unconditionally and a silently-broken overlay still
+  // produces a picture a reviewer reads as "all clear" — which is precisely how
+  // r53 turned fifteen stale frames into fifteen accurate-looking findings.
+  const state = await page.evaluate(() => {
+    const el = document.querySelector('#pause');
+    const r = el?.getBoundingClientRect();
+    return {
+      hidden: el?.hasAttribute('hidden') ?? true,
+      covers: r ? r.width >= innerWidth && r.height >= innerHeight : false,
+    };
+  });
+  if (state.hidden || !state.covers) {
+    console.warn(`22-phone-paused: overlay not raised (hidden=${state.hidden} covers=${state.covers}), frame not written`);
+    return;
+  }
+  await page.screenshot({ path: `${OUT}/22-phone-paused.png` });
+});
+
 /* ── The motion burst ───────────────────────────────────────────────────────
  * Every shot above is a cold page load in its own browser context. No two
  * frames in this set share a page, so sorting them by filename compares
@@ -817,5 +883,17 @@ await burstCtx.close();
 console.log(`burst: ${BURST} frames, ticks ${burst[0]?.tick}..${burst.at(-1)?.tick}`);
 
 await browser.close();
+
+// The load belongs next to the frame count, for r151's reason: this machine does
+// not idle, and a review set is only as good as the machine it was taken on. The
+// gate that consumes these frames cannot see it from inside the PNG.
+//
+// Read via the repo's own reader rather than a second `sysctl` parse here, so
+// there is one place that knows how a load is read and what an unreadable one
+// looks like. An unreadable load prints as whatever that reader prints — never 0.
+const load = execFileSync(process.execPath, [new URL('./host-load.mjs', import.meta.url).pathname], {
+  encoding: 'utf8',
+}).trim();
 console.log(`shots in ${OUT}`);
+console.log(`host load at capture: ${load}`);
 if (errors.length) console.log('console errors:\n' + [...new Set(errors)].join('\n'));

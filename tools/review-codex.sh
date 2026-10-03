@@ -75,6 +75,30 @@ if [[ -z "${OPENROUTER_API_KEY:-}" ]]; then
   exit 2
 fi
 
+# ...and the same trap one layer down: a bearer that is PRESENT but cannot INFER.
+# Nothing above can see it, because codex itself exits 1 and the log is a wall of
+# unrelated MCP auth noise (vercel, github-copilot), so the round diagnoses codex
+# instead of the credential. That is the exact misdiagnosis the empty-bearer check
+# above exists to prevent, in the one case it does not cover.
+#
+# Measured r164: the key in `~/.openrouter` returns HTTP 200 on
+# `/api/v1/models` — which reads as a working key to any probe that stops there —
+# and HTTP 401 "User not found" on `/api/v1/chat/completions`, twice in a row.
+# The catalogue endpoint does not authenticate inference, so it cannot stand in
+# for this. One cheap call separates the two, and costs a fraction of a cent.
+#
+# Exit 4, distinct from 2 (no bearer) and 3 (no binary), because they are three
+# different faults and an operator fixing one does not fix the others.
+BEARER_RC=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 \
+  https://openrouter.ai/api/v1/chat/completions \
+  -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"model":"openai/gpt-4o-mini","messages":[{"role":"user","content":"ping"}],"max_tokens":1}')
+if [[ "$BEARER_RC" != "200" ]]; then
+  echo "codex: the bearer cannot reach inference (HTTP $BEARER_RC) — refusing to run codex, whose exit would name itself rather than the credential" >&2
+  exit 4
+fi
+
 PROMPT=$(cat <<'EOF'
 You are the CONSUMER reviewer. You are looking at a browser point-karate game —
 a two-thumb arcade fighter for a phone, built on a low-bandwidth grid and played
