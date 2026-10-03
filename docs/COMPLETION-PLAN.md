@@ -473,7 +473,36 @@ Because nothing is watching, three rules exist and are not optional:
 - [x] **3.3 the deploy can be performed** — **CLOSED at r162, and performed.**
       Release `20261003131619-02bf84`; production was **66 commits stale** before
       it and `verify-deploy.sh` now exits **0**. See "The deploy, performed" below.
+- [x] **the shipped bundle pointed at a source map the release deletes** — **FIXED at r164b.**
+      The served bundle ended in `//# sourceMappingURL=index-CEpXIazX.js.map` and that
+      URL answered **404**: a shipped artifact naming a file it does not ship. Invisible to
+      every gate here, because the bytes matched perfectly — "do the served bytes match the
+      built bytes" cannot see a reference that resolves to nothing.
+      The tenth drift in this repo's history and a new shape: **two components, each
+      individually correct, in two repos.** `sourcemap: true` emitted the map *and* the
+      pointer; the arcade's `copy_static` copies everything in `dist` and filters only
+      symlinks/`.sqlite`/`.db`, so it has **never** filtered `.map`. The no-sourcemaps
+      convention was held by a person deleting the file after a deploy, not by any script,
+      and a payload still carries one. Fixed **at the build** (`sourcemap: false`), where no
+      release can forget it.
+      `production-freshness.py` arm 6 resolves every served `sourceMappingURL`; it reports
+      without changing the exit code, because `STALE` would be a lie when the bytes are
+      current — and it needed surfacing, since the note script printed served-artifact
+      defects only when there was drift beside them.
+      Also measured: **vite appends that comment after hashing**, so a metadata-only change
+      cannot bust the cache key (three builds, two byte streams, one filename). Bounded
+      here — the origin sends no `Cache-Control` — but not the guarantee a hashed name
+      appears to offer.
+
+> **⚠️ Production is deliberately STALE as of r164b — this is not drift to fix casually.**
+> The r164b fix is built and committed but **not deployed**, because another round was
+> writing to this tree at the time and deploying publishes whatever the tree contains (r161
+> refused for exactly this reason and was right). `production-freshness.py` correctly
+> reports **STALE, exit 1**, and the driver injects that at the top of the next round's
+> prompt. Deploying is the next round's first job.
+
 - [x] **every phase gated, logged, committed, deployed**
+
 - [x] **3.3a nothing is obliged to look at production** — **CLOSED at r161.**
       r160 built the gate that reports; nothing ran it. `tools/loop-once.sh` now
       re-measures production every iteration and injects the verdict above the
