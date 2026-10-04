@@ -35,8 +35,8 @@
 # and its own guard `return`s without writing a file. Those are `opportunistic`
 # and the gate reports a missing one as UNCOVERED rather than as a failure.
 #
-# There is **one `opportunistic` row left**, down from three, and each row that
-# changed changed for a measured reason rather than a policy one.
+# There is **one `opportunistic` row fewer**, down from three to two, and each
+# row that changed changed for a measured reason rather than a policy one.
 #
 # r171 recorded the debt: their guards fired 10, 8 and 8 times across the
 # retained loop logs and nothing noticed, and four review passes had argued about
@@ -54,12 +54,25 @@
 #       **a half stays on the board until the next point**, so its subject does not
 #       expire in four ticks. Measured 3/3, throw 6 every time.
 #
-#   18  THE KICK AT CONTACT — now reliable for a structural reason too. A landed
+#   18  THE KICK AT CONTACT — much better, and **still `opportunistic`, because
+#       "much better" is not "reliable" and the difference is the load.** A landed
 #       kick awards a call, and the referee phase holds the striker on the pose's
-#       `contact` frame for 96 ticks (`spriteFrames.ts`). So this is not a 4-tick
-#       window at all; it is about a second and a half. Measured 3/3, throw 1,
-#       `cell 64 active -> active`, and the kept frame was looked at: leg up, foot
-#       on the defender's body.
+#       `contact` frame for 96 ticks (`spriteFrames.ts`), so the SIM holds the pose
+#       for about a second and a half — which is a real structural handle, and it
+#       took this capture from 0 kept shutters in 12 throws to landing on throw 1.
+#       Measured **4/4 correct at load 7.0-11.7** (`cell 64 active -> active`, and
+#       the kept frames were looked at: leg up, foot on the defender's body).
+#
+#       Then at **load 16.2** the same capture reported `cell 64 active -> active`
+#       and photographed **both fighters standing in guard**. That is the
+#       compositor presenting a frame older than the referee's own hold, and no
+#       amount of reading `spriteFrames()` either side of the shutter can see it,
+#       because both reads agree with each other and both disagree with the
+#       picture. Standing rule 5: a measurement that cannot be reproduced is not a
+#       result. Four greens at load 7-11 and one red at 16 is not a reliable
+#       capture, it is a capture that works when the machine is quiet — and this
+#       machine does not idle, which is r151's standing warning and the reason a
+#       frequency check is not a gate.
 #
 #   21  THE KICK INTO OPEN AIR — **still opportunistic, and the reason is
 #       hardware rather than carelessness.** A whiffed kick gets no call and so no
@@ -98,7 +111,9 @@
 #
 # What replaced the honest half is not nothing: `review-shots.mjs` exits **1** when
 # it fails to deliver a DECLARED `capture`, so the capture says so at the moment
-# it happens rather than leaving a tally for a gate to find later.
+# it happens rather than leaving a tally for a gate to find later. And it reads the
+# kinds from THIS file rather than a second list, because two lists is two things
+# to forget to update.
 #
 # Proved able to fail in `tools/verify-shots-mutation.sh`.
 #
@@ -125,8 +140,8 @@
 15-phone-settings-mixed	capture	settings with LARGE CONTROLS and LEFT-HANDED on	the combination rows r169's rebuild made reachable by identity rather than index
 16-phone-in-play	capture	a bout with the perf HUD showing	the live HUD over a live fight
 17-phone-scored-result	capture	a DRAWN bout's result card, 0 — 0	the score path, and the only DRAW frame in the set — which is what gave r171b's camera defect a reviewable witness. Named `scored-result` and described as "after a point scored" for its whole life; it walks right 40 times and never scores. That is r169's defect in a third place
-18-phone-kick	capture	a kick at contact range	r89's 2.96:1 foot, the measurement that drives open item 2.1. Reliable at r172 because a LANDED kick awards a call and the referee phase holds the striker on the contact frame for 96 ticks, so the subject is held rather than fleeting. Measured 3/3, throw 1, cell 64 active. Was `opportunistic` and missing from roughly one set in six
-19-phone-half-point	capture	a HALF on the board	r148's typography, and the set's most-missed frame: it was watching for a `.score-frac` element r148 had itself deleted, so it had a 0% hit rate in every run since. It reads the `½` glyph in the score's own text now, before and after the shutter. Reliable because a half STAYS on the board until the next point. Measured 3/3, throw 6. The geometry is gated deterministically by tools/scoreline-stability.mjs regardless
+18-phone-kick	opportunistic	a kick at contact range	r89's 2.96:1 foot, the measurement that drives open item 2.1. r172 found the structural handle — a LANDED kick awards a call and the referee phase holds the striker on the contact frame for 96 ticks — and took this capture from 0 kept shutters in 12 throws to landing on throw 1: 4/4 correct at load 7.0-11.7, frames looked at. But at load 16.2 it reported `cell 64 active -> active` and photographed a guard stance, so it stays `opportunistic`. Was missing from roughly one set in six
+19-phone-half-point	capture	a HALF on the board	r148's typography, and the set's most-missed frame: it was watching for a `.score-frac` element r148 had itself deleted, so it had a 0% hit rate in every run since. It reads the `½` glyph in the score's own text now, before and after the shutter. **The one capture here that is genuinely reliable**, for a structural reason: a half STAYS on the board until the next point, so its subject does not expire in four ticks. Measured 5/5 across load 7.0-16.2, throw 6 every time, and every kept frame looked at. The geometry is gated deterministically by tools/scoreline-stability.mjs regardless
 20-phone-call	capture	the referee's call on screen	r118's notation line, mid-announcement
 21-phone-kick-open	opportunistic	a kick thrown into open air, whole end to end	the frame that settles the "amputated kick" family of six reviews — a landed kick puts the foot on the defender's body under an impact effect, obscuring the very thing being judged. Rebuilt at r172 with a jpeg probe shutter (26 ticks to 15, measured) and 30 throws, which took it from about one set in six to a coin flip. It stays `opportunistic` because a whiffed kick gets no referee hold and the compositor presents later than the sim advances: a capture bracketed `active -> recovery` was looked at and came back a guard stance. Its row used to say "a kick landing on the defender's body", which is the one thing this capture exists to avoid
 22-phone-paused	capture	the PAUSED overlay, full viewport	r164 added this: focus loss pauses a bout, and nothing had ever photographed it

@@ -248,17 +248,26 @@ expect_manifest honest                frames-absent.tsv        2 "is not there"
 # broken. That is r170's lesson, and this harness has already been wrong about it
 # twice in one file.
 expect_manifest real-all real-frames.tsv 0 "declared states covered"
-for GONE in 18-phone-kick 19-phone-half-point 23-phone-picked 06-phone-settings; do
+for GONE in 19-phone-half-point 23-phone-picked 06-phone-settings 02-phone-fight; do
   rm -rf "$ROOT/real-missing-$GONE"
   cp -r "$ROOT/real-all" "$ROOT/real-missing-$GONE"
   rm -f "$ROOT/real-missing-$GONE/$GONE.png"
   expect_manifest "real-missing-$GONE" real-frames.tsv 1 "were not written"
 done
-# The optimistic direction: the one row still allowed to miss its subject.
-rm -rf "$ROOT/real-missing-21-opportunistic"
-cp -r "$ROOT/real-all" "$ROOT/real-missing-21-opportunistic"
-rm -f "$ROOT/real-missing-21-opportunistic/21-phone-kick-open.png"
-expect_manifest real-missing-21-opportunistic real-frames.tsv 0 "UNCOVERED"
+# The optimistic direction: the two rows still allowed to miss their subject.
+#
+# This arm READ the manifest rather than naming the frames, so it followed r172's
+# own correction with no edit here: an hour earlier `18-phone-kick` was declared
+# `capture` on 4 greens at load 7-11, then photographed a guard stance at load
+# 16. Flipping the row back made this arm go green by itself, which is the whole
+# argument for building the fixture from the real contract instead of a copy.
+for GONE in 18-phone-kick 21-phone-kick-open; do
+  CASE="real-missing-$GONE-opportunistic"
+  rm -rf "$ROOT/$CASE"
+  cp -r "$ROOT/real-all" "$ROOT/$CASE"
+  rm -f "$ROOT/$CASE/$GONE.png"
+  expect_manifest "$CASE" real-frames.tsv 0 "UNCOVERED"
+done
 
 # --- case 9: the old algorithm, verbatim, on the same failure ----------------
 OLD=$("$PY_BIN" - "$ROOT/unplayed" <<'PY'

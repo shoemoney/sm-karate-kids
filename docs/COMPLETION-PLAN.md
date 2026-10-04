@@ -13,7 +13,7 @@ has been improving.
 | Tests | **249 unit / 32 files** (`pnpm check` → 0, re-measured at r171b); **72 e2e across 11 files declared** (`playwright test --list`) and **run green at r171b** — 66 passed, 6 skipped, 0 failed, at load 10.24, which is the ambiguous band (green 8–10, red 14–16). r171b changed `apps/game/src`, so the e2e run was required rather than optional. |
 | Review loop | 168 rounds, 20 review frames, mutation-tested fences |
 | Commits | 322 |
-| Production | ⚠️ **STALE — 13 commits behind, re-measured at r172.** `production-freshness.py` → **exit 1**: served build pinned to `d839702c9` (r166), an upper bound. The live origin is **missing r167's championship-counter fix** and **r171b's camera fix** — a fighter sliced by the frame edge on the game's own result card. **The deploy is blocked on a human attestation** (r170 reached the privacy gate and stopped; nothing since has changed what it attests to). |
+| Production | ⚠️ **STALE — 15 commits behind, re-measured at r172.** `production-freshness.py` → **exit 1**: served build pinned to `d839702c9` (r166), an upper bound. The live origin is **missing r167's championship-counter fix** and **r171b's camera fix** — a fighter sliced by the frame edge on the game's own result card. **The deploy is blocked on a human attestation** (r170 reached the privacy gate and stopped; nothing since has changed what it attests to). |
 
 > **Re-measured at r168, and this row was wrong.** It said "165 rounds" and
 > "315 commits" — this document's own snapshot drifting — and the Tests row said
@@ -458,7 +458,7 @@ future false alarm and a gate that cries wolf gets deleted. A sha256 comparison
 is exact, and if the served bytes equal the built bytes then every fix in them is
 live.
 
-### 3.4 Three captures that cannot reliably find their subject — `CLOSED at r172, two of three`
+### 3.4 Three captures that cannot reliably find their subject — `CLOSED at r172, one of three`
 
 **Found:** r171, while auditing the review set rather than the game.
 **Why it matters:** they are the three frames this loop has argued about most,
@@ -475,11 +475,21 @@ tripwire against one returning. The selector matched nothing, ever: a **0% hit
 rate in every review run from r148 to r172**, 24 rounds. It now reads the shipped
 `½` glyph in the score element's own text. **3/3, throw 6.**
 
-**`18-phone-kick` is now deterministic for a reason in the game rather than the
-harness.** A landed kick awards a call, and the referee phase holds the striker
-on the pose's `contact` frame for 96 ticks — so this is not a 4-tick window at
-all, it is about a second and a half. **3/3, throw 1, `cell 64 active -> active`**,
-and the kept frame was looked at: leg up, foot on the defender's body.
+**`18-phone-kick` went from 0 kept shutters in 12 throws to landing on throw 1,
+and is still `opportunistic`.** A landed kick awards a call, and the referee phase
+holds the striker on the pose's `contact` frame for 96 ticks, so the SIM holds the
+pose for about a second and a half. **4/4 correct at load 7.0–11.7**, with the
+kept frames looked at: leg up, foot on the defender's body.
+
+Then at **load 16.2** the same capture reported `cell 64 active -> active` and
+photographed **both fighters standing in guard**. Both reads agree with each other
+and both disagree with the picture, because the compositor presented a frame older
+than the referee's own hold — and reading `spriteFrames()` either side of the
+shutter cannot see that, which is the limit of the sandwich stated exactly.
+Standing rule 5: four greens at load 7–11 and one red at 16 is not a reliable
+capture, it is a capture that works when the machine is quiet. This machine does
+not idle, and r151's standing warning is that a per-round frequency check is not a
+gate.
 
 **`21-phone-kick-open` stays `opportunistic`, and the reason is hardware.** A
 whiffed kick gets no call and so has no referee hold; its subject is a 26-tick
@@ -492,7 +502,7 @@ advances. **A capture bracketed `active -> recovery` was looked at and came back
 guard stance.** Flipping that row would make the gate permanently red.
 
 **Do:** done, and what it turned out to need was not the plan's suggestion.
-**Accept:** `verify_shots.py` exits 1 if `18` or `19` is missing — proved in
+**Accept:** `verify_shots.py` exits 1 if `19` is missing — proved in
 `tools/verify-shots-mutation.sh` by an arm that builds its fixture **from the
 repository's own manifest** rather than a hand-written list (4 missing `capture`
 frames red, the missing `opportunistic` row green with UNCOVERED, positive control
@@ -653,16 +663,20 @@ Because nothing is watching, three rules exist and are not optional:
 > The unit test owns the branch; the probe owns the DOM.
 
 - [x] **3.4 the three captures that cannot find their subject** — **CLOSED at r172,
-      two of three.** `19-phone-half-point` had been dead for 24 rounds rather than
-      flaky: its observer polled `.points .score-frac`, an element **r148 deleted**,
-      so it matched nothing and the frame was written 0% of the time since. It now
-      reads the shipped `½` glyph and is 3/3. `18-phone-kick` is deterministic
-      because a landed kick's referee phase holds the striker on the contact frame
-      for 96 ticks. `21-phone-kick-open` stays `opportunistic` with its hardware
-      reason recorded — a whiffed kick has no hold, and a screenshot costs more
-      ticks than the move. `review-shots.mjs` exits 1 for any declared `capture`
-      it cannot deliver; the mutation harness proves it against the repo's real
-      manifest, 26/26.
+      one of three, and the other two recorded rather than left flaky.**
+      `19-phone-half-point` had been dead for 24 rounds rather than flaky: its
+      observer polled `.points .score-frac`, an element **r148 deleted**, so it
+      matched nothing and the frame was written 0% of the time since. It now reads
+      the shipped `½` glyph and is **5/5 across load 7–16**, and it is the only one
+      of the three the coverage gate is strict about. `18-phone-kick` gained the
+      structural handle — a landed kick's referee phase holds the striker on the
+      contact frame for 96 ticks — and went from 0 kept shutters in 12 throws to
+      4/4 at load 7–11.7, **but it photographed a guard stance at load 16.2**, so
+      it stays `opportunistic`. `21-phone-kick-open` stays `opportunistic`: a
+      whiffed kick has no hold, and a screenshot costs 15–33 ticks against a 26-tick
+      move. `review-shots.mjs` exits 1 for any declared `capture` it cannot
+      deliver; the mutation harness proves that against the repo's real manifest,
+      26/26.
 - [x] **a fighter was leaving the screen, on the game's own result card** — **FIXED at
       r171b.** The review set's `17-phone-scored-result` frame is a **DRAW 0 — 0**
       with one fighter **sliced in half by the right frame edge** and the other

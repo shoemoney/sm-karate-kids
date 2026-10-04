@@ -12116,14 +12116,27 @@ The plan said "slow the page's own clock, or install a page-side observer that
 holds the pose". Both are the freeze. The answer turned out to be a property of
 the **game**, not the harness:
 
-- **18 (a kick at contact range) is now deterministic** because a *landed* kick
-  awards a call, and the referee phase holds the striker on the pose's `contact`
-  frame for 96 ticks. So this is not a 4-tick window at all — it is about a
-  second and a half, and photographable. Measured **3/3, throw 1,
-  `cell 64 active -> active`**. Looked at: leg up, foot on the defender's body.
-  And the first version of this fix *failed three bouts* because I had written
+- **18 (a kick at contact range) went from 0 kept shutters in 12 throws to landing
+  on throw 1** — because a *landed* kick awards a call, and the referee phase holds
+  the striker on the pose's `contact` frame for 96 ticks. So the SIM holds the
+  pose for about a second and a half. Measured **4/4 at load 7.0–11.7**,
+  `cell 64 active -> active`. Looked at: leg up, foot on the defender's body. And
+  the first version of this fix *failed three bouts* because I had written
   `if (phase !== 'fight') return null` — bailing on the exact state that makes it
   photographable. That is r163's sheet-pause work paying for itself by accident.
+
+  **And then I reproduced the whole round at load 16.2 and 18 photographed a guard
+  stance**, with both reads reporting `cell 64 active -> active`. The compositor
+  presented a frame older than the referee's own hold, and *both* reads agreeing
+  with each other while disagreeing with the picture is the exact limit of the
+  sandwich: it bounds the SIM, and it cannot see the screen.
+
+  So **18 stays `opportunistic`.** Four greens at load 7–11 and one red at 16 is
+  not a reliable capture, it is a capture that works when the machine is quiet —
+  and r151's standing warning is that this machine does not idle and a per-round
+  frequency check is not a gate. I had already written the manifest row, the plan
+  and this log entry saying `capture`; standing rule 5 says a measurement that
+  cannot be reproduced is not a result, and the pixel said guard.
 - **21 (a kick into open air) stays `opportunistic`, and it is hardware.** A
   whiffed kick gets no call, so there is no hold; its subject is a 26-tick
   transient and the shutter is 15. The probe shutter is jpeg now, which is the
