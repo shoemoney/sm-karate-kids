@@ -164,6 +164,22 @@ and you get a cascade of failures that have nothing to do with your change. Chec
 lsof -ti:4173   # must print nothing before you trust an e2e run
 ```
 
+⚠️ **`pnpm test:e2e` does not modify the tree.** It used to: the capture spec wrote
+`docs/preview/portrait.png` — the README's first image, a tracked file — on every run, so
+every local e2e ended with an unreviewed diff in `git status`. Seven rounds reverted it by
+hand, and it cost a deploy at r164: a dirty tree was indistinguishable from another agent
+mid-edit, so the round correctly refused to publish. The frame now goes to
+`apps/game/test-results/preview/` (gitignored) by default. Refreshing the committed preview
+is an explicit act whose result is a real diff to read:
+
+```bash
+SMKK_COMMIT_PREVIEW=1 pnpm test:e2e   # rewrites docs/preview/portrait.png on purpose
+```
+
+Gated by `apps/game/tests/unit/preview-capture-not-tracked.test.ts`, which resolves the
+spec's default path and checks it against the real `.gitignore` rather than a hardcoded
+string — proved red by restoring the old default.
+
 There is currently no `pnpm lint` script. Don't invent one in CI or docs until it exists.
 
 ## 🧱 Architecture rules

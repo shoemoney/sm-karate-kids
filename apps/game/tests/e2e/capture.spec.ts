@@ -3,7 +3,33 @@ import { dirname, resolve } from 'node:path';
 import { expect, test } from './fixtures.js';
 import { Thumbs, anchorOf, hold } from './thumbs.js';
 
-const OUT = resolve(import.meta.dirname, '../../../../docs/preview');
+/**
+ * Where the captured frame lands.
+ *
+ * The committed README image is NOT the default destination, and making it not
+ * the default is the whole point of this constant. The capture spec runs on
+ * every `pnpm test:e2e`, so writing the tracked path meant every local run
+ * ended with a modified file in the tree — a diff nobody reviewed, in the one
+ * artifact that is supposed to be a deliberate choice. Seven rounds have
+ * reverted it by hand (REVIEW-LOOP.md r152, r154, r155, r156, r157, r158,
+ * r159), and it cost a deploy: r164b found the tree dirty and, correctly,
+ * refused to publish over a tree that looked like another agent's work in
+ * progress. A known side effect was presenting as an unknown one.
+ *
+ * So the frame goes to the git-ignored scratch directory by default, and
+ * refreshing the committed preview is an explicit act whose result is a real
+ * diff to read:
+ *
+ *     SMKK_COMMIT_PREVIEW=1 pnpm test:e2e
+ *
+ * The assertions below are unchanged and still run in both modes — the capture
+ * proves the emblems render and a technique was playing when the shutter was
+ * open whichever path the pixels take.
+ */
+const COMMITTED_PREVIEW = resolve(import.meta.dirname, '../../../../docs/preview');
+const OUT = process.env.SMKK_COMMIT_PREVIEW
+  ? COMMITTED_PREVIEW
+  : resolve(import.meta.dirname, '../../test-results/preview');
 
 /**
  * A roundhouse reaches 2.05m, so opening the drill just inside it means the
@@ -18,12 +44,12 @@ const DRILL_SPACING = 1.95;
  * on a real phone frame, and the only automated check that the sprite fighters
  * are what actually renders.
  *
- * Freshness is a manual step, and deliberately so: CI runs this and writes the
- * frame, but the runner is discarded and nothing commits the result, so the
- * PNG in the repo is only as current as the last local `pnpm test:e2e` whose
- * output somebody committed. Do not read a green CI run as "the preview is
- * up to date". What CI *does* guarantee is that capturing still works and the
- * emblems still render.
+ * Freshness is a manual step, and deliberately so: this test runs on every
+ * `pnpm test:e2e`, but by default its frame goes to a git-ignored scratch
+ * directory (see OUT below), so the PNG in the repo is only as current as the
+ * last run someone made with `SMKK_COMMIT_PREVIEW=1` and committed. Do not read
+ * a green CI run as "the preview is up to date". What CI *does* guarantee is
+ * that capturing still works and the emblems still render.
  */
 test('captures the portrait preview frame', async ({ page }, info) => {
   test.skip(info.project.name !== 'phone-portrait', 'the preview frame is portrait');
