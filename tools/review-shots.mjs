@@ -7,7 +7,7 @@
  */
 import { chromium } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 
 const OUT = process.argv[2] ?? '/tmp/smkk-review';
 const BASE = process.env.SMKK_BASE ?? 'http://127.0.0.1:5173';
@@ -58,6 +58,229 @@ const waitFight = (page) =>
     { timeout: 30000 },
   );
 
+/* ── Captures that photograph a MOMENT rather than a screen ──────────────────
+ *
+ * `18-phone-kick`, `19-phone-half-point` and `21-phone-kick-open` were the set's
+ * three `opportunistic` frames: each polls a subject out of Node and `return`s
+ * without writing a file when it misses, which is how their guards fired 10, 8
+ * and 8 times across the retained loop logs with nothing noticing. r171 named
+ * the debt and left the captures as the next job.
+ *
+ * MEASURED on this machine before anything was changed:
+ *
+ * | | measured |
+ * |---|---|
+ * | `front_kick` | 26 ticks, of which 4 are `active` |
+ * | the page's rendered frame | median 33ms, median 2 ticks, p90 stride 7, max 15 |
+ * | one `page.screenshot()`, clipped | 269 / 317 / 331 / 432 / 435 / 467 / 492 / 550 ms = **16-33 ticks** |
+ * | one `page.screenshot()`, full frame | 546 / 665 / 666 / 769 ms = **33-45 ticks** |
+ * | idle-vs-idle pixel noise, fighters' box | **0.34** mean luma delta |
+ * | the same box, guard stance 1.2s after a strike | **4.04 / 4.44 / 4.42 / 5.02 / 5.81** |
+ * | `19`'s in-page observer | matched `.points .score-frac` — a class r148 DELETED |
+ *
+ * **A screenshot is longer than the move it is trying to photograph.** That one
+ * row decides the design, and it rules out the two obvious answers in turn.
+ *
+ * POLLING FOR THE ACTIVE WINDOW cannot work, at any frame rate: the shutter
+ * costs more ticks than `front_kick` lasts, so the cell read afterwards is
+ * always past the end of the move. Measured — 9 shutters opened across 12
+ * throws, 0 kept, every one rejected on the after-read while the pose was
+ * demonstrably up when the shutter opened.
+ *
+ * FREEZING THE PAGE ON THE FRAME cannot work either, and it looked certain.
+ * Returning 0 from `requestAnimationFrame` at the latch leaves the page
+ * producing no further compositor frame, so `Page.captureScreenshot` hands back
+ * the last cached surface: after the freeze, a magenta timer and a 12px green
+ * body outline **do not appear either** — the whole surface is stale, not just
+ * the canvas. The fighters' box came back byte-identical to an idle reference.
+ *
+ *   The renderer is fine, and that is measured too. Atlas cells 61..66 are a
+ *   front kick, cell 64 is its contact frame, and a live screenshot taken while
+ *   the rig reported cell 61 photographs a fighter with his leg up. The freeze
+ *   nearly got filed as "the renderer draws no kick".
+ *
+ * CHECKING THE PIXELS cannot work either, which is the expensive one to learn. A
+ * kick moves the CAMERA — it is the only move the camera pulls back for — and
+ * the camera's response is not a pose. A whole-frame delta cannot tell a kick
+ * from a guard stance here: the last two rows above are a guard stance reading
+ * 4.0-5.8 against a noise floor of 0.34, and there is no threshold between
+ * them. With a threshold of 3 this gate passed a frame in which **both
+ * fighters were standing in guard**. A gate that cannot fail is worse than one
+ * that cannot run, so it is gone rather than re-tuned.
+ *
+ * WHAT IS LEFT, and it is small: keep the fighter throwing the move *across* the
+ * shutter rather than across the gap between throws, and let the sandwich do
+ * what it is actually good for — bounding the captured instant to a move that
+ * was the same move at both ends of it. See `shootMove`.
+ *
+ * The last row of the table is the whole of frame 19, and it is not a coin
+ * flip. r148 made the half a single text node (`scoreFragment`),
+ * `styles.css:863` says there is deliberately no `.score-frac` rule any more,
+ * and `score-notation.test.ts:116` is a tripwire against one returning. The
+ * capture was polling for an element the game's own test forbids from
+ * existing, so it latched **zero** times in every run since r148 shipped. The
+ * "8 firings" in the logs is an undercount of a total failure: the logs only
+ * retain some rounds. That frame is now reliable because a half STAYS on the
+ * board until the next point — its subject does not expire in four ticks.
+ *
+ * And when no attempt lands, the frame is not written AND the failure is
+ * recorded, so this script's exit code and `verify_shots.py`'s coverage check
+ * go red together. A missing frame has to be loud; that is the r171 lesson and */
+
+/** Declared frames this run promised and could not deliver. */
+const missed = [];
+
+/**
+ * Reads the coverage contract, so the capture honours the same promises the gate
+ * checks. Without this the harness would exit 1 every time `21-phone-kick-open`
+ * missed its subject, which is a gate crying wolf — and a gate that cries wolf
+ * gets deleted, which is the r171 lesson applied to the r172 fix.
+ *
+ * The kinds are deliberately NOT duplicated here. A second list is a second
+ * thing to forget to update, and this repo has been bitten by exactly that shape
+ * nine times.
+ */
+const declaredCapture = (() => {
+  const path = new URL('./review-frames.tsv', import.meta.url);
+  const text = readFileSync(path, 'utf8');
+  const promised = new Set();
+  for (const raw of text.split('\n')) {
+    const line = raw.trim();
+    if (line === '' || line.startsWith('#')) continue;
+    const [name, kind] = line.split('\t').map((f) => f.trim());
+    if (kind === 'capture') promised.add(name);
+  }
+  if (promised.size === 0) throw new Error('review-frames.tsv declares no `capture` rows to honour');
+  return promised;
+})();
+
+const miss = (name, why) => {
+  missed.push(name);
+  // An `opportunistic` row is allowed to miss its subject; that is what the word
+  // means. It is still printed, still recorded, and still counted — it just does
+  // not turn the run red, because `verify_shots.py` prints it as UNCOVERED too
+  // and two reds for one expected miss is noise.
+  const promised = declaredCapture.has(name);
+  console.warn(`${name}: ${why}; frame not written${promised ? '' : ' (declared opportunistic)'}`);
+  if (!promised) return;
+  process.exitCode = 1;
+};
+
+/** The zone anchors and a CDP touch sender. Every played capture needs these. */
+async function sticks(page) {
+  const centre = async (sel) => {
+    const box = await page.locator(sel).boundingBox();
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  };
+  const cdp = await page.context().newCDPSession(page);
+  const pts = new Map();
+  return {
+    L: await centre('#zone-left'),
+    R: await centre('#zone-right'),
+    pts,
+    send: (type) =>
+      cdp.send('Input.dispatchTouchEvent', {
+        type,
+        touchPoints: [...pts].map(([id, q]) => ({ x: Math.round(q.x), y: Math.round(q.y), id })),
+      }),
+  };
+}
+
+/** What the fighter in `seat` is actually drawing. The surface the e2e suite holds the renderer to. */
+const drawnCell = (page, seat = 0) =>
+  page.evaluate((s) => {
+    const api = globalThis.__smkk;
+    if (typeof api?.spriteFrames !== 'function') return null;
+    const f = api.spriteFrames()[s];
+    return { cell: f.cell, pose: f.pose, phase: f.phase };
+  }, seat);
+
+/** The fighters, in CSS pixels of the portrait baseline. The only thing the
+ * moment captures clip their screenshots to, so a reviewer sees the same framing
+ * every time; `18-phone-kick` then re-shoots the full frame once it has its
+ * subject. */
+const FIGHTER_BOX = { x: 20, y: 290, width: 350, height: 200 };
+
+/**
+ * Photographs the fighter drawing `moveId`, and says so when it cannot.
+ *
+ * `throwMove` is called before every attempt and, crucially, again the moment
+ * a shutter fails — so the fighter is throwing the move *across* the shutter
+ * rather than across the gap between throws. That is the whole trick, and it
+ * came out of three measurements that killed the two obvious designs first.
+ *
+ * WHY NOT POLL FOR THE ACTIVE WINDOW. `front_kick` is 26 ticks, 4 of them
+ * `active`, and a PNG screenshot on this box costs **16-45 ticks** — measured,
+ * clipped 269/317/331/432/435/467/492/550ms, full frame 546/665/666/769ms. The
+ * shutter was longer than the move. A sandwich — read the cell before the
+ * screenshot and again after, require both to say the move — could not hold at
+ * the contact frame at all. Measured: 9 shutters opened across 12 throws, 0
+ * kept, every one rejected on the after-read while the pose was demonstrably up
+ * when the shutter opened.
+ *
+ * WHICH IS WHY THE PROBE SHUTTER IS JPEG. Measured in simulation ticks, same
+ * page, same box, six samples each — PNG is not the only cost:
+ *
+ * | shutter | median ticks |
+ * |---|---|
+ * | playwright clip, PNG | **26** |
+ * | playwright clip, **jpeg q50** | **15** |
+ * | playwright small clip, jpeg q40 | 14 |
+ * | CDP `Page.captureScreenshot`, jpeg + `optimizeForSpeed` | 19 |
+ * | playwright full frame, jpeg q50 | 25 |
+ *
+ * Fifteen ticks against a twenty-six-tick move is the first configuration in
+ * this file's history where the subject can be on screen when the shutter
+ * lands. The probe shot is thrown away — it exists to spend time inside the
+ * move — and the frame that is actually kept is a PNG, taken once, after the
+ * subject is proven.
+ *
+ * WHY NOT CHECK THE PIXELS. Because a kick moves the CAMERA — it is the only
+ * move the camera pulls back for — and the camera's response is not the pose.
+ * Measured, with the fighter back in its guard (cell 0, `idle/neutral`) and
+ * 1200ms after the strike finished: delta **4.04, 4.44, 4.42, 5.02, 5.81**,
+ * against an idle-vs-idle noise floor of **0.34**. A whole-frame delta cannot
+ * separate a guard stance from a kick on this hardware, and a threshold between
+ * them does not exist. Kept for the record: with a threshold of 3 this gate
+ * passed a frame in which **both fighters were standing in guard**, which is
+ * how it was caught. A gate that cannot fail is worse than one that cannot run.
+ *
+ * SO: keep the fighter in the move across the shutter, and let the sandwich do
+ * what it is actually good for — bounding the captured instant to a move that
+ * was the same move at both ends of it. It is not a claim that the captured
+ * frame is the contact frame, and the manifest rows now say so.
+ */
+async function shootMove(page, name, moveId, throwMove, tries) {
+  let shots = 0;
+  for (let n = 1; n <= tries; n += 1) {
+    await throwMove();
+    const phase = await page.evaluate(() => globalThis.__smkk?.state?.().phase ?? null);
+    // Only `over` ends the capture's run, because a `front_kick` is worth a half
+    // and four landed ones finish a dojo bout — after which the frame would be a
+    // result card.
+    //
+    // `referee` must NOT bail, and getting that wrong cost this capture three
+    // bouts: a landed kick holds the striker on the pose's contact frame for 96
+    // ticks, which is the one moment here where the subject is on screen for
+    // longer than the shutter takes. The first version bailed on anything that
+    // was not `fight` and so walked past it every time.
+    if (phase === 'over') return null;
+    const before = await drawnCell(page);
+    if (before === null) return null; // the page died; nothing to retry
+    if (before.pose !== moveId) {
+      await page.waitForTimeout(30);
+      continue;
+    }
+    shots += 1;
+    await page.screenshot({ clip: FIGHTER_BOX, type: 'jpeg', quality: 50 });
+    const after = await drawnCell(page);
+    if (after?.pose === moveId) {
+      return { attempt: n, cell: before.cell, phase: before.phase, after: after.phase };
+    }
+  }
+  console.log(`  ${name}: ${tries} throws, ${shots} shutter(s), the sandwich never held`);
+  return null;
+}
 // Throttle so the loading screen is actually observable.
 async function boot(name) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
@@ -552,91 +775,85 @@ await capture('17-phone-scored-result', phone, async (page) => {
  * it. The kick also has the longest reach in the game and is the only move the
  * camera pulls back for, so it is the frame most worth actually having.
  *
- * Drawn on the simulation clock, not on a screenshot timer: the phase is read
- * from the same debug surface the e2e suite reads, so the capture lands in the
- * active window of a real kick rather than near one. */
+ * REWRITTEN at r172. It used to close the gap, throw the kick once, and poll
+ * `state()` from Node every 20ms across a 4-tick active window — a coin flip at
+ * any frame rate, measured at 2 latches in 6 attempts. The block above
+ * `sticks()` has the numbers and the three designs that were measured and
+ * thrown out before this one. What it does now: keep the fighter throwing the
+ * kick across the shutter and keep the frame only when the drawn cell is that
+ * move at BOTH ends of the capture.
+ *
+ * At contact range there is a second, better mechanism available and this is it:
+ * a landed kick awards a call, and the referee phase holds the striker on the
+ * pose's `contact` frame (`spriteFrames.ts`: "the referee's decision is made
+ * during `active`, so that whole window holds the contact frame", and `frozen`
+ * holds it too) for 96 ticks. So the contact frame is not a 4-tick window here
+ * at all — it is a second and a half of it, and photographable. */
 await capture('18-phone-kick', phone, async (page) => {
-  await page.goto(`${BASE}/?mode=dojo`, { waitUntil: 'networkidle' });
+  // `spacing=1.6` puts the pair inside `front_kick`'s 1.85 reach at the bell.
+  // The old capture walked right 24 times to get there, which cost five seconds
+  // and could not be undone if the bout ended — and it does, four landed kicks
+  // from 0.
+  let got = null;
+  for (let reload = 1; reload <= 3 && got === null; reload += 1) {
+  await page.goto(`${BASE}/?mode=dojo&spacing=1.6`, { waitUntil: 'networkidle' });
   await waitFight(page);
-  const anchor = async (sel) => {
-    const box = await page.locator(sel).boundingBox();
-    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
-  };
-  const L = await anchor('#zone-left');
-  const R = await anchor('#zone-right');
-  const cdp = await page.context().newCDPSession(page);
-  const pts = new Map();
-  const send = (type) =>
-    cdp.send('Input.dispatchTouchEvent', {
-      type,
-      touchPoints: [...pts].map(([id, q]) => ({ x: Math.round(q.x), y: Math.round(q.y), id })),
-    });
-  const state = () =>
-    page.evaluate(() => (globalThis.__smkk?.state?.() ?? null));
+  const { L, R, send, pts } = await sticks(page);
 
-  // Close the gap first, so the kick is thrown from inside strike range rather
-  // than from across the mat where it would whiff.
-  for (let i = 0; i < 24; i += 1) {
-    pts.clear();
-    pts.set(1, { x: L.x, y: L.y });
-    await send('touchStart');
-    pts.set(1, { x: L.x + 58, y: L.y });
-    await send('touchMove');
-    await page.waitForTimeout(170);
-    await send('touchEnd');
-    await page.waitForTimeout(140);
-    const s = await state();
-    const pos = s?.positions ?? [];
-    const ax = typeof pos[0] === 'object' ? pos[0].x : pos[0];
-    const bx = typeof pos[1] === 'object' ? pos[1].x : pos[1];
-    if (typeof ax === 'number' && typeof bx === 'number' && Math.abs(ax - bx) < 1.5) break;
+  got = await shootMove(
+    page,
+    '18-phone-kick',
+    'front_kick',
+    async () => {
+      pts.clear();
+      pts.set(1, { x: L.x, y: L.y });
+      await send('touchStart');
+      pts.set(2, { x: R.x, y: R.y });
+      await send('touchStart');
+      // The stick directions are not named after the moves: forward is a lunge
+      // punch, down a foot sweep, back a reverse punch. Up is the front kick.
+      pts.set(2, { x: R.x, y: R.y - 58 });
+      await send('touchMove');
+      await page.waitForTimeout(60);
+      await send('touchEnd');
+      pts.clear();
+    },
+    12,
+  );
   }
-
-  // Now throw, and shoot on the frame the move is actually active.
-  pts.clear();
-  pts.set(1, { x: L.x, y: L.y });
-  await send('touchStart');
-  pts.set(2, { x: R.x, y: R.y });
-  await send('touchStart');
-  // technique UP is `front_kick`. The stick directions are not named after the
-  // moves: forward is a lunge punch, down a foot sweep, back a reverse punch.
-  pts.set(2, { x: R.x, y: R.y - 58 });
-  await send('touchMove');
-  await send('touchEnd');
-  pts.clear();
-
-  // `p1Phase` and `p1Move` are the flat debug surface; a kick is an active
-  // phase on a move whose id names a kick. Anything else and this would
-  // screenshot a recovery frame and call it a kick, which is the mistake the
-  // `03-phone-strike` frame has been making since round 1.
-  let caught = false;
-  for (let i = 0; i < 24; i += 1) {
-    const s = await state();
-    const isKick = String(s?.p1Move ?? '').includes('kick');
-    if (s?.p1Phase === 'active' && isKick) {
-      await page.screenshot({ path: `${OUT}/18-phone-kick.png` });
-      caught = true;
-      break;
-    }
-    if (String(s?.p1Move ?? '').includes('kick') && s?.p1Phase === 'startup') {
-      await page.screenshot({ path: `${OUT}/18-phone-kick.png` });
-      caught = true;
-      break;
-    }
-    await page.waitForTimeout(20);
+  if (got === null) {
+    miss('18-phone-kick', 'no front_kick frame survived three bouts');
+    return;
   }
-  if (!caught) console.warn('18-phone-kick: no active kick observed, frame not written');
+  console.log(`  18 kick: throw ${got.attempt}, cell ${got.cell} ${got.phase} -> ${got.after}`);
+  // The full frame: the clip is only there so the capture compares cheaply.
+  await page.screenshot({ path: `${OUT}/18-phone-kick.png` });
 });
 
 /* ---------- Round 73: a half point, on the board, in the review set ---------- */
 
 /* This is the frame the loop spent thirty-one rounds trying to see.
  *
- * A half point is only awarded when the defender is NOT winding up —
- * `match.ts` promotes the call to a full point when `defender.phase ===
- * 'startup'`, which is what every earlier probe did by accident, thirty lunges
- * in a row, and why two rounds of "there is no half point" measurements came
- * back clean. The stance stick is held NEUTRAL here for exactly that reason.
+ * A half point is only awarded when the defender is NOT winding up — `match.ts`
+ * promotes the call to a full point when `defender.phase === 'startup'`. In the
+ * dojo that cannot happen at all: the partner is a `TrainingDummy` that returns
+ * NEUTRAL forever (`main.ts:57`), so it never enters `startup` and a
+ * `lunge_punch` is always a half. What is left is RANGE, and it was measured
+ * rather than assumed: at the dojo's default separation of 3.20, against a
+ * `lunge_punch` reach of 1.55 plus 0.25 of advance, the punch lands on the
+ * sixth throw and not the first. So this retries.
+ *
+ * The observer's SELECTOR was the defect, and it was total. It polled
+ * `.points .score-frac` — an element r148 deleted when it made the half a single
+ * text node, with `styles.css:863` saying there is deliberately no such rule any
+ * more and `score-notation.test.ts:116` standing as a tripwire against one
+ * returning. It matched nothing, ever. The frame was written **zero** times in
+ * every run since r148 shipped, and the guard's "8 firings" in the retained logs
+ * is an undercount of a total failure: the logs only retain some rounds.
+ *
+ * The shipped notation is the `½` glyph in the score element's own text, which
+ * is what is checked here — before the shutter, after it, and printed so the
+ * frame's own board is legible in the log.
  *
  * Five models reported this notation as ambiguous, cramped, or reading as
  * `21/2`. It is none of those, and this frame is what settles it for a reviewer
@@ -644,36 +861,15 @@ await capture('18-phone-kick', phone, async (page) => {
 await capture('19-phone-half-point', phone, async (page) => {
   await page.goto(`${BASE}/?mode=dojo`, { waitUntil: 'networkidle' });
   await waitFight(page);
-  const anchor = async (sel) => {
-    const box = await page.locator(sel).boundingBox();
-    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
-  };
-  const L = await anchor('#zone-left');
-  const R = await anchor('#zone-right');
-  const cdp = await page.context().newCDPSession(page);
-  const pts = new Map();
-  const send = (type) =>
-    cdp.send('Input.dispatchTouchEvent', {
-      type,
-      touchPoints: [...pts].map(([id, q]) => ({ x: Math.round(q.x), y: Math.round(q.y), id })),
-    });
-  // Watched from inside the page, on every frame, because the state this needs
-  // to catch is shorter than one round trip to the driver.
-  await page.evaluate(() => {
-    globalThis.__half = false;
-    const watch = () => {
-      if (document.querySelector('.points .score-frac')) globalThis.__half = true;
-      requestAnimationFrame(watch);
-    };
-    requestAnimationFrame(watch);
-  });
+  const { L, R, send, pts } = await sticks(page);
 
-  for (let i = 0; i < 34; i += 1) {
-    if (await page.evaluate(() => globalThis.__half === true)) {
-      await page.screenshot({ path: `${OUT}/19-phone-half-point.png` });
-      return;
-    }
-    if (await page.locator('.result-score').isVisible().catch(() => false)) break;
+  const halfOnBoard = () =>
+    page.evaluate(() =>
+      ['#points-0', '#points-1'].some((sel) => document.querySelector(sel)?.textContent.includes('½') ?? false),
+    );
+
+  const THROWS = 24;
+  for (let attempt = 1; attempt <= THROWS; attempt += 1) {
     pts.clear();
     pts.set(1, { x: L.x, y: L.y });
     await send('touchStart');            // stance neutral: no step, so no counter
@@ -685,8 +881,21 @@ await capture('19-phone-half-point', phone, async (page) => {
     pts.clear();
     await send('touchEnd');
     await page.waitForTimeout(180);
+
+    if (!(await halfOnBoard())) continue;
+    const buf = await page.screenshot();
+    // Sandwiched for the same reason the kicks are: one read is a claim, and a
+    // screenshot is ~200ms of a game that is still running.
+    if (!(await halfOnBoard())) continue;
+    writeFileSync(`${OUT}/19-phone-half-point.png`, buf);
+    const score = await page.evaluate(() => [
+      document.querySelector('#points-0')?.textContent ?? '',
+      document.querySelector('#points-1')?.textContent ?? '',
+    ]);
+    console.log(`  19 half: throw ${attempt}, board "${score[0]}" — "${score[1]}"`);
+    return;
   }
-  console.warn('19-phone-half-point: no half landed, frame not written');
+  miss('19-phone-half-point', `no half landed in ${THROWS} throws`);
 });
 
 /* ---------- Round 75: the call. Nothing in the set had ever shown one. ---------- */
@@ -698,24 +907,14 @@ await capture('19-phone-half-point', phone, async (page) => {
  * something — the announcement, the caller's name, the move that earned it, and
  * the new score, all at once — had never been photographed.
  *
- * Captured on the simulation phase rather than a timer, because `referee` is the
- * phase the call lives in and it is short. */
+ * The referee phase is 96 ticks, not the 4 of a kick's active window, so this
+ * one polls. It only records the miss now rather than warning about it, because
+ * it is a declared `capture` and a declared capture that writes nothing has to
+ * turn this script's exit code red. */
 await capture('20-phone-call', phone, async (page) => {
   await page.goto(`${BASE}/?mode=dojo`, { waitUntil: 'networkidle' });
   await waitFight(page);
-  const anchor = async (sel) => {
-    const box = await page.locator(sel).boundingBox();
-    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
-  };
-  const L = await anchor('#zone-left');
-  const R = await anchor('#zone-right');
-  const cdp = await page.context().newCDPSession(page);
-  const pts = new Map();
-  const send = (type) =>
-    cdp.send('Input.dispatchTouchEvent', {
-      type,
-      touchPoints: [...pts].map(([id, q]) => ({ x: Math.round(q.x), y: Math.round(q.y), id })),
-    });
+  const { L, R, send, pts } = await sticks(page);
 
   for (let i = 0; i < 40; i += 1) {
     if (await page.evaluate(() => globalThis.__smkk?.state?.().phase === 'referee')) {
@@ -734,7 +933,7 @@ await capture('20-phone-call', phone, async (page) => {
     await send('touchEnd');
     await page.waitForTimeout(150);
   }
-  console.warn('20-phone-call: no call observed, frame not written');
+  miss('20-phone-call', 'the referee phase was never observed in 40 exchanges');
 });
 
 /* ---------- Round 88: a kick into open space ---------- */
@@ -747,7 +946,12 @@ await capture('20-phone-call', phone, async (page) => {
  * leg whole) is the thing the capture deliberately obscures.
  *
  * This one is thrown into air with the opponent out of reach: the whole kick,
- * end to end, against the mat. It is the frame that settles the family. */
+ * end to end, against the mat. It is the frame that settles the family.
+ *
+ * Rebuilt on the same routine as 18 at r172, and for the same measured reason.
+ * The manifest row for it said "a kick landing on the defender's body", which is
+ * the thing this capture exists to AVOID — the prose and the instrument had
+ * drifted, in the third place r169 and r171 found it. */
 await capture('21-phone-kick-open', phone, async (page) => {
   // `spacing` sets the start separation in dojo mode. Stepping the stance stick
   // right does NOT open the gap — the camera re-frames to hold both fighters,
@@ -755,45 +959,40 @@ await capture('21-phone-kick-open', phone, async (page) => {
   // which is the whole thing this frame exists to avoid.
   await page.goto(`${BASE}/?mode=dojo&spacing=5.6`, { waitUntil: 'networkidle' });
   await waitFight(page);
-  const anchor = async (sel) => {
-    const box = await page.locator(sel).boundingBox();
-    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
-  };
-  const L = await anchor('#zone-left');
-  const R = await anchor('#zone-right');
-  const cdp = await page.context().newCDPSession(page);
-  const pts = new Map();
-  const send = (type) =>
-    cdp.send('Input.dispatchTouchEvent', {
-      type,
-      touchPoints: [...pts].map(([id, q]) => ({ x: Math.round(q.x), y: Math.round(q.y), id })),
-    });
+  const { L, R, send, pts } = await sticks(page);
   await page.waitForTimeout(400);
 
-  // Kick, and shoot on the frame the move is actually active.
-  pts.clear();
-  pts.set(1, { x: L.x, y: L.y });
-  await send('touchStart');
-  pts.set(2, { x: R.x, y: R.y });
-  await send('touchStart');
-  pts.set(2, { x: R.x, y: R.y - 58 });  // up = front_kick
-  await send('touchMove');
-  await send('touchEnd');
-  pts.clear();
-
-  let caught = false;
-  for (let i = 0; i < 24; i += 1) {
-    const s = await page.evaluate(() => globalThis.__smkk?.state?.() ?? null);
-    if (s?.p1Phase === 'active' && String(s?.p1Move ?? '').includes('kick')) {
-      await page.screenshot({ path: `${OUT}/21-phone-kick-open.png` });
-      caught = true;
-      break;
-    }
-    await page.waitForTimeout(20);
+  const got = await shootMove(
+    page,
+    '21-phone-kick-open',
+    'front_kick',
+    async () => {
+      pts.clear();
+      pts.set(1, { x: L.x, y: L.y });
+      await send('touchStart');
+      pts.set(2, { x: R.x, y: R.y });
+      await send('touchStart');
+      pts.set(2, { x: R.x, y: R.y - 58 });  // up = front_kick
+      await send('touchMove');
+      await page.waitForTimeout(60);
+      await send('touchEnd');
+      pts.clear();
+    },
+    // A whiffed kick gets no call and so no referee hold, unlike 18. Its subject
+    // is a 26-tick transient with a 15-tick shutter pointed at it, and it landed
+    // on throws 3, 5, 8, 10 and 17 across the runs that found this — so the cap
+    // is set from the tail of that distribution, not from the median.
+    30,
+  );
+  if (got === null) {
+    miss('21-phone-kick-open', 'no front_kick frame survived 12 throws');
+    return;
   }
-  if (!caught) console.warn('21-phone-kick-open: no active kick observed, frame not written');
+  console.log(
+    `  21 kick-open: throw ${got.attempt}, cell ${got.cell} ${got.phase} -> ${got.after}`,
+  );
+  await page.screenshot({ path: `${OUT}/21-phone-kick-open.png` });
 });
-
 /* ---------- r164: the PAUSED overlay (PRD FR-018) ---------- */
 
 /* The overlay r163 shipped has never been in a review set.
@@ -839,7 +1038,7 @@ await capture('22-phone-paused', phone, async (page) => {
     };
   });
   if (state.hidden || !state.covers) {
-    console.warn(`22-phone-paused: overlay not raised (hidden=${state.hidden} covers=${state.covers}), frame not written`);
+    miss('22-phone-paused', `overlay not raised (hidden=${state.hidden} covers=${state.covers})`);
     return;
   }
   await page.screenshot({ path: `${OUT}/22-phone-paused.png` });
@@ -898,8 +1097,9 @@ await capture('23-phone-picked', phone, async (page) => {
   const aligned = after.views.join('>') === after.sim.join('>');
   const labelFlipped = after.label !== before.label && after.label !== null;
   if (!traded || !aligned || !labelFlipped) {
-    console.warn(
-      `23-phone-picked: not the state this frame reviews (traded=${traded} aligned=${aligned} label=${labelFlipped}; sim ${after.sim.join('>')} views ${after.views.join('>')} "${before.label}" -> "${after.label}"), frame not written`,
+    miss(
+      '23-phone-picked',
+      `not the state this frame reviews (traded=${traded} aligned=${aligned} label=${labelFlipped}; sim ${after.sim.join('>')} views ${after.views.join('>')} "${before.label}" -> "${after.label}")`,
     );
     return;
   }
@@ -978,6 +1178,29 @@ await burstCtx.close();
 console.log(`burst: ${BURST} frames, ticks ${burst[0]?.tick}..${burst.at(-1)?.tick}`);
 
 await browser.close();
+
+/* A declared frame this run could not deliver turns the run red.
+ *
+ * Until r172 every one of these was a `console.warn`, which is how
+ * `18-phone-kick` went missing from roughly one review set in six and
+ * `19-phone-half-point` from about one in five — and, as r172 measured, from
+ * EVERY set since r148 shipped, because its observer was polling for an element
+ * the game's own unit test forbids from existing. The coverage gate in
+ * `verify_shots.py` catches a missing frame after the fact; this makes the
+ * capture say so at the moment it happens, which is the difference between a
+ * diagnosis and a tally.
+ *
+ * Deliberately NOT a throw. A throw would abandon the remaining captures and
+ * leave a reviewer with no set at all, which is a worse failure than a set with
+ * a hole in it and a red exit code — the rest of the set is still worth having. */
+if (missed.length > 0) {
+  console.error(
+    `\n${missed.length} frame(s) this run could not deliver: ${missed.join(', ')}\n` +
+      'Any of these declared `capture` has already set exit 1; the rest are `opportunistic`\n' +
+      'and verify_shots.py will print them as UNCOVERED rather than failing. This is a\n' +
+      'result, not a warning.',
+  );
+}
 
 // The load belongs next to the frame count, for r151's reason: this machine does
 // not idle, and a review set is only as good as the machine it was taken on. The

@@ -12014,3 +12014,194 @@ about things the repo already knows**, which is worth stating plainly — it is
 what a review set that has been looked at for 171 rounds looks like. It is also
 why #1 is worth the round: it was the one nobody had checked, and it is on the
 screen every player sees when a bout ends.
+
+---
+
+## Round 172 — one frame had been dead for 24 rounds, and the other two are hardware 📷
+
+Item 3.4, opened at r171: three captures cannot reliably find their subject, and
+the coverage gate only prints them as UNCOVERED. This is that item, and the
+answer is not the one the plan predicted.
+
+Production, measured at the top of the round: **STALE**, served markup pinned to
+`d839702c9` (r166) — **12 commits behind**, an upper bound. Unchanged by
+anything here; see the note at the end.
+
+### The measurement that decided the design
+
+Everything below came off a clock or a pixel on this machine before a line of
+`review-shots.mjs` was touched. Load 7–13 throughout (this box does not idle;
+r151's standing instruction).
+
+| | measured |
+|---|---|
+| `front_kick` | 26 ticks, 4 of them `active` |
+| the page's rendered frame | median 33ms, median 2 ticks, p90 stride 7, max 15 |
+| one `page.screenshot()`, clipped, **PNG** | 269/317/331/432/435/467/492/550ms = **16–33 ticks** |
+| one `page.screenshot()`, clipped, **jpeg q50** | **15 ticks median** |
+| one `page.screenshot()`, full frame | 33–45 ticks |
+| CDP `Page.captureScreenshot` + `optimizeForSpeed` | 19 ticks |
+| idle-vs-idle pixel noise, fighters' box | **0.34** mean luma delta |
+| the same box, **guard stance**, 1.2s after a strike | **4.04 / 4.44 / 4.42 / 5.02 / 5.81** |
+
+**A PNG screenshot is longer than the move it is trying to photograph.** That one
+row rules out the two obvious designs, and both were built and measured before
+being thrown out.
+
+### What was wrong with 19, and it was not a coin flip
+
+`19-phone-half-point`'s in-page observer polled
+`document.querySelector('.points .score-frac')`. **r148 deleted that element.**
+It made the half a single text node (`scoreFragment`: the whole number, then
+U+00BD, in one node), `styles.css:863` says there is deliberately no
+`.score-frac` rule any more, and `score-notation.test.ts:116` is a tripwire
+asserting one never comes back.
+
+The selector matched nothing, ever. **The frame had a 0% hit rate in every
+review run from r148 to r172** — 24 rounds — and the guard's "8 firings" in the
+retained logs is an undercount of a total failure, because the logs only retain
+some rounds. Four review passes had argued about that notation, and on the
+greatest majority of those sets **the half point was not in the set at all**.
+r171's caveat was right and understated.
+
+It now reads the shipped notation: the `½` glyph in `#points-0`/`#points-1`'s
+own text, checked before the shutter and again after it. Reliable for a
+structural reason, which is the part worth keeping: **a half stays on the board
+until the next point**, so its subject does not expire in four ticks. Measured
+**3/3, throw 6 every time**, and the kept frame was looked at — `0½` on the
+scoreline.
+
+### Freezing the page on the frame — built, measured, and it does not work
+
+The obvious fix for a fleeting subject is to stop the world on it: an in-page
+`requestAnimationFrame` wrapper that latches on the subject, records a proof,
+and returns 0 from every later `requestAnimationFrame`. It latched. The proof
+read `cell 64, pose front_kick, phase active`.
+
+**The screenshot it produced shows both fighters standing in guard.**
+
+That is worth the whole paragraph, because the naive conclusion — "the renderer
+draws no kick" — is a serious defect claim, and it is false. The mechanism:
+
+> Returning 0 from `requestAnimationFrame` leaves the page producing no further
+> compositor frame, so `Page.captureScreenshot` hands back the last **cached
+> surface**. Measured: after the freeze, a magenta timer and a 12px green body
+> outline **do not appear either**. The whole surface is stale, not just the
+> canvas.
+
+And the renderer is fine, measured three ways: atlas cells 61..66 **are** a front
+kick (looked at, cell by cell, cropped out of `shiro-1.webp`); cell 64 is its
+`contact` frame; and a live screenshot taken while the rig reported cell 61
+photographs a fighter with his leg up. All three atlas pages load 200 — that
+hypothesis was checked before it was dropped.
+
+### Checking the pixels for a pose — also built, also measured out
+
+The freeze's failure suggested a second design: accept a frame only if the
+fighters' pixels moved. A kick moves the **camera** — it is the only move the
+camera pulls back for — and the camera's response is not a pose. So the gate was
+built on a mean-luma delta against an idle reference of the same page, and it
+passed frames.
+
+Then I looked at one. **Both fighters standing in guard, +7.5 over idle.** The
+threshold was 3, the noise floor was 0.34, and the settled guard stance after a
+strike reads **4.0–5.8** — a kick and a guard stance are the same number here.
+No threshold separates them. The gate is gone rather than re-tuned, which is
+r153's "a gate that cannot fail is worse than one that cannot run", and the
+frame that caught it is the only reason I know the gate was wrong.
+
+### What actually works, and why it is not the plan's suggestion
+
+The plan said "slow the page's own clock, or install a page-side observer that
+holds the pose". Both are the freeze. The answer turned out to be a property of
+the **game**, not the harness:
+
+- **18 (a kick at contact range) is now deterministic** because a *landed* kick
+  awards a call, and the referee phase holds the striker on the pose's `contact`
+  frame for 96 ticks. So this is not a 4-tick window at all — it is about a
+  second and a half, and photographable. Measured **3/3, throw 1,
+  `cell 64 active -> active`**. Looked at: leg up, foot on the defender's body.
+  And the first version of this fix *failed three bouts* because I had written
+  `if (phase !== 'fight') return null` — bailing on the exact state that makes it
+  photographable. That is r163's sheet-pause work paying for itself by accident.
+- **21 (a kick into open air) stays `opportunistic`, and it is hardware.** A
+  whiffed kick gets no call, so there is no hold; its subject is a 26-tick
+  transient and the shutter is 15. The probe shutter is jpeg now, which is the
+  difference between impossible and a coin flip — throws 3, 5, 7, 8, 10, 17
+  across the runs, against roughly one set in six before. But the sandwich is
+  necessary and not sufficient: the compositor presents a frame later than the sim
+  advances, so a capture bracketed `active -> recovery` can still return a guard
+  stance. **The kept frame was looked at and it was a guard stance.** Flipping
+  that row to `capture` would make the gate permanently red, and a gate that
+  cries wolf gets deleted.
+
+**So: two of the three are closed, and the third is recorded with its mechanism
+rather than quietly left flaky.**
+
+### The gate now bites in both directions
+
+- `review-shots.mjs` routes every skipped frame through `miss()`, which reads
+  `tools/review-frames.tsv` — the same contract `verify_shots.py` reads — and
+  sets **exit 1** for a row declared `capture`. The kinds are not duplicated: a
+  second list is a second thing to forget, and this repo has been bitten by
+  exactly that nine times.
+- `19` and `18` are now `capture` rows, so the gate fails if either is missing.
+- Three new unit tripwires in `pnpm check`, each red on the source this round
+  replaced: no capture may reference `.score-frac`; the half-point capture must
+  test the `½` glyph in the score element's own text; and `frame not written`
+  may appear exactly once in the file, inside `miss()`.
+- `tools/verify-shots-mutation.sh` gained an arm that builds a set **from the
+  repository's own manifest** rather than a hand-written fixture list: 4 missing
+  `capture` frames → exit 1, the missing `opportunistic` row → exit 0 with
+  UNCOVERED, and the positive control first. **26/26.**
+
+Its first run reported five reds and all five were mine: the fixture's frames
+were byte-identical, and my two loop arms built directories with different names
+so the gate was pointed at one that had never been created. r170's lesson, in
+this file, for the third time.
+
+### The result
+
+    $ node tools/review-shots.mjs /tmp/smkk-loop            # exit 0, load 7.4
+    18 kick: throw 1, cell 64 active -> active
+    19 half: throw 6, board "0½" — "0"
+    21 kick-open: throw 8, cell 64 active -> recovery
+    $ python3 tools/verify_shots.py /tmp/smkk-loop          # exit 0
+    OK  24 frames, 24 distinct, 24/24 declared states covered; burst 8 frames,
+       ticks 73..556, 6 positions, motion 16.07%
+    $ pnpm check                                            # exit 0
+    Test Files  32 passed (32)   Tests  252 passed (252)
+
+### Also corrected, because the prose was wrong
+
+- `21-phone-kick-open`'s manifest row said **"a kick landing on the defender's
+  body"** — the one thing that capture exists to avoid, and what its own code
+  comment says. That is the third place the "instrument describes something
+  other than itself" defect has turned up in this repo (r169's settings, r171's
+  scored-result, this).
+- The header of `tools/review-frames.tsv` said the three guards fired **10, 8 and
+  8** times, "so `18-phone-kick` is missing from roughly one review set in six and
+  `19-phone-half-point` from about one in five". 19's was not one in five. It was
+  **every set since r148**, and the count was an artifact of how many rounds the
+  log retains.
+
+### Production
+
+Still **STALE, 12 commits behind**, measured at the top of this round and
+unchanged by it. r170 reached the privacy gate and stopped; the block is an
+attestation about two hashed bundle files, and re-deciding it a round later with
+no new information would be the loop overruling itself for the comfort of a
+commit. r167's championship counter and r171b's camera fix are still not on the
+wire, and that is the honest state of it.
+
+### The generalisable thing
+
+r171's box said *the captures themselves are the next job*, and it was right
+about which three and wrong about what was wrong with them. One was watching for
+an element the game had deleted. Two were trying to photograph a 66-millisecond
+window with a 400-millisecond camera, and the fix was not a better camera
+technique — it was noticing that the game already holds one of those two poses
+still for 96 ticks and photographing that instead.
+
+**A fleeting subject is a property of the subject, and sometimes the thing that
+makes it fleeting is also the thing that makes it photographable.**

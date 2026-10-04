@@ -31,7 +31,7 @@ ok()   { printf '  \033[32mok\033[0m   %s\n' "$1"; pass=$((pass+1)); }
 bad()  { printf '  \033[31mFAIL\033[0m %s\n' "$1"; fail=$((fail+1)); }
 
 # ---------------------------------------------------------------- fixtures ---
-"$PY_BIN" - "$ROOT" <<'PY'
+"$PY_BIN" - "$ROOT" "$HERE/review-frames.tsv" <<'PY'
 import json, pathlib, sys
 from PIL import Image, ImageDraw
 
@@ -145,6 +145,38 @@ d = build("unplayed", spread=True)
 (d / "burst" / "frames.json").write_text(json.dumps([
     {"file": f"{i:02d}.png", "tick": 72 + i * 24, "phase": "fight",
      "positions": [-1.6, 1.6]} for i in range(8)], indent=2))
+
+# --- the r172 arm: a set built from the REPOSITORY's own manifest -------------
+# Everything above proves the coverage gate can fail on a synthetic manifest.
+# This proves item 3.4's actual acceptance criterion: with
+# `tools/review-frames.tsv` as it stands, losing `18-phone-kick` or
+# `19-phone-half-point` must be a FAILURE, and losing `21-phone-kick-open` must
+# not be — that row is still `opportunistic`, because a whiffed kick awards no
+# call and so has no referee hold to photograph. Measured: a capture bracketed
+# `active -> recovery` came back a guard stance, so that row cannot honestly be
+# strict, and a gate that cries wolf gets deleted.
+#
+# Built by READING the real manifest rather than by listing 24 names here. A
+# hand-written fixture would pass today and mean nothing the day a row is
+# renamed, which is r151's shape: a contract asserted against a copy of itself.
+REAL = pathlib.Path(sys.argv[2])
+declared = [
+    f.split("\t")[0].strip()
+    for f in REAL.read_text().splitlines()
+    if f.strip() and not f.strip().startswith("#") and f.split("\t")[1].strip() == "capture"
+]
+d = root / "real-all"
+(d / "burst").mkdir(parents=True)
+for i, name in enumerate(declared):
+    frame(d / f"{name}.png", 2 + i * 2)
+meta = []
+for i in range(8):
+    frame(d / "burst" / f"{i:02d}.png", 6 + i * 5)
+    meta.append({"file": f"{i:02d}.png", "tick": 72 + i * 24, "phase": "fight",
+                 "positions": [-1.6 + i * 0.15, 1.6]})
+(d / "burst" / "frames.json").write_text(json.dumps(meta, indent=2))
+(root / "real-frames.tsv").write_text(REAL.read_text())
+print(f"  (built {len(declared)} declared capture frames from the real manifest)")
 PY
 
 # ------------------------------------------------------------------ assert ---
@@ -209,6 +241,24 @@ expect_manifest coverage-opportunistic-missing frames-opportunistic.tsv 0 "UNCOV
 expect_manifest honest                frames-empty.tsv         2 "declares no frames"
 expect_manifest honest                frames-badkind.tsv       2 "the only kinds are"
 expect_manifest honest                frames-absent.tsv        2 "is not there"
+
+# --- the r172 arm, against the real manifest -----------------------------------
+# The positive control comes FIRST: a set built from the repository's own
+# manifest must PASS, or the four reds below would only prove the fixture is
+# broken. That is r170's lesson, and this harness has already been wrong about it
+# twice in one file.
+expect_manifest real-all real-frames.tsv 0 "declared states covered"
+for GONE in 18-phone-kick 19-phone-half-point 23-phone-picked 06-phone-settings; do
+  rm -rf "$ROOT/real-missing-$GONE"
+  cp -r "$ROOT/real-all" "$ROOT/real-missing-$GONE"
+  rm -f "$ROOT/real-missing-$GONE/$GONE.png"
+  expect_manifest "real-missing-$GONE" real-frames.tsv 1 "were not written"
+done
+# The optimistic direction: the one row still allowed to miss its subject.
+rm -rf "$ROOT/real-missing-21-opportunistic"
+cp -r "$ROOT/real-all" "$ROOT/real-missing-21-opportunistic"
+rm -f "$ROOT/real-missing-21-opportunistic/21-phone-kick-open.png"
+expect_manifest real-missing-21-opportunistic real-frames.tsv 0 "UNCOVERED"
 
 # --- case 9: the old algorithm, verbatim, on the same failure ----------------
 OLD=$("$PY_BIN" - "$ROOT/unplayed" <<'PY'

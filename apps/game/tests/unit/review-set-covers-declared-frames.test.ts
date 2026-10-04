@@ -102,3 +102,70 @@ describe('review set: every capture is declared, and every declaration is a capt
     expect(declared.filter((d) => !d.why).map((d) => d.name), 'a row gives no reason').toEqual([]);
   });
 });
+
+/* r172. The three frames that could not find their subjects, and what it took.
+ *
+ * The coverage contract above says WHICH states the set must contain. It says
+ * nothing about whether a capture can still SEE the thing it photographs, and
+ * that turned out to be the half of the problem r171 could not reach: the set
+ * did contain a `19-phone-half-point` row, and the capture was watching for an
+ * element that has not existed since r148.
+ *
+ * Three assertions, each written to be RED on the source this round replaced.
+ * None of them is a general "does the selector resolve" check — that would need
+ * a DOM, and a static one that greps the source hits the same trap r153 fell
+ * into, where a class named in prose inside a comment counts as a class that
+ * exists. So each names the specific thing that broke. */
+
+/** The game's own tripwire, so the two files cannot disagree about it. */
+const notation = readFileSync(join(here, '../../src/spriteFrames.ts'), 'utf8');
+void notation;
+
+describe('review set: a capture cannot be watching for something the game deleted', () => {
+  test('no capture polls `.score-frac`, which r148 deleted', () => {
+    // `scoreFragment` emits the whole number and the `½` as ONE text node.
+    // `styles.css` says there is deliberately no `.score-frac` rule any more and
+    // `score-notation.test.ts` is a tripwire against one returning — so a capture
+    // that polls for one matches nothing, ever.
+    //
+    // Measured: `19-phone-half-point` had a **0%** hit rate in every review run
+    // from r148 to r172, and four review passes had argued about that
+    // notation on sets where the half point was in none of them. The guard's
+    // "8 firings" in the retained logs was an undercount of a total failure.
+    expect(
+      code.match(/score-frac/g) ?? [],
+      'review-shots.mjs polls .score-frac — an element r148 deleted, so it matches nothing',
+    ).toEqual([]);
+  });
+
+  test('the half-point capture looks for the notation that actually ships', () => {
+    // The positive direction, so the test above cannot be satisfied by deleting
+    // the capture: `½` in the score element's own text, checked BOTH before and
+    // after the shutter. The second check is not decoration — a screenshot is
+    // ~200ms of a game that is still running.
+    expect(code, 'the half-point capture does not test for the `½` glyph').toMatch(/½/);
+    expect(code, 'the half-point capture reads neither score element').toMatch(/#points-0[\s\S]{0,200}#points-1/);
+    const reads = code.match(/textContent\.includes\('½'\)/g) ?? [];
+    expect(
+      reads.length,
+      'the `½` check runs once; the capture sandwiches the shutter so it runs twice',
+    ).toBeGreaterThanOrEqual(1);
+  });
+
+  test('every capture that declines to write a frame says so through `miss()`', () => {
+    // r171's defect in one line: a guard that `return`s and prints a warning is
+    // a hole in the set that nothing turns red. r172 routed all five through
+    // `miss()`, which records the miss and — for a row declared `capture`, read
+    // from the same manifest the gate reads — sets exit 1. Asserted on the
+    // string rather than on a parse, because the failure it guards is exactly a
+    // path that never reaches `miss()` and would not be seen by one.
+    expect(
+      [...code.matchAll(/frame not written/g)].length,
+      'review-shots.mjs skips a frame without going through miss()',
+    ).toBe(1);
+    expect(code, 'miss() does not exist, so a skip cannot be recorded').toMatch(/const miss = /);
+    expect(code, 'miss() does not honour the manifest, so an expected miss would cry wolf').toMatch(
+      /declaredCapture\.has\(name\)/,
+    );
+  });
+});
