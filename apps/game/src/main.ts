@@ -27,7 +27,7 @@ import { mountBootScreen, type BootScreen } from './bootScreen.js';
 import type { FighterView } from './fighterView.js';
 import { Hud, scoreFragment } from './hud.js';
 import { PlayerInput } from './input/index.js';
-import { loadCareer, loadPlayerName, recordBoutResult, recordRun, savePlayerName } from './persist.js';
+import { loadCareer, loadPlayerName, recordBoutResult, recordPieces, recordRun, savePlayerName } from './persist.js';
 import { Leaderboard } from './leaderboard.js';
 import { preBoutDeadline, frameDeadline } from './preBoutBudget.js';
 import { createRenderer } from './renderer.js';
@@ -814,17 +814,18 @@ async function boot(screen: BootScreen): Promise<void> {
       headline: won ? 'CHAMPION' : 'DEFEATED',
       tone: won ? 'full' : 'neutral',
       score: formatScoreNodes(run.score),
-      detail: newBest
-        ? 'New best score'
-        : (() => {
-            const f = document.createDocumentFragment();
+      detail: (() => {
+          // The order and the wording live in `recordPieces`; this loop only
+          // turns pieces into nodes. Rounds 102 and 130 each rejected a second
+          // hand-written copy of the score formatting, so there is one.
+          const f = document.createDocumentFragment();
+          for (const piece of recordPieces({ champion: won && last, newBest, record })) {
             f.append(
-              document.createTextNode('Best '),
-              scoreFragment(record.bestScore),
-              document.createTextNode(` · titles ${record.championships}`),
+              'score' in piece ? scoreFragment(piece.score) : document.createTextNode(piece.text),
             );
-            return f;
-          })(),
+          }
+          return f;
+        })(),
       action: 'NEW TOURNAMENT',
       rematch: () => act(),
     });
