@@ -10980,9 +10980,28 @@ this round's commits. r151's standing instruction — suspect every number in th
 has now caught three: a colour-literal count, a ROUND_INTRO_MS reading, and now the
 scoreboard's own row. None of them were lies. All of them were true when written.
 
+### And it plays
+
+Byte-identity says the right bytes shipped. It does not say a player can play them, so
+three behaviour probes ran against **production**, each with its own negative control:
+
+- `coach-probe` → **0** — first run taught on `/`, `?mode=tournament` and `?mode=dojo`;
+  the returning-player control correctly silent.
+- `coach-legend-probe` → **0** — one arrow order in both halves, 1px divider, **0 cells
+  spilling**, and no strip for a returning player.
+- `keyboard-journey` → **0** — including the arm that matters: a keyboard-only journey
+  that walked in and landed `front_kick` for a half, `0.5 -> 1 at tick 806`.
+
+All nine arcade routes **200**, `/api/health` `{"ok":true}`.
+
 ### Gates
 
 `check=0` (213 unit, content, 20 assets against provenance) · `e2e=0` (54 passed,
 6 skipped) · deploy clearance `cleared` · `verify-deploy.sh` 0 · `production-freshness.py`
 0 · host `readlink` and `/api/health` both confirm. Machine load 9.58 at the e2e, inside
 the green band r151 recorded.
+
+**And afterwards the tool's warning is gone.** With the tree clean,
+`production-freshness.py` no longer prints `the repo has uncommitted changes` — the same
+line that stopped this round mid-deploy, so its absence is the fix's receipt as much as
+the deploy's.
