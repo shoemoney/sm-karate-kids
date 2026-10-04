@@ -10,10 +10,22 @@ has been improving.
 |---|---|
 | Playable | yes — tournament + dojo, two sticks, point karate |
 | Deployed | `https://arcade.shoemoney.com/karate-kids/`, verified playing a real bout |
-| Tests | 213 unit, 54 e2e (+6 phone-only skips on desktop, by design), green locally at r165 |
-| Review loop | 165 rounds, 20 review frames, mutation-tested fences |
-| Commits | 315 |
-| Production | ✅ **EQUAL at r165** — release `20261003195021-2ae1e7`; `verify-deploy.sh` 0, `production-freshness.py` 0, dangling-reference arm clear. Was 63 commits stale at r160 (fixed r162), and deliberately 1 byte stale at r164b (fixed r165). |
+| Tests | **232 unit / 29 files** (`pnpm check` → 0, measured at r168); **72 e2e across 11 files declared** (`playwright test --list`). The e2e suite was **not run at r168** — no game code changed that round, so there was nothing to rebuild. |
+| Review loop | 168 rounds, 20 review frames, mutation-tested fences |
+| Commits | 322 |
+| Production | ✅ **EQUAL at r168** — release `20261003195021-2ae1e7`; `verify-deploy.sh` 0, `production-freshness.py` 0, dangling-reference arm clear. Was 63 commits stale at r160 (fixed r162), and deliberately 1 byte stale at r164b (fixed r165). |
+
+> **Re-measured at r168, and this row was wrong.** It said "165 rounds" and
+> "315 commits" — this document's own snapshot drifting — and the Tests row said
+> "213 unit, 54 e2e". Measured at r168: **232 unit / 29 files** (which is what
+> r167 also recorded, so the 213 had been stale for more than a round) and
+> **72 e2e across 11 files**, so the e2e figure was low by 18. That is the
+> **fifth stale number in this document**, and the fourth caught by re-running a
+> tool instead of reading the prose.
+>
+> The e2e count is stated as **declared, not run**, because r168 changed no game
+> code. Writing "72 e2e green" would have been the r151 error wearing a bigger
+> hat: a number nobody measured this round.
 
 The game is not a prototype. What remains is a short list of specific, named
 gaps — every one of them is in this document, and nothing else is.
@@ -527,6 +539,46 @@ Because nothing is watching, three rules exist and are not optional:
       single bout. The state had been reachable since the ladder shipped.
       `recordPieces` decides the line; `main.ts` renders it with one loop, so the
       score formatting keeps exactly one home. 8/8 unit, mutation-proved twice.
+
+> **And at r168 the thing r167 left behind is settled: it reaches a green
+> end-to-end run, or it was deleted.** r167's browser probe was "wired into
+> nothing", because it did not reproduce: green on some arms at load 19–30,
+> `undefined` on the same arms at load 60–106.
+>
+> **It is green now, and the reason is that the player does nothing.**
+>
+> On a quiet box (load 10–12) the flick-bot version went **3 arms green and 1 arm
+> `undefined`** — and that is the detail worth keeping, because *that is not what
+> a busy machine looks like*. A busy machine loses all four arms, since it is
+> busy for all four. One arm in four means the question was never "was the box
+> busy" but "what was that arm's run doing", which is a question about the bot.
+>
+> So the bot is gone. An idle player is the **deterministic** version of the same
+> journey: the CPU beats a player who does nothing, the run ends `DEFEATED`, and
+> the seeded unreachable `bestScore: 30,000` puts the card on the branch every arm
+> asserts. Measured six arms: **16.7 / 18.4 / 16.7 / 17.0 / 17.1 s — a 0.7s
+> spread**, where the flick bot's run length depended on how well it happened to
+> be playing. The verdict no longer depends on a bot's luck, which is the only
+> property r141 said a gate here has to have.
+>
+> **What it turned out to cover, and what it does not, is the interesting half.**
+> Before this round **nothing anywhere in the repo asserted `.result-detail`**:
+> the unit test renders the pieces through its own local helper and never builds
+> a DOM node, and its only guard on the call site is
+> `expect(src).toContain('recordPieces(...)')` — a string match on the source.
+> So the record line's path to the **screen** was uncovered, and cases 1–2 of the
+> harness prove why a browser was required: drop either half of `main.ts`'s append
+> loop and `recordPieces` stays perfectly correct and the **whole unit suite stays
+> green** while the count never reaches the card.
+>
+> **It would not, on its own, have caught the r166 defect**, and the header says so
+> rather than implying otherwise. Two separate measured facts put both `newBest:
+> true` branches out of reach: every arm seeds an unreachable best, and an idle
+> player scores 0, so `newBest = 0 > 0` is false. Case 3 of the harness is a
+> **negative assertion** — it restores the bug and requires the probe to stay
+> green *and* the unit test to go red, which is the demonstration that the two
+> gates are complementary and that the scope claim is proven rather than asserted.
+> The unit test owns the branch; the probe owns the DOM.
 
 - [x] **every phase gated, logged, committed, deployed**
 

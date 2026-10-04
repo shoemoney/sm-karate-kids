@@ -11186,3 +11186,154 @@ and `contrast-reach.py` agrees, printing the ten as tokens, every one re-pointed
 inside `body.high-contrast`. **Fourth stale number in that document**, and the
 third caught by re-running a tool instead of reading the prose. r151's standing
 instruction is still the most useful sentence in the repo.
+
+---
+
+## Round 168 — the bot was the flake, and the player does nothing 🎯
+
+Started from the injected `EQUAL` verdict, tree clean, load 10–12. Every item in
+the plan is closed or blocked on a human, so this round did the one thing r167
+named and did not do: it picked up the instrument it left wired into nothing.
+
+r167's note, verbatim: *"`tools/champion-probe.mjs` is wired into nothing and its
+header says so … the next round with a quiet box should either make it green or
+delete it. Not before then."*
+
+### The first run, and the inference it forced
+
+    ok   control          (16.8s)  Best 30,000 · titles 5
+    ok   titles 0         (17.0s)  Best 30,000 · titles 0
+    ok   titles 1         (16.8s)  Best 30,000 · titles 1
+    FAIL titles 2                  undefined
+
+**Three arms green, one `undefined`.** That is the whole round, because of what
+it is *not*.
+
+r167 recorded the failures at load 60–106 and attributed them to the machine. But
+a busy machine loses **all four** arms — it is busy for all four. Three arms
+reading their exact strings and one reading `undefined` is not a machine
+measurement. It is a per-run measurement, which means the question was never
+"was the box busy" but **"what was that arm's run doing"** — a question about
+the bot, not about contention.
+
+So the bot was the suspect, and the way to settle it was to remove the variable.
+
+### An idle player is the deterministic version of the same journey
+
+`tools/champion-probe-diag.mjs` presses FIGHT once and then **does nothing at
+all**. The CPU beats a player who does nothing, the run ends `DEFEATED`, and the
+seeded unreachable `bestScore: 30,000` puts the card on the branch every arm
+asserts. It also prints the sim's own `phase` / `timerTicks` / positions / scores
+every half-second, so a run that failed to end would be a printed fact rather
+than an inference.
+
+    titles 0  17.1s   Best 30,000 · titles 0
+    titles 1  17.4s   Best 30,000 · titles 1
+    titles 2  17.1s   Best 30,000 · titles 2
+    titles 5  17.8s   Best 30,000 · titles 5
+
+**A 0.7s spread over four runs**, against a flick bot whose run length depended on
+how well it happened to be playing. That is the fix, and it is r141's rule applied
+to itself: *a gate that needs a skilled player to go green is a gate that flakes
+and then gets deleted.* The idle player cannot play badly.
+
+**And the claim was then checked a second way, on the committed tree**, because
+"deterministic" is exactly the word that deserves a second measurement:
+
+| run | load | arm times |
+|---|---|---|
+| first full run | 10.1 | 16.7 / 18.4 / 16.7 / 17.0 / 17.1s |
+| against the commit | **18** | **17.1s** on the same arm |
+
+Load 18 is the band where the e2e suite goes red on this machine (14–16). That arm
+took **17.1s at load 18 and 17.0s at load 10**, which is the whole thesis as a
+number: the run length no longer moves with the box, because there is no longer
+anything in the loop whose speed is a function of contention. The old version's
+entire failure mode was that one.
+
+### My own arm was wrong, and the measurement said so
+
+The rewrite's second arm asserted that a fresh unseeded store reaches the
+`New best score` branch, on the reasoning that a blank store means `bestScore: 0`
+and therefore any run score beats it. First run of the rewrite:
+
+    FAIL fresh store: a player with no record gets the no-record line
+                       (read "Best 0 · titles 0")
+
+**It does not.** An idle player scores exactly **0**, and `newBest = 0 > 0` is
+false, so the card lands on the same branch as every other arm.
+
+The temptation there is to loosen the assertion until it matches the output. The
+thing worth keeping is that it isn't a loosening — it is a fact about the
+**coverage**, and it is sharper than the branch I was reaching for:
+
+> **An idle player scores 0, so `newBest` is never true, so NEITHER
+> `newBest: true` branch is reachable by this probe.** The `New best score` branch
+> and the champion branch `titles N · new best` — the one the r166 defect
+> destroyed — are both out of reach, for the same reason: both need a player who
+> scores, and this player does not.
+
+The arm now asserts what it genuinely establishes — a blank record renders a
+zeroed count and a standing record, on the card a first-time player actually sees.
+
+### What it turned out to cover
+
+Before this round, **nothing anywhere in the repo asserted `.result-detail`.**
+The unit test renders the pieces through its own local `render()` helper and never
+builds a DOM node; its only guard on the call site is
+`expect(src).toContain('recordPieces(...)')`, a string match on the source. So the
+record line's path to the **screen** was uncovered, and that is the "declared but
+never invoked" class this repo has hit four times — in one of its weaker forms.
+
+### The harness, 7/7 — and one case that is a negative assertion
+
+    ok  baseline (fixed tree)                    probe 0, unit green
+    ok  text pieces dropped before the DOM       probe 1
+    ok  score piece dropped before the DOM       probe 1
+    ok  r166 bug restored                        probe 0  <- blind to it
+    ok  r166 bug restored                        unit RED
+    ok  source restored by checksum
+
+Cases 1 and 2 are why the browser gate was needed at all: drop either half of
+`main.ts`'s append loop and `recordPieces` stays **perfectly correct** and the
+**whole unit suite stays green** while the count never reaches the card. A green
+unit suite was, in this specific case, not evidence about the screen.
+
+Case 3 is the one I would keep if I could only keep one. It restores the r166
+defect and requires the probe to stay green **and** the unit test to go red — so
+the header's scope claim is *proven* rather than asserted, and neither gate is
+quietly doing the other's job. **The unit test owns the branch; the probe owns the
+DOM.** Neither alone is the gate for the defect, and saying so in the header is
+what makes the pair worth having.
+
+### Gates, read before the git line
+
+- `pnpm check` → **0**. **232 unit / 29 files**, typecheck clean, content and assets OK.
+- The mutation harness → **7/7**, with `main.ts` and `persist.ts` both verified
+  byte-identical to `HEAD` afterwards. **No game code changed this round**, so
+  there is nothing to ship: `git diff HEAD -- apps/game/src/` is empty.
+- `production-freshness.py` → **exit 0** at the end as well as the start. Nothing
+  was deployed, so this was measured rather than assumed.
+
+### The port I did not kill
+
+`5173` was already occupied when this round started — PID 83428, a vite dev
+server for **this repo**, up 5h28m, started by somebody else. The harness mutates
+`apps/game/src` for about eight minutes, so pointing it at another session's
+server would have shown them a deliberately broken build mid-edit. It got its own
+dev server on `5179` and killed **that** one, by port, afterwards.
+
+`5173` was still PID 83428 when this round finished. Untouched.
+
+Standing rule 6 is not a formality; it is the difference between a harness that
+runs and one that costs a colleague their afternoon.
+
+### Nothing found
+
+No game defect this round. The plan's claim that every behaviour defect is closed
+survives re-reading, and the work was an instrument — which is the right thing to
+spend a round on when the instrument was the thing that was broken. r167's own
+framing is the one that keeps paying: *a state that becomes reachable is not a
+state that has been reviewed*, and its second half, which cost this round: **a
+gate that is wired to nothing is not a gate.**
+
