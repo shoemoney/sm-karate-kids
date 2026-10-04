@@ -635,6 +635,11 @@ async function boot(screen: BootScreen): Promise<void> {
   };
 
   const restart = (): void => {
+    // A restart is a new bout, so whatever the last one scheduled is void. The
+    // result card arms `restart` itself; a pick made over that card restarts
+    // first, and the stale timer would otherwise wipe the new bout seconds in.
+    pending = null;
+    pendingAt = 0;
     state = newMatch();
     opponent = makeOpponent(mode, seed);
     seatFighters();

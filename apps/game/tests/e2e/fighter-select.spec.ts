@@ -79,7 +79,8 @@ test('in the dojo, Settings swaps fighters at once', async ({ page }) => {
   await expect(page.locator('#name-0')).toHaveText('HasanAbi');
 });
 
-test('mid-bout in a tournament, a Settings change waits for the next round', async ({ page }) => {
+test('mid-bout in a tournament, a Settings change waits for the next bout, then applies', async ({ page }) => {
+  test.setTimeout(120_000);
   await page.goto('/');
   await ready(page);
   await page.locator('.result-rematch').click();
@@ -90,4 +91,40 @@ test('mid-bout in a tournament, a Settings change waits for the next round', asy
   // The bout in progress is not restarted or reseated.
   expect(await seats(page)).toEqual({ sim: ['shiro', 'aka'], views: ['shiro', 'aka'] });
   await expect(page.locator('#name-0')).toHaveText('Asmongold');
+
+  // And the pick is not merely recorded: the next bout is built with it. Nobody
+  // touches the sticks, so the bout ends on the clock or the CPU's points.
+  await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk'].state().phase === 'over', null, { timeout: 60_000 });
+  await page.locator('.result-rematch').click();
+  await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk'].seats().sim[0] === 'aka', null, { timeout: 15_000 });
+  expect(await seats(page)).toEqual({ sim: ['aka', 'shiro'], views: ['aka', 'shiro'] });
+  await expect(page.locator('#name-0')).toHaveText('HasanAbi');
+});
+
+test('a pick made over the dojo result card is not undone by its rematch timer', async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.goto('/?mode=dojo');
+  await ready(page);
+  await page.waitForFunction(() => (globalThis as Record<string, any>)['__smkk'].state().phase === 'over', null, { timeout: 60_000 });
+  await page.locator('#btn-settings').click();
+  await page.locator('#opt-fighter input[value="aka"]').check();
+  await page.locator('#settings-close').click();
+  expect((await seats(page)).sim).toEqual(['aka', 'shiro']);
+
+  // Every frame, because a second restart is a tick that goes backwards for
+  // one frame and a couple of reads afterwards would never see it.
+  await page.evaluate(() => {
+    const g = globalThis as Record<string, any>;
+    g['__ticks'] = [];
+    const sample = (): void => {
+      g['__ticks'].push(g['__smkk'].state().tick);
+      requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  });
+  await page.waitForTimeout(10_000); // past REMATCH_AFTER_MS (8s)
+  const ticks: number[] = await page.evaluate(() => (globalThis as Record<string, any>)['__ticks']);
+  const backwards = ticks.findIndex((t, i) => i > 0 && t < ticks[i - 1]!);
+  expect(backwards, `the bout restarted under the player at sample ${backwards}`).toBe(-1);
+  expect(ticks.at(-1)!, 'the new bout is not running').toBeGreaterThan(ticks[0]!);
 });
