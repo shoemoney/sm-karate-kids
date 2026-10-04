@@ -11612,3 +11612,93 @@ and the code was merely uninstrumented**. Six rounds have run in this direction
 already — a control that is correct and wired to nothing reports a legal value,
 so every gate downstream reads it as working. Here the control was a CSS fallback,
 and the tool that reported on it had been quietly switching it on by hand.
+
+---
+
+## The deploy, blocked at its last gate — r170
+
+Measured before starting, because that is the whole point of r160/r161: this tree
+ships **8 commits behind**, and behind them is **r167's championship-counter
+fix** — a player-visible bug, not instrument work. So this was worth attempting
+rather than deferring.
+
+Everything up to the final gate went correctly, and each step was measured:
+
+| step | result |
+|---|---|
+| `capture-live.sh --release karate-kids` | 8 games captured; **re-capture was byte-identical** to the committed `live-preserve`, so that tree is accurate |
+| `build-release.py --release karate-kids` | `built_from_source: ["karate-kids"]`, other **7 restored from live** |
+| payload sha256 diff vs **live**, all 8 games | **karate-kids: exactly 5 files differ** (new CSS+JS, old pair dropped, `index.html` renamed). **Other 7 games: 0 — byte-identical. Zero collateral.** |
+| fresh bundle contains a `.js.map`? | **no** — r164b's `sourcemap: false` fix still holds |
+| privacy gate `clear` | **BLOCKED** |
+
+The block is real and it is the gate working:
+
+```
+{"status": "blocked", "reason": "Privacy decisions must cover every retained file exactly once."}
+```
+
+Sized precisely, because "blocked" with no number is the r149 shape:
+
+```
+files actually in payload: 429
+in payload but NOT covered by decisions: 2
+    public/karate-kids/assets/index-Bu2qoKWR.css
+    public/karate-kids/assets/index-C6knvd9N.js
+covered by decisions but not in payload: 2
+    public/karate-kids/assets/index-Buq5MQDb.css
+    public/karate-kids/assets/index-CEpXIazX.js
+```
+
+Two files, and they are each other's predecessors — the old bundle's decisions, with
+the new bundle unhashed. Clearing them is one command:
+
+```sh
+# append two entries to artifacts/arcade/clearance/decisions.json for the two new
+# assets — classification + reason — then:
+python3 ops/deploy.py --payload artifacts/arcade/release-payload \
+  --clearance artifacts/arcade/clearance/<new-receipt>.json
+```
+
+**I did not run it, and that is the decision of the round.** Each decision entry
+is a classification plus a prose reason, and the receipt carries a `reviewer_id` —
+together an attestation that these two files are safe to publish to a public host.
+Writing one unattended, for a 1MB bundle nobody in this session has read, is the
+handoff category, not a loop action. The gate is fail-closed and it stayed closed.
+
+Two smaller things found on the way, both **in `~/Projects/SMA-arcade`, not fixed
+here** — that repo has its own owner and this loop does not sprawl:
+
+- **`README.md:113` contradicts its own script.** It says
+  `capture-live.sh --release <slug>` captures "excluding `<slug>`". The script's
+  header says the exclusion was **removed on purpose** after it `rm -rf`'d the
+  committed preserve tree mid-release, and `--release` is now only a log line. The
+  script is right and newer; the README line is r152's pattern in a different repo.
+- **The payload's final assembly is manual.** `build-release.py` writes `dist/`;
+  nothing writes `artifacts/arcade/release-payload/`. The step is
+  `rsync -a --delete dist/ artifacts/arcade/release-payload/public/`, and `api/` is
+  byte-identical either way (verified: `81e3ad85ba82` / `be93b6e1a140`), so there is
+  no API risk in restaging.
+
+### My instrument was wrong twice before the gate
+
+Both caught by looking at the *shape* of the output rather than the verdict:
+
+1. **The collateral diff reported 842 differing files** across all 8 games. The
+   shape said so immediately: nearly every file appeared **twice**, once as
+   `ONLY-LIVE ./assets/…` and once as `NEW assets/…`. A `./` prefix bug in my
+   remote `find`, plus I had treated `assets/` and `brand/` as games ("10 games"
+   for 8). Fixed both — normalise the prefix, take the slugs from
+   `ops/game-sources.json` rather than from directory names — and the real answer
+   is **5 files, all in karate-kids, and 0 in the other seven**. Had I not read the
+   shape, the plausible-looking "842 files differ" would have aborted a clean
+   release, or been waved through as noise.
+2. **`$?` after a pipe is the pipe's exit code.** I read
+   `contrast-reach.py | head` and recorded exit 0 while the tool had exited 1.
+   Re-measured unpiped: **1**, as designed — it had flagged that my change moved a
+   rule out from under its anchor. That misreading nearly hid a real signal.
+
+Standing rule 3 exists because rounds 90, 93 and 95 each shipped a metric that
+agreed with a no-op. Both of these would have been exactly that, in opposite
+directions: one would have stopped a good release, one would have hidden a
+correct red.

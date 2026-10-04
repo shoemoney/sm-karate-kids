@@ -13,7 +13,7 @@ has been improving.
 | Tests | **232 unit / 29 files** (`pnpm check` → 0, measured at r168); **72 e2e across 11 files declared** (`playwright test --list`). The e2e suite was **not run at r168** — no game code changed that round, so there was nothing to rebuild. |
 | Review loop | 168 rounds, 20 review frames, mutation-tested fences |
 | Commits | 322 |
-| Production | ✅ **EQUAL at r168** — release `20261003195021-2ae1e7`; `verify-deploy.sh` 0, `production-freshness.py` 0, dangling-reference arm clear. Was 63 commits stale at r160 (fixed r162), and deliberately 1 byte stale at r164b (fixed r165). |
+| Production | ⚠️ **STALE at r170 — 8 commits behind, measured.** `production-freshness.py` → **exit 1**: served build pinned to `d839702c9` (r166), an upper bound. So the live origin is **missing r167's championship-counter fix**, a player-visible bug (the title count only appeared when you did worse). **The deploy is one reviewer decision away and is blocked on a human — see "The deploy, blocked at its last gate" below.** |
 
 > **Re-measured at r168, and this row was wrong.** It said "165 rounds" and
 > "315 commits" — this document's own snapshot drifting — and the Tests row said
