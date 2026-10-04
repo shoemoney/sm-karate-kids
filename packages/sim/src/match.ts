@@ -68,6 +68,12 @@ export interface MatchOptions {
    * instead of walking in from the ruleset distance every repetition.
    */
   readonly startSeparation?: number;
+  /**
+   * Which fighter is player 1 (left, facing in) and which is player 2, by id.
+   * The player picks who they are, so this is not always the content order,
+   * which remains the default.
+   */
+  readonly fighterIds?: readonly [string, string];
 }
 
 function pick<T extends { id: string }>(items: readonly T[], id: string | undefined, label: string): T {
@@ -79,11 +85,13 @@ function pick<T extends { id: string }>(items: readonly T[], id: string | undefi
 export function createMatch(options: MatchOptions): MatchState {
   const ruleset = pick(options.content.rulesets, options.rulesetId, 'ruleset');
   const arena = pick(options.content.arenas, options.arenaId, 'arena');
-  const first = options.content.fighters[0];
-  const second = options.content.fighters[1];
+  const ids = options.fighterIds;
+  const first = ids === undefined ? options.content.fighters[0] : pick(options.content.fighters, ids[0], 'fighter');
+  const second = ids === undefined ? options.content.fighters[1] : pick(options.content.fighters, ids[1], 'fighter');
   if (first === undefined || second === undefined) {
     throw new Error('a bout needs exactly two fighters');
   }
+  if (first.id === second.id) throw new Error('a bout needs two different fighters');
   const separation = Math.max(
     0.8,
     Math.min(options.startSeparation ?? ruleset.startSeparation, arena.bounds * 1.6),

@@ -10,6 +10,11 @@ export interface Replay {
   readonly arenaId: string;
   /** The opening distance actually in force for this match, after any override and clamping. */
   readonly startSeparation: number;
+  /**
+   * Player 1's and player 2's fighter ids. Optional so a replay recorded before
+   * the player could choose still plays back, in the content order it used.
+   */
+  readonly fighterIds?: readonly [string, string];
   /** One packed input frame per tick. */
   readonly frames: readonly number[];
   /** Checksum after the final recorded tick. */
@@ -31,6 +36,7 @@ export class ReplayRecorder {
       rulesetId: this.state.ruleset.id,
       arenaId: this.state.arena.id,
       startSeparation: this.state.separation,
+      fighterIds: [this.state.fighters[0].spec.id, this.state.fighters[1].spec.id],
       frames: [...this.frames],
       checksum: checksumOf(this.state),
     };
@@ -53,6 +59,7 @@ export function playback(replay: Replay, options: MatchOptions): PlaybackResult 
     rulesetId: replay.rulesetId,
     arenaId: replay.arenaId,
     startSeparation: replay.startSeparation,
+    ...(replay.fighterIds === undefined ? {} : { fighterIds: replay.fighterIds }),
   });
   for (const packed of replay.frames) {
     step(state, unpackFrame(packed));

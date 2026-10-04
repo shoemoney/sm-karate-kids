@@ -272,6 +272,11 @@ export class Hud {
      * the reference it tells the player to consult.
      */
     reference?: { label: string; onOpen: () => void };
+    /**
+     * Swaps which fighter the player is. Only the opening card offers it, and
+     * it sits beside the reference so the card gains no height.
+     */
+    swap?: { label: string; onSwap: () => void };
     /** A small line above the headline, e.g. the round. */
     kicker?: string;
     /**
@@ -363,7 +368,18 @@ export class Hud {
       // fighters no matter how the card's text reflows.
       const actions = document.createElement('div');
       actions.className = 'result-actions';
-      if (opts.reference !== undefined) actions.appendChild(ref);
+      const secondary = document.createElement('div');
+      secondary.className = 'result-secondary';
+      secondary.appendChild(ref);
+      if (opts.swap !== undefined) {
+        const swap = document.createElement('button');
+        swap.type = 'button';
+        swap.className = 'result-swap';
+        swap.textContent = `⇄ ${opts.swap.label}`;
+        swap.addEventListener('click', opts.swap.onSwap, { once: true });
+        secondary.appendChild(swap);
+      }
+      actions.appendChild(secondary);
       actions.appendChild(button);
       actions.appendChild(count);
       parts.push(actions);

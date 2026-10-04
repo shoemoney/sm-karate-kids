@@ -36,6 +36,7 @@ import { createPostStack } from './post.js';
 import { FighterRig, loadEmblem } from './rig.js';
 import { SettingsStore, type Settings } from './settings.js';
 import { tryLoadSpriteViews } from './spriteRig.js';
+import { fighterOrder, loadPick, savePick } from './fighterPick.js';
 import { Stage } from './stage.js';
 import { Juice } from './juice.js';
 import { createControlCoach } from './coach.js';
@@ -216,6 +217,13 @@ async function boot(screen: BootScreen): Promise<void> {
   const spacingParam = Number.parseFloat(params.get('spacing') ?? '');
   const startSeparation =
     mode === 'dojo' && Number.isFinite(spacingParam) ? spacingParam : undefined;
+  // Who the player is: `?as=` for this session, else their saved pick, else the
+  // first fighter in the roster. Every bout is built through `newMatch`, so a
+  // new pick takes effect wherever a bout next begins.
+  const roster = content.fighters.map((fighter) => fighter.id);
+  let pick = loadPick(params, roster);
+  const newMatch = (): ReturnType<typeof createMatch> =>
+    createMatch({ content, startSeparation, fighterIds: fighterOrder(pick, roster) });
 
   const canvas = document.getElementById('view') as HTMLCanvasElement | null;
   const stageEl = document.getElementById('stage');
@@ -244,7 +252,7 @@ async function boot(screen: BootScreen): Promise<void> {
     `url("${import.meta.env.BASE_URL}generated/title-backdrop.webp")`,
   );
 
-  let state = createMatch({ content, startSeparation });
+  let state = newMatch();
   let opponent = makeOpponent(mode, seed);
 
   // The photoreal sprite fighters are the default. ?fighters=mesh selects the
@@ -296,7 +304,16 @@ async function boot(screen: BootScreen): Promise<void> {
 
   const stage = new Stage(state.arena, import.meta.env.BASE_URL);
   for (const view of views) stage.scene.add(view.root);
-  hud.setNames(state.fighters[0].spec.name, state.fighters[1].spec.name);
+  // Views are built once per fighter, so a pick that swaps sides re-seats them
+  // by id instead of reloading an atlas. `data-p1` re-points the HUD's side
+  // colours, which belong to the fighter and not to the side of the screen.
+  const viewById = new Map(state.fighters.map((fighter, index) => [fighter.spec.id, views[index]!] as const));
+  const seatFighters = (): void => {
+    views = state.fighters.map((fighter) => viewById.get(fighter.spec.id)!);
+    hud.setNames(state.fighters[0].spec.name, state.fighters[1].spec.name);
+    document.body.dataset['p1'] = state.fighters[0].spec.id;
+  };
+  seatFighters();
   const coach = createControlCoach();
   // The stance stick has no simulation event of its own — moving is not a move —
   // so the coach learns about it from the input layer instead.
@@ -618,8 +635,9 @@ async function boot(screen: BootScreen): Promise<void> {
   };
 
   const restart = (): void => {
-    state = createMatch({ content, startSeparation });
+    state = newMatch();
     opponent = makeOpponent(mode, seed);
+    seatFighters();
     clearBoutUi();
   };
 
@@ -645,15 +663,57 @@ async function boot(screen: BootScreen): Promise<void> {
     pressure: 'Relentless. Keeps stepping in and throwing.',
   };
 
+  // True from a round card going up until the bout it introduces begins: the
+  // one window in which a new pick can apply to this bout without restarting it.
+  let preBout = false;
+
+  /**
+   * The player picks who they are. On the opening card, or outside the
+   * tournament, the bout has not started (or is practice) and the swap is
+   * immediate. Mid-run it waits for the next round, so a pick can never be
+   * used to throw away a bout that is going badly.
+   */
+  const choose = (id: string): void => {
+    if (id === pick || !roster.includes(id)) return;
+    pick = id;
+    savePick(id);
+    for (const input of pickInputs) input.checked = input.value === pick;
+    if (!tournament) restart();
+    else if (preBout) startRound(performance.now());
+  };
+
+  // "Your fighter" in Settings, one radio per fighter in the roster.
+  const pickGroup = byId<HTMLElement>('opt-fighter');
+  const pickInputs = content.fighters.map((fighter) => {
+    const row = document.createElement('label');
+    row.className = 'setting-row';
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'fighter';
+    input.value = fighter.id;
+    input.checked = fighter.id === pick;
+    input.addEventListener('change', () => {
+      if (input.checked) choose(fighter.id);
+    });
+    const name = document.createElement('span');
+    name.textContent = fighter.name;
+    row.append(input, name);
+    pickGroup.appendChild(row);
+    return input;
+  });
+
   const beginBout = (): void => {
     held = false;
+    preBout = false;
     hud.hideResult();
   };
 
   const startRound = (nowMs: number): void => {
     const round = TOURNAMENT[run.round]!;
-    state = createMatch({ content, startSeparation });
+    state = newMatch();
     opponent = new CpuController(roundArchetype(round), seed + run.round * 101, 1);
+    seatFighters();
+    preBout = true;
     tally = emptyTally();
     clearBoutUi();
     held = true;
@@ -754,6 +814,16 @@ async function boot(screen: BootScreen): Promise<void> {
         // every move in the game — `tools/sheet-pause-probe.mjs`.
         onOpen: () => toggleSheet(byId<HTMLElement>('tech-ref'), true, settings.get().reducedMotion),
       },
+      // Only on the opening card: who you are is decided before the run, and
+      // the fighters standing behind the card trade places when it is pressed.
+      ...(run.round === 0
+        ? {
+            swap: {
+              label: `Play as ${state.fighters[1].spec.name}`,
+              onSwap: () => choose(state.fighters[1].spec.id),
+            },
+          }
+        : {}),
       rematch: () => act(),
     });
     schedule(beginBout, ROUND_INTRO_MS, nowMs);
@@ -1207,6 +1277,15 @@ async function boot(screen: BootScreen): Promise<void> {
         },
         sticks: () => input.read(),
         emblems: () => views.map((view) => view.emblemInfo()),
+        /**
+         * Who sits where, twice: the simulation's player-1/player-2 fighters,
+         * and whose sprites are drawn in those seats. A swap that moved one and
+         * not the other is a player steering the wrong body.
+         */
+        seats: () => ({
+          sim: state.fighters.map((fighter) => fighter.spec.id),
+          views: views.map((view) => [...viewById].find(([, seated]) => seated === view)?.[0] ?? null),
+        }),
       },
       writable: false,
       configurable: true,

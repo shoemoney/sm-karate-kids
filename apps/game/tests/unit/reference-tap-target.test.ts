@@ -7,7 +7,10 @@ const here = dirname(fileURLToPath(import.meta.url));
 const css = readFileSync(join(here, '../../src/styles.css'), 'utf8');
 const main = readFileSync(join(here, '../../src/main.ts'), 'utf8');
 
-const block = css.match(/\.result-reference\s*\{([^}]*)\}/)?.[1] ?? '';
+// The rule may be shared with the opening card's fighter swap, which sits in
+// the same row and must meet the same floor.
+const rule = css.match(/\.result-reference((?:\s*,\s*[^,{]+)*)\s*\{([^}]*)\}/);
+const block = rule?.[2] ?? '';
 
 /* The pre-bout card's only route to the techniques sheet measured 102x21px in
  * --text-2xs caps — under half the 44px tap floor, on the one screen every
@@ -18,6 +21,10 @@ describe('pre-bout reference button', () => {
     const m = block.match(/min-height:\s*(\d+)px/);
     expect(m, '.result-reference has no min-height').not.toBeNull();
     expect(Number(m![1])).toBeGreaterThanOrEqual(44);
+  });
+
+  test('the fighter swap beside it shares the same rule, and so the same floor', () => {
+    expect(rule?.[1] ?? '').toMatch(/\.result-swap\b/);
   });
 
   test('is not the smallest type token in the system', () => {

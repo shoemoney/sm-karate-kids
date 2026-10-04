@@ -104,10 +104,10 @@
   /* Scoreline identity, taken straight from packages/content/data/fighters.json
      (`giColor`). These alias the gi colours above on purpose: the HUD must not
      be able to disagree with the fighter wearing it. */
-  --fighter-0: var(--shiro);
-  --fighter-0-dim: var(--shiro-dim);
-  --fighter-1: var(--aka);
-  --fighter-1-dim: var(--aka-dim);
+  --fighter-shiro: var(--shiro);
+  --fighter-shiro-dim: var(--shiro-dim);
+  --fighter-aka: var(--aka);
+  --fighter-aka-dim: var(--aka-dim);
 
   /* The focus ring was --cool, which is the one deliberately cold token in a
      warm palette — a pale blue ring around the gold button, drawn on load
@@ -787,6 +787,23 @@ body.show-perf #backend {
     font-size: 0.5rem;
     letter-spacing: var(--track-tight);
   }
+}
+
+/* Side colours follow the FIGHTER, not the side of the screen: the player picks
+   who they are, and HasanAbi on the left is still in red. Declared on body, not
+   :root, so they resolve against body.high-contrast's per-fighter values. */
+body {
+  --fighter-0: var(--fighter-shiro);
+  --fighter-0-dim: var(--fighter-shiro-dim);
+  --fighter-1: var(--fighter-aka);
+  --fighter-1-dim: var(--fighter-aka-dim);
+}
+
+body[data-p1="aka"] {
+  --fighter-0: var(--fighter-aka);
+  --fighter-0-dim: var(--fighter-aka-dim);
+  --fighter-1: var(--fighter-shiro);
+  --fighter-1-dim: var(--fighter-shiro-dim);
 }
 
 .side[data-side="0"] .name {
@@ -2131,6 +2148,63 @@ input:focus-visible,
   background: var(--shadow-ink);
 }
 
+/* "Your fighter": a choice of one, so radios, built to the switches' rule —
+   legible in both states. Off is a ring with nothing in it, on fills gold. */
+.setting-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.setting-group legend {
+  padding: var(--space-2) var(--space-1) 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.setting-row input[type="radio"] {
+  position: relative;
+  appearance: none;
+  -webkit-appearance: none;
+  inline-size: 22px;
+  block-size: 22px;
+  flex: 0 0 auto;
+  margin: 0;
+  background: var(--switch-track-off);
+  border: 2px solid var(--text-muted);
+  border-radius: var(--radius-circle);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.setting-row input[type="radio"]:checked {
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 0.7rem -0.1rem var(--gold-glow);
+}
+
+.setting-row input[type="radio"]:checked::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: var(--radius-circle);
+  background: var(--gold);
+}
+
+.setting-row input[type="radio"]:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+}
+
+.setting-row input[type="radio"]:focus:not(:focus-visible) {
+  outline: none;
+}
+
 body.high-contrast .setting-row input[type="checkbox"] {
   border-color: var(--text-ghost);
 }
@@ -2409,10 +2483,10 @@ body.high-contrast {
   --shiro: #ffffff;
   --shiro-dim: #f2f2f2;
 
-  --fighter-0: #ffffff;
-  --fighter-0-dim: #f2f2f2;
-  --fighter-1: var(--aka-bright);
-  --fighter-1-dim: var(--aka);
+  --fighter-shiro: #ffffff;
+  --fighter-shiro-dim: #f2f2f2;
+  --fighter-aka: var(--aka-bright);
+  --fighter-aka-dim: var(--aka);
 
   --outline: #ffffff;
   --check: #ffd400;
@@ -2955,7 +3029,8 @@ body.high-contrast .result-score {
    TECHNIQUES button is behind the card at every phone width — so a 21px target
    is not a polish miss, it is the reference being unreachable by thumb.
    44px is the floor; it gets 46 and a real secondary-button presence. */
-.result-reference {
+.result-reference,
+.result-swap {
   justify-self: center;
   /* No margin of its own any more: `.result-actions` carries `margin-top: auto`
      and places this button and FIGHT as one group in the card's lower band.
@@ -2989,7 +3064,9 @@ body.high-contrast .result-score {
 }
 
 .result-reference:hover,
-.result-reference:focus-visible {
+.result-reference:focus-visible,
+.result-swap:hover,
+.result-swap:focus-visible {
   color: var(--gold-bright);
   border-color: var(--gold);
 }
@@ -3003,6 +3080,16 @@ body.high-contrast .result-score {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: var(--space-2);
+  inline-size: 100%;
+}
+
+/* TECHNIQUES and, on the opening card, the fighter swap: one row, so offering
+   the swap adds no height to a card whose bands were measured to keep the
+   controls off the fighters. */
+.result-secondary {
+  display: flex;
+  justify-content: center;
   gap: var(--space-2);
   inline-size: 100%;
 }
