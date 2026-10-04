@@ -97,6 +97,45 @@ Image.new("RGB", (64, 64), (12, 12, 12)).save(d / "03.png")
 
 build("too-few", n=6)
 
+# --- the r171 coverage arm --------------------------------------------------
+# Every fixture above has the same eight top-level names, so one manifest
+# declares them for all of them and the legacy cases gain a coverage check on
+# the way past. That is deliberate: the new arm is not bolted on beside the old
+# one, it runs on every case the old one already ran.
+ALL = [f"{i:02d}.png" for i in range(8)]
+
+def manifest(name, rows):
+    (root / name).write_text(
+        "# synthetic manifest for the mutation harness\n"
+        + "".join(f"{n}\t{k}\tstate {n}\tsynthetic\n" for n, k in rows)
+    )
+
+manifest("frames.tsv", [(n, "capture") for n in ALL])
+
+# A required frame that was never written. Nine frames, because the count check
+# runs first and a seven-frame fixture would be caught by the WRONG gate, which
+# is the r155 lesson about a red row asserting something other than its label.
+d = build("coverage-missing-required", n=9)
+manifest("frames-nine.tsv", [(f"{i:02d}.png", "capture") for i in range(9)])
+(d / "03.png").unlink()
+
+# A frame in the set that no row declares: a capture added without a manifest
+# entry, which is r158's sentence with the manifest as the new reviewer.
+d = build("coverage-undeclared")
+frame(d / "09.png", 40)
+
+# Only an opportunistic frame absent: exit 0, and it is PRINTED. The split
+# exists so the gate can be strict about screens and honest about moments, and
+# this case is what keeps the honest half from being the silent half.
+build("coverage-opportunistic-missing")
+manifest("frames-opportunistic.tsv",
+         [(n, "capture") for n in ALL] + [("08.png", "opportunistic")])
+
+# A manifest that is not there is operator error, not a defect in the set, and
+# r141's lesson is that the two must never read the same.
+manifest("frames-empty.tsv", [])
+manifest("frames-badkind.tsv", [(n, "capture") for n in ALL] + [("08.png", "sometimes")])
+
 # The r155 failure, shaped: eight distinct richly-coloured frames that are all
 # unrelated static screens of wildly different brightness — dark settings next
 # to a bright fight — plus a burst of a bout nobody played. `spread=True` is
@@ -109,7 +148,12 @@ d = build("unplayed", spread=True)
 PY
 
 # ------------------------------------------------------------------ assert ---
-run() { "$PY_BIN" "$GATE" "$ROOT/$1" 2>&1; }
+# Every case runs against the synthetic manifest, so the legacy eleven also
+# carry a coverage check. Without `--frames` the gate falls back to the repo's
+# real `review-frames.tsv`, and the first run of this arm reported nine red rows
+# that were the harness measuring the wrong tree — r170's lesson, twice, in one
+# file.
+run() { "$PY_BIN" "$GATE" "$ROOT/$1" --frames "$ROOT/frames.tsv" 2>&1; }
 
 expect() {                      # expect <case> <want-exit> <want-substring>
   local name="$1" want="$2" needle="$3" out code
@@ -121,6 +165,23 @@ expect() {                      # expect <case> <want-exit> <want-substring>
     bad "$name: exit $code but no diagnosis matching '$needle'  [$out]"; return
   fi
   ok "$name (exit $code: $(printf '%s' "$out" | head -1 | cut -c1-72))"
+}
+
+# The legacy cases run against the synthetic manifest too, so every one of them
+# now also has to satisfy coverage. `--frames` is omitted only where a case is
+# specifically about the manifest being unreadable.
+run_manifest() { "$PY_BIN" "$GATE" "$ROOT/$1" --frames "$ROOT/$2" 2>&1; }
+
+expect_manifest() {             # expect_manifest <case> <manifest> <exit> <needle>
+  local name="$1" mf="$2" want="$3" needle="$4" out code
+  out="$(run_manifest "$name" "$mf")"; code=$?
+  if [ "$code" != "$want" ]; then
+    bad "$name/$mf: exit $code, want $want  [$out]"; return
+  fi
+  if [ -n "$needle" ] && ! printf '%s' "$out" | grep -qi -- "$needle"; then
+    bad "$name/$mf: exit $code but no diagnosis matching '$needle'  [$out]"; return
+  fi
+  ok "$name/$mf (exit $code: $(printf '%s' "$out" | head -1 | cut -c1-64))"
 }
 
 echo "verify_shots.py mutation harness"
@@ -136,6 +197,18 @@ expect dup-top-level       1 "duplicate"
 expect flat-frame          1 "flat fill"
 expect too-few             1 "want 8"
 expect unplayed            1 "position"
+
+# --- the r171 coverage arm, baseline first -----------------------------------
+# `honest` under the real manifest is the positive control for the new arm: a
+# harness whose fixture is wrong measures a broken gate and reports it as a row
+# of tidy passes, which is what r170's harness was twice wrong about.
+expect_manifest honest                frames.tsv               0 "declared states covered"
+expect_manifest coverage-missing-required frames-nine.tsv       1 "were not written"
+expect_manifest coverage-undeclared   frames.tsv               1 "no row in the manifest"
+expect_manifest coverage-opportunistic-missing frames-opportunistic.tsv 0 "UNCOVERED"
+expect_manifest honest                frames-empty.tsv         2 "declares no frames"
+expect_manifest honest                frames-badkind.tsv       2 "the only kinds are"
+expect_manifest honest                frames-absent.tsv        2 "is not there"
 
 # --- case 9: the old algorithm, verbatim, on the same failure ----------------
 OLD=$("$PY_BIN" - "$ROOT/unplayed" <<'PY'

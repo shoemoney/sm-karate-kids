@@ -39,6 +39,105 @@ const EDGE_MARGIN = 0.6;
 const FIGHTER_HALF_WIDTH = 0.42;
 
 /**
+ * How far the camera's x trails the pair's midpoint, as a fraction.
+ *
+ * It was `0.7`, with nothing written down saying why, and the number was a
+ * defect rather than a style: `framingSolve` below sizes the frame from the
+ * fighters, and the camera then sat `0.3 * midpointX` away from them, so the
+ * further the bout drifted from the middle of the mat the further the pair
+ * slid off the frame edge. See r171 in REVIEW-LOOP.md.
+ *
+ * One, not `0.7`, and — worth being explicit, because my first attempt at this
+ * fix was wrong — **not** `0.7` plus a term that budgeted for the offset.**
+ * That combination does restore the invariant, and it is worse: distance would
+ * then grow with *where on the mat* the fight is, and this function's own
+ * contract is that distance tracks only the distance between the fighters.
+ * Framing the pair from the edge of the mat would dolly the camera back far
+ * enough to turn them into dolls — measured, 9.2 to 20.2 world units at
+ * `bounds`, a little over half size — to pay for a bias nothing asked for.
+ *
+ * `frame()`'s `0.12` lerp already supplies every bit of smoothing the follow
+ * needs. The bias was a second, undocumented softness whose only observable
+ * effect was to walk the fighters out of the picture.
+ */
+const CAMERA_FOLLOW = 1;
+
+export interface FramingSolve {
+  /** How far back the camera sits, in world units. */
+  readonly distance: number;
+  /** Where the camera's x lands. */
+  readonly cameraX: number;
+  /** Height the eye sits at — a phone is lifted, a desktop frame is not. */
+  readonly eyeY: number;
+  /** True on a portrait phone, which is width-starved. */
+  readonly tight: boolean;
+}
+
+/**
+ * The framing arithmetic, pulled out of `frame()` so it can be tested.
+ *
+ * A wall-clock camera budget cannot be unit-tested by waiting for a camera,
+ * which is the same reason `preBoutBudget.ts` exists (r151), and the same reason
+ * this is a pure function over numbers rather than a method that moves a
+ * Three.js object.
+ *
+ * The contract r39 established is that **both fighters stay fully visible**,
+ * and it took a burst of 140 real frames to find it broken: a scored back kick
+ * extends most of a body length past its origin, and framing on the gap alone
+ * sliced that foot off at the edge exactly as it landed. `reach` was added for
+ * that and the family was declared closed.
+ *
+ * It was not closed. `halfWidth` is the half-extent the camera must cover, and
+ * it is centred on the **camera** — but the camera was placed at
+ * `midpointX * 0.7`, not at the fighters' midpoint. That offset grows with how
+ * far the bout has drifted from the middle of the mat, and it was not in the
+ * budget at all. Budgeting for it is the wrong repair; see `CAMERA_FOLLOW`.
+ *
+ * Measured at r171, off `17-phone-scored-result`: a bout that drifted to the
+ * mat's right edge put one fighter **sliced in half by the frame edge** with
+ * the other almost entirely outside the arena, on the game's own result screen.
+ * The camera maths was right about the fighters and wrong about itself.
+ */
+export function framingSolve(
+  width: number,
+  height: number,
+  midpointX: number,
+  gap: number,
+  reach = 0,
+): FramingSolve {
+  const aspect = width / Math.max(height, 1);
+  const tan = Math.tan((FOV * Math.PI) / 360);
+
+  // A tall viewport is width-starved: fitting both fighters side by side
+  // forces the camera far enough back that they end up small, and the frame
+  // below their feet becomes a quarter of the screen in empty mat. So the
+  // breathing room is spent generously on a desktop frame and sparingly on a
+  // phone one, where the pixels are the scarce resource.
+  const tight = aspect < 0.85;
+  const margin = tight ? EDGE_MARGIN * 0.7 : EDGE_MARGIN;
+  const body = tight ? FIGHTER_HALF_WIDTH * 0.8 : FIGHTER_HALF_WIDTH;
+
+  // The gap is measured centre to centre, but a fighter is not a point: a
+  // wide lunge stance throws a foot well past its own centre, and framing on
+  // the gap alone sliced that foot off at the frame edge on the strike pose.
+  // `reach` is how far past its own centre the currently-extended limb
+  // reaches. A fighter is framed by their body half-width, which covers a
+  // punch, but a back kick or a roundhouse extends most of a body length
+  // beyond the fighter's origin.
+  //
+  // gpt-5.6-sol-pro put it as "keep both fighters fully visible during scoring
+  // hits". That is the standard this whole function exists to hold, and the
+  // reason it takes the midpoint is only to place the camera ON the pair — the
+  // distance is a function of the gap alone, which is the property the
+  // regression fence below pins.
+  const cameraX = midpointX * CAMERA_FOLLOW;
+  const halfWidth = Math.max(MIN_HALF_WIDTH, Math.abs(gap) / 2 + margin + body + reach);
+  const distance = Math.max(FRAME_HALF_HEIGHT / tan, halfWidth / (aspect * tan)) * 1.04;
+
+  return { distance, cameraX, eyeY: tight ? 1.5 : 1.18, tight };
+}
+
+/**
  * Where the dojo furniture lives, in metres. The camera only ever dollies and
  * pans along +Z, so these are fixed placements the frame is composed around.
  */
@@ -609,39 +708,12 @@ export class Stage {
    * the caller.
    */
   frame(midpointX: number, gap: number, immediate = false, nowMs = performance.now(), reach = 0): void {
-    const aspect = this.width / Math.max(this.height, 1);
-    const halfFov = (FOV * Math.PI) / 360;
-    const tan = Math.tan(halfFov);
-    // A tall viewport is width-starved: fitting both fighters side by side
-    // forces the camera far enough back that they end up small, and the frame
-    // below their feet becomes a quarter of the screen in empty mat. So the
-    // breathing room is spent generously on a desktop frame and sparingly on a
-    // phone one, where the pixels are the scarce resource.
-    const tight = aspect < 0.85;
-    const margin = tight ? EDGE_MARGIN * 0.7 : EDGE_MARGIN;
-    const body = tight ? FIGHTER_HALF_WIDTH * 0.8 : FIGHTER_HALF_WIDTH;
-    // The gap is measured centre to centre, but a fighter is not a point: a
-    // wide lunge stance throws a foot well past its own centre, and framing on
-    // the gap alone sliced that foot off at the frame edge on the strike pose.
-    // `reach` is how far past its own centre the currently-extended limb
-    // reaches. A fighter is framed by their body half-width, which covers a
-    // punch, but a back kick or a roundhouse extends most of a body length
-    // beyond the fighter's origin — and the frame was slicing that foot off at
-    // the edge exactly when it was landing.
-    //
-    // gpt-5.6-sol-pro put it as "keep both fighters fully visible during scoring
-    // hits", and a burst of 140 real frames found 15 with a fighter's pixels
-    // against the stage edge; the sampled one is a scored back kick with the
-    // foot cut off by the frame. That is the outcome of the only verb in the
-    // game, hidden at the moment it happens.
-    const halfWidth = Math.max(MIN_HALF_WIDTH, Math.abs(gap) / 2 + margin + body + reach);
-    const target = Math.max(FRAME_HALF_HEIGHT / tan, halfWidth / (aspect * tan)) * 1.04;
+    const solve = framingSolve(this.width, this.height, midpointX, gap, reach);
 
     const ease = immediate ? 1 : 0.07;
-    this.distance += (target - this.distance) * ease;
+    this.distance += (solve.distance - this.distance) * ease;
 
-    const targetX = midpointX * 0.7;
-    const x = immediate ? targetX : this.camera.position.x + (targetX - this.camera.position.x) * 0.12;
+    const x = immediate ? solve.cameraX : this.camera.position.x + (solve.cameraX - this.camera.position.x) * 0.12;
 
     // Level camera, lifted only slightly on a phone. There the distance is
     // width-driven, so the vertical window is taller than the fighters need
@@ -649,7 +721,7 @@ export class Stage {
     // slides the window up and crops their feet off the bottom, which is a
     // worse trade. A small lift removes most of the dead band and none of the
     // floor under a stance.
-    const eyeY = tight ? 1.5 : 1.18;
+    const eyeY = solve.tight ? 1.5 : 1.18;
     this.camera.position.set(x, eyeY, this.distance);
     this.camera.lookAt(x, eyeY, 0);
 

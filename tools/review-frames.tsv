@@ -1,0 +1,78 @@
+# The review set's coverage contract. Tab-separated, `#` for comments.
+#
+# WHAT THIS IS. `tools/review-shots.mjs` writes the frames a vision reviewer
+# judges, and `tools/verify_shots.py` decides whether that set is worth
+# reviewing. Until r171 the gate asked "is this a real render from a played
+# bout?" and never "is every state still here?".
+#
+# It could not ask. `MIN_FRAMES = 8` is a floor on a *count*, so a set missing
+# the paused overlay, the fighter pick, the half-point score and the kick at
+# range — sixteen of twenty-four frames — still exits 0. Three captures have a
+# guard that `return`s without writing a file (22, 23 and the r169 settings
+# capture all do), so that is not a hypothetical: the tool is built to skip a
+# frame quietly, and the gate cannot see it happen.
+#
+# That is r158's sentence applied to the loop's own primary instrument. A state
+# that becomes reachable is not a state that has been reviewed — and here the
+# states a reviewer is shown are chosen by a file nobody diffs against a list of
+# what the game can show.
+#
+# HOW IT IS ENFORCED, in two halves, because there are two different failures:
+#
+#   `apps/game/tests/unit/review-set-covers-declared-frames.test.ts`  (offline,
+#     in `pnpm check`) reads `review-shots.mjs` and asserts both directions —
+#     every capture is declared here and every declaration is a capture. That
+#     catches the AUTHOR: a new capture added without a row.
+#
+#   `tools/verify_shots.py --frames` reads this file against the set on disk and
+#     fails on a declared frame that was not written. That catches the RUN: a
+#     capture whose guard bailed, a browser that died on frame 22, a stale
+#     frame left over from a previous set.
+#
+# THE `kind` COLUMN, and it is not decoration. A capture that photographs a
+# guaranteed screen is `capture`. A capture that photographs a MOMENT — a kick
+# at contact, a half on the board — can legitimately fail to find its subject,
+# and its own guard `return`s without writing a file. Those are `opportunistic`
+# and the gate reports a missing one as UNCOVERED rather than as a failure.
+#
+# That split is the honest reading of the harness, not a way round the gate, and
+# the debt is stated rather than hidden: three of the twenty-four frames are
+# opportunistic, and across the retained loop logs their guards fired 10, 8 and
+# 8 times — so `18-phone-kick` is missing from roughly one review set in six and
+# `19-phone-half-point`, r148's entire round, from about one in five. **Four
+# review passes argued about that half-point notation, and on most of those sets
+# the half point was not in them.** Making the gate strict on them would leave it
+# permanently red, and a gate that cries wolf gets deleted; making it silent is
+# what this file exists to stop. So it prints.
+#
+# Proved able to fail in `tools/verify-shots-mutation.sh`.
+#
+# ADDING A ROW is not enough on its own — the same rule `tools/art-manifest.tsv`
+# carries. A capture that is not photographed is not declared, and a declaration
+# the gate enforces but the tool never writes is a red gate, not a covered state.
+#
+# name	kind	state	why it is in the set
+00-boot-loading	capture	the pre-boot publisher card	the first paint a cold phone sees, before any module runs; owned by bootScreen.ts
+01-phone-title	capture	the opening card	at the design baseline, 390x844 — the screen every player reads first
+02-phone-fight	capture	a live bout, both fighters standing	the gameplay frame with nothing happening on top of it
+03-phone-strike	capture	a technique landing	the contact frame, r89's subject: the foot against the mat
+04-phone-controls	capture	the pad, both sticks, feet	The control surface, and where r135's key glyphs sit
+05-phone-techref	capture	the techniques sheet, open	the sheet r136's REFERENCE button opens; r150 re-coloured its pips
+06-phone-settings	capture	the settings sheet, default state	contrast for the sheet as it normally paints — r169 rebuilt this capture after it was photographing the wrong rows
+07-phone-result	capture	a result card, mid-run	the card's own layout, before the run ends
+08-desktop-fight	capture	the same bout at 1280x800	the only desktop frame; r96/r98/r102/r132 are all about this viewport
+09-phone-highcontrast	capture	high-contrast mode, in a fight	the accessibility mode as painted, not as specified
+10-phone-tournament	capture	the tournament bracket	r84's 39.7% dead space and the ladder's own layout
+11-phone-impact	capture	both fighters overlapping, impact effect	the frame where the camera re-frames to hold both
+12-phone-jump	capture	a fighter in the air	vertical state is a different pose set from every other frame
+13-phone-ladder	capture	the ladder between rounds	the between-bout screen r163's sheet-pause work sits on
+14-phone-returning	capture	a returning player, coach retired	the state a second visit is in — the control for 01 and 10
+15-phone-settings-mixed	capture	settings with LARGE CONTROLS and LEFT-HANDED on	the combination rows r169's rebuild made reachable by identity rather than index
+16-phone-in-play	capture	a bout with the perf HUD showing	the live HUD over a live fight
+17-phone-scored-result	capture	a DRAWN bout's result card, 0 — 0	the score path, and the only DRAW frame in the set — which is what gave r171b's camera defect a reviewable witness. Named `scored-result` and described as "after a point scored" for its whole life; it walks right 40 times and never scores. That is r169's defect in a third place
+18-phone-kick	opportunistic	a kick at contact range	r89's 2.96:1 foot, the measurement that drives open item 2.1. A poll from Node every 20ms across an active window of a few 60Hz ticks; missed 10x in the retained logs
+19-phone-half-point	opportunistic	a HALF on the board	r148's typography. A half is only awarded when the defender is NOT winding up, so the capture must be lucky as well as correct; missed 8x. The geometry is gated deterministically by tools/scoreline-stability.mjs instead
+20-phone-call	capture	the referee's call on screen	r118's notation line, mid-announcement
+21-phone-kick-open	opportunistic	a kick landing on the defender's body	the frame r154 recorded as never previously covered. Same polling limit as 18; missed 8x
+22-phone-paused	capture	the PAUSED overlay, full viewport	r164 added this: focus loss pauses a bout, and nothing had ever photographed it
+23-phone-picked	capture	the fighter pick AFTER the press	r166's feature: the seats trade and the label flips, asserted against the sim order

@@ -10,10 +10,10 @@ has been improving.
 |---|---|
 | Playable | yes — tournament + dojo, two sticks, point karate |
 | Deployed | `https://arcade.shoemoney.com/karate-kids/`, verified playing a real bout |
-| Tests | **232 unit / 29 files** (`pnpm check` → 0, measured at r168); **72 e2e across 11 files declared** (`playwright test --list`). The e2e suite was **not run at r168** — no game code changed that round, so there was nothing to rebuild. |
+| Tests | **249 unit / 32 files** (`pnpm check` → 0, re-measured at r171b); **72 e2e across 11 files declared** (`playwright test --list`) and **run green at r171b** — 66 passed, 6 skipped, 0 failed, at load 10.24, which is the ambiguous band (green 8–10, red 14–16). r171b changed `apps/game/src`, so the e2e run was required rather than optional. |
 | Review loop | 168 rounds, 20 review frames, mutation-tested fences |
 | Commits | 322 |
-| Production | ⚠️ **STALE at r170 — 8 commits behind, measured.** `production-freshness.py` → **exit 1**: served build pinned to `d839702c9` (r166), an upper bound. So the live origin is **missing r167's championship-counter fix**, a player-visible bug (the title count only appeared when you did worse). **The deploy is one reviewer decision away and is blocked on a human — see "The deploy, blocked at its last gate" below.** |
+| Production | ⚠️ **STALE at r171 — 10 commits behind, measured.** `production-freshness.py` → **exit 1**: served build pinned to `d839702c9` (r166), an upper bound. The live origin is **missing r167's championship-counter fix**, a player-visible bug (the title count only appeared when you did worse). **The deploy is blocked on a human — see "The deploy, blocked at its last gate" below.** |
 
 > **Re-measured at r168, and this row was wrong.** It said "165 rounds" and
 > "315 commits" — this document's own snapshot drifting — and the Tests row said
@@ -458,6 +458,41 @@ future false alarm and a gate that cries wolf gets deleted. A sha256 comparison
 is exact, and if the served bytes equal the built bytes then every fix in them is
 live.
 
+### 3.4 Three captures that cannot reliably find their subject — `OPEN, raised at r171`
+
+**Found:** r171, while auditing the review set rather than the game.
+**Why it matters:** they are the three frames this loop has argued about most,
+and they have been missing from the review set far more often than anyone
+knew. Measured guard firings across the retained `.loop` iteration logs:
+`18-phone-kick` **10**, `21-phone-kick-open` **8**, `19-phone-half-point` **8**.
+
+`19-phone-half-point` is r148's entire round. r148 closed the item on the
+strength of *"four independently regenerated sets"* — and the half point was
+missing from about one set in five. **The evidence for the shipped `½` glyph was
+partly gathered on sets where the glyph was not in them.** That does not make
+the decision wrong; `tools/notation-probe.mjs` and `scoreline-stability.mjs`
+measure it off real glyphs and a real clock. It does mean r148's headline claim
+needs the caveat attached, and it is attached in REVIEW-LOOP.md.
+
+**Mechanism, and it is mechanical rather than flaky luck:** all three poll
+`state()` from Node every 20ms across a move's active window, which at 60Hz is
+a few ticks. A loaded machine steps straight over it. Measured this round at
+load 8.3, two of the three still missed.
+
+**Do:** catch the frame in-page rather than from Node. Either slow the page's
+own clock for the capture (`Emulation.setCPUThrottlingRate`, the lever
+`throttle-cliff.mjs` already uses) or install a page-side observer that holds
+the pose when it sees the subject. Both are capture-harness changes; **no game
+code moves.**
+**Accept:** with the manifest's `kind` column flipped from `opportunistic` to
+`capture`, `tools/verify_shots.py` exits 1 if any of the three is missing — and
+`tools/verify-shots-mutation.sh` proves that arm red. Nothing softer: a
+per-round frequency check would be a gate that cries wolf on a busy box, which
+is the r151 lesson about a machine that does not idle.
+
+Until then the three stay `opportunistic` in `tools/review-frames.tsv` and
+`verify_shots.py` **prints** any that are absent, on the OK line, by name.
+
 ### 3.1 Standing rule for unattended runs
 Because nothing is watching, three rules exist and are not optional:
 
@@ -580,6 +615,42 @@ Because nothing is watching, three rules exist and are not optional:
 > gates are complementary and that the scope claim is proven rather than asserted.
 > The unit test owns the branch; the probe owns the DOM.
 
+- [ ] **3.4 the three captures that cannot find their subject** — **OPEN at r171.**
+      `18-phone-kick`, `21-phone-kick-open`, `19-phone-half-point`. Their guards
+      fired 10 / 8 / 8 times in the retained loop logs and **nothing noticed**,
+      because `verify_shots.py` had no notion of which states the set was
+      supposed to cover. Both halves of that are now gated
+      (`tools/review-frames.tsv` + `verify_shots.py --frames`, and a unit test in
+      `pnpm check`), so the debt is named and printed instead of silent. The
+      captures themselves are the next job.
+- [x] **a fighter was leaving the screen, on the game's own result card** — **FIXED at
+      r171b.** The review set's `17-phone-scored-result` frame is a **DRAW 0 — 0**
+      with one fighter **sliced in half by the right frame edge** and the other
+      almost entirely outside the arena. `stage.frame()` solved its half-width
+      *around the camera* and then placed the camera at `midpointX * 0.7`, so it
+      was sizing a frame for a pair **0.3 × midpointX away from itself**, and
+      that offset was never in the budget. `arena bounds` is 5.0, so it is a
+      legal position: measured at the edge on a phone, a fighter sits **1.836
+      from the camera axis and the frame covers 1.300**.
+      **r39 fixed this family and closed it on a measurement that was correct** —
+      it added a `reach` term for a long *limb*; nothing covered a displaced
+      *camera*, and the `0.7` had no comment anywhere explaining itself.
+      Fix is `CAMERA_FOLLOW: 0.7 → 1` (`frame()`'s `0.12` lerp already supplies the
+      smoothing), plus the solve extracted to `framingSolve()` so it can be tested
+      the way `preBoutBudget` was at r151. **My first fix was rejected**: keeping
+      `0.7` and budgeting for the offset also restores the invariant, and dollies
+      the camera from **9.2 to 20.2** world units at the mat's edge — a little
+      over half size — because `frame()`'s contract is that distance tracks the
+      gap and not the position. 6/6 unit, three mutations red for their own
+      stated reason, including the exact pre-fix bias and my own rejected fix.
+
+- [x] **the review set had no coverage gate** — **FIXED at r171.**
+      `MIN_FRAMES = 8` is a floor on a *count*: deleting 13 of 22 frames — the
+      techniques sheet, the result card, desktop entirely, high-contrast, the
+      bracket, the airborne fighter — left the gate answering `OK 9 frames`. It
+      was not hypothetical either; two captures dropped their frames on the very
+      run that found this and the gate returned **0**. Now 24 declared states,
+      20/20 in the mutation harness.
 - [x] **every phase gated, logged, committed, deployed**
 
 - [x] **3.3a nothing is obliged to look at production** — **CLOSED at r161.**
@@ -895,6 +966,27 @@ either:** three consecutive review passes flagged the half point —
 *baseline drop* → *confusing ranges, `2 1-2`* → *confusing hyphenated strings* —
 and the fourth, after the glyph, did not mention it. Four independently
 regenerated sets.
+
+> **Caveated at r171, and this is the one place the round touches a closed box.**
+> Those four sets are not four sets that *contained* the half point. The capture
+> that photographs it — `19-phone-half-point` — guards itself and returns
+> without writing a file whenever the half is not awarded, and across the
+> retained loop logs that guard fired **8 times**; a half is only awarded when
+> the defender is not winding up, so the frame is a coin flip that nobody was
+> counting. Nothing caught it, because **nothing in the repo recorded which
+> states the review set was supposed to contain** — `verify_shots.py` only ever
+> asked whether the frames that existed were real.
+>
+> So the "fourth pass did not mention it" evidence is weaker than it reads, and
+> how much weaker cannot be recovered: the retained logs are agent transcripts,
+> so an occurrence count is not a round count. **The decision itself stands on
+> other evidence and is not reopened** — `tools/notation-probe.mjs` renders all
+> five candidates in the shipped font at the score's real size, and
+> `scoreline-stability.mjs` measures the scoreline in three states against a
+> clock. Both read real pixels; neither depends on a review set. What is
+> withdrawn is the *count of reviewers*, which was a claim about instrument
+> coverage and instrument coverage is precisely what r171 found ungated. Item
+> 3.4 is the capture.
 
 One thing could not be made deterministic and is recorded rather than papered
 over: **landing a half is not guaranteed**, because a half is only awarded when the

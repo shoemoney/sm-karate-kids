@@ -11702,3 +11702,315 @@ Standing rule 3 exists because rounds 90, 93 and 95 each shipped a metric that
 agreed with a no-op. Both of these would have been exactly that, in opposite
 directions: one would have stopped a good release, one would have hidden a
 correct red.
+
+---
+
+## The review set had no coverage gate — r171
+
+Production first, because that is the whole point of r160/r161: measured at the
+top of this round, **STALE, 10 commits behind**, served markup pinned to
+`d839702c9` (r166), an upper bound. So r167's championship-counter fix is still
+not on the wire. r170 took the deploy as far as the privacy gate and stopped
+there, and **nothing this round changed that**: the block is an attestation
+about two hashed bundle files, and re-deciding it a round later with no new
+information would be a loop overruling itself for the comfort of a commit.
+
+### The finding
+
+The review set is this loop's primary instrument. It is what a vision model
+looks at. `tools/verify_shots.py` decided whether that set was worth reviewing,
+and it asked one question: *is this a real render from a bout that was actually
+played?* It never asked *is every state still here?*
+
+`MIN_FRAMES = 8` is a floor on a **count**, so the set could be gutted. Measured
+on this game's own set, this round:
+
+    before: 22 frames, gate says OK
+    delete 13 of the 22 declared frames
+    after:  `OK  9 frames, 9 distinct; burst 8 frames, ...`
+    exit 0.
+
+Gone in that pass: the techniques sheet, the result card, **desktop entirely**,
+the high-contrast mode, the tournament bracket, the impact frame, the airborne
+fighter, the ladder, the returning-player control, the mixed-settings state, the
+live HUD and the scored result. A reviewer would have been shown a third of the
+game and the gate would have called the set good.
+
+### It was not hypothetical, and it was not old
+
+**On the very run that found this**, two captures fired their guards and wrote
+nothing:
+
+    19-phone-half-point: no half landed, frame not written
+    21-phone-kick-open: no active kick observed, frame not written
+
+`verify_shots.py` returned **0** on that set. Not "it might have" — the gate's
+own verdict, on the run that produced the evidence.
+
+And the history is worse than this round. Counting the guard firings across the
+retained `.loop` iteration logs:
+
+| frame | guard fired |
+|---|---|
+| `18-phone-kick` | **10** |
+| `21-phone-kick-open` | **8** |
+| `19-phone-half-point` | **8** |
+
+`19-phone-half-point` is **r148's entire round** — the frame the loop spent
+thirty-one rounds trying to see, the one r148 wrote *"evidence of legibility,
+which a screenshot cannot supply"* about, on the strength of **four
+consecutive review passes** flagging the half-point notation and a fifth not
+mentioning it. The half point was missing from about one review set in five. So
+part of the evidence for the shipped glyph was gathered on sets where the glyph
+was not in them. I cannot say how much — the retained logs are agent
+transcripts, so an occurrence count is not a round count — but the direction is
+not in doubt and r148's sentence should now carry this caveat with it.
+
+### The fix, in two halves, because there are two failures
+
+**`tools/review-frames.tsv`** — the states the set has to cover, with the reason
+each one is in it. House style: tab-separated, `#` comments, the same
+"a row is not enough on its own" rule `art-manifest.tsv` carries.
+
+| half | catches | runs in |
+|---|---|---|
+| `apps/game/tests/unit/review-set-covers-declared-frames.test.ts` | the **AUTHOR** — a capture added with no row | `pnpm check`, offline |
+| `tools/verify_shots.py --frames` | the **RUN** — a declared frame that was not written | every review |
+
+The unit test asserts both directions, because either alone is a gate that can
+pass while reporting something else: a capture nobody declared is a coverage
+hole, and a row whose capture is gone is a stale contract, which is the fifth
+drift class r151 found and r153 found again.
+
+Proved red in both directions, on the real files:
+
+    add `await capture('24-phone-whatever')`  ->  FAIL, names 24-phone-whatever
+    delete 20-phone-call's row                ->  FAIL, names 20-phone-call
+
+### The `kind` column, and the debt it makes visible
+
+A capture that photographs a **screen** is `capture`. A capture that
+photographs a **moment** — a kick at contact, a half on the board — can
+legitimately fail to find its subject, and its guard `return`s without writing a
+file. Those are `opportunistic`, and the gate reports one as `UNCOVERED` on the
+OK line rather than as a failure:
+
+    OK  22 frames, 22 distinct, 22/24 declared states covered; burst ...
+    UNCOVERED (opportunistic; its capture could not find its subject):
+      19-phone-half-point, 21-phone-kick-open
+
+That is a deliberate trade and it is worth being explicit about why. Failing on
+those three leaves the gate **permanently red**, and a gate that cries wolf
+every fourth run gets deleted. Leaving them silent is what this round exists to
+stop. So the gate is strict about screens and loud about moments, and the debt
+is written into the manifest with its measured frequency instead of living in a
+console warning nobody reads. The cause is mechanical and recorded: all three
+poll `state()` from Node every 20ms across an active window of a few 60Hz ticks,
+which a loaded machine steps straight over. Fixing that means slowing the page's
+clock or catching the frame in-page, and it is the next round's first job, not
+this one's.
+
+### My harness was wrong twice before it measured anything
+
+Both caught by the shape of the output, not the verdict — r170's lesson arriving
+on schedule:
+
+1. **Nine red rows that were the harness measuring the wrong tree.** The legacy
+   cases called the gate with no `--frames`, so it fell back to the *repo's*
+   real `review-frames.tsv` and reported twenty-one synthetic frames missing.
+   The gate was right; the harness was the thing being wrong. Every case now
+   runs through a synthetic manifest — which means the eleven legacy rows carry
+   a coverage check too, rather than the new arm being bolted on beside them.
+2. **`coverage-missing-required` failed for the wrong reason.** Seven frames
+   trips `MIN_FRAMES` before the coverage check ever runs, so the case would
+   have gone green against the *count* gate while its label claimed the
+   coverage gate. It is nine frames now. This is r155's exact shape — a red row
+   asserting something other than what it says — found by reading which line
+   printed, not by whether it printed red.
+
+### Gates
+
+- `pnpm check` → **0**. **243 unit / 31 files** (r169/r170's 239 / 30, plus this
+  file's four).
+- `tools/verify-shots-mutation.sh` → **20/20** (was 13; six new rows and one
+  added assertion on the opportunistic split).
+- `tools/verify_shots.py /tmp/smkk-loop` → **exit 0, 22/24 covered** with the two
+  `UNCOVERED` frames named — which it would also have said, as exit 0 with no
+  `UNCOVERED` line at all, before this round.
+- `pnpm test:e2e` → **not run.** No file under `apps/game/src` changed; this
+  round is `tools/` plus one unit test, and `pnpm check` runs that. Stating it
+  as a number nobody measured is the r151 error.
+- `production-freshness.py` → **STALE, 10 commits behind**, measured at the top.
+- `review-codex.sh` → **failed closed, exit 2, on an empty bearer.** The key was
+  not in the unattended shell's environment; it is at
+  `~/.config/openrouter/key` and the run was repeated with it exported. Per
+  standing rule 4 that is an environment fact, not a result about the game, and
+  it is why the key lives in a file rather than only in an exported shell.
+
+### The shape
+
+The eleventh instrument, and the first aimed at the loop's own reviewer rather
+than at the game. Rounds r154, r155 and r170 all found instruments reporting
+values they never took; this one is the instrument that could not see **two of
+the states it exists to show**, in a set it called good. r158's sentence —
+*a state that becomes reachable is not a state that has been reviewed* — turned
+out to have a second application that is strictly worse: **the set of reviewed
+states was not itself recorded anywhere**, so it could shrink by a third with no
+diff, no failure and no reviewer's noticing, because a reviewer has nothing to
+notice the absence of.
+
+---
+
+## A fighter off the screen, on the game's own result card — r171b
+
+The reviewer's first finding, checked against the pixels rather than accepted.
+`17-phone-scored-result.png` is a **DRAW 0 — 0** and one fighter is **sliced in
+half by the right frame edge** with the other **almost entirely outside the
+arena**. Both halves of the claim are true of that image.
+
+### Why it survived r39
+
+r39 found this exact class and closed the family: *"a burst of 140 real frames
+of live strikes found 15 with fighter pixels against the stage edge… a scored
+back kick with the foot cut off by the frame."* `frame()` gained a `reach` term
+and the re-burst went 15 → 7. The family was declared closed on a measurement
+that was correct.
+
+**It was not closed, and the gap is one term.** `halfWidth` is the half-extent
+the camera must cover, and it is solved *around the camera*. The camera was then
+placed at
+
+```ts
+const targetX = midpointX * 0.7;   // ← nowhere near the fighters once the bout drifts
+```
+
+That is a **0.3 × midpointX** offset between where the camera is and what it is
+sizing a frame for, growing with how far the fight has walked from the middle of
+the mat — and it was not in the budget. `reach` covered a long *limb*; nothing
+covered a displaced *camera*.
+
+Mutation A below measures it as the pre-fix code actually was, at the mat's
+edge on a phone:
+
+```
+phone m=-5.00 gap=0: a fighter sits 1.836 from the camera axis
+                    and the frame only covers 1.300
+```
+
+41% outside the frame. And `bounds` is **5.0**, so this is a legal position, not
+an extrapolation.
+
+### The fix, and the one I threw away first
+
+My first attempt kept `0.7` and added `|midpoint − cameraX|` to `halfWidth`.
+It **does** restore the invariant — the mutation harness proves the sweep goes
+green with it. I rejected it, and the reason is the thing worth keeping:
+
+**it makes the camera dolly from 9.2 to 20.2 world units at the mat's edge — a
+little over half size — to pay for a bias nothing asked for.** `frame()`'s own
+docstring says the frame *"holds only the distance actually between them"*.
+Budgeting for position would make distance a function of *where on the mat* the
+fight is, which is a different function wearing the same signature. Mutation C
+pins that as a hard fence: reintroduce a position term and the test goes red
+naming it.
+
+So the fix is `CAMERA_FOLLOW: 0.7 → 1`. `frame()`'s `0.12` lerp already supplies
+every bit of smoothing the follow needs; the bias was a second, undocumented
+softness whose only observable effect was to walk the fighters out of the
+picture. Nothing anywhere explained the `0.7`, which is its own finding.
+
+**Extracted to `framingSolve()`**, because a camera budget cannot be
+unit-tested by waiting for a camera — the same reason r151 pulled
+`preBoutBudget` out of `main.ts`.
+
+| | |
+|---|---|
+| contract | **both fighters fully inside the frustum**, asserted over the *whole* legal position space (±5.0 × 7 gaps × 2 viewports), not at one pose |
+| r39's `reach` term | still load-bearing — mutation B (drop it) is red |
+| pre-fix bias | mutation A red, with the 1.836-vs-1.300 number |
+| rejected first fix | mutation C red |
+| inert at the centre | distance equals the **pre-fix closed form** at every midpoint and gap, to 9 places — only the camera's placement changed |
+
+### Measured, at the position that used to be the worst one
+
+A throwaway probe drove the same input and read the simulation off the page at
+the moment the result card was up, rather than trusting the frame to be
+reproducible:
+
+```
+positions  4.300, 5.000
+midpoint   4.650          sim gap 0.700      (arena bounds 5.0)
+pre-fix camera offset would have been  1.395 world units
+```
+
+Against ~1.30 of horizontal coverage on a phone, that is the fighter **outside
+the frame** — which is what `17-phone-scored-result` is a photograph of.
+
+At that same midpoint, after the fix: **both fighters complete from head to bare
+foot and centred** (torsos at ~320 and ~460 in a 780px frame, centre 390). One
+pixel check at the worst legal position, agreeing with the unit sweep.
+
+**One honest loose end.** The first post-fix capture of `17` still shows the
+pair right of centre. That frame is taken **600ms** after the bout ends and the
+camera eases at `0.12` per frame; the probe waited 2500ms. So the likeliest
+explanation is that the camera had not finished easing — but **I did not measure
+that**, and it is stated as a possibility rather than a finding. If a future
+round sees the pair off-centre in a result frame, that is where to look first.
+
+### The capture was lying about what it photographs
+
+`17-phone-scored-result` is named, commented and manifested as *"a result card
+after a point scored"*. What it produces is **a draw, 0 — 0**, because it walks
+the player right 40 times with rotating techniques and never lands a point.
+
+That is r169's defect in a third place: a capture that photographs something
+other than what its own record claims, found this time by reading the frame
+against the manifest row I had just written. The manifest now says
+`a drawn bout's result card` — and this frame is the **only** DRAW in the set,
+which is why the camera defect had a reviewable witness at all.
+
+### Gates
+
+- `apps/game/tests/unit/framing-keeps-both-fighters-in-frame.test.ts` → **6/6**,
+  three mutations all red for their own stated reason.
+- `pnpm check` → **0**. **249 unit / 32 files**.
+- `pnpm test:e2e` → **0**, **66 passed / 6 skipped / 0 failed** (72 declared).
+  Run at **load 10.24**, which is the ambiguous band — r151's note is that this
+  machine does not idle and the suite is green at 8–10 and red at 14–16, so a
+  failure here would have been inconclusive rather than a verdict. It passed
+  anyway. **`apps/game/src` moved, so this run was required, not optional**,
+  and 4173 was checked free first because `reuseExistingServer` is on locally
+  and a foreign server on that port silently becomes the subject.
+- `tools/verify-shots-mutation.sh` → **20/20**.
+- `css-literals.py` **0** · `undefined-vars.py` **0** · `orphaned-branches.py`
+  **0** · `contrast-reach.py` **0** · `validate:assets` **0**. (No CSS changed;
+  run anyway, because a gate you did not touch is a gate you did not check.)
+- `production-freshness.py` → **STALE, 10 commits behind**, and the deploy stays
+  blocked on r170's privacy attestation. **Nothing this round ships**, and the
+  live origin is now missing r167's championship-counter fix *and* r171b's
+  camera fix — two player-visible defects, both measured, neither published,
+  because the only supported deploy path builds eight games and four of the
+  other seven have another agent's uncommitted work in them.
+
+### The other four findings, triaged rather than accepted
+
+`review-codex.sh` returned five. One was real (above). The rest are recorded
+with what was checked, because **"the reviewer said so" is the weakest possible
+ground and this loop has been bitten by it in both directions** — r127 shipped a
+finding about already-fixed code off a stale set, and r133 nearly "corrected" a
+non-problem after reading a CSS comment instead of `keyboard.ts`.
+
+| # | finding | disposition |
+|---|---|---|
+| 1 | a fighter clipped by the frame edge on the DRAW result card | **REAL — fixed above** |
+| 2 | the pre-bout TECHNIQUES / PLAY AS buttons overlap the fighters' legs | **already a structural invariant.** `apps/game/tests/e2e/result-card-fighters-clear.spec.ts` asserts both controls sit inside one `.result-actions` group and that the group's top is **below** the card's top — i.e. below the fighters' band — plus 44px tap floors measured off the rendered box. The model is describing a layout the suite already holds fixed; a real overlap would be red there |
+| 3 | stair-stepped sprite edges on the desktop frame | **not a lever, and already measured.** r146's sweep read `antialias: false` at **88% in one sweep and 115% in another** — inside the noise, slower the second time. It is not the 4× MSAA cost it appears to be. Silhouette antialiasing in the atlas is provenance-tracked generated art, which is Phase 2's "needs a human". Recorded, not acted on |
+| 4 | the coach's two halves read as one undivided line | **the divider is there.** `tools/coach-legend-probe.mjs` → **exit 0**: one arrow order (`◀▶▲▼`) in both halves, **`divider 1px on the second half`**, 0 cells spilling, and the returning-player control correctly silent. The fair reading of the finding is that a **1px** rule does not survive being looked at in a downscaled review image — which is a legitimate observation *about r158's chosen design*, and r158 chose 1px as a measurement rather than a default. Recorded; changing it is a look trade |
+| 5 | the techniques sheet teaches before it references | **an information-architecture opinion on a screen with two jobs.** It is reachable from the pre-bout card as a quick reference *and* from the HUD mid-bout, and it has to work as both. Reordering it is a design change this loop has no mandate to make alone. Recorded |
+
+So: one real defect, one already-gated claim, one measured-not-a-lever, one
+contradicted by a passing probe, one a taste call. **Four of five findings were
+about things the repo already knows**, which is worth stating plainly — it is
+what a review set that has been looked at for 171 rounds looks like. It is also
+why #1 is worth the round: it was the one nobody had checked, and it is on the
+screen every player sees when a bout ends.
