@@ -11337,3 +11337,114 @@ framing is the one that keeps paying: *a state that becomes reachable is not a
 state that has been reviewed*, and its second half, which cost this round: **a
 gate that is wired to nothing is not a gate.**
 
+
+## Round 169 — the capture that photographed the wrong switches 🎛️
+
+Not a scheduled finding. A state that had become reachable in r166 and had never
+been looked at — and looking at it turned up an instrument that had been lying
+in its own comment for three rounds.
+
+### `15-phone-settings-mixed` was not photographing the settings sheet
+
+That capture's stated reason for existing is in its own comment, and it is a good
+one:
+
+> Two models reported "the settings menu lacks sufficient contrast" off a frame
+> that was, in fact, the high-contrast theme. Toggling a state must not change
+> the conditions under which the state is being reviewed.
+
+So it toggled **Mute sound** and **Show performance HUD** — rows that have no
+effect on how the sheet paints — by **position**:
+
+    const rows = page.locator('.setting-row input');
+    await rows.nth(4).click();
+    await rows.nth(5).click();
+
+r166 appended the fighter pick as two `label.setting-row` radios at the **top** of
+the same selector. Every index below them moved down by two, and the comment kept
+describing the instrument as it had been written.
+
+**Measured, not read off the source** — clicking `nth(4)`/`nth(5)` on the shipped
+tree:
+
+    body.class after the capture's own two clicks:
+    "coach-active large-controls left-handed"
+
+    opt-muted        unchecked   <- the comment says this one is ON
+    opt-show-perf    unchecked   <- and this one too
+
+**Large controls** and **Left-handed layout**. The exact defect the comment
+exists to prevent, reintroduced through the selector: a reviewer looking at this
+frame was looking at a non-default theme, in the one capture whose purpose is the
+default paint. Three rounds of reviewers — r166, r167, r168 — saw it, and the
+frame reads as perfectly ordinary, because large controls is a *plausible* thing
+for a settings screenshot to show.
+
+> The instrument was fine. It clicked exactly what it said, at the indices it had
+> always used. **The label was the lie** — which is this loop's ninth shape of the
+> same pattern and the sharpest yet, because nothing about the drift is visible
+> in the tool, in its output, or in its exit code. Only the comment was wrong.
+
+**Fixed by identity, and the assertion is the point.** `#opt-muted` /
+`#opt-show-perf` now, each read back out of the DOM and compared to the label the
+capture names — and a mismatch throws. Plus a guard that refuses to shoot at all
+if the body class contains `high-contrast`, `large-controls` or `left-handed`,
+so the *reason* the rows were chosen is enforced rather than remembered. The
+frame now logs its body class every run: `"coach-active show-perf"`.
+
+### The pick frame, which did not exist
+
+`result-swap` appears **zero times** in 11,400 lines of this log, and the fighters
+trading places was in no frame at all. r158's sentence, landing for the fourth
+time: *a state that becomes reachable is not a state that has been reviewed.* The
+button had been in shot 01 all along, as scenery in a review of something else.
+
+**`23-phone-picked`** presses it and photographs the result, asserting three
+things off `__smkk.seats()` before the file is written:
+
+| | measured |
+|---|---|
+| label | `⇄ Play as HasanAbi` → `⇄ Play as Asmongold` |
+| sim seats | `shiro,aka` → `aka,shiro` |
+| drawn seats | `shiro,aka` → `aka,shiro` |
+
+The third row is the one that matters. r166 shipped `seats()` as **two** lists
+because "a swap that moved one and not the other is a player steering the wrong
+body" — and that defect is invisible in a screenshot and uncatchable by a label
+check. So the frame asserts `views === sim` alongside the trade, and writes
+nothing if any of the three fails.
+
+**It crashed on first run**, which is worth recording: `Cannot read properties of
+undefined (reading 'seats')`, killing the run's remaining frames. `__smkk` is
+published at `ready`, and the card is markup the boot screen hands over *before*
+boot finishes — so the button is visible before the handle exists. Standing rule 4
+applied to my own new code: the fix was ordering, `waitFor` the button, **then**
+`waitForFunction` the handle.
+
+### Gates
+
+- `pnpm check` → **0**. **239 unit / 30 files** (was 232/29; r168's count holds).
+- `tools/review-shots-mutation.sh` → **10/10**, and it **caught a gap in my own
+  guard**: deleting the `throw` from `clickSetting` left all six assertions
+  green, because every other check reads the *call site* — `clickSetting('opt-muted',
+  'Mute sound')` is still sitting right there in the source. The function had
+  become a click with a string parameter. Now asserted directly, inside the
+  helper.
+- The harness's own first version was broken before it measured anything: it
+  snapshotted to `$WORK/shots` while the file lived at `$WORK/tools/review-shots.mjs`,
+  so `restore` failed on all eight cases and each mutation inherited the previous
+  one's damage. Two mutations then failed to *apply* — reported as failures,
+  which is the one number here that must never lie, since a mutation that does
+  not land measures nothing. Fixed, and `restore` now verifies the file exists in
+  both directions.
+- No game code changed. `git diff HEAD -- apps/game/src apps/game/index.html` is
+  empty, so nothing is deployed and `production-freshness.py` was measured at the
+  end rather than assumed.
+
+### Nothing found
+
+No game defect. The r166 feature works — three rounds after shipping it, the
+first thing anyone did with it was find that the *instrument* had been
+photographing the wrong thing. Which is r158's other half again: an instrument
+extended to cover a new state is not extended until someone has read what comes
+out of it, and here the extension had happened without the reading.

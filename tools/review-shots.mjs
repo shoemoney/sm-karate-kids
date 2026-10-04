@@ -375,7 +375,7 @@ await capture('15-phone-settings-mixed', phone, async (page) => {
   await waitFight(page);
   await page.locator('.hud-actions button').last().click();
   await page.waitForTimeout(600);
-  // Rows 4 and 5 — Mute sound and Show performance HUD — NOT rows 1 and 3.
+  // Mute sound and Show performance HUD — NOT High contrast or Reduced motion.
   //
   // The first version of this capture toggled High contrast, which meant every
   // reviewer saw the settings sheet rendered in its best-case theme and could
@@ -385,9 +385,40 @@ await capture('15-phone-settings-mixed', phone, async (page) => {
   //
   // Toggling a state must not change the conditions under which the state is
   // being reviewed. These two have no effect on how the sheet paints.
-  const rows = page.locator('.setting-row input');
-  await rows.nth(4).click();
-  await rows.nth(5).click();
+  //
+  // r169: these two were `rows.nth(4)` and `rows.nth(5)`, and the comment above
+  // named what those positions meant. r166 appended two `label.setting-row`
+  // radios for the fighter pick to the TOP of that same selector, so every
+  // position after them moved down by two and the comment stopped describing the
+  // instrument. Measured, not inferred — clicking nth(4)/nth(5) left
+  // `body.class = "coach-active large-controls left-handed"`, i.e. the frame was
+  // photographing **Large controls** and **Left-handed layout**, in a capture whose
+  // stated purpose is the settings sheet as it normally paints. `opt-muted` and
+  // `opt-show-perf` were never on. Three rounds of reviewers were shown a state
+  // nobody named.
+  //
+  // So: select by identity, and **assert the identity**. A capture that cannot
+  // tell you it clicked the wrong switch is the r154 shape — an instrument that
+  // reports a plausible value it never measured. If a row is renamed or moved,
+  // this throws instead of quietly photographing the neighbour.
+  const clickSetting = async (id, expectedLabel) => {
+    const input = page.locator(`#${id}`);
+    const label = (await input.evaluate((el) => el.closest('.setting-row')?.textContent.trim() ?? '')).trim();
+    if (label !== expectedLabel) {
+      throw new Error(`settings capture: #${id} reads "${label}", expected "${expectedLabel}"`);
+    }
+    await input.click();
+  };
+  await clickSetting('opt-muted', 'Mute sound');
+  await clickSetting('opt-show-perf', 'Show performance HUD');
+  // The whole reason for the row choice above: this frame must show the sheet's
+  // DEFAULT paint so a reviewer can judge its contrast. Recorded every run,
+  // because the failure this guards against is silent by construction.
+  const bodyClass = await page.evaluate(() => document.body.className);
+  if (/high-contrast|large-controls|left-handed/.test(bodyClass)) {
+    throw new Error(`settings capture: frame would show a non-default theme: "${bodyClass}"`);
+  }
+  console.log(`  15 settings frame body class: "${bodyClass}"`);
   // Drop focus before the shot.
   //
   // The switch's own focus ring is correct — measured: a touch tap leaves
@@ -812,6 +843,70 @@ await capture('22-phone-paused', phone, async (page) => {
     return;
   }
   await page.screenshot({ path: `${OUT}/22-phone-paused.png` });
+});
+
+/* The fighter pick, AFTER the press — the state r166 created and nobody looked at.
+ *
+ * r158's sentence has now landed three times: a state that becomes reachable is
+ * not a state that has been reviewed. r164 found the PAUSED overlay, r167 found
+ * the championship card, and here it is again. The ⇄ button *was* in the set —
+ * shot 01 frames the opening card — but only ever as scenery in a review of
+ * something else, and no reviewer has written the words "Play as" once in 11,400
+ * lines of the loop log.
+ *
+ * What has never been photographed is the effect: the fighters trading places
+ * behind the card, and the button's own label flipping to the other fighter. That
+ * is the feature. This frame is it.
+ *
+ * `seats()` reports the sim order and the drawn order separately (r166 built it
+ * for exactly this: "a swap that moved one and not the other is a player steering
+ * the wrong body"), so the capture can assert the trade happened rather than
+ * photograph a card that looks right while the seats are wrong. */
+await capture('23-phone-picked', phone, async (page) => {
+  await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+  const swap = page.locator('.result-swap');
+  await swap.waitFor({ state: 'visible', timeout: 30_000 });
+  // `__smkk` is published at `ready`, which is LATER than the card being up —
+  // the card is markup the boot screen hands over before boot finishes. The
+  // first version of this capture read `seats()` as soon as the button appeared
+  // and died with `Cannot read properties of undefined`, taking the whole run's
+  // remaining frames with it. Order matters: button, then handle.
+  await page.waitForFunction(() => typeof globalThis.__smkk?.seats === 'function', null, { timeout: 60_000 });
+
+  const read = () =>
+    page.evaluate(() => ({
+      sim: globalThis.__smkk.seats().sim,
+      views: globalThis.__smkk.seats().views,
+      label: document.querySelector('.result-swap')?.textContent.trim() ?? null,
+    }));
+
+  const before = await read();
+  await swap.click();
+  await page.waitForTimeout(1200);
+  const after = await read();
+
+  // Two assertions, and the second is the one r166 exists for. Measured off the
+  // shipped build: shiro/aka -> aka/shiro in BOTH lists.
+  //
+  // 1. The seats actually traded, and the label now offers the other fighter.
+  // 2. `views` still equals `sim`. r166's own words: "a swap that moved one and
+  //    not the other is a player steering the wrong body" — the sprite in seat
+  //    one is not the fighter the sim thinks is in seat one. That is invisible
+  //    in a screenshot and fatal in play, so a capture that only checked the
+  //    label would photograph a working button over a broken game.
+  const traded = before.views.join('>') !== after.views.join('>');
+  const aligned = after.views.join('>') === after.sim.join('>');
+  const labelFlipped = after.label !== before.label && after.label !== null;
+  if (!traded || !aligned || !labelFlipped) {
+    console.warn(
+      `23-phone-picked: not the state this frame reviews (traded=${traded} aligned=${aligned} label=${labelFlipped}; sim ${after.sim.join('>')} views ${after.views.join('>')} "${before.label}" -> "${after.label}"), frame not written`,
+    );
+    return;
+  }
+  console.log(
+    `  23 pick: "${before.label}" -> "${after.label}" | sim ${before.sim.join('>')} -> ${after.sim.join('>')} | views ${before.views.join('>')} -> ${after.views.join('>')}`,
+  );
+  await page.screenshot({ path: `${OUT}/23-phone-picked.png` });
 });
 
 /* ── The motion burst ───────────────────────────────────────────────────────
