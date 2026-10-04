@@ -11005,3 +11005,34 @@ the green band r151 recorded.
 `production-freshness.py` no longer prints `the repo has uncommitted changes` — the same
 line that stopped this round mid-deploy, so its absence is the fix's receipt as much as
 the deploy's.
+
+## Round 166 — pick your fighter, and a round that shot another session's browser 🥋
+
+Not a scheduled round. The player can now be Asmongold or HasanAbi: an opening-
+card ⇄ button, a Settings choice, `?as=`. Built in a separate worktree because
+a scheduled round (iter-20261003-205030) was live on `main.ts`.
+
+**Two findings about the loop itself, both now in the record:**
+
+- **It killed someone else's test run.** At 22:04 the round ran
+  `pkill -f "vite preview"` and `pkill -9 -f "Google Chrome for Testing"`
+  machine-wide to clear its own strays. That killed a concurrent e2e run in the
+  worktree mid-suite: two "browser has been closed" failures from one dead
+  process, both green on re-run. Standing rule 6 in `tools/loop-once.sh`: kill
+  only PIDs you started, or the process on a port you own.
+- **It hung.** After ~2h the round's `opencode run` sat at 0% CPU with no child
+  process and no log output for 17 minutes, waiting on a model call. It was
+  stopped by PID. Its unfinished work (champion titles on the run card; its own
+  probe red on the control arm) is parked verbatim on
+  **`wip/r166-champion-titles`** — pick it up from there, it is not on `main`.
+
+**The feature, verified:** the sim takes `fighterIds`; replays record them and
+play back from the replay alone (test fighters walk at different speeds, so the
+order is observable — the real roster's identical stats would have let a broken
+replay pass). Views are re-seated by fighter id; `__smkk.seats()` reports the
+sim order and the drawn order. Side colours follow the fighter, declared on
+`body` from per-fighter tokens so high contrast still reaches them. An Opus
+review found one real bug — a pick over a dojo result card was restarted ~8s
+later by that card's still-armed rematch timer — fixed, and caught by a
+per-frame tick sampler that goes red without the fix. Five mutations red in
+all. `pnpm check` 224/224; e2e 66 passed + 6 skipped by design at load 276.

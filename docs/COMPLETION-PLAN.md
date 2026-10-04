@@ -617,6 +617,13 @@ Because nothing is watching, three rules exist and are not optional:
       `be20e71` the prompt opened with `---` and opencode read it as a flag;
       every scheduled round exited 1 before a model ran.
 
+- [x] **the player picks who they are** — **SHIPPED at r166.** Asmongold or
+      HasanAbi: a ⇄ PLAY AS button on the opening card (the fighters trade
+      places behind it), a "Your fighter" choice in Settings, `?as=` for a
+      visit. Mid-run in a tournament it applies from the next bout, never as a
+      do-over. The sim chooses P1/P2 by id and replays record the order.
+      `fighter-select.spec.ts`, five mutations red.
+
 **Not "done" means:** every item above is either finished or blocked on a human
 decision with the measurement attached. **As of r153 every behaviour defect this
 document knew about is closed**, including the two r152 left: item 1.2's "returns
