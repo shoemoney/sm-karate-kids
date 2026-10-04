@@ -11448,3 +11448,167 @@ first thing anyone did with it was find that the *instrument* had been
 photographing the wrong thing. Which is r158's other half again: an instrument
 extended to cover a new state is not extended until someone has read what comes
 out of it, and here the extension had happened without the reading.
+
+## Round 170 — a fallback that could not fire, and the instrument that faked it 🎛️
+
+Not a scheduled finding. It came out of auditing r166's newly-reachable control,
+which is r158's sentence landing for the fourth time: *a state that becomes
+reachable is not a state that has been reviewed.* r166 added a radio to the
+settings sheet; chasing its touch target (48px row, clears the floor — not a
+defect) led to the high-contrast block beside it.
+
+### Four rules selected by a class nothing sets
+
+`body.no-backdrop-filter` appeared **four times** in `styles.css` and **zero
+times** in any TypeScript or HTML:
+
+```
+$ grep -rn "no-backdrop-filter" apps/game/src apps/game/index.html apps/game/tests
+apps/game/src/styles.css:162:<comment>
+apps/game/src/styles.css:1803:<comment>
+apps/game/src/styles.css:2935:<comment>
+```
+
+`git log --oneline -S"no-backdrop-filter" -- apps/game/src/main.ts
+apps/game/index.html` returns **nothing**: no source file has ever put that class
+on `<body>`, so the fallback plates it guarded — `--scrim-icon-btn-fallback`,
+`--result-plate-solid` — have never painted **on any renderer, including the
+renderers that lack `backdrop-filter` and are the only reason those rules
+exist.**
+
+### What the branch would have done, which is not what it looks like
+
+It is easy to read this as "a plate goes near-opaque," and that reading is wrong.
+`.result-title` and `.result-score` were the **first two selectors of
+`.result-notation`'s rule**, qualified with the dead class — so the branch was not
+a background change at all. It would have given the card's two loudest elements
+`display: block`, `--text-faint`, sentence case and label scale. **A
+typographic rewrite of the round card, on no renderer, ever.** Nothing has ever
+seen what it looks like.
+
+### The half that was not visible: the tool made the state
+
+`tools/pixel-identity.mjs` had a site labelled **"hud icon btn fallback"** whose
+`prep` hook ran `document.body.classList.add('no-backdrop-filter')`, after which
+it read `--scrim-icon-btn-fallback` and reported the fallback verified.
+
+It hand-enabled the branch, then measured it. **The instrument manufactured the
+state it was measuring** — the sharpest version of a shape this log already has
+three names for: *an instrument that is not consulted is not a gate* (r161),
+*the mechanism its own header describes, documented, orphaned* (r162), *a state
+that becomes reachable is not a state that has been reviewed* (r158). All three
+are one thing: a branch that exists, looks correct, and cannot be taken.
+
+### Why no browser probe
+
+The obvious instrument — load the page, add the class, compare pixels — is the
+trap above. And the fallback cannot be painted from this repo's Chromium at all.
+Measured, with the flag this would need:
+
+```
+[]                                    -> matches:true  color:rgb(0,0,0)
+["--disable-blink-features=CSSBackdropFilter"] -> matches:true  color:rgb(0,0,0)
+```
+
+`--disable-blink-features=CSSBackdropFilter` is a **no-op**, so
+`CSS.supports('backdrop-filter','blur(1px)')` stays true with it set and the two
+arms are indistinguishable. A probe on that difference is rounds 90, 93 and 95: a
+metric agreeing with a no-op. So reachability is checked **against source**,
+which is where the reachability has to come from anyway.
+
+### Fixed at the mechanism, not the symptom
+
+All four branches now sit behind the feature query that is actually about the
+condition:
+
+```css
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+```
+
+Both spellings, so it fires only where a renderer has neither. The class is gone
+from the codebase, so nothing can be fooled by it again — and the `.result-notation`
+rule keeps its own selectors, with the two card-title selectors split out behind
+the query rather than silently sharing a declaration block with prose.
+
+### `tools/orphaned-branches.py` — the gate for the class
+
+Baseline is honest and non-trivial: **7 `body.<class>` branches, 6 set by source,
+1 not.** It exits 1 naming the class, and 2 (INCONCLUSIVE, never a failure) on a
+missing stylesheet or a stylesheet with no branch at all — so a moved file never
+reads as a defect, which is the `verify-deploy.sh` r141 lesson.
+
+Two details that are the whole difference between a gate and a grep:
+
+- **Comments are stripped first, newline-preserving.** The fixed stylesheet names
+  `body.no-backdrop-filter` in **three comments describing the fix**. A
+  comment-blind scanner reports the repair as the disease — which is r153, whose
+  colour-literal counter shipped `13` and then `12` into this very document
+  because it skipped comment *start* lines and missed wrapped continuations.
+- **The match must be a quoted literal.** `classList.add('high-contrast')`
+  counts; `// someday: high-contrast` does not. Accepting the bare form is
+  exactly how a dead branch would survive its own gate.
+
+Proved in `tools/orphaned-branches-mutation.sh`, **10/10**, baseline first.
+
+### The harness was wrong twice before it measured anything
+
+Worth the space, because both are the r155 lesson arriving on schedule — and
+baseline-first is the only reason either was caught rather than shipped as six red
+cases attributed to the tool.
+
+1. **Six red cases on a green tool.** The fixture copied `styles.css` and
+   `index.html` but not the app source, so **no** class had a source that could
+   set it and the tool correctly reported all six unreachable. The tool was right;
+   the harness was measuring a tree that does not exist. Case 1 runs first
+   precisely so this is caught here and not read as a broken gate.
+2. **Case 7 passed for the wrong reason.** It asserted that an *unquoted* mention
+   does not count as setting a class, but it inherited case 6's quoted literal
+   from `index.html`, which was restored *after* it rather than before. Exit 0,
+   names empty, and the case was asserting nothing. Restoring before the case
+   makes it red for the right reason.
+
+### Collateral, and one tool that behaved correctly
+
+- **`contrast-reach.py` caught the move.** Its anchor for
+  `--scrim-icon-btn-fallback` was `no-backdrop-filter .hud-actions`; the rule left
+  and the tool printed `reads NO … ANCHOR GONE` and **exited 1**. That is the
+  tool doing its job — it is anchored on `(selector, property, token)` and never
+  on a line number, which is why r157 deleting those lines did not stale it.
+  Retargeted to the shared `.hud-actions .icon-btn`, with the two sites now told
+  apart by TOKEN; the boundary is safe because the match requires `,` or `)` after
+  the token name, so `--scrim-icon-btn` cannot match inside
+  `var(--scrim-icon-btn-fallback)`. Back to **0**, all ten sites reachable.
+  *(My first read of its exit code was wrong: `$?` after a pipe is `head`'s, not
+  python's. Re-measured unpiped: 1, then 0. Standing rule 3, caught by not
+  shipping the number.)*
+- **`pixel-identity.mjs`'s fallback site was deleted, not repointed.** With the
+  class gone, its `prep` adds a class that styles nothing and the site would
+  report "no movement" for a reason unrelated to any change under test — the
+  exact failure that file already documents for reading a *checked* switch track.
+  `contrast-reach.py` still asserts the token is declared, read and re-pointed,
+  which is the part that is statically checkable.
+
+### Gates
+
+- `pnpm check` → **0**. **239 unit / 30 files** (r169's count holds).
+- `pnpm test:e2e` → **66 passed, 6 skipped, 0 failed** (72 declared, so the plan's
+  figure is right). Run at **load 11.55**, between the green band (8–10) and the
+  red one (14–16) — a failure here would have been inconclusive rather than a
+  verdict, and it passed anyway. *The pipe consumed the exit code, so the reported
+  result is the printed counts, not a separately captured exit.*
+- `tools/orphaned-branches.py` → **0**, 6/6 reachable.
+- `tools/orphaned-branches-mutation.sh` → **10/10**.
+- `css-literals.py` → **0**, `undefined-vars.py` → **0** (both were at risk: new
+  `@supports` blocks, and the colour ratchet had to stay at zero).
+- `production-freshness.py` → **exit 1, STALE**, measured: served build pinned to
+  `d839702c9` (r166), **8 commits behind**, an upper bound. So production is also
+  missing **r167's championship-counter fix** — a real player-visible bug, not just
+  instrument work. Deploy is this round's remaining job.
+
+### The shape
+
+The tenth instance of one pattern, and the first where **the tool was the defect
+and the code was merely uninstrumented**. Six rounds have run in this direction
+already — a control that is correct and wired to nothing reports a legal value,
+so every gate downstream reads it as working. Here the control was a CSS fallback,
+and the tool that reported on it had been quietly switching it on by hand.

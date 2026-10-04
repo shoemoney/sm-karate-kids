@@ -58,7 +58,15 @@ COLOUR = re.compile(
 SITES = [
     ("coach strip plate", "background", ".coach-strip", "--coach-plate"),
     ("hud icon button", "background", ".hud-actions .icon-btn", "--scrim-icon-btn"),
-    ("hud icon btn fallback", "background", "no-backdrop-filter .hud-actions", "--scrim-icon-btn-fallback"),
+    # r170: this was anchored on `no-backdrop-filter .hud-actions`, because the
+    # fallback used to be selected by a body class no source file could set — the
+    # rule existed and could never fire. It now lives behind an `@supports`
+    # feature query, which is the only selector text it has. So this entry shares
+    # its selector with the row above, and the two are told apart by the TOKEN,
+    # which is the thing being asserted anyway. The boundary is safe: the match
+    # requires `,` or `)` after the token name, so `--scrim-icon-btn` cannot match
+    # inside `var(--scrim-icon-btn-fallback)`.
+    ("hud icon btn fallback", "background", ".hud-actions .icon-btn", "--scrim-icon-btn-fallback"),
     ("tech-ref list fade", "background", "#tech-ref::after", "--fade-void"),
     ("settings sheet scrim", "box-shadow", "#settings-sheet", "--scrim-panel"),
     ("settings switch OFF track", "background", '.setting-row input[type="checkbox"]', "--switch-track-off"),

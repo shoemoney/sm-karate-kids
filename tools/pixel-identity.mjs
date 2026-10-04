@@ -131,13 +131,31 @@ const SCENES = [
     },
     sites: [
       { label: 'hud icon button', sel: '.hud-actions .icon-btn', prop: 'backgroundColor', box: '.hud-actions .icon-btn', prep: null },
-      {
-        label: 'hud icon btn fallback',
-        sel: '.hud-actions .icon-btn',
-        prop: 'backgroundColor',
-        box: '.hud-actions .icon-btn',
-        prep: 'no-backdrop-filter',
-      },
+      // r170 REMOVED the 'hud icon btn fallback' site, which set
+      // `prep: 'no-backdrop-filter'` on <body> and then measured
+      // `--scrim-icon-btn-fallback`.
+      //
+      // Two things were wrong with it and only one was visible. It is gone
+      // because the fallback is no longer selected by a body class — it is
+      // behind `@supports not (backdrop-filter)`, so the prep adds a class that
+      // styles nothing and the site would report "no movement" for a reason that
+      // has nothing to do with any change under test. That is precisely the
+      // failure this file already documents for the switch OFF track, where
+      // reading a CHECKED box reported no movement for an unrelated reason.
+      //
+      // The half that was not visible: the instrument manufactured the state it
+      // measured. No source file has ever put `no-backdrop-filter` on <body>
+      // (`git log -S` over main.ts and index.html returns nothing), so the site
+      // was hand-enabling a branch no player could reach and reporting the
+      // fallback verified. `tools/orphaned-branches.py` is the gate for that
+      // class of defect, and `contrast-reach.py` still asserts the TOKEN is
+      // declared, read and re-pointed in high contrast — the part of the claim
+      // that is statically checkable.
+      //
+      // It cannot be painted here either, measured: Chromium's
+      // `--disable-blink-features=CSSBackdropFilter` is a no-op, so
+      // `CSS.supports('backdrop-filter','blur(1px)')` stays true with the flag
+      // set and the two arms are indistinguishable.
     ],
   },
   {

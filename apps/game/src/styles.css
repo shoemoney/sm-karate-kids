@@ -157,10 +157,11 @@
      the repo could see it. `tools/undefined-vars.py` is the gate that can.
 
      The value is the one this stylesheet had already chosen for the same
-     element in its no-backdrop-filter branch — near opaque, so a lesson stays
-     readable over a bright patch of dojo. That branch is gone rather than kept
-     as a second spelling of one decision, which is the drift r157's own note
-     describes for the settings switch. */
+     element for a renderer without `backdrop-filter` — near opaque, so a lesson
+     stays readable over a bright patch of dojo. That branch was a
+     `body.no-backdrop-filter` selector, which no source file ever set (r170);
+     the same fallback now lives behind the `@supports` feature query the other
+     three use, so it is one decision with one spelling. */
   --coach-plate: rgb(12 8 4 / 0.94);
   /* Lifted from 0.8/0.96. At those values the round card blacked out the
      dojo entirely — 90% of the title screen measured below 1% relative
@@ -1799,8 +1800,21 @@ body.reduced-motion .coach-strip {
     border-color: var(--edge-faint);
   }
 
-  body.no-backdrop-filter .hud-actions .icon-btn {
-    background: var(--scrim-icon-btn-fallback);
+  /* r170: this was `body.no-backdrop-filter .hud-actions .icon-btn`. That class
+     is not one any source file has ever put on <body> — `git log -S` over
+     main.ts and index.html returns nothing — so the branch could not fire and
+     the fallback plate was unreachable. `@supports` asks the UA instead of a
+     class nobody sets, so it fires on exactly the renderers it was written for.
+
+     Note this fallback is NOT exercisable from this repo's Playwright Chromium:
+     `--disable-blink-features=CSSBackdropFilter` is a no-op, measured —
+     `CSS.supports('backdrop-filter','blur(1px)')` stays true with the flag set.
+     That is why `tools/orphaned-branches.py` gates reachability statically
+     instead of painting the arm. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .hud-actions .icon-btn {
+      background: var(--scrim-icon-btn-fallback);
+    }
   }
 
   /* Collapsing the header row put these two on top of the dojo, which is
@@ -2883,8 +2897,6 @@ body.reduced-motion .boot[data-measuring='true'] .boot-bar::after {
   margin-block-start: 0;
 }
 
-body.no-backdrop-filter .result-title,
-body.no-backdrop-filter .result-score,
 /* The notation sentence on the pre-bout card. Set apart from the opponent's
    tell above it, because they answer different questions: that one is "who am I
    fighting", this one is "how does a move work". Same size, dimmer, so the
@@ -2919,14 +2931,40 @@ body.no-backdrop-filter .result-score,
   line-height: 1.45;
 }
 
+/* r170: `.result-title` and `.result-score` used to be the first two selectors of
+   the rule above, qualified `body.no-backdrop-filter` — a class no source file
+   has ever set, so they carried that typography on no renderer at all. Split out
+   and gated on the feature instead.
+
+   Worth stating plainly, because the old text does not make it obvious: in that
+   branch these two did not merely lose a blur, they inherited
+   `.result-notation`'s entire voice — `display:block`, `--text-faint`, sentence
+   case, label scale. So the branch was a typographic change to the card's two
+   loudest elements, not a plate going near-opaque, and nothing has ever painted
+   it. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .result-title,
+  .result-score {
+    display: block;
+    margin-block-start: var(--space-1);
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+    letter-spacing: var(--track-normal);
+    text-transform: none;
+    line-height: 1.45;
+  }
+}
+
 /* The objective, sharing the notation's sentence-case voice because it is part
    of the same thought: what a move is, and what you are playing for. */
 .result-goal {
   color: var(--text-muted);
 }
 
-body.no-backdrop-filter .result-detail {
-  background: var(--result-plate-solid);
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .result-detail {
+    background: var(--result-plate-solid);
+  }
 }
 
 .result.show {
