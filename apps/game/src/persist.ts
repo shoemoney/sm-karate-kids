@@ -131,6 +131,56 @@ export function recordRun(score: number, roundReached: number, champion: boolean
   return { record, newBest };
 }
 
+/**
+ * One piece of the final card's record line, in reading order.
+ *
+ * `score` is a score and must be rendered by the one formatter that knows about
+ * the thousands separator and the half glyph (`scoreFragment`); `text` is words
+ * and a count, which is not a score and must not be run through it. Rounds 102
+ * and 130 each rejected a hand-written second copy of that formatting as "a bug
+ * waiting for a round number", so the pieces are returned in order and the
+ * caller has one loop with no branching in it.
+ */
+export type RecordPiece = { readonly text: string } | { readonly score: number };
+
+/**
+ * The record line on the card that ends a run.
+ *
+ * Why this is a function and not an `if` in the caller: the card it builds is
+ * the CHAMPION screen, the one state in this game no reviewer has ever seen —
+ * `champion` appeared zero times in 11,007 lines of the loop log, and the review
+ * set has no frame that can reach it, because it takes five consecutive wins.
+ *
+ * So the defect it had is invisible to every instrument here. The line was
+ *
+ *     newBest ? 'New best score' : `Best ${best} · titles ${n}`
+ *
+ * — a bare either/or between two facts that are frequently BOTH true, and the
+ * `titles` half was on the losing branch. On the first title of a player's life
+ * `bestScore` is 0, so `newBest` is necessarily true, so the counter that had
+ * just gone 0 -> 1 was never rendered at all. It appeared only on a LATER run
+ * that failed to beat the same score: the one number that records the rarest
+ * achievement in the game was shown precisely when the player had done worse.
+ *
+ * Both facts now survive, in the order a player wants them, and the two strings
+ * are the same length as the one they replace (this is the card whose copy
+ * budget rounds 119-122 measured to the character).
+ */
+export function recordPieces(args: {
+  readonly champion: boolean;
+  readonly newBest: boolean;
+  readonly record: TournamentRecord;
+}): readonly RecordPiece[] {
+  const titles: RecordPiece = { text: `titles ${args.record.championships}` };
+  if (!args.newBest) {
+    return [{ text: 'Best ' }, { score: args.record.bestScore }, { text: ' · ' }, titles];
+  }
+  // "New best score" restates the number directly above it, because the score
+  // on the card IS the new best. So on a championship, where the headline
+  // already says CHAMPION, the title count is the fact this line is for.
+  return args.champion ? [titles, { text: ' · new best' }] : [{ text: 'New best score' }];
+}
+
 const NAME_KEY = 'playerName';
 
 export function loadPlayerName(): string {
