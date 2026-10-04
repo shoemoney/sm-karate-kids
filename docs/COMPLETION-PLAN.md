@@ -10,10 +10,10 @@ has been improving.
 |---|---|
 | Playable | yes — tournament + dojo, two sticks, point karate |
 | Deployed | `https://arcade.shoemoney.com/karate-kids/`, verified playing a real bout |
-| Tests | 210 unit, 54 e2e (+6 phone-only skips on desktop, by design), green locally at r163 |
-| Review loop | 163 rounds, 20 review frames, mutation-tested fences |
-| Commits | 300 |
-| Production | ✅ **EQUAL at r163** — release `20261003173539-ade9a7`; `verify-deploy.sh` 0, `production-freshness.py` 0. Was 63 commits stale at r160, fixed at r162. |
+| Tests | 213 unit, 54 e2e (+6 phone-only skips on desktop, by design), green locally at r165 |
+| Review loop | 165 rounds, 20 review frames, mutation-tested fences |
+| Commits | 315 |
+| Production | ✅ **EQUAL at r165** — release `20261003195021-2ae1e7`; `verify-deploy.sh` 0, `production-freshness.py` 0, dangling-reference arm clear. Was 63 commits stale at r160 (fixed r162), and deliberately 1 byte stale at r164b (fixed r165). |
 
 The game is not a prototype. What remains is a short list of specific, named
 gaps — every one of them is in this document, and nothing else is.
@@ -494,12 +494,25 @@ Because nothing is watching, three rules exist and are not optional:
       here — the origin sends no `Cache-Control` — but not the guarantee a hashed name
       appears to offer.
 
-> **⚠️ Production is deliberately STALE as of r164b — this is not drift to fix casually.**
-> The r164b fix is built and committed but **not deployed**, because another round was
-> writing to this tree at the time and deploying publishes whatever the tree contains (r161
-> refused for exactly this reason and was right). `production-freshness.py` correctly
-> reports **STALE, exit 1**, and the driver injects that at the top of the next round's
-> prompt. Deploying is the next round's first job.
+> **✅ Deployed at r165 — release `20261003195021-2ae1e7`.** r164b left production
+> deliberately stale and named this as the next round's first job. That job is done:
+>
+> - `verify-deploy.sh` → **0**, 2 assets sha256-matched over the wire.
+> - `production-freshness.py` → **OK, exit 0**. The dangling line is **gone**; the served
+>   bundle contains `sourceMappingURL` **zero** times, and the old `.map` URL still 404s —
+>   now because nothing asks for it, rather than because a map was deleted by hand.
+> - **Exactly one file of 425 changed**, checked by sha256 against the live tree rather
+>   than against the build: `karate-kids/assets/index-CEpXIazX.js`, `0bb7d9bc` →
+>   `401bc0af`. **Zero collateral** — `index.html` and the stylesheet did not change.
+> - Clearance `cleared`, fingerprint `b5bb6f1d` (426 of 429 files carried forward by
+>   content hash, 3 reviewed).
+
+> **That last row is the measurement r164b could not have had**, and it is worth more
+> than the fix: `index.html` is **byte-identical** before and after, because vite appends
+> the source-map comment *after* hashing. So this release changed a hashed asset's bytes
+> **without changing anything that names it** — a 43-byte correction with no cache-busting
+> change to go with it. Bounded (the origin sends no `Cache-Control`, and the ETag tracks
+> the bytes), but now measured on the wire rather than reasoned about in a build log.
 
 - [x] **every phase gated, logged, committed, deployed**
 

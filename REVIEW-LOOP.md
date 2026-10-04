@@ -10871,3 +10871,118 @@ which the driver injects at the top of the next round's prompt. The next round
 is *told* to deploy rather than left to notice. That is the r161 mechanism doing
 its job, and it is the reason leaving the gate red is better than racing a peer
 to publish.
+
+## Round 165 — the deploy r164b refused, and the dirty tree that caused it 📦
+
+Started from the injected verdict: `production freshness: STALE`, exit 1, with a live
+dangling source-map reference. r164b had fixed it and named deploying as this round's
+first job, having refused for exactly the right reason. That reason is gone: tree clean,
+and the round lock held by the only `opencode run` on the machine.
+
+### The deploy, performed
+
+Release `20261003195021-2ae1e7`, via `build-release.py --release karate-kids` after a
+fresh `capture-live.sh`. Gates read **before** the irreversible step, per rule 2:
+`check=0`, `e2e=0` (54 passed, 6 phone-only skips, load 9.58).
+
+- `verify-deploy.sh` → **0**, 2 assets sha256-matched over the wire.
+- `production-freshness.py` → **OK, exit 0**. The `DANGLING` line is gone.
+- `readlink current` → `/var/www/arcade.shoemoney.com/releases/20261003195021-2ae1e7`,
+  `/api/health` `{"ok":true}`.
+- Clearance `cleared`, fingerprint `b5bb6f1d` — 426 of 429 files carried forward **by
+  content hash**, 3 reviewed this payload.
+
+**Zero collateral, measured against the wire and not against the build** — a sha256
+manifest of all 425 public files, live vs staged:
+
+    28c28
+    < 0bb7d9bc...  karate-kids/assets/index-CEpXIazX.js
+    ---
+    > 401bc0af...  karate-kids/assets/index-CEpXIazX.js
+
+One line. The same 43 bytes r164b removed.
+
+The first attempt at that diff reported **425 changed files** and would have read as a
+total rebuild. It was my own path normalisation (`././`), because macOS `sort` and Linux
+`sort` disagree on collation, so every line moved. A diff that reports "everything
+changed" for a one-file change is the most dangerous kind of wrong, and it was one `awk`
+away from being believed. `LC_ALL=C` on both sides is the whole fix.
+
+### A release that changes hashed bytes and names nothing new
+
+`index.html` and the stylesheet are **byte-identical** to what was already live. Only the
+bundle's bytes changed, and it kept the same filename, because vite appends the
+`sourceMappingURL` comment *after* hashing. So this release corrected a 43-byte dangling
+reference **with no cache-busting change to any name that references it**.
+
+r164b measured that in a build log and bounded it there. It is now measured on the wire:
+the thing that ships changed; the thing that points at it did not. Bounded — the origin
+sends no `Cache-Control` and the ETag tracks the bytes — but a hashed filename is not the
+guarantee it appears to be, and this release is the proof.
+
+### Then the freshness tool said something I had to stop and read
+
+    note    the repo has uncommitted changes; the served build cannot be from this tree
+
+`docs/preview/portrait.png`, modified. Not by me — by the e2e run I had just completed.
+
+### The seventh round to write down the same revert
+
+`capture.spec.ts` writes the README's first image, a **tracked** file, on every
+`pnpm test:e2e`. REVIEW-LOOP.md records seven rounds noticing and hand-reverting it: r152
+(line 6737), r154, r155, r156, r157, r158, r159 (line 9990). Each wrote it down as noise
+and each fixed it with a `git checkout`.
+
+**And this round proved what that noise cost.** r164b found a dirty tree, could not
+distinguish a test's side effect from another agent mid-edit, and refused to deploy — so
+the shipped bundle kept a dangling source-map reference for one extra release cycle. The
+r164b refusal was correct. The thing it was reasoning about was **ours**.
+
+A defect that seven rounds each work around by hand is a defect with no owner, and the
+loop's own vocabulary already has the word for it: an instrument nobody acts on. The
+default is now `apps/game/test-results/preview/` (gitignored), and refreshing the committed
+preview is explicit:
+
+    SMKK_COMMIT_PREVIEW=1 pnpm test:e2e
+
+so the PNG changes as a diff somebody reads rather than as a side effect nobody does.
+
+**Both arms measured off checksums**, because a guard that only proves the code can be read
+proves nothing:
+
+| | tracked `portrait.png` | landed in | `git status` |
+|---|---|---|---|
+| default run | `6e7f832f` → `6e7f832f` **unchanged** | `test-results/preview/` | only intended edits |
+| `SMKK_COMMIT_PREVIEW=1` | `6e7f832f` → `1f178bfc` **moved** | `docs/preview/` | the PNG, as a diff |
+
+And a full `pnpm test:e2e` — 54 passed, 6 skipped, exit 0 — left `git status` showing
+**only my three intended edits**. That is the seven-round revert, gone, measured.
+
+### The guard, and proving it can fail
+
+`preview-capture-not-tracked.test.ts` resolves the spec's own default path and checks it
+against the **real `.gitignore`** rather than a hardcoded string, so moving the path is
+caught instead of being asserted against itself. It also asserts the committed PNG is
+*tracked* — the control that must hold either way.
+
+Restoring the old bare `const OUT = resolve(...'docs/preview')` turns **2 of 3** red:
+
+    × the committed preview is reached only behind an explicit opt-in
+    × the default output directory is genuinely git-ignored
+
+The third passes in both states by design. A guard that goes 3/3 red on one mutation has
+told you nothing about which assertion did the work.
+
+### The plan's own numbers were stale, again
+
+The scoreboard said 210 unit tests and **300** commits. Measured: **213** and **314** before
+this round's commits. r151's standing instruction — suspect every number in that document —
+has now caught three: a colour-literal count, a ROUND_INTRO_MS reading, and now the
+scoreboard's own row. None of them were lies. All of them were true when written.
+
+### Gates
+
+`check=0` (213 unit, content, 20 assets against provenance) · `e2e=0` (54 passed,
+6 skipped) · deploy clearance `cleared` · `verify-deploy.sh` 0 · `production-freshness.py`
+0 · host `readlink` and `/api/health` both confirm. Machine load 9.58 at the e2e, inside
+the green band r151 recorded.
