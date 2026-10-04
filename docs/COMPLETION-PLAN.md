@@ -13,7 +13,7 @@ has been improving.
 | Tests | **249 unit / 32 files** (`pnpm check` → 0, re-measured at r171b); **72 e2e across 11 files declared** (`playwright test --list`) and **run green at r171b** — 66 passed, 6 skipped, 0 failed, at load 10.24, which is the ambiguous band (green 8–10, red 14–16). r171b changed `apps/game/src`, so the e2e run was required rather than optional. |
 | Review loop | 168 rounds, 20 review frames, mutation-tested fences |
 | Commits | 322 |
-| Production | ⚠️ **STALE at r171 — 10 commits behind, measured.** `production-freshness.py` → **exit 1**: served build pinned to `d839702c9` (r166), an upper bound. The live origin is **missing r167's championship-counter fix**, a player-visible bug (the title count only appeared when you did worse). **The deploy is blocked on a human — see "The deploy, blocked at its last gate" below.** |
+| Production | ⚠️ **STALE — 13 commits behind, re-measured at r172.** `production-freshness.py` → **exit 1**: served build pinned to `d839702c9` (r166), an upper bound. The live origin is **missing r167's championship-counter fix** and **r171b's camera fix** — a fighter sliced by the frame edge on the game's own result card. **The deploy is blocked on a human attestation** (r170 reached the privacy gate and stopped; nothing since has changed what it attests to). |
 
 > **Re-measured at r168, and this row was wrong.** It said "165 rounds" and
 > "315 commits" — this document's own snapshot drifting — and the Tests row said
@@ -458,40 +458,77 @@ future false alarm and a gate that cries wolf gets deleted. A sha256 comparison
 is exact, and if the served bytes equal the built bytes then every fix in them is
 live.
 
-### 3.4 Three captures that cannot reliably find their subject — `OPEN, raised at r171`
+### 3.4 Three captures that cannot reliably find their subject — `CLOSED at r172, two of three`
 
 **Found:** r171, while auditing the review set rather than the game.
 **Why it matters:** they are the three frames this loop has argued about most,
-and they have been missing from the review set far more often than anyone
-knew. Measured guard firings across the retained `.loop` iteration logs:
+and they have been missing from the review set far more often than anyone knew.
+Measured guard firings across the retained `.loop` iteration logs:
 `18-phone-kick` **10**, `21-phone-kick-open` **8**, `19-phone-half-point` **8**.
 
-`19-phone-half-point` is r148's entire round. r148 closed the item on the
-strength of *"four independently regenerated sets"* — and the half point was
-missing from about one set in five. **The evidence for the shipped `½` glyph was
-partly gathered on sets where the glyph was not in them.** That does not make
-the decision wrong; `tools/notation-probe.mjs` and `scoreline-stability.mjs`
-measure it off real glyphs and a real clock. It does mean r148's headline claim
-needs the caveat attached, and it is attached in REVIEW-LOOP.md.
+**`19-phone-half-point` was not flaky. It was dead.** r171 recorded its miss rate
+as "about one set in five", and that number was an artifact of how many rounds
+the log retains. Its observer polled `.points .score-frac` — **an element r148
+deleted** when it made the half a single text node. `styles.css:863` says there is
+deliberately no `.score-frac` rule any more and `score-notation.test.ts:116` is a
+tripwire against one returning. The selector matched nothing, ever: a **0% hit
+rate in every review run from r148 to r172**, 24 rounds. It now reads the shipped
+`½` glyph in the score element's own text. **3/3, throw 6.**
 
-**Mechanism, and it is mechanical rather than flaky luck:** all three poll
-`state()` from Node every 20ms across a move's active window, which at 60Hz is
-a few ticks. A loaded machine steps straight over it. Measured this round at
-load 8.3, two of the three still missed.
+**`18-phone-kick` is now deterministic for a reason in the game rather than the
+harness.** A landed kick awards a call, and the referee phase holds the striker
+on the pose's `contact` frame for 96 ticks — so this is not a 4-tick window at
+all, it is about a second and a half. **3/3, throw 1, `cell 64 active -> active`**,
+and the kept frame was looked at: leg up, foot on the defender's body.
 
-**Do:** catch the frame in-page rather than from Node. Either slow the page's
-own clock for the capture (`Emulation.setCPUThrottlingRate`, the lever
-`throttle-cliff.mjs` already uses) or install a page-side observer that holds
-the pose when it sees the subject. Both are capture-harness changes; **no game
-code moves.**
-**Accept:** with the manifest's `kind` column flipped from `opportunistic` to
-`capture`, `tools/verify_shots.py` exits 1 if any of the three is missing — and
-`tools/verify-shots-mutation.sh` proves that arm red. Nothing softer: a
-per-round frequency check would be a gate that cries wolf on a busy box, which
-is the r151 lesson about a machine that does not idle.
+**`21-phone-kick-open` stays `opportunistic`, and the reason is hardware.** A
+whiffed kick gets no call and so has no referee hold; its subject is a 26-tick
+transient and a screenshot costs more than that. Measured in simulation ticks:
+playwright clip PNG **26**, jpeg q50 **15**, CDP `optimizeForSpeed` 19, full
+frame 25. The probe shutter is jpeg now — throws 3, 5, 7, 8, 10 and 17 across the
+runs, against roughly one set in six before — but the sandwich is necessary and
+not sufficient, because the compositor presents a frame later than the sim
+advances. **A capture bracketed `active -> recovery` was looked at and came back a
+guard stance.** Flipping that row would make the gate permanently red.
 
-Until then the three stay `opportunistic` in `tools/review-frames.tsv` and
-`verify_shots.py` **prints** any that are absent, on the OK line, by name.
+**Do:** done, and what it turned out to need was not the plan's suggestion.
+**Accept:** `verify_shots.py` exits 1 if `18` or `19` is missing — proved in
+`tools/verify-shots-mutation.sh` by an arm that builds its fixture **from the
+repository's own manifest** rather than a hand-written list (4 missing `capture`
+frames red, the missing `opportunistic` row green with UNCOVERED, positive control
+first; 26/26).
+
+**Two designs were built and measured out, and both are worth the ink because
+each looked certain:**
+
+- **Freezing the page on the frame** — the plan's own suggestion. Returning 0 from
+  `requestAnimationFrame` at the latch leaves the page producing no compositor
+  frame, so `Page.captureScreenshot` returns the last **cached surface**: after the
+  freeze a magenta timer and a 12px green body outline do not appear either, and
+  the fighters' box came back byte-identical to an idle reference. This is how a
+  guard stance nearly got filed as "the renderer draws no kick" — the renderer is
+  fine, and three separate measurements say so.
+- **Checking the pixels for a pose.** A kick moves the **camera**, and that is not
+  a pose: a settled guard stance reads **4.04–5.81** against a **0.34** idle
+  noise floor. With a threshold of 3 the gate passed a frame in which both
+  fighters were standing in guard, which is how it was caught. Removed rather than
+  re-tuned.
+
+**What replaced the honest half is not nothing.** `review-shots.mjs` routes every
+skipped frame through `miss()`, which reads the same `tools/review-frames.tsv` the
+coverage gate reads and exits **1** for a row declared `capture` — the kinds are
+not duplicated anywhere. Three unit tripwires came with it, each red on the source
+r172 replaced: no capture may reference `.score-frac`, the half-point capture must
+test the `½` glyph, and `frame not written` may appear exactly once, inside
+`miss()`.
+
+> **The r171 caveat on r148 is now settled rather than softened.** Four review
+> passes had argued about the half-point notation, and the count of reviewers was
+> withdrawn because it was a claim about instrument coverage. Coverage is now
+> gated on the frame itself: `19` is a `capture` row, and the coverage gate is
+> proved red without it. The decision to ship U+00BD was never reopened and does
+> not need to be — `tools/notation-probe.mjs` and `scoreline-stability.mjs` read
+> real glyphs against a real clock, and they still do.
 
 ### 3.1 Standing rule for unattended runs
 Because nothing is watching, three rules exist and are not optional:
@@ -615,14 +652,17 @@ Because nothing is watching, three rules exist and are not optional:
 > gates are complementary and that the scope claim is proven rather than asserted.
 > The unit test owns the branch; the probe owns the DOM.
 
-- [ ] **3.4 the three captures that cannot find their subject** — **OPEN at r171.**
-      `18-phone-kick`, `21-phone-kick-open`, `19-phone-half-point`. Their guards
-      fired 10 / 8 / 8 times in the retained loop logs and **nothing noticed**,
-      because `verify_shots.py` had no notion of which states the set was
-      supposed to cover. Both halves of that are now gated
-      (`tools/review-frames.tsv` + `verify_shots.py --frames`, and a unit test in
-      `pnpm check`), so the debt is named and printed instead of silent. The
-      captures themselves are the next job.
+- [x] **3.4 the three captures that cannot find their subject** — **CLOSED at r172,
+      two of three.** `19-phone-half-point` had been dead for 24 rounds rather than
+      flaky: its observer polled `.points .score-frac`, an element **r148 deleted**,
+      so it matched nothing and the frame was written 0% of the time since. It now
+      reads the shipped `½` glyph and is 3/3. `18-phone-kick` is deterministic
+      because a landed kick's referee phase holds the striker on the contact frame
+      for 96 ticks. `21-phone-kick-open` stays `opportunistic` with its hardware
+      reason recorded — a whiffed kick has no hold, and a screenshot costs more
+      ticks than the move. `review-shots.mjs` exits 1 for any declared `capture`
+      it cannot deliver; the mutation harness proves it against the repo's real
+      manifest, 26/26.
 - [x] **a fighter was leaving the screen, on the game's own result card** — **FIXED at
       r171b.** The review set's `17-phone-scored-result` frame is a **DRAW 0 — 0**
       with one fighter **sliced in half by the right frame edge** and the other
@@ -985,8 +1025,18 @@ regenerated sets.
 > `scoreline-stability.mjs` measures the scoreline in three states against a
 > clock. Both read real pixels; neither depends on a review set. What is
 > withdrawn is the *count of reviewers*, which was a claim about instrument
-> coverage and instrument coverage is precisely what r171 found ungated. Item
-> 3.4 is the capture.
+> coverage and instrument coverage is precisely what r171 found ungated.
+>
+> **Settled at r172 rather than left caveated.** Coverage is now gated on the
+> frame itself: `19` is a `capture` row in `tools/review-frames.tsv`, the coverage
+> gate is proved red without it against the repository's own manifest, and the
+> capture's observer was found to have been dead rather than flaky — it polled
+> `.points .score-frac`, an element r148 had itself deleted. So the four passes
+> were looking at sets where the half point was in none of them, and the reason is
+> now closed. It also corrects one thing above that is still standing: "landing a
+> half is not guaranteed" is true in a bout and false as a statement about this
+> capture — in the dojo the partner is a `TrainingDummy` that never winds up, so a
+> `lunge_punch` is always a half, and what was actually missing was range.
 
 One thing could not be made deterministic and is recorded rather than papered
 over: **landing a half is not guaranteed**, because a half is only awarded when the
