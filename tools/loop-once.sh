@@ -136,6 +136,10 @@ Standing rules, all of which exist because a round broke them:
    code. Three rounds in a row were environment failures wearing the costume of
    regressions.
 5. A measurement that cannot be reproduced is not a result. Say so and stop.
+6. Never kill by pattern (`pkill -f chrome`, `pkill -f "vite preview"`). Other
+   agents run browsers and preview servers on this machine; r165's cleanup
+   killed another session's e2e run mid-suite. Kill only PIDs you started, or
+   the one process holding a port you own (`lsof -ti:4188`).
 
 Prefer finishing an open plan item over starting a new one. Commit conventionally,
 never add AI attribution, and log what happened in REVIEW-LOOP.md — including
