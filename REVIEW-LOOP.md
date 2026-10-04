@@ -11036,3 +11036,153 @@ review found one real bug — a pick over a dojo result card was restarted ~8s
 later by that card's still-armed rematch timer — fixed, and caught by a
 per-frame tick sampler that goes red without the fix. Five mutations red in
 all. `pnpm check` 224/224; e2e 66 passed + 6 skipped by design at load 276.
+
+## Round 167 — the screen nobody had ever looked at 🏆
+
+Started from the injected `EQUAL` verdict, tree clean, production serving this
+tree's build. The loop's own vocabulary says what to do next when everything is
+closed: *"a state that becomes reachable is not a state that has been
+reviewed."* So this round went looking for one.
+
+### The defect
+
+    detail: newBest ? 'New best score' : `Best ${best} · titles ${n}`
+
+The card that ends a run chose between two facts that are frequently **both**
+true, and `titles` was on the losing branch. The branch that loses is the one a
+**first** title always takes: `bestScore` starts at 0 and a championship scores
+more than 0, so `newBest` is necessarily true. So the counter went **0 → 1 with
+no on-screen trace at all**, and only ever appeared on a LATER run that failed to
+beat the same score.
+
+The one number recording the rarest achievement in the game was displayed
+precisely when the player had done worse than last time.
+
+### How it was found, which is the part worth keeping
+
+`champion` appeared **zero times in 11,007 lines** of this log. And no frame in
+`tools/review-shots.mjs` can reach the card — it needs five consecutive won
+bouts, and every result frame in the set is a single bout. 165 rounds of review
+had an instrument pointed at this screen that could not see it.
+
+The state had been reachable since the tournament ladder shipped.
+
+### The fix, and why it is a function
+
+`recordPieces` decides the line and `main.ts` renders it with **one loop**, so
+the score formatting keeps exactly one home — rounds 102 and 130 each rejected a
+hand-written second copy as "a bug waiting for a round number", and this was the
+fourth place that copy could have appeared. Both replacement strings are the
+same length as the one they replace, on the card whose copy budget rounds
+119-122 measured to the character.
+
+### Two probe versions that were wrong, and why
+
+**It did not reach the card through a test hook.** The first version called a
+`test.finishBout` / `test.setRound` that does not exist, and would have needed a
+mutator added to the shipped bundle to exist at all. That surface is documented
+read-only — *"nothing here can score a point or move a fighter"*, the comment
+above `publishTestSurface`. Adding a mutator to it to make a probe convenient is
+the trade r141 refused: the instrument gets easier and the thing measured stops
+being the thing that ships.
+
+**It then tried to actually win the title, and could not.** The bot is
+competent — it wins the qualifier in **1.92s** — and it was tuned across five
+range settings until it reached the semi-final:
+
+    throw only in range  1.6 -> loses the qualifier
+                       2.6 -> clears 1, out in the Regional
+                       3.2 -> clears 3, out in the Semi-final     (best)
+                       4.5 -> clears 1, then the bout never ended
+                      99   -> clears 2, out in the Quarter-final
+
+Round 3 is a difficulty-0.8 CPU and round 4 is 1.0, so the ladder ends exactly
+where a blind flick bot stops being able to win. **A gate that needs a skilled
+player to go green is a gate that flakes and then gets deleted**, and r141
+recorded the reason: a gate that cries wolf is worse than no gate. Dropped.
+
+**And it asserted on the wrong screen once**, which is r155's lesson from the
+other end. Winning the qualifier renders `Next: the Regional` — the round-clear
+card, which has no record line at all, so every `titles` assertion failed against
+a card that never claims to carry one. A probe reporting a missing fact about the
+wrong screen looks exactly like a red gate.
+
+### What is actually established
+
+On one run at load 19-30 the probe read, off the card:
+
+    Best 30,000 · titles 0
+    Best 30,000 · titles 1
+    Best 30,000 · titles 2
+
+Three different stored counts, each rendering its own number, with the standing
+best still on the line — **the fix rendering through the loop this round
+changed**. On later runs at load 60-106 the same arms went red: the bot's run no
+longer finished inside the budget, `card` was null, every assertion read
+`undefined`. That is the machine, and the difference is measured rather than
+asserted — `undefined` on a card that never appeared, against the exact string on
+one that did.
+
+**So `tools/champion-probe.mjs` is wired into nothing and its header says so.**
+Per standing rule 5, a measurement that does not reproduce is not a result: the
+browser-level claim rests on those three strings plus the unit test, and the next
+round with a quiet box should either make it green or delete it. Not before then.
+
+### Gates, and a control for the two red results
+
+`check=0` — **232 unit / 29 files**, typecheck clean, content and assets OK.
+
+Two mutations, each isolating a different assertion, re-run on the rebased tree:
+
+| mutation | result |
+|---|---|
+| drop the champion branch (the r166 defect) | **2 assertions red** |
+| unhook `recordPieces` from `main.ts` | **1 assertion red** |
+
+The second is the point of the source guard: the pure function stays perfect
+while nothing calls it, which is the "declared but never invoked" class this repo
+has now hit four times.
+
+### Two things this round got wrong about the machine
+
+**A red e2e that was not mine.** `pnpm test:e2e` was 2 failed / 52 passed at load
+33. One of them was `result-card-fighters-clear` — the result card, which is
+exactly what I had just edited — so it could not be waved off. Control: the same
+two specs on **stashed, unmodified HEAD** gave **4 failed**, one *more* than with
+my change. Environmental, and established by running it rather than reasoning
+about it. The suite was not re-run to green; at load 20-37 it is not a verdict
+either way.
+
+**A `soak.test.ts` failure that would have been easy to misread.** One full-suite
+run showed 8 failures across 6 files including mine. Two checks settled it: soak
+imports only `@smkk/sim` and touches nothing I changed, and the sim is
+genuinely deterministic — 6 identical runs per seed in one process, verified
+while the failure was live. Clean HEAD passed **224/224 at load 76/140/169**,
+which is *higher* load than the failing run, so "the machine was busy" does not
+explain it. It did not reproduce: two consecutive full passes, 232/232, with the
+fix present. Recorded as not-reproduced rather than as fixed, because nobody
+caught the assertion that failed.
+
+### Another agent took the tree mid-round
+
+At 22:45 `main.ts` had no `recordPieces` in it and the new test file was gone;
+three commits had landed on `main` underneath. The work was parked verbatim at
+`5008de5` on `wip/r166-champion-titles`, nothing lost. It was rebased onto the
+new `main` by hand — the parked commit was based on the pre-`fighter-select`
+tree, so merging it would have reverted `fighterPick`.
+
+This round is numbered **167**, not 166: `## Round 166` is the fighter-select
+round, written by a different session in the same hour.
+
+### And the plan's own numbers were stale, again
+
+`AGENTS.md` records the colour-literal ratchet hitting **0 at r157**.
+`COMPLETION-PLAN.md` still said **10 remain**. Measured:
+
+    literals  192 in comment-free source, 0 outside token/high-contrast blocks
+    ratchet expects 0; this run says 0
+
+and `contrast-reach.py` agrees, printing the ten as tokens, every one re-pointed
+inside `body.high-contrast`. **Fourth stale number in that document**, and the
+third caught by re-running a tool instead of reading the prose. r151's standing
+instruction is still the most useful sentence in the repo.

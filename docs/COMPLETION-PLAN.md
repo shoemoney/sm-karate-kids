@@ -514,6 +514,20 @@ Because nothing is watching, three rules exist and are not optional:
 > change to go with it. Bounded (the origin sends no `Cache-Control`, and the ETag tracks
 > the bytes), but now measured on the wire rather than reasoned about in a build log.
 
+- [x] **the championship count was shown only when you did worse** — **FIXED at r167.**
+      The card that ends a run built its record line as a bare either/or,
+      `newBest ? 'New best score' : 'Best N · titles K'`, and `titles` was on the
+      losing branch. A **first** title always takes the winning branch — `bestScore`
+      starts at 0 and a championship scores more than 0 — so the counter went
+      **0 → 1 with no on-screen trace at all**, and appeared only on a later run
+      that failed to beat the same score.
+      Found by looking for the state, not the code: `champion` appeared **zero
+      times in 11,007 lines** of the loop log, and no frame in the review set can
+      reach the card — it takes five consecutive wins, and every result frame is a
+      single bout. The state had been reachable since the ladder shipped.
+      `recordPieces` decides the line; `main.ts` renders it with one loop, so the
+      score formatting keeps exactly one home. 8/8 unit, mutation-proved twice.
+
 - [x] **every phase gated, logged, committed, deployed**
 
 - [x] **3.3a nothing is obliged to look at production** — **CLOSED at r161.**
@@ -653,15 +667,32 @@ exclusive). The scoreboard's round and commit counts are current.
 
 Two things are **recorded, not fixed**, and neither is a defect in the game:
 
-- the remaining 10 colour literals outside `:root` / `body.high-contrast`
-  (six translucent scrims, two wood tones, one `color`, one text-shadow alpha),
-  counted and classified above. Each is a look decision with a real backdrop to
-  measure, and they do not belong in a commit about the one that was named.
+> **CORRECTED at r167 — the first of these was closed at r157 and this document
+> still said it was open.** The ratchet reads **0**:
+>
+> ```
+> $ python3 tools/css-literals.py
+> literals  192 in comment-free source, 0 outside token/high-contrast blocks
+> ratchet expects 0; this run says 0
+> ```
+>
+> `tools/contrast-reach.py` agrees, and prints the ten sites as tokens rather
+> than literals, every one re-pointed inside `body.high-contrast`. r157 is what
+> transcribed them. Nothing was reverted. **This is the fourth stale number in
+> this document** and the third caught by re-running a tool instead of reading
+> the prose — r151's standing instruction, still the most useful sentence here.
+>
+> - ~~the remaining 10 colour literals outside `:root` / `body.high-contrast`~~
+>   — **closed at r157.** They were six translucent scrims, two wood tones, one
+>   `color` and one text-shadow alpha, each transcribed into a token that
+>   `body.high-contrast` can reach. Nothing remains; kept here for history.
 - r152's warning still stands as the standing instruction for anyone who reads
   this next: re-read the closed boxes against the code on suspicion, not on the
   hypothesis that they are now correct. r153 found the fifth drift — a **count**
   in prose, thirteen against one — and it was in the *open* item's description,
-  not a closed contract. The suspicion applies to every number in this document.
+  not a closed contract. r167 found the fourth stale number (the colour-literal
+  ratchet, closed ten rounds earlier and still described as open). The suspicion
+  applies to every number in this document.
 
 **But read that as a claim to re-check, not a fact.** r149's own lesson was that
 this document recorded a conclusion where a blocker had been, and r150 audited
