@@ -7,8 +7,10 @@ packages:
 allowBuilds:
   esbuild: true
 
-# three@0.187.0 was published inside pnpm's built-in 24 hour minimumReleaseAge
-# window, so a frozen install rejects the lockfile before anything else runs.
-# This exempts that exact version. Every other release still has to clear the cutoff.
+# three@0.187.0 and @types/three@0.187.0 were published inside pnpm's built-in
+# 24 hour minimumReleaseAge window, so a frozen install rejects the lockfile
+# before anything else runs. These exempt those exact versions. Every other
+# release still has to clear the cutoff.
 minimumReleaseAgeExclude:
   - three@0.187.0
+  - '@types/three@0.187.0'
