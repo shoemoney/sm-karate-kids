@@ -6,3 +6,9 @@ packages:
 # fetches as an optional platform dependency. Nothing needs to run.
 allowBuilds:
   esbuild: true
+
+# three@0.187.0 was published inside pnpm's built-in 24 hour minimumReleaseAge
+# window, so a frozen install rejects the lockfile before anything else runs.
+# This exempts that exact version. Every other release still has to clear the cutoff.
+minimumReleaseAgeExclude:
+  - three@0.187.0
